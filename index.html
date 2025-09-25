@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Endpoint Pricing Calculator — Modern (Fixed)</title>
+  <title>Endpoint Pricing Calculator — Modern (Email Copy)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -93,7 +93,7 @@
             <div class="flex items-center justify-between">
               <h1 class="text-2xl sm:text-3xl font-extrabold">Recast Pricing Calculator</h1>
               <button type="button" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95" data-action="copy">
-                <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Summary'}</span>
+                <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Email'}</span>
               </button>
             </div>
             <p class="mt-2 max-w-2xl text-slate-300">This is a pricing estimate only and should not be considered a formal quote.</p>
@@ -334,6 +334,43 @@
       `).join('');
     }
 
+    function buildEmailText(m, clientName){
+      const subject = `Subject: Pricing Estimate for ${m.meta.name}`;
+      const name = clientName && clientName.trim() ? clientName.trim() : '[Client Name]';
+      const platformDisplay = m.platformWaived ? '— (waived)' : money(m.platformFeeApplied);
+      const supportDisplay = STATE.addSupport ? money(m.support) : '—';
+
+      const table = [
+        '| Type       | MSRP (List) | Margin % | Margin $  | Partner Price |',
+        '|------------|-------------|----------|-----------|---------------|',
+        `| Net New    | ${money(m.msrp)}  | 30%      | ${money(m.msrp*0.30)}| ${money(m.partnerNewPrice)}    |`,
+        `| Renewal    | ${money(m.msrp)}  | 15%      | ${money(m.msrp*0.15)}| ${money(m.partnerRenPrice)}    |`,
+        `| **Total**  | ${money(m.msrp)}  | –        | –         | –             |`
+      ].join('\n');
+
+      const lines = [
+        subject,
+        `Hi ${name},`,
+        '',
+        'As requested, here is a high-level pricing estimate based on your requirements:',
+        `Product: ${m.meta.name}`,
+        `Endpoints: ${m.endpoints.toLocaleString()}`,
+        `Platform Fee: ${platformDisplay}`,
+        `Premium Support: ${supportDisplay}`,
+        `Base Total ARR (graduated): ${money(m.baseARR)}`,
+        `Total ARR: ${money(m.totalARR)}`,
+        '',
+        'Below is a breakdown of pricing with MSRP, partner margin, and partner price:',
+        table,
+        '',
+        'Please note this is an estimate only and should not be considered a formal quote.',
+        'Let me know if you’d like me to prepare a formal proposal or discuss package options.',
+        'Best regards,',
+        'Recast Partner Team'
+      ];
+      return lines.join('\n');
+    }
+
     function attachEvents(){
       const root = document.getElementById('app');
 
@@ -372,17 +409,12 @@
       const copyBtn = root.querySelector('[data-action="copy"]');
       if(copyBtn) copyBtn.addEventListener('click', async () => {
         const m = model();
-        const fields = [
-          ['Product', m.meta.name],
-          ['Endpoints', m.endpoints.toLocaleString()],
-          ['Base Total ARR (graduated)', money(m.baseARR)],
-          ['Platform Fee', m.platformWaived ? '— (waived)' : money(m.platformFeeApplied)],
-          ['Premium Support', STATE.addSupport ? money(m.support) : '—'],
-          ['Total ARR', money(m.totalARR)],
-          ['Partner (New)', money(m.partnerNewPrice)],
-          ['Partner (Renewal)', money(m.partnerRenPrice)]
-        ];
-        const text = fields.map(([k,v])=>`${k}: ${v}`).join('\n');
+        let clientName = '';
+        try {
+          clientName = window.prompt('Client name for the email? (optional)', '') || '';
+        } catch { clientName = ''; }
+        const text = buildEmailText(m, clientName);
+
         try {
           await navigator.clipboard.writeText(text);
         } catch {
