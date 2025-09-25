@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Endpoint Pricing Calculator — Modern</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
+  <div id="app" class="min-h-screen"></div>
+
+  <script>
+    // ---------- STATE ----------
+    const STATE = {
+      endpoints: 1000,
+      productKey: 'rct',
+      addSupport: false,
+      activeTab: 'customer',
+      copied: false,
+      showBreakdown: false
+    };
+
+    // ---------- DATA ----------
+    const TIERS_BASE5 = [
+      { max: 1000, rate: 5.00 }, { max: 2000, rate: 4.50 }, { max: 3000, rate: 4.25 }, { max: 4000, rate: 4.00 }, { max: 5000, rate: 3.75 },
+      { max: 6000, rate: 3.50 }, { max: 7000, rate: 3.25 }, { max: 8000, rate: 3.00 }, { max: 9000, rate: 2.75 }, { max: 10000, rate: 2.50 },
+      { max: 15000, rate: 2.25 }, { max: 20000, rate: 2.00 }, { max: 25000, rate: 1.75 }, { max: 30000, rate: 1.50 }, { max: 40000, rate: 1.25 },
+      { max: 50000, rate: 1.00 }, { max: 60000, rate: 0.75 }, { max: 70000, rate: 0.50 }, { max: 80000, rate: 0.40 }, { max: 90000, rate: 0.35 },
+      { max: 100000, rate: 0.30 }, { max: 120000, rate: 0.25 }, { max: 140000, rate: 0.20 }, { max: 160000, rate: 0.15 }, { max: 180000, rate: 0.10 },
+      { max: 200000, rate: 0.05 }, { max: Infinity, rate: 0.10 }
+    ];
+    const PRODUCTS = {
+      rct:       { name: 'Right Click Tools (Core)', baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
+      patch:     { name: 'Patching',                 baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
+      insights:  { name: 'Insights',                  baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
+      priv:      { name: 'Privilege Manager',         baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
+      aw_cloud:  { name: 'Application Workspace — Direct Cloud',  baseFactor: 11/5, platformFee: 15000, minTotal: 26000 },
+      aw_onprem: { name: 'Application Workspace — Direct On-Prem', baseFactor: 10/5, platformFee: 15000, minTotal: 25000 }
+    };
+
+    // ---------- UTILS ----------
+    function cx(...a){ return a.filter(Boolean).join(' '); }
+    function money(n){ return (!isFinite(n)) ? '—' : n.toLocaleString(undefined,{ style:'currency', currency:'USD' }); }
+    function int(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
+    function clampFloor(r){ return Math.max(r, 0.10); }
+    function tiersFor(key){
+      const f = (PRODUCTS[key] || PRODUCTS.rct).baseFactor;
+      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+(t.rate * f).toFixed(4)) }));
+    }
+    function graduatedSubtotal(units, tiers){
+      let rem = Math.max(0, Math.floor(units)), from = 0, sum = 0, lines = [];
+      for(const b of tiers){
+        if(rem<=0) break;
+        const c = Math.min(rem, b.max - from);
+        const ext = c * b.rate;
+        sum += ext;
+        lines.push({ band: `${from+1}–${from+c}`, units: c, rate: b.rate, extended: ext });
+        rem -= c; from = b.max;
+      }
+      return { subtotal: sum, lines };
+    }
+    function premiumSupportCost(add, basePlusPlat){ return add ? Math.max(basePlusPlat * 0.20, 6000) : 0; }
+
+    function model(){
+      const endpoints = int(STATE.endpoints);
+      const meta = PRODUCTS[STATE.productKey] || PRODUCTS.rct;
+      const tiers = tiersFor(STATE.productKey);
+      const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiers);
+      const platformFeeApplied = baseARR >= 30000 ? 0 : meta.platformFee;
+      const basePlusPlatform = Math.max(baseARR + platformFeeApplied, meta.minTotal);
+      const support = premiumSupportCost(STATE.addSupport, basePlusPlatform);
+      const totalARR = basePlusPlatform + support;
+
+      const msrp = totalARR;
+      const partnerNewPrice = msrp * (1 - 0.30);
+      const partnerRenPrice = msrp * (1 - 0.15);
+
+      return {
+        endpoints, meta, baseARR, platformFeeApplied, basePlusPlatform, support, totalARR,
+        partnerNewPrice, partnerRenPrice, msrp, lines,
+        platformWaived: platformFeeApplied === 0
+      };
+    }
+
+    // ---------- RENDER ROOT ----------
+    function render(){
+      const m = model();
+      const root = document.getElementById('app');
+      root.innerHTML = `
+        <header class="relative overflow-hidden">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+            <div class="absolute -top-40 -left-24 h-[420px] w-[420px] rounded-full blur-[110px] bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
+            <div class="absolute -top-10 right-0 h-[280px] w-[280px] rounded-full blur-[110px] bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
+          </div>
+          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
+            <div class="flex items-center justify-between">
+              <h1 class="text-2xl sm:text-3xl font-extrabold">Endpoint Pricing Calculator</h1>
+              <button type="button" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95" data-action="copy">
+                <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Summary'}</span>
+              </button>
+            </div>
+            <p class="mt-2 max-w-2xl text-slate-300">Graduated (marginal) pricing by band. Premium Support is +20% of subtotal after any platform fee waiver (min $6k).</p>
+          </div>
+
+          <div class="relative mx-auto max-w-6xl px-4">
+            <div role="tablist" aria-label="Views" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
+              ${tabBtn('customer','Customer Pricing')}
+              ${tabBtn('partner','Partner Pricing')}
+              ${tabBtn('sla','Support SLA')}
+            </div>
+          </div>
+        </header>
+
+        <main class="mx-auto max-w-6xl px-4 pb-16">
+          <section class="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
+            ${inputCard()}
+            ${kpiCard('Total ARR', money(m.totalARR), 'calculator')}
+            ${kpiCard('Base ARR', money(m.baseARR), 'badge-dollar-sign')}
+          </section>
+
+          <section class="mt-4">
+            ${STATE.activeTab==='customer' ? renderCustomer(m) : ''}
+            ${STATE.activeTab==='partner' ? renderPartner(m) : ''}
+            ${STATE.activeTab==='sla' ? renderSLA() : ''}
+          </section>
+        </main>
+      `;
+
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+      attachEvents();
+      updateBreakdownTable();
+    }
+
+    // ---------- SUB-RENDERS ----------
+    function tabBtn(id,label){
+      const active = STATE.activeTab===id;
+      return `
+        <button type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm transition', active ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
+          data-action="switch" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${active}">
+          <i data-lucide="${id==='customer'?'calculator':id==='partner'?'users':'life-buoy'}" class="w-4 h-4"></i><span>${label}</span>
+        </button>
+      `;
+    }
+
+    function inputCard(){
+      const m = model();
+      return `
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 lg:col-span-2" role="region" aria-label="Inputs">
+          <h2 class="text-base font-semibold">Inputs</h2>
+          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="text-[12px] text-slate-300">Endpoint count</span>
+              <input id="inp-endpoints" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" inputmode="numeric" value="${STATE.endpoints}" aria-describedby="endpoints-help">
+              <span id="endpoints-help" class="text-[11px] text-slate-400">Graduated by band</span>
+            </label>
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="text-[12px] text-slate-300">Product</span>
+              <select id="inp-product" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm">
+                ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${STATE.productKey===k?'selected':''}>${v.name}</option>`).join('')}
+              </select>
+              <span class="text-[11px] text-slate-400">Different base, fees & minimums</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm mt-6 sm:mt-0">
+              <input id="inp-support" type="checkbox" ${STATE.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]">
+              <span>Add Premium Support <span class="ml-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"><i data-lucide="percent" class="w-3.5 h-3.5"></i>+20% (min $6k)</span></span>
+            </label>
+          </div>
+          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-sm">
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Product</span><div class="font-semibold">${m.meta.name}</div></div>
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Platform Fee</span><div class="font-semibold">${m.platformWaived ? '— (waived)' : money(m.platformFeeApplied)}</div></div>
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Premium Support</span><div class="font-semibold">${STATE.addSupport ? money(m.support) : '—'}</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function kpiCard(label,value,icon){
+      return `
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-[12px] text-slate-300">${label}</div>
+              <div class="text-xl font-semibold font-mono">${value}</div>
+            </div>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCustomer(m){
+      return `
+        <section id="panel-customer" role="tabpanel" aria-labelledby="tab-customer" class="mt-2 space-y-3">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+            <h3 class="text-base font-semibold">Quote</h3>
+            <div class="mt-3 divide-y divide-white/10">
+              ${rowKV('Base Total ARR', money(m.baseARR), 'Graduated tiers')}
+              ${rowKV('Platform Fee', m.platformWaived ? '— (waived)' : money(m.platformFeeApplied))}
+              ${rowKV('Premium Support (20% min $6k)', STATE.addSupport ? money(m.support) : '—')}
+              <div class="flex items-center justify-between py-3">
+                <div class="text-lg font-bold">Total ARR</div>
+                <div class="text-lg font-extrabold font-mono">${money(m.totalARR)}</div>
+              </div>
+            </div>
+            <div class="mt-2 text-[12px] text-slate-400">
+              ${m.platformWaived ? 'Platform fee waived automatically (base ARR ≥ $30,000).' : 'Platform fee not waived (base ARR < $30,000).'}
+              ${m.basePlusPlatform===m.meta.minTotal ? ` Minimum base+platform minimum applied: ${money(m.meta.minTotal)}.` : ''}
+            </div>
+            <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown">
+              <i data-lucide="${STATE.showBreakdown?'chevron-up':'chevron-down'}" class="w-4 h-4"></i>
+              ${STATE.showBreakdown ? 'Hide tier calculation' : 'Show tier calculation'}
+            </button>
+            <div id="breakdown" class="${STATE.showBreakdown ? 'mt-3' : 'hidden'}">
+              <div class="overflow-x-auto rounded-lg border border-white/10">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-[#0b152f] text-slate-300">
+                    <tr>
+                      <th class="px-3 py-2 text-left">Band</th>
+                      <th class="px-3 py-2 text-left">Units</th>
+                      <th class="px-3 py-2 text-left">Rate</th>
+                      <th class="px-3 py-2 text-left">Extended</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tier-body" class="bg-[#0b1328]"></tbody>
+                  <tfoot class="bg-[#0b152f]">
+                    <tr>
+                      <th scope="row" colspan="3" class="px-3 py-2 text-right">Subtotal (before platform/support)</th>
+                      <th class="px-3 py-2 text-left font-mono">${money(m.baseARR)}</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderPartner(m){
+      return `
+        <section id="panel-partner" role="tabpanel" aria-labelledby="tab-partner" class="space-y-3">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+            <h3 class="text-base font-semibold">Partner Margin</h3>
+            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
+              <table class="min-w-full text-sm">
+                <thead class="bg-[#0b152f] text-slate-300">
+                  <tr>
+                    <th class="px-3 py-2 text-left">Type</th>
+                    <th class="px-3 py-2 text-left">MSRP (List)</th>
+                    <th class="px-3 py-2 text-left">Margin %</th>
+                    <th class="px-3 py-2 text-left">Margin $</th>
+                    <th class="px-3 py-2 text-left">Partner Price</th>
+                    <th class="px-3 py-2 text-left">$ / Endpoint</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-[#0b1328]">
+                  <tr>
+                    <td class="px-3 py-2">Net New</td>
+                    <td class="px-3 py-2 font-mono">${money(m.msrp)}</td>
+                    <td class="px-3 py-2">30%</td>
+                    <td class="px-3 py-2 font-mono">${money(m.msrp*0.30)}</td>
+                    <td class="px-3 py-2 font-mono">${money(m.partnerNewPrice)}</td>
+                    <td class="px-3 py-2 font-mono">${m.endpoints ? money(m.partnerNewPrice/m.endpoints) : '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2">Renewal</td>
+                    <td class="px-3 py-2 font-mono">${money(m.msrp)}</td>
+                    <td class="px-3 py-2">15%</td>
+                    <td class="px-3 py-2 font-mono">${money(m.msrp*0.15)}</td>
+                    <td class="px-3 py-2 font-mono">${money(m.partnerRenPrice)}</td>
+                    <td class="px-3 py-2 font-mono">${m.endpoints ? money(m.partnerRenPrice/m.endpoints) : '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="mt-2 text-[12px] text-slate-400">Partner price is MSRP minus margin. MSRP includes platform fee (if not waived) and premium support (if selected).</p>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSLA(){
+      return `
+        <section id="panel-sla" role="tabpanel" aria-labelledby="tab-sla" class="space-y-3">
+          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+            <h3 class="text-base font-semibold">Support SLA</h3>
+            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
+              <table class="min-w-full text-sm">
+                <thead class="bg-[#0b152f] text-slate-300">
+                  <tr><th class="px-3 py-2 text-left">Support Level</th><th class="px-3 py-2 text-left">Basic</th><th class="px-3 py-2 text-left">Premium</th></tr>
+                </thead>
+                <tbody class="bg-[#0b1328]">
+                  <tr><td class="px-3 py-2">Urgent Severity</td><td class="px-3 py-2">First response: <strong>1 Business Day</strong></td><td class="px-3 py-2">First & update: <strong>2 Business Hours</strong></td></tr>
+                  <tr><td class="px-3 py-2">Normal Severity</td><td class="px-3 py-2">First response: <strong>2 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>4 Business Hours</strong></td></tr>
+                  <tr><td class="px-3 py-2">Low Severity</td><td class="px-3 py-2">First response: <strong>3 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>8 Business Hours</strong></td></tr>
+                  <tr><td class="px-3 py-2">Availability</td><td class="px-3 py-2" colspan="2">8am – 5pm CT/CET</td></tr>
+                  <tr><td class="px-3 py-2">Support Hours</td><td class="px-3 py-2" colspan="2">Unlimited</td></tr>
+                  <tr><td class="px-3 py-2">Dedicated CSM</td><td class="px-3 py-2">✔</td><td class="px-3 py-2">✔</td></tr>
+                  <tr><td class="px-3 py-2">Support Call Scheduling</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Urgent within 2 business days; Normal within 4; Low based on availability</td></tr>
+                  <tr><td class="px-3 py-2">Environment Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
+                  <tr><td class="px-3 py-2">Configuration Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
+                  <tr><td class="px-3 py-2">Upgrade Assistance</td><td class="px-3 py-2">—</td><td class="px-3 py-2">2× / year</td></tr>
+                  <tr><td class="px-3 py-2">User Group Membership</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Priority recruitment</td></tr>
+                  <tr><td class="px-3 py-2">Pricing</td><td class="px-3 py-2">Included with Enterprise License</td><td class="px-3 py-2">+20% of total ARR (minimum $6,000)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="mt-2 text-[12px] text-slate-400">Note: Response-time commitments do not guarantee time to resolution.</p>
+          </div>
+        </section>
+      `;
+    }
+
+    function rowKV(label,value,pill){
+      return `
+        <div class="flex items-center justify-between py-3">
+          <div class="flex items-center gap-2">
+            <span>${label}</span>
+            ${pill ? `<span class="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300">${pill}</span>` : ''}
+          </div>
+          <div class="font-mono">${value}</div>
+        </div>
+      `;
+    }
+
+    // ---------- BREAKDOWN TABLE POPULATION ----------
+    function updateBreakdownTable(){
+      if(!STATE.showBreakdown) return;
+      const m = model();
+      const tbody = document.getElementById('tier-body');
+      if(!tbody) return;
+      tbody.innerHTML = m.lines.map(r=>`
+        <tr class="odd:bg-[#0b1328] even:bg-[#0b1328]">
+          <td class="px-3 py-2">${r.band}</td>
+          <td class="px-3 py-2">${r.units.toLocaleString()}</td>
+          <td class="px-3 py-2 font-mono">${money(r.rate)}</td>
+          <td class="px-3 py-2 font-mono">${money(r.extended)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---------- EVENTS ----------
+    function attachEvents(){
+      const root = document.getElementById('app');
+
+      const ep = root.querySelector('#inp-endpoints');
+      if(ep) ep.addEventListener('input', e => { STATE.endpoints = int(e.target.value); render(); });
+
+      const prod = root.querySelector('#inp-product');
+      if(prod) prod.addEventListener('change', e => { STATE.productKey = e.target.value; render(); });
+
+      const sup = root.querySelector('#inp-support');
+      if(sup) sup.addEventListener('change', e => { STATE.addSupport = !!e.target.checked; render(); });
+
+      root.querySelectorAll('[data-action="switch"]').forEach(b => b.addEventListener('click', e => {
+        STATE.activeTab = e.currentTarget.getAttribute('data-tab');
+        render();
+      }));
+
+      const copyBtn = root.querySelector('[data-action="copy"]');
+      if(copyBtn) copyBtn.addEventListener('click', async () => {
+        const m = model();
+        const fields = [
+          ['Product', m.meta.name],
+          ['Endpoints', m.endpoints.toLocaleString()],
+          ['Base Total ARR (graduated)', money(m.baseARR)],
+          ['Platform Fee', m.platformWaived ? '— (waived)' : money(m.platformFeeApplied)],
+          ['Premium Support', STATE.addSupport ? money(m.support) : '—'],
+          ['Total ARR', money(m.totalARR)],
+          ['Partner (New)', money(m.partnerNewPrice)],
+          ['Partner (Renewal)', money(m.partnerRenPrice)]
+        ];
+        const text = fields.map(([k,v])=>`${k}: ${v}`).join('\n');
+        try { await navigator.clipboard.writeText(text); } catch {
+          const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+      });
+
+      const toggle = root.querySelector('[data-action="toggle-breakdown"]');
+      if(toggle) toggle.addEventListener('click', () => { STATE.showBreakdown = !STATE.showBreakdown; render(); });
+    }
+
+    // ---------- INIT ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      if(!window.tailwind){ const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3'; b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>'; document.body.prepend(b); }
+    });
+  </script>
+</body>
+</html>
