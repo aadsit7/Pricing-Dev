@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Endpoint Pricing Calculator — Modern</title>
+  <title>Endpoint Pricing Calculator — Modern (Fixed)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -12,11 +12,9 @@
 </head>
 <body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
-
   <script>
-    // ---------- STATE ----------
     const STATE = {
-      endpoints: 1000,
+      endpointsText: '1000',
       productKey: 'rct',
       addSupport: false,
       activeTab: 'customer',
@@ -24,7 +22,6 @@
       showBreakdown: false
     };
 
-    // ---------- DATA ----------
     const TIERS_BASE5 = [
       { max: 1000, rate: 5.00 }, { max: 2000, rate: 4.50 }, { max: 3000, rate: 4.25 }, { max: 4000, rate: 4.00 }, { max: 5000, rate: 3.75 },
       { max: 6000, rate: 3.50 }, { max: 7000, rate: 3.25 }, { max: 8000, rate: 3.00 }, { max: 9000, rate: 2.75 }, { max: 10000, rate: 2.50 },
@@ -36,20 +33,20 @@
     const PRODUCTS = {
       rct:       { name: 'Right Click Tools (Core)', baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
       patch:     { name: 'Patching',                 baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
-      insights:  { name: 'Insights',                  baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
-      priv:      { name: 'Privilege Manager',         baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
+      insights:  { name: 'Insights',                 baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
+      priv:      { name: 'Privilege Manager',        baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
       aw_cloud:  { name: 'Application Workspace — Direct Cloud',  baseFactor: 11/5, platformFee: 15000, minTotal: 26000 },
       aw_onprem: { name: 'Application Workspace — Direct On-Prem', baseFactor: 10/5, platformFee: 15000, minTotal: 25000 }
     };
 
-    // ---------- UTILS ----------
     function cx(...a){ return a.filter(Boolean).join(' '); }
     function money(n){ return (!isFinite(n)) ? '—' : n.toLocaleString(undefined,{ style:'currency', currency:'USD' }); }
-    function int(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
+    function toInt(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
+    function sanitizeDigits(text){ return String(text ?? '').replace(/[^\d]/g,''); }
     function clampFloor(r){ return Math.max(r, 0.10); }
     function tiersFor(key){
       const f = (PRODUCTS[key] || PRODUCTS.rct).baseFactor;
-      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+(t.rate * f).toFixed(4)) }));
+      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+((t.rate * f)).toFixed(4)) }));
     }
     function graduatedSubtotal(units, tiers){
       let rem = Math.max(0, Math.floor(units)), from = 0, sum = 0, lines = [];
@@ -66,7 +63,7 @@
     function premiumSupportCost(add, basePlusPlat){ return add ? Math.max(basePlusPlat * 0.20, 6000) : 0; }
 
     function model(){
-      const endpoints = int(STATE.endpoints);
+      const endpoints = toInt(STATE.endpointsText);
       const meta = PRODUCTS[STATE.productKey] || PRODUCTS.rct;
       const tiers = tiersFor(STATE.productKey);
       const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiers);
@@ -74,19 +71,15 @@
       const basePlusPlatform = Math.max(baseARR + platformFeeApplied, meta.minTotal);
       const support = premiumSupportCost(STATE.addSupport, basePlusPlatform);
       const totalARR = basePlusPlatform + support;
-
       const msrp = totalARR;
       const partnerNewPrice = msrp * (1 - 0.30);
       const partnerRenPrice = msrp * (1 - 0.15);
-
       return {
         endpoints, meta, baseARR, platformFeeApplied, basePlusPlatform, support, totalARR,
-        partnerNewPrice, partnerRenPrice, msrp, lines,
-        platformWaived: platformFeeApplied === 0
+        partnerNewPrice, partnerRenPrice, msrp, lines, platformWaived: platformFeeApplied === 0
       };
     }
 
-    // ---------- RENDER ROOT ----------
     function render(){
       const m = model();
       const root = document.getElementById('app');
@@ -105,7 +98,6 @@
             </div>
             <p class="mt-2 max-w-2xl text-slate-300">This is a pricing estimate only and should not be considered a formal quote.</p>
           </div>
-
           <div class="relative mx-auto max-w-6xl px-4">
             <div role="tablist" aria-label="Views" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
               ${tabBtn('customer','Customer Pricing')}
@@ -114,14 +106,12 @@
             </div>
           </div>
         </header>
-
         <main class="mx-auto max-w-6xl px-4 pb-16">
           <section class="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
             ${inputCard()}
             ${kpiCard('Total ARR', money(m.totalARR), 'calculator')}
             ${kpiCard('Base ARR', money(m.baseARR), 'badge-dollar-sign')}
           </section>
-
           <section class="mt-4">
             ${STATE.activeTab==='customer' ? renderCustomer(m) : ''}
             ${STATE.activeTab==='partner' ? renderPartner(m) : ''}
@@ -129,13 +119,11 @@
           </section>
         </main>
       `;
-
       if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
       updateBreakdownTable();
     }
 
-    // ---------- SUB-RENDERS ----------
     function tabBtn(id,label){
       const active = STATE.activeTab===id;
       return `
@@ -148,24 +136,28 @@
 
     function inputCard(){
       const m = model();
+      const effectiveText = STATE.endpointsText ?? String(m.endpoints || '');
+      const hint = m.endpoints ? `${m.endpoints.toLocaleString()} endpoints` : 'Enter endpoint count';
       return `
         <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 lg:col-span-2" role="region" aria-label="Inputs">
           <h2 class="text-base font-semibold">Inputs</h2>
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <label class="flex flex-col gap-1 text-sm">
               <span class="text-[12px] text-slate-300">Endpoint count</span>
-              <input id="inp-endpoints" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" inputmode="numeric" value="${STATE.endpoints}" aria-describedby="endpoints-help">
-              <span id="endpoints-help" class="text-[11px] text-slate-400">Graduated by band</span>
+              <input id="inp-endpoints" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm"
+                     type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false"
+                     value="${effectiveText}" aria-describedby="endpoints-help" aria-label="Endpoint count">
+              <span id="endpoints-help" class="text-[11px] text-slate-400">${hint}</span>
             </label>
             <label class="flex flex-col gap-1 text-sm">
               <span class="text-[12px] text-slate-300">Product</span>
-              <select id="inp-product" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm">
+              <select id="inp-product" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" aria-label="Product">
                 ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${STATE.productKey===k?'selected':''}>${v.name}</option>`).join('')}
               </select>
               <span class="text-[11px] text-slate-400">Different base, fees & minimums</span>
             </label>
             <label class="flex items-center gap-2 text-sm mt-6 sm:mt-0">
-              <input id="inp-support" type="checkbox" ${STATE.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]">
+              <input id="inp-support" type="checkbox" ${STATE.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]" aria-label="Add premium support">
               <span>Add Premium Support <span class="ml-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"><i data-lucide="percent" class="w-3.5 h-3.5"></i>+20% (min $6k)</span></span>
             </label>
           </div>
@@ -180,13 +172,13 @@
 
     function kpiCard(label,value,icon){
       return `
-        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
+        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4" role="region" aria-live="polite">
           <div class="flex items-center justify-between">
             <div>
               <div class="text-[12px] text-slate-300">${label}</div>
               <div class="text-xl font-semibold font-mono">${value}</div>
             </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
           </div>
         </div>
       `;
@@ -203,14 +195,14 @@
               ${rowKV('Premium Support (20% min $6k)', STATE.addSupport ? money(m.support) : '—')}
               <div class="flex items-center justify-between py-3">
                 <div class="text-lg font-bold">Total ARR</div>
-                <div class="text-lg font-extrabold font-mono">${money(m.totalARR)}</div>
+                <div class="text-lg font-extrabold font-mono" aria-live="polite">${money(m.totalARR)}</div>
               </div>
             </div>
             <div class="mt-2 text-[12px] text-slate-400">
               ${m.platformWaived ? 'Platform fee waived automatically (base ARR ≥ $30,000).' : 'Platform fee not waived (base ARR < $30,000).'}
               ${m.basePlusPlatform===m.meta.minTotal ? ` Minimum base+platform minimum applied: ${money(m.meta.minTotal)}.` : ''}
             </div>
-            <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown">
+            <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown" aria-expanded="${STATE.showBreakdown}">
               <i data-lucide="${STATE.showBreakdown?'chevron-up':'chevron-down'}" class="w-4 h-4"></i>
               ${STATE.showBreakdown ? 'Hide tier calculation' : 'Show tier calculation'}
             </button>
@@ -221,7 +213,7 @@
                     <tr>
                       <th class="px-3 py-2 text-left">Band</th>
                       <th class="px-3 py-2 text-left">Units</th>
-                      <th class="px-3 py-2 text-left">Rate</th>
+                      <th class="px-3 py-2 text-left">$ / Unit</th>
                       <th class="px-3 py-2 text-left">Extended</th>
                     </tr>
                   </thead>
@@ -327,7 +319,6 @@
       `;
     }
 
-    // ---------- BREAKDOWN TABLE POPULATION ----------
     function updateBreakdownTable(){
       if(!STATE.showBreakdown) return;
       const m = model();
@@ -343,12 +334,29 @@
       `).join('');
     }
 
-    // ---------- EVENTS ----------
     function attachEvents(){
       const root = document.getElementById('app');
 
       const ep = root.querySelector('#inp-endpoints');
-      if(ep) ep.addEventListener('input', e => { STATE.endpoints = int(e.target.value); render(); });
+      if(ep){
+        ep.addEventListener('beforeinput', e => {
+          if(e.data && /\D/.test(e.data)) e.preventDefault();
+        });
+        ep.addEventListener('input', e => {
+          STATE.endpointsText = sanitizeDigits(e.target.value);
+          render();
+          const repl = document.querySelector('#inp-endpoints');
+          if(repl){ repl.focus(); repl.setSelectionRange(STATE.endpointsText.length, STATE.endpointsText.length); }
+        });
+        ep.addEventListener('blur', e => {
+          STATE.endpointsText = sanitizeDigits(e.target.value);
+          render();
+        });
+        ep.addEventListener('keydown', e => {
+          if(e.key === 'Enter'){ e.currentTarget.blur(); }
+        });
+        ep.addEventListener('wheel', e => { e.preventDefault(); }, { passive: false });
+      }
 
       const prod = root.querySelector('#inp-product');
       if(prod) prod.addEventListener('change', e => { STATE.productKey = e.target.value; render(); });
@@ -375,8 +383,13 @@
           ['Partner (Renewal)', money(m.partnerRenPrice)]
         ];
         const text = fields.map(([k,v])=>`${k}: ${v}`).join('\n');
-        try { await navigator.clipboard.writeText(text); } catch {
-          const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          try {
+            const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+            document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          } catch {}
         }
         STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
       });
@@ -385,7 +398,6 @@
       if(toggle) toggle.addEventListener('click', () => { STATE.showBreakdown = !STATE.showBreakdown; render(); });
     }
 
-    // ---------- INIT ----------
     document.addEventListener('DOMContentLoaded', () => {
       render();
       if(!window.tailwind){ const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3'; b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>'; document.body.prepend(b); }
