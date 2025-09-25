@@ -2,108 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Recast + Nerdio — Better Together (Single-File Demo)</title>
+  <title>Recast + Nerdio — Clear Story (3 Slides)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://unpkg.com">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     html,body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial}
-    .card{border:1px solid rgba(255,255,255,.08);border-radius:1rem;background:#0b1328}
-    .sub{border:1px solid rgba(255,255,255,.08);border-radius:.75rem;background:#0a1124}
+    .glass{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.1);border-radius:1rem}
+    .chip{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);border-radius:.75rem}
     .focus-ring:focus-visible{outline:2px solid #facc15;outline-offset:2px}
-    /* Stack visual */
-    .node{border-radius:.75rem;border:1px solid rgba(255,255,255,.12);background:#0b162d}
-    .pulse.run{animation:pop .75s cubic-bezier(.2,.8,.2,1) forwards}
-    @keyframes pop{0%{transform:scale(.96);opacity:.7}60%{transform:scale(1.03);opacity:1}100%{transform:scale(1)}}
-    .beam{height:.28rem;border-radius:.28rem;transform:scaleX(0);transform-origin:left center}
-    .run .beam{animation:beam 1s ease forwards}
-    @keyframes beam{to{transform:scaleX(1)}}
-    .tick{opacity:0;transform:translateY(-4px)}
-    .run .tick{animation:tick .6s ease .6s forwards}
-    @keyframes tick{to{opacity:1;transform:translateY(0)}}
+    .step-dot{width:.625rem;height:.625rem;border-radius:999px}
+    .arrow{height:.4rem;border-radius:.4rem;transform-origin:left center;transform:scaleX(0)}
+    .animate .arrow{animation:grow 900ms ease-out forwards}
+    @keyframes grow{to{transform:scaleX(1)}}
+    .pop{transform:scale(.96);opacity:.8}
+    .animate .pop{animation:pop .7s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes pop{50%{transform:scale(1.03);opacity:1}100%{transform:scale(1)}}
   </style>
 </head>
-<body class="min-h-screen bg-[#0a0f22] text-slate-100 antialiased">
+<body class="min-h-screen bg-[#090f1f] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
 
   <script>
     const STATE = {
-      tab: 'positioning',
-      targets: { onboardingMins: 60, pkgHours: 8, patchPct: 95, azureSavingsPct: 20 },
-      roiInputs: { users: 1000, loadedCostPerHour: 85 },
-      flowRunning: false,
+      slide: 0, // 0=positioning,1=problem,2=approach,3=outcomes
+      animateFlow: false,
+      targets: { onboardingMins: 60, patchPct: 95, azureSavePct: 20, pkgHrsLow: 5, pkgHrsHigh: 10 },
       copied: false
     };
 
     function render(){
       const root = document.getElementById('app');
       root.innerHTML = `
+        ${renderHeader()}
+        <main class="mx-auto max-w-6xl px-4 pb-16">
+          ${STATE.slide===0?renderPositioning():''}
+          ${STATE.slide===1?renderProblem():''}
+          ${STATE.slide===2?renderApproach():''}
+          ${STATE.slide===3?renderOutcomes():''}
+        </main>
+      `;
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch{} }
+      bindEvents();
+    }
+
+    function renderHeader(){
+      const steps = ['Positioning','Problem','Better Together','Outcomes'];
+      const dots = steps.map((s,i)=>{
+        const active = STATE.slide===i;
+        const done = i<STATE.slide;
+        return `
+          <button type="button" class="group flex items-center gap-2 text-xs sm:text-sm focus-ring" data-action="goto" data-i="${i}" aria-current="${active?'step':''}">
+            <span class="step-dot ${active?'bg-yellow-400':'bg-white/25'} ${done&&!active?'ring-2 ring-yellow-300':''}"></span>
+            <span class="${active?'text-yellow-300':'text-slate-300 group-hover:text-white'}">${s}</span>
+          </button>`;
+      }).join('<span class="mx-2 w-6 border-t border-white/15 hidden sm:inline-block"></span>');
+      return `
         <header class="relative overflow-hidden">
           <div aria-hidden="true" class="absolute inset-0">
             <div class="absolute -top-24 -left-24 h-96 w-96 blur-[120px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
-            <div class="absolute -bottom-28 right-0 h-80 w-80 blur-[120px] rounded-full bg-gradient-to-tr from-emerald-400/20 via-cyan-400/20 to-sky-400/25"></div>
+            <div class="absolute -bottom-24 right-0 h-80 w-80 blur-[120px] rounded-full bg-gradient-to-tr from-emerald-400/20 via-cyan-400/20 to-sky-400/25"></div>
           </div>
-
           <div class="relative mx-auto max-w-6xl px-4 py-8">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <h1 class="text-3xl sm:text-4xl font-extrabold">Recast + Nerdio — Better Together</h1>
-              <div class="flex items-center gap-2 text-xs text-slate-300">
-                <i data-lucide="shield-check" class="h-4 w-4"></i><span>Identity-driven & governed workspace</span>
+              <div class="chip px-3 py-1.5 text-xs text-slate-200 flex items-center gap-2">
+                <i data-lucide="shield-check" class="h-4 w-4"></i>
+                <span>One governed, identity-driven workspace</span>
               </div>
             </div>
-            <p class="mt-3 max-w-3xl text-slate-200 text-lg">
-              Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together we deliver one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
-            </p>
-            <p class="mt-2 text-sm text-slate-400">(Backed by Nerdio’s all-in-one management for AVD/Windows 365/Intune and Recast’s large curated app catalog + third-party patching.)</p>
-
-            <nav class="mt-5 flex flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10" role="tablist" aria-label="Sections">
-              ${tabBtn('positioning','Positioning','megaphone')}
-              ${tabBtn('problem','Slide 1 — Problem','alert-triangle')}
-              ${tabBtn('approach','Slide 2 — Better Together','workflow')}
-              ${tabBtn('outcomes','Slide 3 — Outcomes','bar-chart-3')}
+            <nav class="mt-5 flex flex-wrap items-center gap-3" role="navigation" aria-label="Slide steps">
+              ${dots}
+              <div class="ml-auto flex gap-2">
+                <button type="button" class="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 focus-ring" data-action="prev" aria-label="Previous slide">Back</button>
+                <button type="button" class="rounded-full bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-slate-900 focus-ring" data-action="next" aria-label="Next slide">Next</button>
+              </div>
             </nav>
           </div>
         </header>
-
-        <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${STATE.tab==='positioning' ? renderPositioning() : ''}
-          ${STATE.tab==='problem' ? renderProblem() : ''}
-          ${STATE.tab==='approach' ? renderApproach() : ''}
-          ${STATE.tab==='outcomes' ? renderOutcomes() : ''}
-        </main>
       `;
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
-      attachEvents();
-    }
-
-    function tabBtn(id,label,icon){
-      const active = STATE.tab===id;
-      return `<button type="button" class="${active?'bg-yellow-400 text-slate-900':'text-slate-200 hover:bg-white/5'} inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-ring" data-action="tab" data-id="${id}" aria-selected="${active}" aria-controls="panel-${id}">
-        <i data-lucide="${icon}" class="w-4 h-4"></i><span>${label}</span>
-      </button>`;
     }
 
     function renderPositioning(){
       return `
-        <section id="panel-positioning" class="space-y-3">
-          <article class="card p-4">
-            <h2 class="text-xl font-semibold">One-sentence positioning</h2>
-            <p class="mt-2 text-slate-200">“Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together we deliver one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.”</p>
+        <section class="space-y-4" aria-labelledby="positioning">
+          <article class="glass p-5">
+            <h2 id="positioning" class="text-xl font-semibold">Say it in one line</h2>
+            <p class="mt-2 text-lg text-slate-100"><span class="font-semibold">Nerdio orchestrates Cloud PCs/AVD/Intune.</span> <span class="font-semibold">Recast controls the apps.</span> Together we deliver <span class="font-semibold text-yellow-300">one governed, identity-driven workspace</span>—desktops and applications provisioned, patched, and ready in a single flow.</p>
+            <p class="mt-2 text-sm text-slate-300">Backed by Nerdio’s all-in-one management for AVD/Windows 365/Intune and Recast’s large curated app catalog + third-party patching.</p>
           </article>
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            ${nerdioVisual()}
-            ${recastVisual()}
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            ${nerdioCard()}
+            ${recastCard()}
           </div>
-          <div class="card p-4">
-            <div class="flex items-start gap-3">
-              <i data-lucide="link" class="h-5 w-5 text-emerald-300"></i>
-              <p class="text-slate-300 text-sm">Together: Users receive the right desktop and the right apps at the same time, governed by identity and rollout rings.</p>
-            </div>
-            <div class="mt-3">
-              <button type="button" data-action="tab" data-id="approach" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 focus-ring inline-flex items-center gap-2"><i data-lucide="arrow-right" class="w-4 h-4"></i>See the Better Together flow</button>
-            </div>
+          <div class="glass p-4 text-sm text-slate-300">
+            <span class="font-medium text-slate-100">Plain English:</span> Nerdio makes the right desktop appear at the right size and cost. Recast puts the right apps on it and keeps them patched. The user signs in once and it’s all there.
           </div>
         </section>
       `;
@@ -111,218 +105,183 @@
 
     function renderProblem(){
       return `
-        <section id="panel-problem" class="space-y-3">
-          <article class="card p-4">
-            <h2 class="text-xl font-semibold">Slide 1 — The Problem (Current State)</h2>
-            <p class="mt-2 text-slate-200">Infra can be stood up fast (AVD/Windows 365), but <span class="font-semibold">apps, patching, and access are fragmented</span> across tools—users wait, IT burns hours, and zero-day windows linger.</p>
+        <section class="space-y-4" aria-labelledby="problem">
+          <article class="glass p-5">
+            <h2 id="problem" class="text-xl font-semibold">Slide 1 — The Problem</h2>
+            <p class="mt-2 text-slate-200">Infra can be stood up fast (AVD/Windows 365), but <span class="font-semibold">apps, patching, and access are fragmented</span>—users wait, IT burns hours, zero-day windows linger.</p>
           </article>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            ${problemCard('Fragmented delivery','layers','Windows / Mac / VDI / Web — users guess the right route.')}
-            ${problemCard('Packaging backlog','boxes','Each version means rebuilds; updates stall.')}
-            ${problemCard('Slow & risky patching','shield','Security fixes take days, not hours.')}
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            ${problemTile('Fragmented delivery','split-square-horizontal','Different tools for desktop vs. apps.')}
+            ${problemTile('Packaging backlog','boxes','Every app/update needs care and feeding.')}
+            ${problemTile('Slow patching risk','shield','Delays leave exposure windows.')}
           </div>
-          <div class="card p-4">
-            <div class="text-sm text-slate-300">Nerdio sets up and right-sizes the desktop estate rapidly. Recast closes the last-mile app gap so day-one is actually usable and secure.</div>
-          </div>
+          <div class="glass p-4 text-sm text-slate-300">Conclusion: “Infra ready” ≠ “Work ready”. We need desktop <span class="font-semibold text-slate-100">and</span> apps to land together.</div>
         </section>
       `;
     }
 
     function renderApproach(){
       return `
-        <section id="panel-approach" class="space-y-3">
-          <article class="card p-4">
-            <h2 class="text-xl font-semibold">Slide 2 — The Approach (Better Together)</h2>
-            <div class="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-2">
-              ${stackDiagram()}
-              <div class="flex flex-col gap-3">
-                <div class="sub p-3">
-                  <div class="flex items-center gap-2 font-medium"><i data-lucide="server-cog" class="w-4 h-4 text-sky-300"></i>Nerdio = infra & policy automation</div>
-                  <ul class="mt-2 list-disc pl-5 text-sm text-slate-300">
-                    <li>Provisioning and lifecycle for AVD & Windows 365</li>
-                    <li>Autoscale to control Azure cost</li>
-                    <li>Insights & guardrails across tenants</li>
-                  </ul>
-                </div>
-                <div class="sub p-3">
-                  <div class="flex items-center gap-2 font-medium"><i data-lucide="package" class="w-4 h-4 text-emerald-300"></i>Recast = app control layer</div>
-                  <ul class="mt-2 list-disc pl-5 text-sm text-slate-300">
-                    <li>7,000+ curated apps with silent installs</li>
-                    <li>Self-service and governed rings</li>
-                    <li>Third-party patching & compliance reporting</li>
-                  </ul>
-                </div>
-                <div class="sub p-3">
-                  <div class="flex items-center gap-2 font-medium"><i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>Result</div>
-                  <p class="mt-1 text-sm text-slate-300">Desktops and apps are delivered together with identity and rollout rings—ready on first sign-in.</p>
-                  <button type="button" data-action="run-flow" class="mt-2 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900">Animate flow</button>
-                </div>
+        <section class="space-y-4" aria-labelledby="approach">
+          <article class="glass p-5">
+            <h2 id="approach" class="text-xl font-semibold">Slide 2 — The Approach (Better Together)</h2>
+            <p class="mt-2 text-slate-200">Two layers, one outcome.</p>
+          </article>
+          <div class="glass p-5 ${STATE.animateFlow?'animate':''}" role="region" aria-label="Flow: Nerdio → Recast → Workspace">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div class="pop">
+                ${logoBadge('N','from-emerald-400 via-cyan-400 to-sky-500')}
+                <h3 class="mt-2 font-semibold">Nerdio — Orchestrate</h3>
+                <ul class="mt-1 text-sm text-slate-300 list-disc pl-5">
+                  <li>Provision AVD & Windows 365</li>
+                  <li>Autoscale to control Azure cost</li>
+                  <li>Apply policies via Intune</li>
+                </ul>
+              </div>
+
+              <div class="hidden lg:flex flex-col justify-center">
+                <div class="arrow bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300"></div>
+                <div class="h-6"></div>
+                <div class="arrow bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300"></div>
+              </div>
+
+              <div class="pop">
+                ${logoBadge('R','from-yellow-300 via-amber-300 to-orange-400')}
+                <h3 class="mt-2 font-semibold">Recast — Control the Apps</h3>
+                <ul class="mt-1 text-sm text-slate-300 list-disc pl-5">
+                  <li>7,000+ curated, silent installers</li>
+                  <li>Self-service & governed rings</li>
+                  <li>Third-party patching & compliance</li>
+                </ul>
               </div>
             </div>
-          </article>
+
+            <div class="mt-6 pop">
+              <div class="chip p-3 flex items-center gap-2">
+                <i data-lucide="user-check" class="w-5 h-5 text-emerald-300"></i>
+                <span class="font-medium">Identity-driven workspace</span>
+                <span class="ml-auto text-xs text-slate-300">Desktop + Apps land together on first sign-in</span>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button type="button" class="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 focus-ring" data-action="animate">Animate</button>
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm focus-ring" data-action="reset-anim">Reset</button>
+            </div>
+          </div>
         </section>
       `;
     }
 
     function renderOutcomes(){
       const t = STATE.targets;
-      const minutesSaved = Math.max(0, 60 - t.onboardingMins);
-      const pkgRange = '5–10';
-      const patch = t.patchPct;
-      const azureSave = t.azureSavingsPct;
-      const monthHours = Math.round((minutesSaved / 60) * STATE.roiInputs.users);
-      const dollarMonth = monthHours * STATE.roiInputs.loadedCostPerHour;
       return `
-        <section id="panel-outcomes" class="space-y-3">
-          <article class="card p-4">
-            <h2 class="text-xl font-semibold">Slide 3 — Outcomes (Impact & ROI)</h2>
-            <p class="mt-2 text-slate-200">Targets to validate in pilots. Show these as model inputs and commit to measuring.</p>
-            <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4">
-              ${target('Under 1 hour onboarding','timer', t.onboardingMins+' mins','onboarding')}
-              ${target('Hours/app packaging avoided','scissors',''+pkgRange+' hrs','pkg')}
-              ${target('Patch-compliance goal','shield-check', patch+'%','patch')}
-              ${target('Autoscale Azure cost reduction','trending-down', azureSave+'%','azure')}
-            </div>
+        <section class="space-y-4" aria-labelledby="outcomes">
+          <article class="glass p-5">
+            <h2 id="outcomes" class="text-xl font-semibold">Slide 3 — Outcomes (Impact & ROI)</h2>
+            <p class="mt-2 text-slate-200">Targets to validate in pilots. Keep these visible, measure weekly.</p>
           </article>
-
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div class="card p-4 md:col-span-2">
-              <h3 class="text-base font-semibold">Illustrative calculator (edit)</h3>
-              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                ${numInput('Users', 'users', STATE.roiInputs.users)}
-                ${numInput('Loaded cost ($/hr)', 'loadedCostPerHour', STATE.roiInputs.loadedCostPerHour)}
-                <div class="flex flex-col gap-1 text-sm">
-                  <span class="text-[12px] text-slate-300">Minutes saved at onboarding</span>
-                  <input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 focus-ring" inputmode="decimal" value="${minutesSaved}" data-action="set-mins">
-                </div>
-              </div>
-              <p class="mt-2 text-[12px] text-slate-400">Assumes onboarding time saved applies once; adjust to your reality during pilots.</p>
-            </div>
-            <div class="card p-4">
-              <h3 class="text-base font-semibold">Quick results</h3>
-              <div class="mt-3 space-y-2 text-sm">
-                ${kv('Onboarding minutes saved', minutesSaved+' mins')}
-                ${kv('Org hours saved (first month)', monthHours)}
-                ${kv('$ saved (first month)', '$'+fmt(dollarMonth))}
-                ${kv('Patch compliance target', patch+'%')}
-                ${kv('Azure cost reduction target', azureSave+'%')}
-              </div>
-              <div class="mt-3 flex gap-2">
-                <button type="button" data-action="copy" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 focus-ring inline-flex items-center gap-2">
-                  <i data-lucide="clipboard" class="w-4 h-4"></i>${STATE.copied?'Copied!':'Copy summary'}
-                </button>
-                <button type="button" data-action="tab" data-id="approach" class="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm focus-ring">Back to flow</button>
-              </div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+            ${metric('Under 1 hour onboarding','timer',t.onboardingMins+' mins',range('onboardingMins',30,120,t.onboardingMins))}
+            ${metric('Packaging avoided per app','scissors',`${t.pkgHrsLow}–${t.pkgHrsHigh} hrs`,'')}
+            ${metric('Patch-compliance goal','shield-check',t.patchPct+' %',range('patchPct',85,100,t.patchPct))}
+            ${metric('Azure cost reduction','trending-down',t.azureSavePct+' %',range('azureSavePct',0,40,t.azureSavePct))}
+          </div>
+          <div class="glass p-4 flex flex-col gap-3">
+            <div class="text-sm text-slate-300">Talking points:</div>
+            <ul class="text-sm list-disc pl-5 text-slate-200">
+              <li><span class="font-semibold">Time-to-value:</span> desktop + apps ready under 60 minutes.</li>
+              <li><span class="font-semibold">Focus time back:</span> avoid ${t.pkgHrsLow}–${t.pkgHrsHigh} hours per app per update.</li>
+              <li><span class="font-semibold">Risk down:</span> keep third-party apps patched to &gt;${t.patchPct}%.</li>
+              <li><span class="font-semibold">Spend smarter:</span> autoscale targets ~${t.azureSavePct}% Azure savings.</li>
+            </ul>
+            <div class="flex gap-2">
+              <button type="button" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 focus-ring inline-flex items-center gap-2" data-action="copy">
+                <i data-lucide="clipboard" class="w-4 h-4"></i>${STATE.copied?'Copied':'Copy summary'}
+              </button>
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm focus-ring" data-action="goto" data-i="2">Back to flow</button>
             </div>
           </div>
         </section>
       `;
     }
 
-    function nerdioVisual(){
+    function nerdioCard(){
       return `
-        <section class="card p-4" aria-label="Nerdio visual">
+        <section class="glass p-5" aria-label="Nerdio visual">
           <div class="flex items-center gap-3">
-            <div class="h-10 w-10 grid place-items-center rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-400 to-sky-500 text-slate-900 font-black">N</div>
+            ${nerdioSVG()}
             <div>
-              <h3 class="text-base font-semibold">Nerdio — Orchestrate the desktop estate</h3>
+              <h3 class="font-semibold">Nerdio — Orchestrate the desktop estate</h3>
               <p class="text-sm text-slate-300">AVD • Windows 365 • Intune</p>
             </div>
           </div>
-          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            ${nerdioTile('Provisioning','server')}
-            ${nerdioTile('Autoscale','gauge')}
-            ${nerdioTile('Insights','line-chart')}
-          </div>
-          <div class="mt-3 sub p-3 text-sm text-slate-300">Automates infra and policy so the right Cloud PC or session host is available and cost-optimized.</div>
+          <ul class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-200 sm:grid-cols-3">
+            <li class="chip px-3 py-2">Provisioning</li>
+            <li class="chip px-3 py-2">Autoscale</li>
+            <li class="chip px-3 py-2">Insights</li>
+          </ul>
         </section>
       `;
     }
 
-    function recastVisual(){
+    function recastCard(){
       return `
-        <section class="card p-4" aria-label="Recast visual">
+        <section class="glass p-5" aria-label="Recast visual">
           <div class="flex items-center gap-3">
-            <div class="h-10 w-10 grid place-items-center rounded-xl bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-400 text-slate-900 font-black">R</div>
+            <div class="h-10 w-10 grid place-items-center rounded-xl bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-400 text-slate-900 font-black" aria-hidden="true">R</div>
             <div>
-              <h3 class="text-base font-semibold">Recast — Control the apps</h3>
+              <h3 class="font-semibold">Recast — Control the apps</h3>
               <p class="text-sm text-slate-300">Catalog • Self-service • Third-party patching</p>
             </div>
           </div>
-          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            ${appTile('7,000+ curated apps','boxes')}
-            ${appTile('Governed rings & approvals','git-branch')}
-            ${appTile('Patch & compliance','shield-check')}
-          </div>
-          <div class="mt-3 sub p-3 text-sm text-slate-300">Delivers and maintains applications across Intune/AVD so day-one desktops are actually ready.</div>
+          <ul class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-200 sm:grid-cols-3">
+            <li class="chip px-3 py-2">7,000+ curated apps</li>
+            <li class="chip px-3 py-2">Governed rings</li>
+            <li class="chip px-3 py-2">Compliance reporting</li>
+          </ul>
         </section>
       `;
     }
 
-    function nerdioTile(label,icon){
-      return `<div class="node p-3"><div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="${icon}" class="h-4 w-4 text-emerald-300"></i>${label}</div></div>`;
-    }
-    function appTile(label,icon){
-      return `<div class="node p-3"><div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="${icon}" class="h-4 w-4 text-amber-300"></i>${label}</div></div>`;
-    }
-
-    function problemCard(title,icon,body){
-      return `<article class="sub p-3"><div class="flex items-center gap-2"><i data-lucide="${icon}" class="w-5 h-5 text-rose-300"></i><h3 class="font-semibold">${title}</h3></div><p class="mt-1 text-sm text-slate-300">${body}</p></article>`;
-    }
-
-    function stackDiagram(){
+    function nerdioSVG(){
       return `
-        <section class="sub p-4" role="region" aria-label="Better Together flow">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-slate-300">Animated flow — click run</div>
-            <div class="flex items-center gap-2">
-              <button type="button" data-action="run-flow" class="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900">Run</button>
-              <button type="button" data-action="reset-flow" class="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm">Reset</button>
-            </div>
+        <figure class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 via-cyan-400 to-sky-500 p-[2px]" role="img" aria-label="Nerdio">
+          <div class="h-full w-full rounded-[10px] bg-[#0b1328] grid place-items-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 16V8a3 3 0 0 1 3-3h3" stroke="currentColor" stroke-width="1.5" class="text-emerald-300"/>
+              <path d="M19 8v8a3 3 0 0 1-3 3h-3" stroke="currentColor" stroke-width="1.5" class="text-sky-300"/>
+              <circle cx="12" cy="12" r="3" class="text-cyan-300" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
           </div>
-
-          <div id="flow" class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
-            <div class="space-y-2">
-              <div class="node p-3 ${STATE.flowRunning?'pulse run':''}">
-                <div class="flex items-center gap-2 font-medium"><div class="h-6 w-6 grid place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-400 text-slate-900 font-black">N</div><span>Nerdio — Orchestration</span></div>
-                <ul class="mt-2 text-[12px] text-slate-300 list-disc pl-5">
-                  <li>Provision AVD & Windows 365</li>
-                  <li>Autoscale hosts</li>
-                  <li>Apply policies via Intune</li>
-                </ul>
-              </div>
-              <div class="beam ${STATE.flowRunning?'run':''} bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300"></div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="node p-3 ${STATE.flowRunning?'pulse run':''}">
-                <div class="flex items-center gap-2 font-medium"><div class="h-6 w-6 grid place-items-center rounded-lg bg-gradient-to-br from-yellow-300 to-orange-400 text-slate-900 font-black">R</div><span>Recast — App Control</span></div>
-                <ul class="mt-2 text-[12px] text-slate-300 list-disc pl-5">
-                  <li>Curated app catalog</li>
-                  <li>Rings & self-service</li>
-                  <li>Third-party patching</li>
-                </ul>
-              </div>
-              <div class="beam ${STATE.flowRunning?'run':''} bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300"></div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="node p-3 ${STATE.flowRunning?'pulse run':''}">
-                <div class="flex items-center gap-2 font-medium"><i data-lucide="user-check" class="h-5 w-5 text-emerald-300"></i><span>Identity-driven Workspace</span></div>
-                <p class="mt-2 text-[12px] text-slate-300">Desktop + Apps arrive together with the user’s identity and rollout ring.</p>
-                <div class="mt-2 flex items-center gap-2 text-[12px]">
-                  <span class="tick ${STATE.flowRunning?'run':''} inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-2 py-1 text-emerald-200"><i data-lucide="check" class="h-3.5 w-3.5"></i>Ready on first sign-in</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        </figure>
       `;
     }
 
-    function target(title,icon,value,id){
+    function logoBadge(text,gradient){
       return `
-        <div class="sub p-3">
+        <div class="inline-flex items-center gap-2">
+          <div class="h-8 w-8 grid place-items-center rounded-lg bg-gradient-to-br ${gradient} text-slate-900 font-black" aria-hidden="true">${text}</div>
+          <span class="sr-only">${text==='N'?'Nerdio':'Recast'}</span>
+        </div>
+      `;
+    }
+
+    function problemTile(title,icon,body){
+      return `
+        <article class="glass p-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${icon}" class="w-5 h-5 text-rose-300"></i>
+            <h3 class="font-semibold">${title}</h3>
+          </div>
+          <p class="mt-1 text-sm text-slate-300">${body}</p>
+        </article>
+      `;
+    }
+
+    function metric(title,icon,value,controlHtml){
+      return `
+        <div class="glass p-4">
           <div class="flex items-center justify-between">
             <div>
               <div class="text-[12px] text-slate-300">${title}</div>
@@ -330,81 +289,57 @@
             </div>
             <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
           </div>
-          ${id==='onboarding'?rangeUI('Target (mins)','onboardingMins',30,120,STATE.targets.onboardingMins):''}
-          ${id==='patch'?rangeUI('Target (%)','patchPct',85,100,STATE.targets.patchPct):''}
-          ${id==='azure'?rangeUI('Target (%)','azureSavingsPct',0,40,STATE.targets.azureSavingsPct):''}
+          ${controlHtml||''}
         </div>
       `;
     }
 
-    function rangeUI(label,key,min,max,val){
+    function range(key,min,max,val){
       return `
-        <label class="mt-2 flex items-center gap-2 text-xs">
-          <span class="text-slate-400">${label}</span>
+        <label class="mt-3 flex items-center gap-2 text-xs">
+          <span class="text-slate-400">Target</span>
           <input type="range" min="${min}" max="${max}" value="${val}" data-action="range" data-key="${key}" class="w-full accent-yellow-400">
-          <output class="w-10 text-right">${val}</output>
+          <output class="w-10 text-right" aria-live="polite">${val}</output>
         </label>
       `;
     }
 
-    function kv(label,value){
-      return `<div class="flex items-center justify-between rounded bg-black/20 px-3 py-2"><span class="text-slate-300">${label}</span><span class="font-semibold">${value}</span></div>`;
-    }
-    function numInput(label,key,value){
-      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-slate-300">${label}</span><input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
-    }
-    function fmt(n){ return new Intl.NumberFormat().format(Math.round(n)); }
-
-    function attachEvents(){
+    function bindEvents(){
       const root = document.getElementById('app');
-      root.querySelectorAll('[data-action="tab"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.tab = e.currentTarget.getAttribute('data-id'); render();
+      root.querySelector('[data-action="next"]')?.addEventListener('click',()=>{ STATE.slide=Math.min(3,STATE.slide+1); render(); });
+      root.querySelector('[data-action="prev"]')?.addEventListener('click',()=>{ STATE.slide=Math.max(0,STATE.slide-1); render(); });
+      root.querySelectorAll('[data-action="goto"]').forEach(b=>b.addEventListener('click',e=>{
+        const i=Number(e.currentTarget.getAttribute('data-i')); if(Number.isFinite(i)){ STATE.slide=i; render(); }
       }));
-      root.querySelectorAll('[data-action="run-flow"]').forEach(b=>b.addEventListener('click',()=>{
-        STATE.flowRunning = false; render(); requestAnimationFrame(()=>{ STATE.flowRunning = true; render(); });
-      }));
-      root.querySelectorAll('[data-action="reset-flow"]').forEach(b=>b.addEventListener('click',()=>{ STATE.flowRunning=false; render(); }));
-
+      root.querySelector('[data-action="animate"]')?.addEventListener('click',()=>{ STATE.animateFlow=false; render(); requestAnimationFrame(()=>{ STATE.animateFlow=true; render(); }); });
+      root.querySelector('[data-action="reset-anim"]')?.addEventListener('click',()=>{ STATE.animateFlow=false; render(); });
       root.querySelectorAll('[data-action="range"]').forEach(r=>r.addEventListener('input',e=>{
         const key=e.currentTarget.getAttribute('data-key'); const v=Number(e.target.value)||0; STATE.targets[key]=v; render();
       }));
-      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
-        const key=e.currentTarget.getAttribute('data-key'); const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); STATE.roiInputs[key]=isFinite(v)?v:0;
-      }));
-      const mins = root.querySelector('[data-action="set-mins"]'); if(mins){ mins.addEventListener('input',e=>{}); }
-
-      const copy = root.querySelector('[data-action="copy"]');
-      if(copy) copy.addEventListener('click', async ()=>{
-        const t=STATE.targets, i=STATE.roiInputs;
-        const minutesSaved = Math.max(0, 60 - t.onboardingMins);
-        const monthHours = Math.round((minutesSaved/60) * i.users);
-        const dollarMonth = monthHours * i.loadedCostPerHour;
-        const text =
-`Recast + Nerdio — Pilot Targets
+      root.querySelector('[data-action="copy"]')?.addEventListener('click',async ()=>{
+        const t=STATE.targets;
+        const text = `Recast + Nerdio — Summary
 
 Positioning
-Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together: one governed, identity-driven workspace.
+Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together: one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
+
+Problem
+Infra is fast, but apps/patching/access are fragmented; users wait and risk lingers.
+
+Approach
+- Nerdio: provisioning, autoscale, Insights
+- Recast: 7,000+ curated apps, self-service, third-party patching
+- Result: desktop + apps land together with identity and rings
 
 Pilot Targets
-- Onboarding: under 1 hour (desktop + apps)
+- Under 1 hour onboarding
 - Packaging avoided: 5–10 hrs per app
-- Patch compliance goal: >${t.patchPct}%
-- Azure cost reduction via autoscale: ~${t.azureSavingsPct}%
-
-Illustrative impact (editable)
-- Users: ${i.users}
-- Loaded cost: $${i.loadedCostPerHour}/hr
-- Onboarding minutes saved: ${minutesSaved}
-- Org hours saved (month one): ${monthHours}
-- $ saved (month one): $${fmt(dollarMonth)}
-
-Better Together
-- Nerdio: provisioning, autoscale, Insights for AVD/Windows 365/Intune
-- Recast: 7,000+ curated apps, self-service, third-party patching & governance`;
+- Patch compliance > ${t.patchPct}%
+- Azure cost reduction ~ ${t.azureSavePct}% via autoscale`;
         try { await navigator.clipboard.writeText(text); } catch {
           const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
         }
-        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied=false; render(); }, 1200);
+        STATE.copied=true; render(); setTimeout(()=>{ STATE.copied=false; render(); }, 1200);
       });
     }
 
