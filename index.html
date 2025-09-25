@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Endpoint Pricing Calculator — Modern (Email Copy)</title>
+  <title>Endpoint Pricing Calculator — Multi-Product + Partner Quote</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -12,16 +12,23 @@
 </head>
 <body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
+
   <script>
+    /* =======================
+       STATE
+    ======================= */
     const STATE = {
-      endpointsText: '1000',
-      productKey: 'rct',
-      addSupport: false,
+      items: [
+        { id: cryptoRandomId(), productKey: 'rct', endpointsText: '1000', addSupport: false }
+      ],
       activeTab: 'customer',
       copied: false,
       showBreakdown: false
     };
 
+    /* =======================
+       DATA
+    ======================= */
     const TIERS_BASE5 = [
       { max: 1000, rate: 5.00 }, { max: 2000, rate: 4.50 }, { max: 3000, rate: 4.25 }, { max: 4000, rate: 4.00 }, { max: 5000, rate: 3.75 },
       { max: 6000, rate: 3.50 }, { max: 7000, rate: 3.25 }, { max: 8000, rate: 3.00 }, { max: 9000, rate: 2.75 }, { max: 10000, rate: 2.50 },
@@ -39,14 +46,17 @@
       aw_onprem: { name: 'Application Workspace — Direct On-Prem', baseFactor: 10/5, platformFee: 15000, minTotal: 25000 }
     };
 
+    /* =======================
+       UTILS
+    ======================= */
     function cx(...a){ return a.filter(Boolean).join(' '); }
     function money(n){ return (!isFinite(n)) ? '—' : n.toLocaleString(undefined,{ style:'currency', currency:'USD' }); }
-    function toInt(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
-    function sanitizeDigits(text){ return String(text ?? '').replace(/[^\d]/g,''); }
+    function int(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
+    function digitsOnly(text){ return String(text ?? '').replace(/[^\d]/g,''); }
     function clampFloor(r){ return Math.max(r, 0.10); }
     function tiersFor(key){
       const f = (PRODUCTS[key] || PRODUCTS.rct).baseFactor;
-      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+((t.rate * f)).toFixed(4)) }));
+      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+(t.rate * f).toFixed(4)) }));
     }
     function graduatedSubtotal(units, tiers){
       let rem = Math.max(0, Math.floor(units)), from = 0, sum = 0, lines = [];
@@ -61,25 +71,62 @@
       return { subtotal: sum, lines };
     }
     function premiumSupportCost(add, basePlusPlat){ return add ? Math.max(basePlusPlat * 0.20, 6000) : 0; }
+    function cryptoRandomId(){
+      try { return crypto.randomUUID(); } catch { return 'id-'+Math.random().toString(36).slice(2); }
+    }
 
-    function model(){
-      const endpoints = toInt(STATE.endpointsText);
-      const meta = PRODUCTS[STATE.productKey] || PRODUCTS.rct;
-      const tiers = tiersFor(STATE.productKey);
-      const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiers);
+    /* =======================
+       MODEL
+    ======================= */
+    function computeItem(item){
+      const endpoints = int(item.endpointsText);
+      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
+      const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiersFor(item.productKey));
       const platformFeeApplied = baseARR >= 30000 ? 0 : meta.platformFee;
       const basePlusPlatform = Math.max(baseARR + platformFeeApplied, meta.minTotal);
-      const support = premiumSupportCost(STATE.addSupport, basePlusPlatform);
+      const support = premiumSupportCost(!!item.addSupport, basePlusPlatform);
       const totalARR = basePlusPlatform + support;
       const msrp = totalARR;
-      const partnerNewPrice = msrp * (1 - 0.30);
-      const partnerRenPrice = msrp * (1 - 0.15);
       return {
-        endpoints, meta, baseARR, platformFeeApplied, basePlusPlatform, support, totalARR,
-        partnerNewPrice, partnerRenPrice, msrp, lines, platformWaived: platformFeeApplied === 0
+        id: item.id,
+        productKey: item.productKey,
+        productName: meta.name,
+        endpoints,
+        baseARR,
+        platformFeeApplied,
+        platformWaived: platformFeeApplied === 0,
+        basePlusPlatform,
+        support,
+        totalARR,
+        msrp,
+        partnerNewPrice: msrp * 0.70,
+        partnerRenPrice: msrp * 0.85,
+        marginNew$: msrp * 0.30,
+        marginRen$: msrp * 0.15,
+        addSupport: !!item.addSupport,
+        lines
       };
     }
 
+    function model(){
+      const items = STATE.items.map(computeItem);
+      const totals = items.reduce((a,it)=>({
+        endpoints: a.endpoints + it.endpoints,
+        baseARR: a.baseARR + it.baseARR,
+        platform: a.platform + it.platformFeeApplied,
+        support: a.support + it.support,
+        msrp: a.msrp + it.msrp,
+        partnerNew: a.partnerNew + it.partnerNewPrice,
+        partnerRen: a.partnerRen + it.partnerRenPrice,
+        marginNew$: a.marginNew$ + it.marginNew$,
+        marginRen$: a.marginRen$ + it.marginRen$
+      }), { endpoints:0, baseARR:0, platform:0, support:0, msrp:0, partnerNew:0, partnerRen:0, marginNew$:0, marginRen$:0 });
+      return { items, totals };
+    }
+
+    /* =======================
+       RENDER
+    ======================= */
     function render(){
       const m = model();
       const root = document.getElementById('app');
@@ -96,7 +143,7 @@
                 <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Email'}</span>
               </button>
             </div>
-            <p class="mt-2 max-w-2xl text-slate-300">This is a pricing estimate only and should not be considered a formal quote.</p>
+            <p class="mt-2 max-w-2xl text-slate-300">Estimate only. Not a formal quote.</p>
           </div>
           <div class="relative mx-auto max-w-6xl px-4">
             <div role="tablist" aria-label="Views" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
@@ -106,12 +153,14 @@
             </div>
           </div>
         </header>
+
         <main class="mx-auto max-w-6xl px-4 pb-16">
           <section class="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
-            ${inputCard()}
-            ${kpiCard('Total ARR', money(m.totalARR), 'calculator')}
-            ${kpiCard('Base ARR', money(m.baseARR), 'badge-dollar-sign')}
+            ${inputsCard(m)}
+            ${kpiCard('Total ARR (MSRP)', money(m.totals.msrp), 'calculator')}
+            ${kpiCard('Base ARR', money(m.totals.baseARR), 'badge-dollar-sign')}
           </section>
+
           <section class="mt-4">
             ${STATE.activeTab==='customer' ? renderCustomer(m) : ''}
             ${STATE.activeTab==='partner' ? renderPartner(m) : ''}
@@ -121,9 +170,10 @@
       `;
       if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
-      updateBreakdownTable();
+      if (STATE.showBreakdown) updateBreakdownTable();
     }
 
+    /* ---------- Sub-renders ---------- */
     function tabBtn(id,label){
       const active = STATE.activeTab===id;
       return `
@@ -134,37 +184,54 @@
       `;
     }
 
-    function inputCard(){
-      const m = model();
-      const effectiveText = STATE.endpointsText ?? String(m.endpoints || '');
-      const hint = m.endpoints ? `${m.endpoints.toLocaleString()} endpoints` : 'Enter endpoint count';
+    function inputsCard(m){
       return `
         <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 lg:col-span-2" role="region" aria-label="Inputs">
-          <h2 class="text-base font-semibold">Inputs</h2>
-          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <label class="flex flex-col gap-1 text-sm">
-              <span class="text-[12px] text-slate-300">Endpoint count</span>
-              <input id="inp-endpoints" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm"
-                     type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false"
-                     value="${effectiveText}" aria-describedby="endpoints-help" aria-label="Endpoint count">
-              <span id="endpoints-help" class="text-[11px] text-slate-400">${hint}</span>
-            </label>
-            <label class="flex flex-col gap-1 text-sm">
-              <span class="text-[12px] text-slate-300">Product</span>
-              <select id="inp-product" class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" aria-label="Product">
-                ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${STATE.productKey===k?'selected':''}>${v.name}</option>`).join('')}
-              </select>
-              <span class="text-[11px] text-slate-400">Different base, fees & minimums</span>
-            </label>
-            <label class="flex items-center gap-2 text-sm mt-6 sm:mt-0">
-              <input id="inp-support" type="checkbox" ${STATE.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]" aria-label="Add premium support">
-              <span>Add Premium Support <span class="ml-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300"><i data-lucide="percent" class="w-3.5 h-3.5"></i>+20% (min $6k)</span></span>
-            </label>
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold">Line Items</h2>
+            <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="add-item">
+              <i data-lucide="plus" class="w-4 h-4"></i>Add Product
+            </button>
+          </div>
+          <div class="mt-3 space-y-3">
+            ${STATE.items.map(itemRow).join('')}
           </div>
           <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-sm">
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Product</span><div class="font-semibold">${m.meta.name}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Platform Fee</span><div class="font-semibold">${m.platformWaived ? '— (waived)' : money(m.platformFeeApplied)}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Premium Support</span><div class="font-semibold">${STATE.addSupport ? money(m.support) : '—'}</div></div>
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Platform Fees</span><div class="font-semibold">${money(m.totals.platform)}</div></div>
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Support</span><div class="font-semibold">${money(m.totals.support)}</div></div>
+            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Endpoints</span><div class="font-semibold">${m.totals.endpoints.toLocaleString()}</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function itemRow(item){
+      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
+      return `
+        <div class="rounded-xl border border-white/10 bg-[#0b1328] p-3" data-item="${item.id}">
+          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2 items-end">
+            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
+              <span class="text-[12px] text-slate-300">Product</span>
+              <select class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" data-action="change-product" aria-label="Product">
+                ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${item.productKey===k?'selected':''}>${v.name}</option>`).join('')}
+              </select>
+            </label>
+            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
+              <span class="text-[12px] text-slate-300">Endpoint count</span>
+              <input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm"
+                     type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false"
+                     value="${item.endpointsText}" data-action="edit-endpoints" aria-label="Endpoint count">
+              <span class="text-[11px] text-slate-400">${meta.name}</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm sm:col-span-1">
+              <input type="checkbox" ${item.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]" data-action="toggle-support" aria-label="Add premium support">
+              <span>Premium Support</span>
+            </label>
+            <div class="sm:col-span-1 flex justify-start sm:justify-end">
+              <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="remove-item" ${STATE.items.length===1?'disabled':''} aria-disabled="${STATE.items.length===1}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i><span>Remove</span>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -188,47 +255,78 @@
       return `
         <section id="panel-customer" role="tabpanel" aria-labelledby="tab-customer" class="mt-2 space-y-3">
           <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Quote</h3>
-            <div class="mt-3 divide-y divide-white/10">
-              ${rowKV('Base Total ARR', money(m.baseARR), 'Graduated tiers')}
-              ${rowKV('Platform Fee', m.platformWaived ? '— (waived)' : money(m.platformFeeApplied))}
-              ${rowKV('Premium Support (20% min $6k)', STATE.addSupport ? money(m.support) : '—')}
-              <div class="flex items-center justify-between py-3">
-                <div class="text-lg font-bold">Total ARR</div>
-                <div class="text-lg font-extrabold font-mono" aria-live="polite">${money(m.totalARR)}</div>
-              </div>
+            <h3 class="text-base font-semibold">Customer Quote</h3>
+            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
+              <table class="min-w-full text-sm">
+                <thead class="bg-[#0b152f] text-slate-300">
+                  <tr>
+                    <th class="px-3 py-2 text-left">Product</th>
+                    <th class="px-3 py-2 text-left">Endpoints</th>
+                    <th class="px-3 py-2 text-left">Base ARR</th>
+                    <th class="px-3 py-2 text-left">Platform Fee</th>
+                    <th class="px-3 py-2 text-left">Premium Support</th>
+                    <th class="px-3 py-2 text-left">Line Total (MSRP)</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-[#0b1328]">
+                  ${m.items.map(it => `
+                    <tr>
+                      <td class="px-3 py-2">${it.productName}</td>
+                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
+                      <td class="px-3 py-2 font-mono">${money(it.baseARR)}</td>
+                      <td class="px-3 py-2">${it.platformWaived ? '— (waived)' : `<span class="font-mono">${money(it.platformFeeApplied)}</span>`}</td>
+                      <td class="px-3 py-2">${it.addSupport ? `<span class="font-mono">${money(it.support)}</span>` : '—'}</td>
+                      <td class="px-3 py-2 font-mono">${money(it.totalARR)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+                <tfoot class="bg-[#0b152f]">
+                  <tr>
+                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.baseARR)}</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.platform)}</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.support)}</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
-            <div class="mt-2 text-[12px] text-slate-400">
-              ${m.platformWaived ? 'Platform fee waived automatically (base ARR ≥ $30,000).' : 'Platform fee not waived (base ARR < $30,000).'}
-              ${m.basePlusPlatform===m.meta.minTotal ? ` Minimum base+platform minimum applied: ${money(m.meta.minTotal)}.` : ''}
-            </div>
+
             <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown" aria-expanded="${STATE.showBreakdown}">
               <i data-lucide="${STATE.showBreakdown?'chevron-up':'chevron-down'}" class="w-4 h-4"></i>
               ${STATE.showBreakdown ? 'Hide tier calculation' : 'Show tier calculation'}
             </button>
             <div id="breakdown" class="${STATE.showBreakdown ? 'mt-3' : 'hidden'}">
-              <div class="overflow-x-auto rounded-lg border border-white/10">
-                <table class="min-w-full text-sm">
-                  <thead class="bg-[#0b152f] text-slate-300">
-                    <tr>
-                      <th class="px-3 py-2 text-left">Band</th>
-                      <th class="px-3 py-2 text-left">Units</th>
-                      <th class="px-3 py-2 text-left">$ / Unit</th>
-                      <th class="px-3 py-2 text-left">Extended</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tier-body" class="bg-[#0b1328]"></tbody>
-                  <tfoot class="bg-[#0b152f]">
-                    <tr>
-                      <th scope="row" colspan="3" class="px-3 py-2 text-right">Subtotal (before platform/support)</th>
-                      <th class="px-3 py-2 text-left font-mono">${money(m.baseARR)}</th>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+              ${m.items.map(it => tierTable(it)).join('')}
             </div>
           </div>
         </section>
+      `;
+    }
+
+    function tierTable(it){
+      return `
+        <div class="mb-3 overflow-x-auto rounded-lg border border-white/10">
+          <table class="min-w-full text-sm">
+            <caption class="text-left px-3 py-2 bg-[#0b152f] font-semibold">${it.productName} — ${it.endpoints.toLocaleString()} endpoints</caption>
+            <thead class="bg-[#0b152f] text-slate-300">
+              <tr><th class="px-3 py-2 text-left">Band</th><th class="px-3 py-2 text-left">Units</th><th class="px-3 py-2 text-left">$ / Unit</th><th class="px-3 py-2 text-left">Extended</th></tr>
+            </thead>
+            <tbody class="bg-[#0b1328]">
+              ${it.lines.map(r=>`
+                <tr>
+                  <td class="px-3 py-2">${r.band}</td>
+                  <td class="px-3 py-2">${r.units.toLocaleString()}</td>
+                  <td class="px-3 py-2 font-mono">${money(r.rate)}</td>
+                  <td class="px-3 py-2 font-mono">${money(r.extended)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+            <tfoot class="bg-[#0b152f]">
+              <tr><th class="px-3 py-2 text-right" colspan="3">Base ARR Subtotal</th><th class="px-3 py-2 text-left font-mono">${money(it.baseARR)}</th></tr>
+            </tfoot>
+          </table>
+        </div>
       `;
     }
 
@@ -236,40 +334,52 @@
       return `
         <section id="panel-partner" role="tabpanel" aria-labelledby="tab-partner" class="space-y-3">
           <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Partner Margin</h3>
+            <h3 class="text-base font-semibold">Partner Quote (Per Line Item)</h3>
             <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
               <table class="min-w-full text-sm">
                 <thead class="bg-[#0b152f] text-slate-300">
                   <tr>
-                    <th class="px-3 py-2 text-left">Type</th>
+                    <th class="px-3 py-2 text-left">Product</th>
+                    <th class="px-3 py-2 text-left">Endpoints</th>
                     <th class="px-3 py-2 text-left">MSRP (List)</th>
-                    <th class="px-3 py-2 text-left">Margin %</th>
-                    <th class="px-3 py-2 text-left">Margin $</th>
-                    <th class="px-3 py-2 text-left">Partner Price</th>
-                    <th class="px-3 py-2 text-left">$ / Endpoint</th>
+                    <th class="px-3 py-2 text-left">Net New Margin %</th>
+                    <th class="px-3 py-2 text-left">Net New Margin $</th>
+                    <th class="px-3 py-2 text-left">Net New Partner Price</th>
+                    <th class="px-3 py-2 text-left">Renewal Margin %</th>
+                    <th class="px-3 py-2 text-left">Renewal Margin $</th>
+                    <th class="px-3 py-2 text-left">Renewal Partner Price</th>
                   </tr>
                 </thead>
                 <tbody class="bg-[#0b1328]">
-                  <tr>
-                    <td class="px-3 py-2">Net New</td>
-                    <td class="px-3 py-2 font-mono">${money(m.msrp)}</td>
-                    <td class="px-3 py-2">30%</td>
-                    <td class="px-3 py-2 font-mono">${money(m.msrp*0.30)}</td>
-                    <td class="px-3 py-2 font-mono">${money(m.partnerNewPrice)}</td>
-                    <td class="px-3 py-2 font-mono">${m.endpoints ? money(m.partnerNewPrice/m.endpoints) : '—'}</td>
-                  </tr>
-                  <tr>
-                    <td class="px-3 py-2">Renewal</td>
-                    <td class="px-3 py-2 font-mono">${money(m.msrp)}</td>
-                    <td class="px-3 py-2">15%</td>
-                    <td class="px-3 py-2 font-mono">${money(m.msrp*0.15)}</td>
-                    <td class="px-3 py-2 font-mono">${money(m.partnerRenPrice)}</td>
-                    <td class="px-3 py-2 font-mono">${m.endpoints ? money(m.partnerRenPrice/m.endpoints) : '—'}</td>
-                  </tr>
+                  ${m.items.map(it => `
+                    <tr>
+                      <td class="px-3 py-2">${it.productName}</td>
+                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
+                      <td class="px-3 py-2 font-mono">${money(it.msrp)}</td>
+                      <td class="px-3 py-2">30%</td>
+                      <td class="px-3 py-2 font-mono">${money(it.marginNew$)}</td>
+                      <td class="px-3 py-2 font-mono">${money(it.partnerNewPrice)}</td>
+                      <td class="px-3 py-2">15%</td>
+                      <td class="px-3 py-2 font-mono">${money(it.marginRen$)}</td>
+                      <td class="px-3 py-2 font-mono">${money(it.partnerRenPrice)}</td>
+                    </tr>
+                  `).join('')}
                 </tbody>
+                <tfoot class="bg-[#0b152f]">
+                  <tr>
+                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
+                    <th class="px-3 py-2 text-left">—</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginNew$)}</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerNew)}</th>
+                    <th class="px-3 py-2 text-left">—</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginRen$)}</th>
+                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerRen)}</th>
+                  </tr>
+                </tfoot>
               </table>
             </div>
-            <p class="mt-2 text-[12px] text-slate-400">Partner price is MSRP minus margin. MSRP includes platform fee (if not waived) and premium support (if selected).</p>
+            <p class="mt-2 text-[12px] text-slate-400">MSRP includes platform fee (if not waived) and premium support (if selected) per line item. Partner prices reflect margins applied to each line.</p>
           </div>
         </section>
       `;
@@ -307,117 +417,120 @@
       `;
     }
 
-    function rowKV(label,value,pill){
-      return `
-        <div class="flex items-center justify-between py-3">
-          <div class="flex items-center gap-2">
-            <span>${label}</span>
-            ${pill ? `<span class="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-slate-300">${pill}</span>` : ''}
-          </div>
-          <div class="font-mono">${value}</div>
-        </div>
-      `;
-    }
-
-    function updateBreakdownTable(){
-      if(!STATE.showBreakdown) return;
-      const m = model();
-      const tbody = document.getElementById('tier-body');
-      if(!tbody) return;
-      tbody.innerHTML = m.lines.map(r=>`
-        <tr class="odd:bg-[#0b1328] even:bg-[#0b1328]">
-          <td class="px-3 py-2">${r.band}</td>
-          <td class="px-3 py-2">${r.units.toLocaleString()}</td>
-          <td class="px-3 py-2 font-mono">${money(r.rate)}</td>
-          <td class="px-3 py-2 font-mono">${money(r.extended)}</td>
-        </tr>
-      `).join('');
-    }
-
+    /* =======================
+       EMAIL COPY (multi-item)
+    ======================= */
     function buildEmailText(m, clientName){
-      const subject = `Subject: Pricing Estimate for ${m.meta.name}`;
       const name = clientName && clientName.trim() ? clientName.trim() : '[Client Name]';
-      const platformDisplay = m.platformWaived ? '— (waived)' : money(m.platformFeeApplied);
-      const supportDisplay = STATE.addSupport ? money(m.support) : '—';
-
-      const table = [
-        '| Type       | MSRP (List) | Margin % | Margin $  | Partner Price |',
-        '|------------|-------------|----------|-----------|---------------|',
-        `| Net New    | ${money(m.msrp)}  | 30%      | ${money(m.msrp*0.30)}| ${money(m.partnerNewPrice)}    |`,
-        `| Renewal    | ${money(m.msrp)}  | 15%      | ${money(m.msrp*0.15)}| ${money(m.partnerRenPrice)}    |`,
-        `| **Total**  | ${money(m.msrp)}  | –        | –         | –             |`
-      ].join('\n');
-
+      const subject = `Subject: Pricing Estimate for ${m.items.length>1?'Multiple Products':m.items[0]?.productName || 'Products'}`;
       const lines = [
         subject,
         `Hi ${name},`,
         '',
         'As requested, here is a high-level pricing estimate based on your requirements:',
-        `Product: ${m.meta.name}`,
-        `Endpoints: ${m.endpoints.toLocaleString()}`,
-        `Platform Fee: ${platformDisplay}`,
-        `Premium Support: ${supportDisplay}`,
-        `Base Total ARR (graduated): ${money(m.baseARR)}`,
-        `Total ARR: ${money(m.totalARR)}`,
+      ];
+      m.items.forEach((it, idx) => {
+        lines.push(
+          `Product ${idx+1}: ${it.productName}`,
+          `Endpoints: ${it.endpoints.toLocaleString()}`,
+          `Platform Fee: ${it.platformWaived ? '— (waived)' : money(it.platformFeeApplied)}`,
+          `Premium Support: ${it.addSupport ? money(it.support) : '—'}`,
+          `Base Total ARR (graduated): ${money(it.baseARR)}`,
+          `Line Total (MSRP): ${money(it.msrp)}`,
+          ''
+        );
+      });
+      lines.push(
+        'Order Totals:',
+        `Base ARR: ${money(m.totals.baseARR)}`,
+        `Platform Fees: ${money(m.totals.platform)}`,
+        `Premium Support: ${money(m.totals.support)}`,
+        `Total ARR (MSRP): ${money(m.totals.msrp)}`,
         '',
         'Below is a breakdown of pricing with MSRP, partner margin, and partner price:',
-        table,
+        '| Type       | MSRP (List) | Margin % | Margin $  | Partner Price |',
+        '|------------|-------------|----------|-----------|---------------|',
+        `| Net New    | ${money(m.totals.msrp)}  | 30%      | ${money(m.totals.marginNew$)}| ${money(m.totals.partnerNew)}    |`,
+        `| Renewal    | ${money(m.totals.msrp)}  | 15%      | ${money(m.totals.marginRen$)}| ${money(m.totals.partnerRen)}    |`,
+        `| **Total**  | ${money(m.totals.msrp)}  | –        | –         | –             |`,
         '',
         'Please note this is an estimate only and should not be considered a formal quote.',
         'Let me know if you’d like me to prepare a formal proposal or discuss package options.',
         'Best regards,',
         'Recast Partner Team'
-      ];
+      );
       return lines.join('\n');
     }
 
+    /* =======================
+       EVENTS
+    ======================= */
     function attachEvents(){
       const root = document.getElementById('app');
 
-      const ep = root.querySelector('#inp-endpoints');
-      if(ep){
-        ep.addEventListener('beforeinput', e => {
-          if(e.data && /\D/.test(e.data)) e.preventDefault();
-        });
-        ep.addEventListener('input', e => {
-          STATE.endpointsText = sanitizeDigits(e.target.value);
-          render();
-          const repl = document.querySelector('#inp-endpoints');
-          if(repl){ repl.focus(); repl.setSelectionRange(STATE.endpointsText.length, STATE.endpointsText.length); }
-        });
-        ep.addEventListener('blur', e => {
-          STATE.endpointsText = sanitizeDigits(e.target.value);
+      // Add item
+      const addBtn = root.querySelector('[data-action="add-item"]');
+      if(addBtn){
+        addBtn.addEventListener('click', () => {
+          STATE.items.push({ id: cryptoRandomId(), productKey: 'rct', endpointsText: '0', addSupport: false });
           render();
         });
-        ep.addEventListener('keydown', e => {
-          if(e.key === 'Enter'){ e.currentTarget.blur(); }
-        });
-        ep.addEventListener('wheel', e => { e.preventDefault(); }, { passive: false });
       }
 
-      const prod = root.querySelector('#inp-product');
-      if(prod) prod.addEventListener('change', e => { STATE.productKey = e.target.value; render(); });
+      // Delegate events per item
+      root.querySelectorAll('[data-item]').forEach(container => {
+        const id = container.getAttribute('data-item');
+        const item = STATE.items.find(x=>x.id===id);
+        if(!item) return;
 
-      const sup = root.querySelector('#inp-support');
-      if(sup) sup.addEventListener('change', e => { STATE.addSupport = !!e.target.checked; render(); });
+        // Product change
+        const sel = container.querySelector('[data-action="change-product"]');
+        if(sel) sel.addEventListener('change', e => { item.productKey = e.target.value; render(); });
 
+        // Support toggle
+        const sup = container.querySelector('[data-action="toggle-support"]');
+        if(sup) sup.addEventListener('change', e => { item.addSupport = !!e.target.checked; render(); });
+
+        // Endpoints input
+        const ep = container.querySelector('[data-action="edit-endpoints"]');
+        if(ep){
+          ep.addEventListener('beforeinput', e => { if(e.data && /\D/.test(e.data)) e.preventDefault(); });
+          ep.addEventListener('input', e => {
+            item.endpointsText = digitsOnly(e.target.value);
+            const caret = item.endpointsText.length;
+            render();
+            const repl = document.querySelector(`[data-item="${id}"] [data-action="edit-endpoints"]`);
+            if(repl){ repl.focus(); repl.setSelectionRange(caret, caret); }
+          });
+          ep.addEventListener('blur', e => { item.endpointsText = digitsOnly(e.target.value); render(); });
+          ep.addEventListener('keydown', e => { if(e.key==='Enter'){ e.currentTarget.blur(); } });
+          ep.addEventListener('wheel', e => { e.preventDefault(); }, { passive: false });
+        }
+
+        // Remove item
+        const rm = container.querySelector('[data-action="remove-item"]');
+        if(rm) rm.addEventListener('click', () => {
+          if(STATE.items.length<=1) return;
+          STATE.items = STATE.items.filter(x=>x.id!==id);
+          render();
+        });
+      });
+
+      // Tab switching
       root.querySelectorAll('[data-action="switch"]').forEach(b => b.addEventListener('click', e => {
         STATE.activeTab = e.currentTarget.getAttribute('data-tab');
         render();
       }));
 
+      // Copy email
       const copyBtn = root.querySelector('[data-action="copy"]');
       if(copyBtn) copyBtn.addEventListener('click', async () => {
         const m = model();
         let clientName = '';
-        try {
-          clientName = window.prompt('Client name for the email? (optional)', '') || '';
-        } catch { clientName = ''; }
+        try { clientName = window.prompt('Client name for the email? (optional)', '') || ''; } catch {}
         const text = buildEmailText(m, clientName);
-
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
+        try { await navigator.clipboard.writeText(text); }
+        catch {
           try {
             const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
             document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
@@ -426,13 +539,23 @@
         STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
       });
 
+      // Show/Hide tier breakdown
       const toggle = root.querySelector('[data-action="toggle-breakdown"]');
       if(toggle) toggle.addEventListener('click', () => { STATE.showBreakdown = !STATE.showBreakdown; render(); });
     }
 
+    function updateBreakdownTable(){ /* populated during render via tierTable per item */ }
+
+    /* =======================
+       INIT
+    ======================= */
     document.addEventListener('DOMContentLoaded', () => {
       render();
-      if(!window.tailwind){ const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3'; b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>'; document.body.prepend(b); }
+      if(!window.tailwind){
+        const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3';
+        b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>';
+        document.body.prepend(b);
+      }
     });
   </script>
 </body>
