@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Nerdio + Recast — Clear Click-Through (Better Together)</title>
+  <title>Nerdio + Recast — Current State, Approach, Outcomes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,8 +12,6 @@
     .focus-ring:focus-visible{outline:2px solid #facc15;outline-offset:2px}
     .card{border-radius:1rem;border:1px solid rgba(255,255,255,.08);background:#0c142b}
     .sub{border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:#0a1124}
-
-    /* Recast Application Workspace primitives */
     .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
     .logo-wrap{display:flex;align-items:center;gap:.4rem}
     .logo-name{font-size:.7rem;color:#cbd5e1;white-space:nowrap}
@@ -35,8 +33,6 @@
     .badge{width:1.15rem;height:1.15rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
     .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
     @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
-
-    /* Nerdio Orchestration primitives */
     .pool{border-radius:.75rem;border:1px solid rgba(255,255,255,.12);background:#0b162d}
     .meter{height:.5rem;border-radius:.5rem;overflow:hidden;background:rgba(255,255,255,.06)}
     .bar{height:100%;transform:scaleX(0);transform-origin:left center}
@@ -48,17 +44,14 @@
 </head>
 <body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
-
   <script>
     const STATE = {
-      tab: 'approach', // approach | outcomes
+      tab: 'current',
       showLabelsRecast: false,
       showLabelsNerdio: false,
-      flowRunning: false,
       targets: { onboardingMins: 60, patchPct: 95, azureSavePct: 20, pkgHrsLow: 5, pkgHrsHigh: 10 },
       copied: false
     };
-
     function render(){
       const root=document.getElementById('app');
       root.innerHTML = `
@@ -73,17 +66,19 @@
               Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together we deliver one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
             </p>
             <nav class="mt-5 flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10" role="tablist">
-              ${tabBtn('approach','Approach (Click-Through)','workflow')}
+              ${tabBtn('current','Current State','alert-circle')}
+              ${tabBtn('approach','Approach (Nerdio+Recast)','workflow')}
               ${tabBtn('outcomes','Outcomes','bar-chart-3')}
+              ${STATE.tab==='approach' ? `
               <div class="ml-auto flex items-center gap-2">
                 <button type="button" class="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 focus-ring" data-action="start">Start</button>
                 <button type="button" class="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm focus-ring" data-action="reset">Reset</button>
-              </div>
+              </div>` : ''}
             </nav>
           </div>
         </header>
-
         <main class="mx-auto max-w-6xl px-4 pb-16">
+          ${STATE.tab==='current'?renderCurrent():''}
           ${STATE.tab==='approach'?renderApproach():''}
           ${STATE.tab==='outcomes'?renderOutcomes():''}
         </main>
@@ -92,15 +87,92 @@
       attachEvents();
       if (STATE.tab==='approach'){ buildRecast(); buildNerdio(); }
     }
-
     function tabBtn(id,label,icon){
       const active=STATE.tab===id;
       return `<button type="button" class="${active?'bg-yellow-400 text-slate-900':'text-slate-200 hover:bg-white/5'} inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-ring" data-action="tab" data-id="${id}" aria-selected="${active}" aria-controls="panel-${id}">
         <i data-lucide="${icon}" class="w-4 h-4"></i><span>${label}</span>
       </button>`;
     }
-
-    /* ---------- APPROACH PANEL (side-by-side) ---------- */
+    function renderCurrent(){
+      return `
+        <section id="panel-current" class="space-y-4">
+          <div class="card p-4">
+            <div class="flex flex-wrap items-center gap-2 text-[12px]">
+              <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 ring-1 ring-white/15">
+                <span class="grid h-4 w-4 place-items-center rounded-md bg-gradient-to-br from-emerald-400 via-cyan-400 to-sky-500 text-slate-900 text-[10px] font-black">N</span>
+                <span>Nerdio — <span class="font-medium">Infrastructure Automation</span></span>
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 ring-1 ring-white/15">
+                <span class="grid h-4 w-4 place-items-center rounded-md bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-400 text-slate-900 text-[10px] font-black">R</span>
+                <span>Recast — <span class="font-medium">Application Modernization</span></span>
+              </span>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+            ${problemTile('Fragmented Delivery','layout-grid','Images sprawl across AVD, W365, and on-prem; policy drift grows.')}
+            ${problemTile('Packaging Backlog','boxes','Teams burn 5–10 hrs per app doing repeat work; migrations stall.')}
+            ${problemTile('Zero-day Exposure','shield-alert','Third-party apps + OS images unpatched = risk window measured in days.')}
+            ${problemTile('Slow Upgrades','gauge','Idle host pools and static capacity drive Azure overspend.')}
+          </div>
+          <p class="text-sm text-slate-300">Too many apps, too many versions — IT can’t keep up. Desktops and apps drift apart; security and cost suffer.</p>
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <article class="sub p-4">
+              <div class="flex items-center gap-2"><i data-lucide="circle-help" class="h-5 w-5 text-sky-300"></i><h3 class="font-semibold">Why Change (the problem)</h3></div>
+              <ul class="mt-2 list-disc pl-5 text-sm text-slate-200">
+                <li>Apps are the #1 bottleneck — packaging, patching, and approvals stall every project.</li>
+                <li>Infra sprawl & idle capacity — static pools and image drift drive Azure overspend.</li>
+                <li>Innovation waits — cloud, security, and AI adoption slows until desktops + apps are governed together.</li>
+              </ul>
+            </article>
+            <article class="sub p-4">
+              <div class="flex items-center gap-2"><i data-lucide="alarm-clock" class="h-5 w-5 text-amber-300"></i><h3 class="font-semibold">Why Now (the urgency)</h3></div>
+              <ul class="mt-2 list-disc pl-5 text-sm text-slate-200">
+                <li>Faster release cycles — OS, SaaS, and AI tools demand automation, not manual work.</li>
+                <li>Zero-day & compliance pressure — patch delays and image lag create unacceptable risk.</li>
+                <li>Do more with less — IT teams aren’t growing, but Azure spend is; automation is no longer optional.</li>
+              </ul>
+            </article>
+            <article class="sub p-4">
+              <div class="flex items-center gap-2"><i data-lucide="sparkles" class="h-5 w-5 text-emerald-300"></i><h3 class="font-semibold">Why Better Together (Recast + Nerdio)</h3></div>
+              <ol class="mt-2 list-decimal pl-5 text-sm text-slate-200 space-y-2">
+                <li>
+                  <span class="font-medium">Solve both halves of the problem at once</span>
+                  <ul class="mt-1 list-disc pl-5 text-slate-300">
+                    <li>Desktops without apps are useless; apps without secure desktops are risky.</li>
+                    <li>Only Nerdio + Recast deliver infrastructure + applications in one governed motion.</li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="font-medium">Prove value on day one, not month twelve</span>
+                  <ul class="mt-1 list-disc pl-5 text-slate-300">
+                    <li>Desktops right-sized and apps delivered in under an hour, not weeks.</li>
+                    <li>Immediate cost savings (Azure autoscale up to 55%) + instant app readiness (5–10 hrs/app saved).</li>
+                  </ul>
+                </li>
+                <li>
+                  <span class="font-medium">Migrate without disruption, secure without friction</span>
+                  <ul class="mt-1 list-disc pl-5 text-slate-300">
+                    <li>Smart Icons keep shortcuts consistent as users move from Citrix/Horizon → AVD.</li>
+                    <li>Automated patching + lifecycle management mean &gt;95% compliance and reduced risk — built in, not bolted on.</li>
+                  </ul>
+                </li>
+              </ol>
+            </article>
+          </div>
+        </section>
+      `;
+    }
+    function problemTile(title,icon,body){
+      return `
+        <article class="sub p-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
+            <h3 class="font-semibold">${title}</h3>
+          </div>
+          <p class="mt-1 text-sm text-slate-300">${body}</p>
+        </article>
+      `;
+    }
     function renderApproach(){
       return `
         <section id="panel-approach" class="space-y-4">
@@ -109,13 +181,11 @@
             ${renderRecast()}
           </div>
           <div class="card p-4 text-sm text-slate-300">
-            <span class="font-medium text-slate-100">Explain it in one breath:</span> Nerdio makes the right Cloud PC or AVD session appear—right-sized and policy-compliant. Recast puts the right apps on it and keeps them patched. The user signs in once and it’s all there.
+            <span class="font-medium text-slate-100">Put Simply|</span> Nerdio makes the right Cloud PC or AVD session appear—right-sized and policy-compliant. Recast puts the right apps on it and keeps them patched. The user signs in once and it’s all there.
           </div>
         </section>
       `;
     }
-
-    /* ---------- NERDIO (left) ---------- */
     function renderNerdio(){
       return `
         <section class="card p-4" aria-label="Nerdio Orchestration">
@@ -123,13 +193,12 @@
             <div class="flex items-center gap-2">
               <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-400 via-cyan-400 to-sky-500 grid place-items-center"><span class="text-slate-900 font-black">N</span></div>
               <div>
-                <h3 class="text-base font-semibold">Nerdio — Orchestration</h3>
+                <h3 class="text.base font-semibold text-base">Nerdio — Orchestration</h3>
                 <div class="text-[12px] text-slate-400">Provision • Autoscale • Policy via Intune</div>
               </div>
             </div>
             <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[12px]" data-action="toggle-labels-nerdio">${STATE.showLabelsNerdio?'Hide':'Show'} labels</button>
           </div>
-
           <div id="nerdioCard" class="mt-3 sub p-3">
             <div class="grid grid-cols-1 gap-3" role="region" aria-label="Animated orchestration">
               <div class="pool p-3">
@@ -140,7 +209,6 @@
                 <div class="mt-2 grid grid-cols-6 gap-2" id="poolA"></div>
                 <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:.2s"></div></div>
               </div>
-
               <div class="pool p-3">
                 <div class="flex items-center justify-between">
                   <div class="text-sm font-medium">AVD Host Pools</div>
@@ -149,17 +217,14 @@
                 <div class="mt-2 grid grid-cols-6 gap-2" id="poolB"></div>
                 <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:.5s"></div></div>
               </div>
-
               <div class="pool p-3">
                 <div class="text-sm font-medium">Policy via Intune</div>
                 <div class="mt-2 grid grid-cols-10 gap-1.5" id="policyDots"></div>
               </div>
-
               <div class="pool p-3">
                 <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="chart-no-axes-combined" class="w-4 h-4 text-sky-300"></i>Insights</div>
                 <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-400" style="--d:.9s"></div></div>
               </div>
-
               <div class="pool p-3">
                 <div class="flex items-center gap-2 text-sm"><i data-lucide="user-check" class="w-4 h-4 text-emerald-300"></i><span>Identity-driven Workspace</span></div>
                 <div class="mt-2 user-beam bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:1.2s"></div>
@@ -170,8 +235,6 @@
         </section>
       `;
     }
-
-    /* ---------- RECAST (right) ---------- */
     function renderRecast(){
       return `
         <section class="card p-4" aria-label="Recast Application Workspace">
@@ -187,7 +250,6 @@
               <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1" data-action="toggle-labels-recast">${STATE.showLabelsRecast?'Hide':'Show'} labels</button>
             </div>
           </div>
-
           <div id="recastCard" class="mt-3 sub p-3" role="region" aria-label="Animated catalog">
             <div class="space-y-2">
               ${CATALOG.map(s=>`
@@ -197,7 +259,6 @@
                 </div>
               `).join('')}
             </div>
-
             <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
               ${['Existing Platforms','Staged Rings','Access & Policy'].map((t,i)=>`
                 <div class="sub p-2">
@@ -207,7 +268,6 @@
                 </div>
               `).join('')}
             </div>
-
             <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
               ${['Business Unit','Subsidiary','Region'].map((t,i)=>`
                 <div class="sub p-2">
@@ -217,17 +277,15 @@
                 </div>
               `).join('')}
             </div>
-
             <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
               ${['Windows & macOS','VDI / Web','Mobile'].map((t,i)=>`
                 <div class="sub p-2 text-center">
-                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
+                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 opacity-80"></i>
                   <div id="flowDev${'ABC'[i]}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
                   <div class="mt-1 text-[11px] text-slate-400">${t}</div>
                 </div>
               `).join('')}
             </div>
-
             <div class="mt-3">
               <div id="endUserCard" class="sub p-3">
                 <div class="flex items-center gap-3">
@@ -250,14 +308,12 @@
         </section>
       `;
     }
-
-    /* ---------- OUTCOMES PANEL ---------- */
     function renderOutcomes(){
       const t=STATE.targets;
       return `
         <section id="panel-outcomes" class="space-y-4">
           <div class="card p-4">
-            <h2 class="text-xl font-semibold">Pilot targets (edit to fit)</h2>
+            <h2 class="text-xl font-semibold">Nerdio runs the desktops. Built for business speed. Faster onboarding, stronger compliance, lower cost—all proven, measurable outcomes. (Estimated Combined Value)</h2>
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
               ${metric('Under 1 hour onboarding','timer', t.onboardingMins+' mins', range('onboardingMins',30,120,t.onboardingMins))}
               ${metric('Packaging avoided / app','scissors', `${t.pkgHrsLow}–${t.pkgHrsHigh} hrs`, '')}
@@ -274,7 +330,6 @@
         </section>
       `;
     }
-
     function metric(title,icon,value,controlHtml){
       return `
         <div class="sub p-3">
@@ -298,10 +353,10 @@
         </label>
       `;
     }
-
-    /* ---------- BUILDERS: NERDIO ---------- */
     function buildNerdio(){
-      const a=document.getElementById('poolA'); const b=document.getElementById('poolB'); const p=document.getElementById('policyDots');
+      const a=document.getElementById('poolA');
+      const b=document.getElementById('poolB');
+      const p=document.getElementById('policyDots');
       if(a){ a.innerHTML=''; for(let i=0;i<12;i++){ a.appendChild(poolVM(i,.15+i*0.05,'emerald')); } }
       if(b){ b.innerHTML=''; for(let i=0;i<12;i++){ b.appendChild(poolVM(i,.4+i*0.05,'sky')); } }
       if(p){ p.innerHTML=''; for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='policy-dot'; d.style.setProperty('--d', (0.8 + i*0.05)+'s'); p.appendChild(d); } }
@@ -320,21 +375,36 @@
         ? 'linear-gradient(to right,#34d399,#22d3ee,#38bdf8)'
         : 'linear-gradient(to right,#38bdf8,#6366f1,#a78bfa)';
       d.appendChild(bar);
-      if(STATE.showLabelsNerdio){ const t=document.createElement('span'); t.textContent='VM'; t.className='absolute inset-0 grid place-items-center text-[10px] text-white/80'; d.appendChild(t); }
+      if(STATE.showLabelsNerdio){
+        const t=document.createElement('span');
+        t.textContent='VM';
+        t.className='absolute inset-0 grid place-items-center text-[10px] text-white/80';
+        d.appendChild(t);
+      }
       return d;
     }
-
-    /* ---------- BUILDERS: RECAST ---------- */
     function buildRecast(){
       let base=0;
       CATALOG.forEach(section=>{
         const mount=document.getElementById(section.id); if(!mount) return;
         mount.innerHTML='';
         section.items.forEach((itm,idx)=>{
-          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
-          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+          const wrap=document.createElement('div');
+          wrap.className='logo-wrap';
+          wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
+          const ring=document.createElement('div');
+          ring.className='logo-ring';
+          ring.innerHTML=itm.svg;
+          ring.title=itm.name;
+          ring.setAttribute('role','img');
+          ring.setAttribute('aria-label',itm.name);
           wrap.appendChild(ring);
-          if(STATE.showLabelsRecast){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
+          if(STATE.showLabelsRecast){
+            const label=document.createElement('span');
+            label.className='logo-name';
+            label.textContent=itm.name;
+            wrap.appendChild(label);
+          }
           mount.appendChild(wrap);
         });
         base+=0.25;
@@ -348,8 +418,6 @@
       buildTiles(document.getElementById('flowDevA'), 10, 1.5);
       buildTiles(document.getElementById('flowDevB'), 10, 1.55);
       buildTiles(document.getElementById('flowDevC'), 10, 1.6);
-
-      // Reset end-user to "red"
       const avatar=document.getElementById('endUserAvatar');
       const badge=document.getElementById('endUserBadge');
       if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
@@ -357,10 +425,13 @@
     }
     function buildTiles(container,count,baseDelay){
       if(!container) return; container.innerHTML='';
-      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
+      for(let i=0;i<count;i++){
+        const d=document.createElement('div');
+        d.className='tile';
+        d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s');
+        container.appendChild(d);
+      }
     }
-
-    /* ---------- CATALOG (brands-like marks) ---------- */
     const CATALOG=[
       {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
         logo('Microsoft Word','W','#185ABD'),
@@ -429,15 +500,13 @@
       return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
     }
     function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-
-    /* ---------- EVENTS ---------- */
     function attachEvents(){
       const root=document.getElementById('app');
       root.querySelectorAll('[data-action="tab"]').forEach(b=>b.addEventListener('click',e=>{ STATE.tab=e.currentTarget.getAttribute('data-id'); render(); }));
-      root.querySelector('[data-action="start"]')?.addEventListener('click', startAll);
-      root.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll);
       root.querySelector('[data-action="toggle-labels-recast"]')?.addEventListener('click',()=>{ STATE.showLabelsRecast=!STATE.showLabelsRecast; buildRecast(); });
       root.querySelector('[data-action="toggle-labels-nerdio"]')?.addEventListener('click',()=>{ STATE.showLabelsNerdio=!STATE.showLabelsNerdio; buildNerdio(); });
+      root.querySelector('[data-action="start"]')?.addEventListener('click', startAll);
+      root.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll);
       root.querySelectorAll('[data-action="range"]').forEach(r=>r.addEventListener('input',e=>{
         const key=e.currentTarget.getAttribute('data-key'); const v=Number(e.target.value)||0; STATE.targets[key]=v; render();
       }));
@@ -462,31 +531,32 @@ Measure weekly and adjust rings/policies accordingly.`;
         STATE.copied=true; render(); setTimeout(()=>{ STATE.copied=false; render(); }, 1200);
       });
     }
-
     function startAll(){
       const nerdio=document.getElementById('nerdioCard');
       const recast=document.getElementById('recastCard');
       [nerdio,recast].forEach(c=>{ if(!c) return; c.classList.remove('run'); void c.offsetWidth; c.classList.add('run'); });
-
-      // flip end-user to green at the end of Recast flow
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge'); const success=document.getElementById('flowSuccess');
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
+      const success=document.getElementById('flowSuccess');
       if(avatar&&badge){
-        avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500');
+        avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90');
+        badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500');
         setTimeout(()=>{ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); success && success.classList.remove('hidden'); }, 2300);
         setTimeout(()=>{ [nerdio,recast].forEach(c=>c && c.classList.remove('run')); }, 6000);
       }
     }
     function resetAll(){
-      const nerdio=document.getElementById('nerdioCard'); const recast=document.getElementById('recastCard'); const success=document.getElementById('flowSuccess');
+      const nerdio=document.getElementById('nerdioCard');
+      const recast=document.getElementById('recastCard');
+      const success=document.getElementById('flowSuccess');
       [nerdio,recast].forEach(c=>c && c.classList.remove('run'));
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
       if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
       if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
       success && success.classList.add('hidden');
       buildNerdio(); buildRecast();
     }
-
-    /* ---------- INIT ---------- */
     document.addEventListener('DOMContentLoaded', render);
   </script>
 </body>
