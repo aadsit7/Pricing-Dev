@@ -2,561 +2,492 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Endpoint Pricing Calculator — Multi-Product + Partner Quote</title>
+  <title>Nerdio + Recast — Clear Click-Through (Better Together)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    html,body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial}
+    .focus-ring:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+    .card{border-radius:1rem;border:1px solid rgba(255,255,255,.08);background:#0c142b}
+    .sub{border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:#0a1124}
+
+    /* Recast Application Workspace primitives */
+    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+    .logo-wrap{display:flex;align-items:center;gap:.4rem}
+    .logo-name{font-size:.7rem;color:#cbd5e1;white-space:nowrap}
+    .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
+    .cat-title{font-size:.7rem;letter-spacing:.08em}
+    .tile{width:.45rem;height:.45rem;border-radius:.25rem;background:#334155;opacity:.9}
+    .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
+    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
+    .flow-bar{height:.22rem;border-radius:.25rem;transform-origin:left center;transform:scaleX(0)}
+    .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
+    @keyframes barGrow{to{transform:scaleX(1)}}
+    .bolt-line{width:.22rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
+    .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
+    @keyframes boltDrop{to{transform:scaleY(1)}}
+    .run .logo-ring{animation:appPop .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
+    @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.65}60%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
+    .user-beam{height:.38rem;border-radius:.38rem;transform-origin:left center;transform:scaleX(0)}
+    .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
+    .badge{width:1.15rem;height:1.15rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
+    .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
+    @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
+
+    /* Nerdio Orchestration primitives */
+    .pool{border-radius:.75rem;border:1px solid rgba(255,255,255,.12);background:#0b162d}
+    .meter{height:.5rem;border-radius:.5rem;overflow:hidden;background:rgba(255,255,255,.06)}
+    .bar{height:100%;transform:scaleX(0);transform-origin:left center}
+    .run .bar{animation:barGrow 1.1s ease forwards var(--d,0s)}
+    .policy-dot{width:.5rem;height:.5rem;border-radius:999px;background:#334155}
+    .run .policy-dot{animation:dotOn .9s ease forwards var(--d,0s)}
+    @keyframes dotOn{0%{transform:scale(.7);opacity:.4}60%{transform:scale(1.2);opacity:1;background:#34d399}100%{transform:scale(1);background:#22c55e}}
+  </style>
 </head>
 <body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
   <div id="app" class="min-h-screen"></div>
 
   <script>
-    /* =======================
-       STATE
-    ======================= */
     const STATE = {
-      items: [
-        { id: cryptoRandomId(), productKey: 'rct', endpointsText: '1000', addSupport: false }
-      ],
-      activeTab: 'customer',
-      copied: false,
-      showBreakdown: false
+      tab: 'approach', // approach | outcomes
+      showLabelsRecast: false,
+      showLabelsNerdio: false,
+      flowRunning: false,
+      targets: { onboardingMins: 60, patchPct: 95, azureSavePct: 20, pkgHrsLow: 5, pkgHrsHigh: 10 },
+      copied: false
     };
 
-    /* =======================
-       DATA
-    ======================= */
-    const TIERS_BASE5 = [
-      { max: 1000, rate: 5.00 }, { max: 2000, rate: 4.50 }, { max: 3000, rate: 4.25 }, { max: 4000, rate: 4.00 }, { max: 5000, rate: 3.75 },
-      { max: 6000, rate: 3.50 }, { max: 7000, rate: 3.25 }, { max: 8000, rate: 3.00 }, { max: 9000, rate: 2.75 }, { max: 10000, rate: 2.50 },
-      { max: 15000, rate: 2.25 }, { max: 20000, rate: 2.00 }, { max: 25000, rate: 1.75 }, { max: 30000, rate: 1.50 }, { max: 40000, rate: 1.25 },
-      { max: 50000, rate: 1.00 }, { max: 60000, rate: 0.75 }, { max: 70000, rate: 0.50 }, { max: 80000, rate: 0.40 }, { max: 90000, rate: 0.35 },
-      { max: 100000, rate: 0.30 }, { max: 120000, rate: 0.25 }, { max: 140000, rate: 0.20 }, { max: 160000, rate: 0.15 }, { max: 180000, rate: 0.10 },
-      { max: 200000, rate: 0.05 }, { max: Infinity, rate: 0.10 }
-    ];
-    const PRODUCTS = {
-      rct:       { name: 'Right Click Tools (Core)', baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
-      patch:     { name: 'Patching',                 baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
-      insights:  { name: 'Insights',                 baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
-      priv:      { name: 'Privilege Manager',        baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
-      aw_cloud:  { name: 'Application Workspace — Direct Cloud',  baseFactor: 11/5, platformFee: 15000, minTotal: 26000 },
-      aw_onprem: { name: 'Application Workspace — Direct On-Prem', baseFactor: 10/5, platformFee: 15000, minTotal: 25000 }
-    };
-
-    /* =======================
-       UTILS
-    ======================= */
-    function cx(...a){ return a.filter(Boolean).join(' '); }
-    function money(n){ return (!isFinite(n)) ? '—' : n.toLocaleString(undefined,{ style:'currency', currency:'USD' }); }
-    function int(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
-    function digitsOnly(text){ return String(text ?? '').replace(/[^\d]/g,''); }
-    function clampFloor(r){ return Math.max(r, 0.10); }
-    function tiersFor(key){
-      const f = (PRODUCTS[key] || PRODUCTS.rct).baseFactor;
-      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+(t.rate * f).toFixed(4)) }));
-    }
-    function graduatedSubtotal(units, tiers){
-      let rem = Math.max(0, Math.floor(units)), from = 0, sum = 0, lines = [];
-      for(const b of tiers){
-        if(rem<=0) break;
-        const c = Math.min(rem, b.max - from);
-        const ext = c * b.rate;
-        sum += ext;
-        lines.push({ band: `${from+1}–${from+c}`, units: c, rate: b.rate, extended: ext });
-        rem -= c; from = b.max;
-      }
-      return { subtotal: sum, lines };
-    }
-    function premiumSupportCost(add, basePlusPlat){ return add ? Math.max(basePlusPlat * 0.20, 6000) : 0; }
-    function cryptoRandomId(){
-      try { return crypto.randomUUID(); } catch { return 'id-'+Math.random().toString(36).slice(2); }
-    }
-
-    /* =======================
-       MODEL
-    ======================= */
-    function computeItem(item){
-      const endpoints = int(item.endpointsText);
-      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
-      const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiersFor(item.productKey));
-      const platformFeeApplied = baseARR >= 30000 ? 0 : meta.platformFee;
-      const basePlusPlatform = Math.max(baseARR + platformFeeApplied, meta.minTotal);
-      const support = premiumSupportCost(!!item.addSupport, basePlusPlatform);
-      const totalARR = basePlusPlatform + support;
-      const msrp = totalARR;
-      return {
-        id: item.id,
-        productKey: item.productKey,
-        productName: meta.name,
-        endpoints,
-        baseARR,
-        platformFeeApplied,
-        platformWaived: platformFeeApplied === 0,
-        basePlusPlatform,
-        support,
-        totalARR,
-        msrp,
-        partnerNewPrice: msrp * 0.70,
-        partnerRenPrice: msrp * 0.85,
-        marginNew$: msrp * 0.30,
-        marginRen$: msrp * 0.15,
-        addSupport: !!item.addSupport,
-        lines
-      };
-    }
-
-    function model(){
-      const items = STATE.items.map(computeItem);
-      const totals = items.reduce((a,it)=>({
-        endpoints: a.endpoints + it.endpoints,
-        baseARR: a.baseARR + it.baseARR,
-        platform: a.platform + it.platformFeeApplied,
-        support: a.support + it.support,
-        msrp: a.msrp + it.msrp,
-        partnerNew: a.partnerNew + it.partnerNewPrice,
-        partnerRen: a.partnerRen + it.partnerRenPrice,
-        marginNew$: a.marginNew$ + it.marginNew$,
-        marginRen$: a.marginRen$ + it.marginRen$
-      }), { endpoints:0, baseARR:0, platform:0, support:0, msrp:0, partnerNew:0, partnerRen:0, marginNew$:0, marginRen$:0 });
-      return { items, totals };
-    }
-
-    /* =======================
-       RENDER
-    ======================= */
     function render(){
-      const m = model();
-      const root = document.getElementById('app');
+      const root=document.getElementById('app');
       root.innerHTML = `
         <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-            <div class="absolute -top-40 -left-24 h-[420px] w-[420px] rounded-full blur-[110px] bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
-            <div class="absolute -top-10 right-0 h-[280px] w-[280px] rounded-full blur-[110px] bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
+          <div aria-hidden="true" class="absolute inset-0">
+            <div class="absolute -top-36 -left-28 h-[420px] w-[420px] blur-[110px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
+            <div class="absolute -bottom-28 right-0 h-[320px] w-[320px] blur-[110px] rounded-full bg-gradient-to-tr from-emerald-400/20 via-cyan-400/20 to-sky-400/25"></div>
           </div>
           <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-            <div class="flex items-center justify-between">
-              <h1 class="text-2xl sm:text-3xl font-extrabold">Recast Pricing Calculator</h1>
-              <button type="button" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95" data-action="copy">
-                <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Email'}</span>
-              </button>
-            </div>
-            <p class="mt-2 max-w-2xl text-slate-300">Estimate only. Not a formal quote.</p>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4">
-            <div role="tablist" aria-label="Views" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
-              ${tabBtn('customer','Customer Pricing')}
-              ${tabBtn('partner','Partner Pricing')}
-              ${tabBtn('sla','Support SLA')}
-            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold">Nerdio + Recast — Better Together</h1>
+            <p class="mt-2 max-w-3xl text-slate-300">
+              Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together we deliver one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
+            </p>
+            <nav class="mt-5 flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10" role="tablist">
+              ${tabBtn('approach','Approach (Click-Through)','workflow')}
+              ${tabBtn('outcomes','Outcomes','bar-chart-3')}
+              <div class="ml-auto flex items-center gap-2">
+                <button type="button" class="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 focus-ring" data-action="start">Start</button>
+                <button type="button" class="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-sm focus-ring" data-action="reset">Reset</button>
+              </div>
+            </nav>
           </div>
         </header>
 
         <main class="mx-auto max-w-6xl px-4 pb-16">
-          <section class="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
-            ${inputsCard(m)}
-            ${kpiCard('Total ARR (MSRP)', money(m.totals.msrp), 'calculator')}
-            ${kpiCard('Base ARR', money(m.totals.baseARR), 'badge-dollar-sign')}
-          </section>
-
-          <section class="mt-4">
-            ${STATE.activeTab==='customer' ? renderCustomer(m) : ''}
-            ${STATE.activeTab==='partner' ? renderPartner(m) : ''}
-            ${STATE.activeTab==='sla' ? renderSLA() : ''}
-          </section>
+          ${STATE.tab==='approach'?renderApproach():''}
+          ${STATE.tab==='outcomes'?renderOutcomes():''}
         </main>
       `;
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch{} }
       attachEvents();
-      if (STATE.showBreakdown) updateBreakdownTable();
+      if (STATE.tab==='approach'){ buildRecast(); buildNerdio(); }
     }
 
-    /* ---------- Sub-renders ---------- */
-    function tabBtn(id,label){
-      const active = STATE.activeTab===id;
+    function tabBtn(id,label,icon){
+      const active=STATE.tab===id;
+      return `<button type="button" class="${active?'bg-yellow-400 text-slate-900':'text-slate-200 hover:bg-white/5'} inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-ring" data-action="tab" data-id="${id}" aria-selected="${active}" aria-controls="panel-${id}">
+        <i data-lucide="${icon}" class="w-4 h-4"></i><span>${label}</span>
+      </button>`;
+    }
+
+    /* ---------- APPROACH PANEL (side-by-side) ---------- */
+    function renderApproach(){
       return `
-        <button type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm transition', active ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
-          data-action="switch" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${active}">
-          <i data-lucide="${id==='customer'?'calculator':id==='partner'?'users':'life-buoy'}" class="w-4 h-4"></i><span>${label}</span>
-        </button>
+        <section id="panel-approach" class="space-y-4">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            ${renderNerdio()}
+            ${renderRecast()}
+          </div>
+          <div class="card p-4 text-sm text-slate-300">
+            <span class="font-medium text-slate-100">Explain it in one breath:</span> Nerdio makes the right Cloud PC or AVD session appear—right-sized and policy-compliant. Recast puts the right apps on it and keeps them patched. The user signs in once and it’s all there.
+          </div>
+        </section>
       `;
     }
 
-    function inputsCard(m){
+    /* ---------- NERDIO (left) ---------- */
+    function renderNerdio(){
       return `
-        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 lg:col-span-2" role="region" aria-label="Inputs">
+        <section class="card p-4" aria-label="Nerdio Orchestration">
           <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold">Line Items</h2>
-            <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="add-item">
-              <i data-lucide="plus" class="w-4 h-4"></i>Add Product
-            </button>
+            <div class="flex items-center gap-2">
+              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-400 via-cyan-400 to-sky-500 grid place-items-center"><span class="text-slate-900 font-black">N</span></div>
+              <div>
+                <h3 class="text-base font-semibold">Nerdio — Orchestration</h3>
+                <div class="text-[12px] text-slate-400">Provision • Autoscale • Policy via Intune</div>
+              </div>
+            </div>
+            <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[12px]" data-action="toggle-labels-nerdio">${STATE.showLabelsNerdio?'Hide':'Show'} labels</button>
           </div>
-          <div class="mt-3 space-y-3">
-            ${STATE.items.map(itemRow).join('')}
-          </div>
-          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-sm">
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Platform Fees</span><div class="font-semibold">${money(m.totals.platform)}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Support</span><div class="font-semibold">${money(m.totals.support)}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Endpoints</span><div class="font-semibold">${m.totals.endpoints.toLocaleString()}</div></div>
-          </div>
-        </div>
-      `;
-    }
 
-    function itemRow(item){
-      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
-      return `
-        <div class="rounded-xl border border-white/10 bg-[#0b1328] p-3" data-item="${item.id}">
-          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2 items-end">
-            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
-              <span class="text-[12px] text-slate-300">Product</span>
-              <select class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" data-action="change-product" aria-label="Product">
-                ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${item.productKey===k?'selected':''}>${v.name}</option>`).join('')}
-              </select>
-            </label>
-            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
-              <span class="text-[12px] text-slate-300">Endpoint count</span>
-              <input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm"
-                     type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false"
-                     value="${item.endpointsText}" data-action="edit-endpoints" aria-label="Endpoint count">
-              <span class="text-[11px] text-slate-400">${meta.name}</span>
-            </label>
-            <label class="flex items-center gap-2 text-sm sm:col-span-1">
-              <input type="checkbox" ${item.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]" data-action="toggle-support" aria-label="Add premium support">
-              <span>Premium Support</span>
-            </label>
-            <div class="sm:col-span-1 flex justify-start sm:justify-end">
-              <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="remove-item" ${STATE.items.length===1?'disabled':''} aria-disabled="${STATE.items.length===1}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i><span>Remove</span>
-              </button>
+          <div id="nerdioCard" class="mt-3 sub p-3">
+            <div class="grid grid-cols-1 gap-3" role="region" aria-label="Animated orchestration">
+              <div class="pool p-3">
+                <div class="flex items-center justify-between">
+                  <div class="text-sm font-medium">Cloud PC Pools</div>
+                  <div class="text-[12px] text-slate-400">Windows 365</div>
+                </div>
+                <div class="mt-2 grid grid-cols-6 gap-2" id="poolA"></div>
+                <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:.2s"></div></div>
+              </div>
+
+              <div class="pool p-3">
+                <div class="flex items-center justify-between">
+                  <div class="text-sm font-medium">AVD Host Pools</div>
+                  <div class="text-[12px] text-slate-400">Autoscale</div>
+                </div>
+                <div class="mt-2 grid grid-cols-6 gap-2" id="poolB"></div>
+                <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:.5s"></div></div>
+              </div>
+
+              <div class="pool p-3">
+                <div class="text-sm font-medium">Policy via Intune</div>
+                <div class="mt-2 grid grid-cols-10 gap-1.5" id="policyDots"></div>
+              </div>
+
+              <div class="pool p-3">
+                <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="chart-no-axes-combined" class="w-4 h-4 text-sky-300"></i>Insights</div>
+                <div class="mt-2 meter"><div class="bar bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-400" style="--d:.9s"></div></div>
+              </div>
+
+              <div class="pool p-3">
+                <div class="flex items-center gap-2 text-sm"><i data-lucide="user-check" class="w-4 h-4 text-emerald-300"></i><span>Identity-driven Workspace</span></div>
+                <div class="mt-2 user-beam bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-400" style="--d:1.2s"></div>
+                <div class="mt-2 text-[12px] text-slate-400">Desktop is ready and right-sized before apps arrive.</div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       `;
     }
 
-    function kpiCard(label,value,icon){
+    /* ---------- RECAST (right) ---------- */
+    function renderRecast(){
       return `
-        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4" role="region" aria-live="polite">
+        <section class="card p-4" aria-label="Recast Application Workspace">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-400 grid place-items-center"><span class="text-slate-900 font-black">R</span></div>
+              <div>
+                <h3 class="text-base font-semibold">Recast — Application Workspace</h3>
+                <div class="text-[12px] text-slate-400">Curated & secured catalog + third-party patching</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-[12px] text-slate-300">
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1" data-action="toggle-labels-recast">${STATE.showLabelsRecast?'Hide':'Show'} labels</button>
+            </div>
+          </div>
+
+          <div id="recastCard" class="mt-3 sub p-3" role="region" aria-label="Animated catalog">
+            <div class="space-y-2">
+              ${CATALOG.map(s=>`
+                <div class="cat-row">
+                  <div class="cat-title text-slate-400 uppercase">${s.title}</div>
+                  <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Existing Platforms','Staged Rings','Access & Policy'].map((t,i)=>`
+                <div class="sub p-2">
+                  <div class="text-[12px] text-slate-300">${t}</div>
+                  <div id="flowConn${'ABC'[i]}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                  <div class="mt-1 flow-bar w-full bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-400" style="--d:${.55 + .12*i}s"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Business Unit','Subsidiary','Region'].map((t,i)=>`
+                <div class="sub p-2">
+                  <div class="text-[12px] text-slate-300">${t}</div>
+                  <div id="flowGrp${'ABC'[i]}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                  <div class="mx-auto mt-1 bolt-line h-16 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d:${1 + .15*i}s"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['Windows & macOS','VDI / Web','Mobile'].map((t,i)=>`
+                <div class="sub p-2 text-center">
+                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
+                  <div id="flowDev${'ABC'[i]}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                  <div class="mt-1 text-[11px] text-slate-400">${t}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3">
+              <div id="endUserCard" class="sub p-3">
+                <div class="flex items-center gap-3">
+                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-rose-600/90 grid place-items-center font-semibold">U</div>
+                  <div class="text-sm">
+                    <div class="font-medium text-slate-200">End user</div>
+                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
+                  </div>
+                </div>
+                <div class="mt-3 user-beam bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-400" style="--d:2.1s"></div>
+                <div class="relative mt-2 rounded-lg border border-white/10 bg-[#0b1328] p-4">
+                  <i data-lucide="laptop" class="h-5 w-5 opacity-80"></i>
+                  <div id="endUserBadge" class="absolute right-2 top-2 badge bg-rose-500 text-black grid place-items-center font-bold" style="--d:2.4s">!</div>
+                  <div class="mt-1 text-[11px] text-slate-400">Workspace launches the correct app instantly</div>
+                </div>
+              </div>
+              <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Desktop + apps delivered together with identity and rings.</span></div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    /* ---------- OUTCOMES PANEL ---------- */
+    function renderOutcomes(){
+      const t=STATE.targets;
+      return `
+        <section id="panel-outcomes" class="space-y-4">
+          <div class="card p-4">
+            <h2 class="text-xl font-semibold">Pilot targets (edit to fit)</h2>
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-4">
+              ${metric('Under 1 hour onboarding','timer', t.onboardingMins+' mins', range('onboardingMins',30,120,t.onboardingMins))}
+              ${metric('Packaging avoided / app','scissors', `${t.pkgHrsLow}–${t.pkgHrsHigh} hrs`, '')}
+              ${metric('Patch-compliance goal','shield-check', t.patchPct+' %', range('patchPct',85,100,t.patchPct))}
+              ${metric('Azure cost reduction','trending-down', t.azureSavePct+' %', range('azureSavePct',0,40,t.azureSavePct))}
+            </div>
+            <div class="mt-3 flex gap-2">
+              <button type="button" class="rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 focus-ring inline-flex items-center gap-2" data-action="copy">
+                <i data-lucide="clipboard" class="w-4 h-4"></i>${STATE.copied?'Copied!':'Copy pilot summary'}
+              </button>
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm focus-ring" data-action="tab" data-id="approach">Back to click-through</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function metric(title,icon,value,controlHtml){
+      return `
+        <div class="sub p-3">
           <div class="flex items-center justify-between">
             <div>
-              <div class="text-[12px] text-slate-300">${label}</div>
-              <div class="text-xl font-semibold font-mono">${value}</div>
+              <div class="text-[12px] text-slate-300">${title}</div>
+              <div class="text-xl font-semibold">${value}</div>
             </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
           </div>
+          ${controlHtml||''}
         </div>
       `;
     }
-
-    function renderCustomer(m){
+    function range(key,min,max,val){
       return `
-        <section id="panel-customer" role="tabpanel" aria-labelledby="tab-customer" class="mt-2 space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Customer Quote</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr>
-                    <th class="px-3 py-2 text-left">Product</th>
-                    <th class="px-3 py-2 text-left">Endpoints</th>
-                    <th class="px-3 py-2 text-left">Base ARR</th>
-                    <th class="px-3 py-2 text-left">Platform Fee</th>
-                    <th class="px-3 py-2 text-left">Premium Support</th>
-                    <th class="px-3 py-2 text-left">Line Total (MSRP)</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  ${m.items.map(it => `
-                    <tr>
-                      <td class="px-3 py-2">${it.productName}</td>
-                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.baseARR)}</td>
-                      <td class="px-3 py-2">${it.platformWaived ? '— (waived)' : `<span class="font-mono">${money(it.platformFeeApplied)}</span>`}</td>
-                      <td class="px-3 py-2">${it.addSupport ? `<span class="font-mono">${money(it.support)}</span>` : '—'}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.totalARR)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-                <tfoot class="bg-[#0b152f]">
-                  <tr>
-                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.baseARR)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.platform)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.support)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown" aria-expanded="${STATE.showBreakdown}">
-              <i data-lucide="${STATE.showBreakdown?'chevron-up':'chevron-down'}" class="w-4 h-4"></i>
-              ${STATE.showBreakdown ? 'Hide tier calculation' : 'Show tier calculation'}
-            </button>
-            <div id="breakdown" class="${STATE.showBreakdown ? 'mt-3' : 'hidden'}">
-              ${m.items.map(it => tierTable(it)).join('')}
-            </div>
-          </div>
-        </section>
+        <label class="mt-2 flex items-center gap-2 text-xs">
+          <span class="text-slate-400">Target</span>
+          <input type="range" min="${min}" max="${max}" value="${val}" data-action="range" data-key="${key}" class="w-full accent-yellow-400">
+          <output class="w-10 text-right" aria-live="polite">${val}</output>
+        </label>
       `;
     }
 
-    function tierTable(it){
-      return `
-        <div class="mb-3 overflow-x-auto rounded-lg border border-white/10">
-          <table class="min-w-full text-sm">
-            <caption class="text-left px-3 py-2 bg-[#0b152f] font-semibold">${it.productName} — ${it.endpoints.toLocaleString()} endpoints</caption>
-            <thead class="bg-[#0b152f] text-slate-300">
-              <tr><th class="px-3 py-2 text-left">Band</th><th class="px-3 py-2 text-left">Units</th><th class="px-3 py-2 text-left">$ / Unit</th><th class="px-3 py-2 text-left">Extended</th></tr>
-            </thead>
-            <tbody class="bg-[#0b1328]">
-              ${it.lines.map(r=>`
-                <tr>
-                  <td class="px-3 py-2">${r.band}</td>
-                  <td class="px-3 py-2">${r.units.toLocaleString()}</td>
-                  <td class="px-3 py-2 font-mono">${money(r.rate)}</td>
-                  <td class="px-3 py-2 font-mono">${money(r.extended)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-            <tfoot class="bg-[#0b152f]">
-              <tr><th class="px-3 py-2 text-right" colspan="3">Base ARR Subtotal</th><th class="px-3 py-2 text-left font-mono">${money(it.baseARR)}</th></tr>
-            </tfoot>
-          </table>
-        </div>
-      `;
+    /* ---------- BUILDERS: NERDIO ---------- */
+    function buildNerdio(){
+      const a=document.getElementById('poolA'); const b=document.getElementById('poolB'); const p=document.getElementById('policyDots');
+      if(a){ a.innerHTML=''; for(let i=0;i<12;i++){ a.appendChild(poolVM(i,.15+i*0.05,'emerald')); } }
+      if(b){ b.innerHTML=''; for(let i=0;i<12;i++){ b.appendChild(poolVM(i,.4+i*0.05,'sky')); } }
+      if(p){ p.innerHTML=''; for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='policy-dot'; d.style.setProperty('--d', (0.8 + i*0.05)+'s'); p.appendChild(d); } }
+    }
+    function poolVM(i,delay,tone){
+      const d=document.createElement('div');
+      d.className='h-6 rounded-md bg-black/30';
+      d.style.border='1px solid rgba(255,255,255,.08)';
+      d.style.boxShadow='inset 0 0 0 1px rgba(255,255,255,.03)';
+      d.style.position='relative';
+      const bar=document.createElement('div');
+      bar.className='absolute left-0 top-0 h-full bar';
+      bar.style.setProperty('--d', delay+'s');
+      bar.style.width='100%';
+      bar.style.background= tone==='emerald'
+        ? 'linear-gradient(to right,#34d399,#22d3ee,#38bdf8)'
+        : 'linear-gradient(to right,#38bdf8,#6366f1,#a78bfa)';
+      d.appendChild(bar);
+      if(STATE.showLabelsNerdio){ const t=document.createElement('span'); t.textContent='VM'; t.className='absolute inset-0 grid place-items-center text-[10px] text-white/80'; d.appendChild(t); }
+      return d;
     }
 
-    function renderPartner(m){
-      return `
-        <section id="panel-partner" role="tabpanel" aria-labelledby="tab-partner" class="space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Partner Quote (Per Line Item)</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr>
-                    <th class="px-3 py-2 text-left">Product</th>
-                    <th class="px-3 py-2 text-left">Endpoints</th>
-                    <th class="px-3 py-2 text-left">MSRP (List)</th>
-                    <th class="px-3 py-2 text-left">Net New Margin %</th>
-                    <th class="px-3 py-2 text-left">Net New Margin $</th>
-                    <th class="px-3 py-2 text-left">Net New Partner Price</th>
-                    <th class="px-3 py-2 text-left">Renewal Margin %</th>
-                    <th class="px-3 py-2 text-left">Renewal Margin $</th>
-                    <th class="px-3 py-2 text-left">Renewal Partner Price</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  ${m.items.map(it => `
-                    <tr>
-                      <td class="px-3 py-2">${it.productName}</td>
-                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.msrp)}</td>
-                      <td class="px-3 py-2">30%</td>
-                      <td class="px-3 py-2 font-mono">${money(it.marginNew$)}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.partnerNewPrice)}</td>
-                      <td class="px-3 py-2">15%</td>
-                      <td class="px-3 py-2 font-mono">${money(it.marginRen$)}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.partnerRenPrice)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-                <tfoot class="bg-[#0b152f]">
-                  <tr>
-                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
-                    <th class="px-3 py-2 text-left">—</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginNew$)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerNew)}</th>
-                    <th class="px-3 py-2 text-left">—</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginRen$)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerRen)}</th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            <p class="mt-2 text-[12px] text-slate-400">MSRP includes platform fee (if not waived) and premium support (if selected) per line item. Partner prices reflect margins applied to each line.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderSLA(){
-      return `
-        <section id="panel-sla" role="tabpanel" aria-labelledby="tab-sla" class="space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Support SLA</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr><th class="px-3 py-2 text-left">Support Level</th><th class="px-3 py-2 text-left">Basic</th><th class="px-3 py-2 text-left">Premium</th></tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  <tr><td class="px-3 py-2">Urgent Severity</td><td class="px-3 py-2">First response: <strong>1 Business Day</strong></td><td class="px-3 py-2">First & update: <strong>2 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Normal Severity</td><td class="px-3 py-2">First response: <strong>2 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>4 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Low Severity</td><td class="px-3 py-2">First response: <strong>3 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>8 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Availability</td><td class="px-3 py-2" colspan="2">8am – 5pm CT/CET</td></tr>
-                  <tr><td class="px-3 py-2">Support Hours</td><td class="px-3 py-2" colspan="2">Unlimited</td></tr>
-                  <tr><td class="px-3 py-2">Dedicated CSM</td><td class="px-3 py-2">✔</td><td class="px-3 py-2">✔</td></tr>
-                  <tr><td class="px-3 py-2">Support Call Scheduling</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Urgent within 2 business days; Normal within 4; Low based on availability</td></tr>
-                  <tr><td class="px-3 py-2">Environment Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
-                  <tr><td class="px-3 py-2">Configuration Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
-                  <tr><td class="px-3 py-2">Upgrade Assistance</td><td class="px-3 py-2">—</td><td class="px-3 py-2">2× / year</td></tr>
-                  <tr><td class="px-3 py-2">User Group Membership</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Priority recruitment</td></tr>
-                  <tr><td class="px-3 py-2">Pricing</td><td class="px-3 py-2">Included with Enterprise License</td><td class="px-3 py-2">+20% of total ARR (minimum $6,000)</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="mt-2 text-[12px] text-slate-400">Note: Response-time commitments do not guarantee time to resolution.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    /* =======================
-       EMAIL COPY (multi-item)
-    ======================= */
-    function buildEmailText(m, clientName){
-      const name = clientName && clientName.trim() ? clientName.trim() : '[Client Name]';
-      const subject = `Subject: Pricing Estimate for ${m.items.length>1?'Multiple Products':m.items[0]?.productName || 'Products'}`;
-      const lines = [
-        subject,
-        `Hi ${name},`,
-        '',
-        'As requested, here is a high-level pricing estimate based on your requirements:',
-      ];
-      m.items.forEach((it, idx) => {
-        lines.push(
-          `Product ${idx+1}: ${it.productName}`,
-          `Endpoints: ${it.endpoints.toLocaleString()}`,
-          `Platform Fee: ${it.platformWaived ? '— (waived)' : money(it.platformFeeApplied)}`,
-          `Premium Support: ${it.addSupport ? money(it.support) : '—'}`,
-          `Base Total ARR (graduated): ${money(it.baseARR)}`,
-          `Line Total (MSRP): ${money(it.msrp)}`,
-          ''
-        );
+    /* ---------- BUILDERS: RECAST ---------- */
+    function buildRecast(){
+      let base=0;
+      CATALOG.forEach(section=>{
+        const mount=document.getElementById(section.id); if(!mount) return;
+        mount.innerHTML='';
+        section.items.forEach((itm,idx)=>{
+          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
+          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+          wrap.appendChild(ring);
+          if(STATE.showLabelsRecast){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
+          mount.appendChild(wrap);
+        });
+        base+=0.25;
       });
-      lines.push(
-        'Order Totals:',
-        `Base ARR: ${money(m.totals.baseARR)}`,
-        `Platform Fees: ${money(m.totals.platform)}`,
-        `Premium Support: ${money(m.totals.support)}`,
-        `Total ARR (MSRP): ${money(m.totals.msrp)}`,
-        '',
-        'Below is a breakdown of pricing with MSRP, partner margin, and partner price:',
-        '| Type       | MSRP (List) | Margin % | Margin $  | Partner Price |',
-        '|------------|-------------|----------|-----------|---------------|',
-        `| Net New    | ${money(m.totals.msrp)}  | 30%      | ${money(m.totals.marginNew$)}| ${money(m.totals.partnerNew)}    |`,
-        `| Renewal    | ${money(m.totals.msrp)}  | 15%      | ${money(m.totals.marginRen$)}| ${money(m.totals.partnerRen)}    |`,
-        `| **Total**  | ${money(m.totals.msrp)}  | –        | –         | –             |`,
-        '',
-        'Please note this is an estimate only and should not be considered a formal quote.',
-        'Let me know if you’d like me to prepare a formal proposal or discuss package options.',
-        'Best regards,',
-        'Recast Partner Team'
-      );
-      return lines.join('\n');
+      buildTiles(document.getElementById('flowConnA'), 14, .5);
+      buildTiles(document.getElementById('flowConnB'), 14, .56);
+      buildTiles(document.getElementById('flowConnC'), 14, .62);
+      buildTiles(document.getElementById('flowGrpA'), 18, .95);
+      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
+      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
+      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
+      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
+      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
+
+      // Reset end-user to "red"
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
+    }
+    function buildTiles(container,count,baseDelay){
+      if(!container) return; container.innerHTML='';
+      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
     }
 
-    /* =======================
-       EVENTS
-    ======================= */
+    /* ---------- CATALOG (brands-like marks) ---------- */
+    const CATALOG=[
+      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+        logo('Microsoft Word','W','#185ABD'),
+        logo('Microsoft Excel','X','#107C41'),
+        logo('PowerPoint','P','#D24726'),
+        logo('Outlook','O','#106EBE'),
+        logo('Microsoft Teams','T','#5B53D6'),
+        logo('Google Docs','Dc','#1A73E8'),
+        logo('Google Sheets','Sh','#1E8E3E'),
+        logo('Google Slides','Sl','#F9AB00')
+      ]},
+      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
+        multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
+        logo('Zoom','Z','#0B5CFF'),
+        logo('Gmail','G','#EA4335'),
+        logo('Google Meet','GM','#0F9D58')
+      ]},
+      {title:'WEB BROWSERS',id:'cat-browsers',items:[
+        triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
+        ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
+        flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+      ]},
+      {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
+        logo('Salesforce','SF','#00A1E0'),
+        logo('Workday','WD','#1F5BFF'),
+        logo('ServiceNow','SN','#81B29A'),
+        logo('SAP','SAP','#0A6ED1'),
+        logo('Oracle NetSuite','NS','#C74634')
+      ]},
+      {title:'SECURITY & ACCESS',id:'cat-security',items:[
+        logo('Duo','D','#3CB371'),
+        logo('Okta','O','#007DC1'),
+        logo('Ping Identity','P','#C0172C'),
+        logo('Cisco AnyConnect','AC','#00B5AD'),
+        logo('Microsoft Defender','MD','#0067B8'),
+        logo('CrowdStrike Falcon','CS','#D61F26')
+      ]},
+      {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
+        logo('Adobe Acrobat','A','#ED2224'),
+        logo('Dropbox','DB','#0061FF'),
+        logo('Box','BX','#0061D5'),
+        logo('OneDrive','OD','#0A5BD5'),
+        logo('ZoomIt / Sysinternals','ZI','#58595B')
+      ]}
+    ];
+    function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
+    function mark(letter,color){
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
+          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
+        </svg>`;
+    }
+    function multiLogo(name,colors){
+      const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>${slices}</svg>` };
+    }
+    function triLogo(name,r1,r2,r3,r4){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
+    }
+    function ringLogo(name,c1,c2){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
+    }
+    function flameLogo(name,c1,c2){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
+    }
+    function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+
+    /* ---------- EVENTS ---------- */
     function attachEvents(){
-      const root = document.getElementById('app');
-
-      // Add item
-      const addBtn = root.querySelector('[data-action="add-item"]');
-      if(addBtn){
-        addBtn.addEventListener('click', () => {
-          STATE.items.push({ id: cryptoRandomId(), productKey: 'rct', endpointsText: '0', addSupport: false });
-          render();
-        });
-      }
-
-      // Delegate events per item
-      root.querySelectorAll('[data-item]').forEach(container => {
-        const id = container.getAttribute('data-item');
-        const item = STATE.items.find(x=>x.id===id);
-        if(!item) return;
-
-        // Product change
-        const sel = container.querySelector('[data-action="change-product"]');
-        if(sel) sel.addEventListener('change', e => { item.productKey = e.target.value; render(); });
-
-        // Support toggle
-        const sup = container.querySelector('[data-action="toggle-support"]');
-        if(sup) sup.addEventListener('change', e => { item.addSupport = !!e.target.checked; render(); });
-
-        // Endpoints input
-        const ep = container.querySelector('[data-action="edit-endpoints"]');
-        if(ep){
-          ep.addEventListener('beforeinput', e => { if(e.data && /\D/.test(e.data)) e.preventDefault(); });
-          ep.addEventListener('input', e => {
-            item.endpointsText = digitsOnly(e.target.value);
-            const caret = item.endpointsText.length;
-            render();
-            const repl = document.querySelector(`[data-item="${id}"] [data-action="edit-endpoints"]`);
-            if(repl){ repl.focus(); repl.setSelectionRange(caret, caret); }
-          });
-          ep.addEventListener('blur', e => { item.endpointsText = digitsOnly(e.target.value); render(); });
-          ep.addEventListener('keydown', e => { if(e.key==='Enter'){ e.currentTarget.blur(); } });
-          ep.addEventListener('wheel', e => { e.preventDefault(); }, { passive: false });
-        }
-
-        // Remove item
-        const rm = container.querySelector('[data-action="remove-item"]');
-        if(rm) rm.addEventListener('click', () => {
-          if(STATE.items.length<=1) return;
-          STATE.items = STATE.items.filter(x=>x.id!==id);
-          render();
-        });
-      });
-
-      // Tab switching
-      root.querySelectorAll('[data-action="switch"]').forEach(b => b.addEventListener('click', e => {
-        STATE.activeTab = e.currentTarget.getAttribute('data-tab');
-        render();
+      const root=document.getElementById('app');
+      root.querySelectorAll('[data-action="tab"]').forEach(b=>b.addEventListener('click',e=>{ STATE.tab=e.currentTarget.getAttribute('data-id'); render(); }));
+      root.querySelector('[data-action="start"]')?.addEventListener('click', startAll);
+      root.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll);
+      root.querySelector('[data-action="toggle-labels-recast"]')?.addEventListener('click',()=>{ STATE.showLabelsRecast=!STATE.showLabelsRecast; buildRecast(); });
+      root.querySelector('[data-action="toggle-labels-nerdio"]')?.addEventListener('click',()=>{ STATE.showLabelsNerdio=!STATE.showLabelsNerdio; buildNerdio(); });
+      root.querySelectorAll('[data-action="range"]').forEach(r=>r.addEventListener('input',e=>{
+        const key=e.currentTarget.getAttribute('data-key'); const v=Number(e.target.value)||0; STATE.targets[key]=v; render();
       }));
+      root.querySelector('[data-action="copy"]')?.addEventListener('click', async ()=>{
+        const t=STATE.targets;
+        const body =
+`Nerdio + Recast — Pilot Targets
 
-      // Copy email
-      const copyBtn = root.querySelector('[data-action="copy"]');
-      if(copyBtn) copyBtn.addEventListener('click', async () => {
-        const m = model();
-        let clientName = '';
-        try { clientName = window.prompt('Client name for the email? (optional)', '') || ''; } catch {}
-        const text = buildEmailText(m, clientName);
-        try { await navigator.clipboard.writeText(text); }
-        catch {
-          try {
-            const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-            document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-          } catch {}
+Positioning
+Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together: one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
+
+Targets
+- Under 1 hour onboarding (desktop + apps)
+- Packaging avoided: ${t.pkgHrsLow}–${t.pkgHrsHigh} hrs per app
+- Patch compliance goal: > ${t.patchPct}%
+- Azure cost reduction via autoscale: ~ ${t.azureSavePct}%
+
+Measure weekly and adjust rings/policies accordingly.`;
+        try { await navigator.clipboard.writeText(body); } catch {
+          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
         }
-        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+        STATE.copied=true; render(); setTimeout(()=>{ STATE.copied=false; render(); }, 1200);
       });
-
-      // Show/Hide tier breakdown
-      const toggle = root.querySelector('[data-action="toggle-breakdown"]');
-      if(toggle) toggle.addEventListener('click', () => { STATE.showBreakdown = !STATE.showBreakdown; render(); });
     }
 
-    function updateBreakdownTable(){ /* populated during render via tierTable per item */ }
+    function startAll(){
+      const nerdio=document.getElementById('nerdioCard');
+      const recast=document.getElementById('recastCard');
+      [nerdio,recast].forEach(c=>{ if(!c) return; c.classList.remove('run'); void c.offsetWidth; c.classList.add('run'); });
 
-    /* =======================
-       INIT
-    ======================= */
-    document.addEventListener('DOMContentLoaded', () => {
-      render();
-      if(!window.tailwind){
-        const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3';
-        b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>';
-        document.body.prepend(b);
+      // flip end-user to green at the end of Recast flow
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge'); const success=document.getElementById('flowSuccess');
+      if(avatar&&badge){
+        avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500');
+        setTimeout(()=>{ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); success && success.classList.remove('hidden'); }, 2300);
+        setTimeout(()=>{ [nerdio,recast].forEach(c=>c && c.classList.remove('run')); }, 6000);
       }
-    });
+    }
+    function resetAll(){
+      const nerdio=document.getElementById('nerdioCard'); const recast=document.getElementById('recastCard'); const success=document.getElementById('flowSuccess');
+      [nerdio,recast].forEach(c=>c && c.classList.remove('run'));
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
+      success && success.classList.add('hidden');
+      buildNerdio(); buildRecast();
+    }
+
+    /* ---------- INIT ---------- */
+    document.addEventListener('DOMContentLoaded', render);
   </script>
 </body>
 </html>
