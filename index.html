@@ -30,7 +30,6 @@
         </div>
       </header>
 
-      <!-- Panels -->
       <div id="panel-demo" role="tabpanel" aria-labelledby="tab-demo" class="block">
         <div class="flex flex-col gap-4 p-5 pt-2">
           <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -38,89 +37,60 @@
               <h2 class="text-lg font-bold tracking-tight">
                 Nerdio + Recast — <span class="text-slate-400 font-semibold">One Intune-governed workspace</span>
               </h2>
-              <p class="text-slate-400 text-sm">Click <em>Play</em> or step through to see how Intune, Nerdio, and Recast work together.</p>
+              <p class="text-slate-400 text-sm">Press <strong>Play</strong> to show how Intune, Nerdio, and Recast feed into a Day One Workspace.</p>
             </div>
-            <nav aria-label="Demo controls" class="flex flex-wrap items-center gap-2">
-              <button id="btn-play" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Play animation (auto)">
+            <nav aria-label="Demo controls" class="flex items-center gap-2">
+              <button id="btn-play" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Play animation">
                 <i data-lucide="play" class="w-4 h-4"></i><span>Play</span>
-              </button>
-              <button id="btn-step1" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 1">
-                <i data-lucide="circle-dot" class="w-4 h-4"></i><span>Step 1</span>
-              </button>
-              <button id="btn-step2" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 2">
-                <i data-lucide="git-branch" class="w-4 h-4"></i><span>Step 2</span>
-              </button>
-              <button id="btn-step3" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 3">
-                <i data-lucide="merge" class="w-4 h-4"></i><span>Step 3</span>
-              </button>
-              <button id="btn-reset" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400" aria-label="Reset demo">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
               </button>
             </nav>
           </div>
 
-          <div id="stage" class="relative overflow-hidden rounded-xl p-5 md:p-6 min-h-[460px] bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800" aria-live="polite">
-            <!-- Intune -->
-            <article id="card-intune" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:top-3 text-center w-full md:w-[340px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-emerald-300 mb-1">INTUNE — Control Plane</span>
-              <h3 class="text-base font-bold">Intune in Control</h3>
-              <p class="text-slate-400 text-sm">Policy • Security • Compliance</p>
-              <div class="flex flex-wrap justify-center gap-2 mt-2">
-                <span id="kpi-intune-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Identity-driven</span>
-                <span id="kpi-intune-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">One policy brain</span>
+          <div id="stage" class="relative overflow-hidden rounded-xl p-5 md:p-6 min-h-[500px] bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800" aria-live="polite">
+            <article id="card-intune" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:top-4 text-center w-full md:w-[340px] rounded-xl bg-blue-950/70 ring-2 ring-blue-600 shadow-xl p-4">
+              <div class="flex items-center justify-center gap-2 mb-1">
+                <i data-lucide="shield-check" class="w-5 h-5 text-blue-300"></i>
+                <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-blue-950 bg-blue-300">INTUNE — Control Plane</span>
               </div>
+              <h3 class="text-base font-extrabold text-blue-100">Intune in Control</h3>
+              <p class="text-blue-200/80 text-sm">Governance • Policy • Security</p>
             </article>
 
-            <!-- Nerdio -->
-            <article id="card-nerdio" class="mt-3 md:mt-0 md:absolute md:left-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-sky-300 mb-1">NERDIO — Desktop Automation</span>
-              <h3 class="text-base font-bold">Right-sized Desktops</h3>
-              <p class="text-slate-400 text-sm">AVD • Windows 365 • Autoscale</p>
-              <div id="icons-desktops" class="flex flex-wrap gap-1.5 mt-2">
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
+            <article id="card-nerdio" class="mt-3 md:mt-0 md:absolute md:left-6 md:top-1/2 md:-translate-y-1/2 w-full md:w-[300px] rounded-xl bg-emerald-950/70 ring-2 ring-emerald-500 shadow-xl p-4">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="monitor" class="w-5 h-5 text-emerald-300"></i>
+                <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-emerald-950 bg-emerald-300">NERDIO</span>
               </div>
-              <div class="flex flex-wrap gap-2 mt-2">
-                <span id="kpi-nerdio-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Up to 55% Azure savings</span>
-                <span id="kpi-nerdio-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Image & lifecycle in clicks</span>
-              </div>
+              <h3 class="text-base font-extrabold text-emerald-100">Right-sized Desktops</h3>
+              <p id="benefit-nerdio" class="mt-2 inline-block text-xs text-emerald-100 bg-emerald-900/50 ring-1 ring-emerald-600 rounded-lg px-2.5 py-1">Up to 55% Azure savings</p>
             </article>
 
-            <!-- Recast -->
-            <article id="card-recast" class="mt-3 md:mt-0 md:absolute md:right-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-amber-300 mb-1">RECAST — Application Workspace</span>
-              <h3 class="text-base font-bold">Apps Delivered & Patched</h3>
-              <p class="text-slate-400 text-sm">7,000+ Catalog • Smart Icons</p>
-              <div id="icons-apps" class="flex flex-wrap gap-1.5 mt-2">
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="puzzle" class="w-3.5 h-3.5"></i>Addon</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="package" class="w-3.5 h-3.5"></i>Package</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="globe" class="w-3.5 h-3.5"></i>Web</span>
-                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i>Chat</span>
+            <article id="card-recast" class="mt-3 md:mt-0 md:absolute md:right-6 md:top-1/2 md:-translate-y-1/2 w-full md:w-[300px] rounded-xl bg-amber-950/70 ring-2 ring-amber-500 shadow-xl p-4">
+              <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="package" class="w-5 h-5 text-amber-300"></i>
+                <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-amber-950 bg-amber-300">RECAST</span>
               </div>
-              <div class="flex flex-wrap gap-2 mt-2">
-                <span id="kpi-recast-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">5–10 hrs/app saved</span>
-                <span id="kpi-recast-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">&gt;95% compliance</span>
-              </div>
+              <h3 class="text-base font-extrabold text-amber-100">Apps Delivered &amp; Patched</h3>
+              <p id="benefit-recast" class="mt-2 inline-block text-xs text-amber-100 bg-amber-900/50 ring-1 ring-amber-600 rounded-lg px-2.5 py-1">&gt;95% compliance</p>
             </article>
 
-            <!-- Workspace Outcome -->
-            <div id="workspace" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:bottom-4 mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-dashed border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-300">
-              <span class="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_10px_2px] shadow-emerald-300/40"></span>
-              <strong class="font-semibold tracking-wide">One Workspace • Day One</strong>
+            <div id="workspace" class="md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 mx-auto mt-6 inline-flex items-center gap-3 rounded-full border border-dashed border-emerald-400/50 bg-emerald-900/30 px-5 py-3 text-base">
+              <span class="w-3 h-3 rounded-full bg-emerald-300 shadow-[0_0_14px_3px] shadow-emerald-300/60"></span>
+              <strong class="font-extrabold tracking-wide text-emerald-100 text-lg md:text-2xl">Day One Workspace</strong>
             </div>
 
-            <!-- Flow lines -->
             <svg class="pointer-events-none absolute inset-0" viewBox="0 0 1000 600" aria-hidden="true">
-              <path id="line-i2n-static" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-              <path id="line-i2n-flow" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-              <path id="line-i2r-static" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-              <path id="line-i2r-flow" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-              <path id="line-n2w-static" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-              <path id="line-n2w-flow" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-              <path id="line-r2w-static" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-              <path id="line-r2w-flow" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto-start-reverse">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#a5b4fc"></path>
+                </marker>
+              </defs>
+              <path id="line-i2w-static" d="M500,120 C 500,170 500,220 500,280" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.35"></path>
+              <path id="line-i2w-flow" d="M500,120 C 500,170 500,220 500,280" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" marker-end="url(#arrow)" opacity="0"></path>
+              <path id="line-n2w-static" d="M190,300 C 320,330 420,330 500,300" fill="none" stroke="#34d399" stroke-width="2" opacity="0.35"></path>
+              <path id="line-n2w-flow" d="M190,300 C 320,330 420,330 500,300" fill="none" stroke="#a7f3d0" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" marker-end="url(#arrow)" opacity="0"></path>
+              <path id="line-r2w-static" d="M810,300 C 680,330 580,330 500,300" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.35"></path>
+              <path id="line-r2w-flow" d="M810,300 C 680,330 580,330 500,300" fill="none" stroke="#fde68a" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" marker-end="url(#arrow)" opacity="0"></path>
             </svg>
           </div>
         </div>
@@ -210,7 +180,6 @@
       reducedMotion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     };
 
-    // Tabs
     const tabs = {
       demo: document.getElementById('tab-demo'),
       better: document.getElementById('tab-better')
@@ -233,60 +202,38 @@
       try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
     }
 
-    // Demo refs
     const el = {
       play: document.getElementById('btn-play'),
-      s1: document.getElementById('btn-step1'),
-      s2: document.getElementById('btn-step2'),
-      s3: document.getElementById('btn-step3'),
-      reset: document.getElementById('btn-reset'),
       cards: {
         intune: document.getElementById('card-intune'),
         nerdio: document.getElementById('card-nerdio'),
         recast: document.getElementById('card-recast')
       },
-      kpis: {
-        intune: [document.getElementById('kpi-intune-1'), document.getElementById('kpi-intune-2')],
-        nerdio: [document.getElementById('kpi-nerdio-1'), document.getElementById('kpi-nerdio-2')],
-        recast: [document.getElementById('kpi-recast-1'), document.getElementById('kpi-recast-2')]
-      },
-      icons: {
-        desktops: Array.from(document.querySelectorAll('#icons-desktops .ic')),
-        apps: Array.from(document.querySelectorAll('#icons-apps .ic'))
-      },
       flows: {
-        i2n: { static: document.getElementById('line-i2n-static'), flow: document.getElementById('line-i2n-flow') },
-        i2r: { static: document.getElementById('line-i2r-static'), flow: document.getElementById('line-i2r-flow') },
+        i2w: { static: document.getElementById('line-i2w-static'), flow: document.getElementById('line-i2w-flow') },
         n2w: { static: document.getElementById('line-n2w-static'), flow: document.getElementById('line-n2w-flow') },
         r2w: { static: document.getElementById('line-r2w-static'), flow: document.getElementById('line-r2w-flow') }
       },
       workspace: document.getElementById('workspace')
     };
 
-    // Helpers
-    function addClasses(node, classes) { if (node) node.classList.add(...classes); }
-    function removeClasses(node, classes) { if (node) node.classList.remove(...classes); }
-    function show(elm) { if (elm) elm.classList.remove('hidden'); }
-    function hide(elm) { if (elm) elm.classList.add('hidden'); }
     function setOpacity(node, value) { if (node) node.setAttribute('opacity', String(value)); }
     function setDashOffset(node, value) { if (node) node.setAttribute('stroke-dashoffset', String(value)); }
     function clearTimers() { while (STATE.timers.length) clearTimeout(STATE.timers.pop()); }
     function stopAnim() { if (STATE.rafId) cancelAnimationFrame(STATE.rafId); STATE.rafId = null; }
 
-    // Demo rendering
-    function clearAllHighlights() {
+    function clearHighlights() {
       [el.cards.intune, el.cards.nerdio, el.cards.recast].forEach(c => {
-        removeClasses(c, ['ring-emerald-400','ring-2','shadow-emerald-500/20','animate-pulse','scale-[1.01]']);
+        c.classList.remove('ring-4','ring-offset-2','ring-offset-slate-900','scale-[1.02]','animate-pulse');
       });
-      [...el.icons.desktops, ...el.icons.apps].forEach(i => i.style.opacity = '0.7');
-      Object.values(el.kpis).flat().forEach(k => hide(k));
       el.workspace.style.boxShadow = '';
+      el.workspace.classList.remove('ring-2','ring-emerald-300/70','shadow-emerald-500/30');
     }
 
     function renderFlows() {
       const enabled = new Set();
-      if (STATE.step === 2) { enabled.add('i2n'); enabled.add('i2r'); }
-      else if (STATE.step === 3) { enabled.add('n2w'); enabled.add('r2w'); }
+      if (STATE.step === 2) enabled.add('i2w');
+      if (STATE.step === 3) { enabled.add('n2w'); enabled.add('r2w'); enabled.add('i2w'); }
       Object.entries(el.flows).forEach(([key, pair]) => {
         setOpacity(pair.static, window.innerWidth >= 768 ? 0.35 : 0);
         setOpacity(pair.flow, enabled.has(key) ? 1 : 0);
@@ -295,11 +242,11 @@
 
     function animateFlows() {
       if (STATE.reducedMotion) return;
-      const stepHasFlow = (STATE.step === 2 || STATE.step === 3);
+      const stepHasFlow = (STATE.step >= 2);
       if (!stepHasFlow) { stopAnim(); return; }
       const tick = () => {
         STATE.flowOffset -= 2;
-        ['i2n','i2r','n2w','r2w'].forEach(id => {
+        ['i2w','n2w','r2w'].forEach(id => {
           const n = el.flows[id].flow;
           if (n && n.getAttribute('opacity') !== '0') setDashOffset(n, STATE.flowOffset);
         });
@@ -310,95 +257,70 @@
     }
 
     function renderStep() {
-      clearAllHighlights();
+      clearHighlights();
       renderFlows();
+
       if (STATE.step === 1) {
-        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20','animate-pulse']);
-        show(el.kpis.intune[0]); show(el.kpis.intune[1]);
+        el.cards.intune.classList.add('animate-pulse');
       }
+
       if (STATE.step === 2) {
-        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
-        addClasses(el.cards.nerdio, ['ring-2','ring-emerald-400','shadow-emerald-500/20','scale-[1.01]']);
-        addClasses(el.cards.recast, ['ring-2','ring-emerald-400','shadow-emerald-500/20','scale-[1.01]']);
-        [...el.icons.desktops, ...el.icons.apps].forEach((i, idx) => STATE.timers.push(setTimeout(() => { i.style.opacity = '1'; }, idx * 90)));
-        el.kpis.nerdio.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 250 + i * 180)));
-        el.kpis.recast.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 350 + i * 180)));
+        el.cards.intune.classList.add('ring-4','ring-offset-2','ring-offset-slate-900','scale-[1.02]');
       }
+
       if (STATE.step === 3) {
-        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
-        addClasses(el.cards.nerdio, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
-        addClasses(el.cards.recast, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
-        el.workspace.style.boxShadow = '0 0 0 2px rgba(16,185,129,.35), 0 0 26px rgba(16,185,129,.35)';
-        const all = [...el.kpis.intune, ...el.kpis.nerdio, ...el.kpis.recast];
-        all.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 150 + i * 120)));
-        [...el.icons.desktops, ...el.icons.apps].forEach(i => i.style.opacity = '1');
+        el.cards.intune.classList.add('ring-4','ring-offset-2','ring-offset-slate-900');
+        el.cards.nerdio.classList.add('ring-4','ring-offset-2','ring-offset-slate-900','scale-[1.02]');
+        el.cards.recast.classList.add('ring-4','ring-offset-2','ring-offset-slate-900','scale-[1.02]');
+        el.workspace.style.boxShadow = '0 0 0 3px rgba(52,211,153,.45), 0 0 40px rgba(52,211,153,.35)';
+        el.workspace.classList.add('ring-2','ring-emerald-300/70','shadow-emerald-500/30');
       }
+
       animateFlows();
     }
 
     function renderControls() {
       const playLabel = STATE.playing ? 'Playing…' : 'Play';
-      if (el.play) el.play.querySelector('span').textContent = playLabel;
-      if (el.play) el.play.setAttribute('aria-pressed', String(STATE.playing));
-      [el.s1, el.s2, el.s3].forEach((b, idx) => {
-        if (!b) return;
-        const active = STATE.step === (idx + 1);
-        b.classList.toggle('ring-emerald-400', active);
-        b.classList.toggle('ring-2', active);
-      });
+      el.play.querySelector('span').textContent = playLabel;
+      el.play.setAttribute('aria-pressed', String(STATE.playing));
     }
 
-    function renderDemo() { renderStep(); renderControls(); }
+    function renderDemo() {
+      renderStep();
+      renderControls();
+    }
 
-    // Actions
-    function toStep(step) { STATE.step = step; STATE.playing = false; clearTimers(); renderDemo(); }
-    function resetDemo() { STATE.step = 1; STATE.playing = false; clearTimers(); stopAnim(); renderDemo(); }
     function playDemo() {
       if (STATE.playing) return;
       STATE.playing = true;
       STATE.step = 1; renderDemo();
-      STATE.timers.push(setTimeout(() => { STATE.step = 2; renderDemo(); }, 1500));
-      STATE.timers.push(setTimeout(() => { STATE.step = 3; renderDemo(); }, 3200));
-      STATE.timers.push(setTimeout(() => { STATE.playing = false; renderDemo(); }, 5200));
+      STATE.timers.push(setTimeout(() => { STATE.step = 2; renderDemo(); }, 1200));
+      STATE.timers.push(setTimeout(() => { STATE.step = 3; renderDemo(); }, 2600));
+      STATE.timers.push(setTimeout(() => { STATE.playing = false; renderDemo(); }, 4800));
     }
 
-    // Listeners
     tabs.demo.addEventListener('click', () => switchTab('demo'));
     tabs.better.addEventListener('click', () => switchTab('better'));
 
-    if (el.play) el.play.addEventListener('click', playDemo);
-    if (el.s1) el.s1.addEventListener('click', () => toStep(1));
-    if (el.s2) el.s2.addEventListener('click', () => toStep(2));
-    if (el.s3) el.s3.addEventListener('click', () => toStep(3));
-    if (el.reset) el.reset.addEventListener('click', resetDemo);
+    el.play.addEventListener('click', playDemo);
 
     document.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
-      if (STATE.tab === 'demo') {
-        if (k === '1') toStep(1);
-        if (k === '2') toStep(2);
-        if (k === '3') toStep(3);
-        if (k === 'p') playDemo();
-        if (k === 'r') resetDemo();
-      }
-      if (k === 'b') switchTab('better');
+      if (k === 'p') playDemo();
       if (k === 'd') switchTab('demo');
+      if (k === 'b') switchTab('better');
     });
 
     window.addEventListener('resize', () => { if (STATE.tab === 'demo') renderFlows(); });
 
-    // Init icons (graceful fallback)
     try {
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.lucide.createIcons();
-      } else {
-        setTimeout(() => window.lucide && window.lucide.createIcons && window.lucide.createIcons(), 50);
-      }
+      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+      else setTimeout(() => window.lucide && window.lucide.createIcons && window.lucide.createIcons(), 50);
     } catch (_) {}
 
-    // Boot
     switchTab('demo');
-    toStep(1);
+    STATE.step = 1;
+    renderDemo();
   </script>
 </body>
 </html>
