@@ -3,122 +3,206 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nerdio + Recast + Intune — Better Together Demo</title>
+  <title>Nerdio + Recast + Intune — Demo & Better Together</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tailwind config: enable arbitrary values (default) and dark palette friendliness
-    tailwind.config = {
-      theme: {
-        extend: {}
-      }
-    };
+    tailwind.config = { theme: { extend: {} } };
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 antialiased selection:bg-cyan-300/30 selection:text-white">
   <main class="w-full flex items-center justify-center py-8">
-    <section class="w-[92vw] max-w-[1000px] bg-slate-900/60 backdrop-blur rounded-2xl shadow-2xl ring-1 ring-slate-800" role="region" aria-label="Nerdio + Recast + Intune Better Together Demo">
-      <header class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-5">
-        <div class="space-y-0.5">
-          <h1 class="text-lg font-bold tracking-tight">
-            Nerdio + Recast — <span class="text-slate-400 font-semibold">One Intune-governed workspace</span>
-          </h1>
-          <p class="text-slate-400 text-sm">Click <em>Play</em> or step through to see how Intune, Nerdio, and Recast work together.</p>
+    <section class="w-[92vw] max-w-[1100px] bg-slate-900/60 backdrop-blur rounded-2xl shadow-2xl ring-1 ring-slate-800">
+      <header class="p-5 pb-3">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="space-y-1">
+            <h1 class="text-xl font-bold tracking-tight">Nerdio + Recast + Intune</h1>
+            <p class="text-slate-400 text-sm">Demo of the flow <span class="mx-1">•</span> Strategy brief in <em>Better Together</em> tab</p>
+          </div>
+          <nav role="tablist" aria-label="Pages" class="flex items-center gap-2">
+            <button id="tab-demo" role="tab" aria-controls="panel-demo" aria-selected="true" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-slate-800/80 ring-1 ring-slate-700 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+              <i data-lucide="play-circle" class="w-4 h-4"></i><span>Demo</span>
+            </button>
+            <button id="tab-better" role="tab" aria-controls="panel-better" aria-selected="false" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-slate-800/50 ring-1 ring-slate-700 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+              <i data-lucide="sparkles" class="w-4 h-4"></i><span>Better Together</span>
+            </button>
+          </nav>
         </div>
-        <nav aria-label="Demo controls" class="flex flex-wrap items-center gap-2">
-          <button id="btn-play" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Play animation (auto)">
-            <i data-lucide="play" class="w-4 h-4"></i><span>Play</span>
-          </button>
-          <button id="btn-step1" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 1">
-            <i data-lucide="circle-dot" class="w-4 h-4"></i><span>Step 1</span>
-          </button>
-          <button id="btn-step2" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 2">
-            <i data-lucide="git-branch" class="w-4 h-4"></i><span>Step 2</span>
-          </button>
-          <button id="btn-step3" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 3">
-            <i data-lucide="merge" class="w-4 h-4"></i><span>Step 3</span>
-          </button>
-          <button id="btn-reset" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400" aria-label="Reset demo">
-            <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
-          </button>
-        </nav>
       </header>
 
-      <div id="stage" class="relative overflow-hidden rounded-xl mx-5 mb-5 p-5 md:p-6 min-h-[460px] bg-gradient-to-b from-slate-900 to-slate-950" aria-live="polite">
-        <!-- Intune -->
-        <article id="card-intune" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:top-3 text-center w-full md:w-[340px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-          <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-emerald-300 mb-1">INTUNE — Control Plane</span>
-          <h2 class="text-base font-bold">Intune in Control</h2>
-          <p class="text-slate-400 text-sm">Policy • Security • Compliance</p>
-          <div class="flex flex-wrap justify-center gap-2 mt-2">
-            <span id="kpi-intune-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Identity-driven</span>
-            <span id="kpi-intune-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">One policy brain</span>
+      <!-- Panels -->
+      <div id="panel-demo" role="tabpanel" aria-labelledby="tab-demo" class="block">
+        <div class="flex flex-col gap-4 p-5 pt-2">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-0.5">
+              <h2 class="text-lg font-bold tracking-tight">
+                Nerdio + Recast — <span class="text-slate-400 font-semibold">One Intune-governed workspace</span>
+              </h2>
+              <p class="text-slate-400 text-sm">Click <em>Play</em> or step through to see how Intune, Nerdio, and Recast work together.</p>
+            </div>
+            <nav aria-label="Demo controls" class="flex flex-wrap items-center gap-2">
+              <button id="btn-play" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Play animation (auto)">
+                <i data-lucide="play" class="w-4 h-4"></i><span>Play</span>
+              </button>
+              <button id="btn-step1" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 1">
+                <i data-lucide="circle-dot" class="w-4 h-4"></i><span>Step 1</span>
+              </button>
+              <button id="btn-step2" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 2">
+                <i data-lucide="git-branch" class="w-4 h-4"></i><span>Step 2</span>
+              </button>
+              <button id="btn-step3" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" aria-label="Go to Step 3">
+                <i data-lucide="merge" class="w-4 h-4"></i><span>Step 3</span>
+              </button>
+              <button id="btn-reset" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400" aria-label="Reset demo">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
+              </button>
+            </nav>
           </div>
-        </article>
 
-        <!-- Nerdio -->
-        <article id="card-nerdio" class="mt-3 md:mt-0 md:absolute md:left-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-          <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-sky-300 mb-1">NERDIO — Desktop Automation</span>
-          <h2 class="text-base font-bold">Right-sized Desktops</h2>
-          <p class="text-slate-400 text-sm">AVD • Windows 365 • Autoscale</p>
-          <div id="icons-desktops" class="flex flex-wrap gap-1.5 mt-2">
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
-          </div>
-          <div class="flex flex-wrap gap-2 mt-2">
-            <span id="kpi-nerdio-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Up to 55% Azure savings</span>
-            <span id="kpi-nerdio-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Image & lifecycle in clicks</span>
-          </div>
-        </article>
+          <div id="stage" class="relative overflow-hidden rounded-xl p-5 md:p-6 min-h-[460px] bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800" aria-live="polite">
+            <!-- Intune -->
+            <article id="card-intune" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:top-3 text-center w-full md:w-[340px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
+              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-emerald-300 mb-1">INTUNE — Control Plane</span>
+              <h3 class="text-base font-bold">Intune in Control</h3>
+              <p class="text-slate-400 text-sm">Policy • Security • Compliance</p>
+              <div class="flex flex-wrap justify-center gap-2 mt-2">
+                <span id="kpi-intune-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Identity-driven</span>
+                <span id="kpi-intune-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">One policy brain</span>
+              </div>
+            </article>
 
-        <!-- Recast -->
-        <article id="card-recast" class="mt-3 md:mt-0 md:absolute md:right-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
-          <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-amber-300 mb-1">RECAST — Application Workspace</span>
-          <h2 class="text-base font-bold">Apps Delivered & Patched</h2>
-          <p class="text-slate-400 text-sm">7,000+ Catalog • Smart Icons</p>
-          <div id="icons-apps" class="flex flex-wrap gap-1.5 mt-2">
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="puzzle" class="w-3.5 h-3.5"></i>Addon</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="package" class="w-3.5 h-3.5"></i>Package</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="globe" class="w-3.5 h-3.5"></i>Web</span>
-            <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i>Chat</span>
-          </div>
-          <div class="flex flex-wrap gap-2 mt-2">
-            <span id="kpi-recast-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">5–10 hrs/app saved</span>
-            <span id="kpi-recast-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">&gt;95% compliance</span>
-          </div>
-        </article>
+            <!-- Nerdio -->
+            <article id="card-nerdio" class="mt-3 md:mt-0 md:absolute md:left-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
+              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-sky-300 mb-1">NERDIO — Desktop Automation</span>
+              <h3 class="text-base font-bold">Right-sized Desktops</h3>
+              <p class="text-slate-400 text-sm">AVD • Windows 365 • Autoscale</p>
+              <div id="icons-desktops" class="flex flex-wrap gap-1.5 mt-2">
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="monitor" class="w-3.5 h-3.5"></i>Desktop</span>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span id="kpi-nerdio-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Up to 55% Azure savings</span>
+                <span id="kpi-nerdio-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">Image & lifecycle in clicks</span>
+              </div>
+            </article>
 
-        <!-- Workspace Outcome -->
-        <div id="workspace" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:bottom-4 mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-dashed border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_10px_2px] shadow-emerald-300/40"></span>
-          <strong class="font-semibold tracking-wide">One Workspace • Day One</strong>
+            <!-- Recast -->
+            <article id="card-recast" class="mt-3 md:mt-0 md:absolute md:right-4 md:bottom-6 w-full md:w-[300px] rounded-xl bg-slate-900 ring-1 ring-slate-800 shadow-xl p-4">
+              <span class="inline-block text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-slate-900 bg-amber-300 mb-1">RECAST — Application Workspace</span>
+              <h3 class="text-base font-bold">Apps Delivered & Patched</h3>
+              <p class="text-slate-400 text-sm">7,000+ Catalog • Smart Icons</p>
+              <div id="icons-apps" class="flex flex-wrap gap-1.5 mt-2">
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="puzzle" class="w-3.5 h-3.5"></i>Addon</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="package" class="w-3.5 h-3.5"></i>Package</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="globe" class="w-3.5 h-3.5"></i>Web</span>
+                <span class="ic inline-flex items-center gap-1 text-xs rounded-lg px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60 opacity-70"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i>Chat</span>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span id="kpi-recast-1" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">5–10 hrs/app saved</span>
+                <span id="kpi-recast-2" class="kpi hidden text-xs text-indigo-100 bg-slate-900 ring-1 ring-slate-700 rounded-lg px-2.5 py-1">&gt;95% compliance</span>
+              </div>
+            </article>
+
+            <!-- Workspace Outcome -->
+            <div id="workspace" class="md:absolute md:left-1/2 md:-translate-x-1/2 md:bottom-4 mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-dashed border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-slate-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-300 shadow-[0_0_10px_2px] shadow-emerald-300/40"></span>
+              <strong class="font-semibold tracking-wide">One Workspace • Day One</strong>
+            </div>
+
+            <!-- Flow lines -->
+            <svg class="pointer-events-none absolute inset-0" viewBox="0 0 1000 600" aria-hidden="true">
+              <path id="line-i2n-static" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
+              <path id="line-i2n-flow" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
+              <path id="line-i2r-static" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
+              <path id="line-i2r-flow" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
+              <path id="line-n2w-static" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
+              <path id="line-n2w-flow" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
+              <path id="line-r2w-static" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
+              <path id="line-r2w-flow" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
+            </svg>
+          </div>
         </div>
+      </div>
 
-        <!-- Flow lines -->
-        <svg class="pointer-events-none absolute inset-0" viewBox="0 0 1000 600" aria-hidden="true">
-          <!-- Intune -> Nerdio -->
-          <path id="line-i2n-static" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-          <path id="line-i2n-flow" d="M500,100 C 380,160 300,240 170,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-          <!-- Intune -> Recast -->
-          <path id="line-i2r-static" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-          <path id="line-i2r-flow" d="M500,100 C 620,160 700,240 830,390" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-          <!-- Nerdio -> Workspace -->
-          <path id="line-n2w-static" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-          <path id="line-n2w-flow" d="M170,420 C 300,470 420,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-          <!-- Recast -> Workspace -->
-          <path id="line-r2w-static" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#4a5296" stroke-width="2" opacity="0.35"></path>
-          <path id="line-r2w-flow" d="M830,420 C 700,470 580,500 500,520" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 10" stroke-linecap="round" opacity="0"></path>
-        </svg>
+      <div id="panel-better" role="tabpanel" aria-labelledby="tab-better" class="hidden">
+        <div class="p-6 pt-4 space-y-8">
+          <header class="space-y-2">
+            <h2 class="text-2xl font-extrabold tracking-tight">Better Together | Nerdio + Recast</h2>
+            <p class="text-slate-300 text-base">“One Intune-governed workspace. Desktops right-sized. Apps delivered and patched. Day one.”</p>
+          </header>
+
+          <section aria-labelledby="offer" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="handshake" class="w-5 h-5 text-emerald-300"></i>
+              <h3 id="offer" class="text-lg font-semibold">The Offer</h3>
+            </div>
+            <ul class="list-disc pl-6 space-y-2 text-slate-300">
+              <li>One workspace, governed by Intune — desktops and apps delivered together, not separate.</li>
+              <li>One motion — provisioned, right-sized, patched, and policy-compliant at the same time.</li>
+              <li>Built on Microsoft — Azure-native, Intune-driven, Marketplace/MACC eligible.</li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="why-change" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-300"></i>
+              <h3 id="why-change" class="text-lg font-semibold">Why Change</h3>
+            </div>
+            <ol class="list-decimal pl-6 space-y-2 text-slate-300">
+              <li>Manual app delivery stalls projects — Cloud PCs/AVD spin up in minutes, but apps take weeks to package, patch, and approve, leaving users waiting.</li>
+              <li>Overprovisioned infra wastes money — idle pools, image drift, and manual scaling push Azure spend up to 55% higher than necessary.</li>
+              <li>Governance is fragmented — desktops in one system, apps in another; without unification under Intune, compliance slips and innovation slows.</li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="why-now" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="timer" class="w-5 h-5 text-sky-300"></i>
+              <h3 id="why-now" class="text-lg font-semibold">Why Now</h3>
+            </div>
+            <ol class="list-decimal pl-6 space-y-2 text-slate-300">
+              <li>Release cycles are accelerating — OS, SaaS, and AI updates drop constantly; manual processes can’t keep pace.</li>
+              <li>Zero-day &amp; compliance pressure — every day of patch delay is a measurable risk window for attackers and auditors.</li>
+              <li>Do more with less — IT headcount is flat, Azure bills are rising; automation is the only lever left.</li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="why-better" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="layers" class="w-5 h-5 text-indigo-300"></i>
+              <h3 id="why-better" class="text-lg font-semibold">Why Better Together</h3>
+            </div>
+            <ol class="list-decimal pl-6 space-y-2 text-slate-300">
+              <li>Complete the workspace — Nerdio (desktops) + Recast (apps) under Intune governance = a secure, productive Cloud PC from day one.</li>
+              <li>Prove ROI in days, not months — &lt; 1 hr to live desktops + apps; 5–10 hrs/app packaging avoided; &gt;95% patch compliance; 30–40% lower infra/ops spend (with up to 55% Azure savings from autoscale).</li>
+              <li>Migration-safe, MSP-ready — Smart Icons for zero-disruption cutover; parallel tracks enable value while migrations build; repeatable offer makes it easy for MSPs to roll out across tenants.</li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="use-cases" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="check-square" class="w-5 h-5 text-emerald-300"></i>
+              <h3 id="use-cases" class="text-lg font-semibold">Use Cases</h3>
+            </div>
+            <ul class="list-disc pl-6 space-y-2 text-slate-300">
+              <li>Windows 365 / AVD rollout — deliver desktops + apps + policy together via Intune.</li>
+              <li>SCCM → Intune modernization — keep SCCM-style sophistication while shifting to modern management.</li>
+              <li>Zero-day compliance — coordinate desktop + app patching to shrink exposure windows.</li>
+              <li>M&amp;A / rapid onboarding — governed desktops + apps in &lt;1 hr.</li>
+              <li>MSP multi-tenant enablement — repeatable “workspace in a box” offer that scales across customers.</li>
+            </ul>
+          </section>
+        </div>
       </div>
     </section>
   </main>
 
   <script>
-    // Global STATE as the single source of truth
     const STATE = {
-      step: 1,              // 1, 2, 3
+      tab: 'demo',
+      step: 1,
       playing: false,
       timers: [],
       flowOffset: 0,
@@ -126,14 +210,36 @@
       reducedMotion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     };
 
-    // Element refs
+    // Tabs
+    const tabs = {
+      demo: document.getElementById('tab-demo'),
+      better: document.getElementById('tab-better')
+    };
+    const panels = {
+      demo: document.getElementById('panel-demo'),
+      better: document.getElementById('panel-better')
+    };
+
+    function switchTab(to) {
+      STATE.tab = to;
+      Object.keys(tabs).forEach(k => {
+        const selected = (k === to);
+        tabs[k].setAttribute('aria-selected', String(selected));
+        tabs[k].classList.toggle('bg-slate-800/80', selected);
+        tabs[k].classList.toggle('bg-slate-800/50', !selected);
+        panels[k].classList.toggle('hidden', !selected);
+        panels[k].classList.toggle('block', selected);
+      });
+      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
+    }
+
+    // Demo refs
     const el = {
       play: document.getElementById('btn-play'),
       s1: document.getElementById('btn-step1'),
       s2: document.getElementById('btn-step2'),
       s3: document.getElementById('btn-step3'),
       reset: document.getElementById('btn-reset'),
-      stage: document.getElementById('stage'),
       cards: {
         intune: document.getElementById('card-intune'),
         nerdio: document.getElementById('card-nerdio'),
@@ -149,91 +255,53 @@
         apps: Array.from(document.querySelectorAll('#icons-apps .ic'))
       },
       flows: {
-        i2n: {
-          static: document.getElementById('line-i2n-static'),
-          flow: document.getElementById('line-i2n-flow')
-        },
-        i2r: {
-          static: document.getElementById('line-i2r-static'),
-          flow: document.getElementById('line-i2r-flow')
-        },
-        n2w: {
-          static: document.getElementById('line-n2w-static'),
-          flow: document.getElementById('line-n2w-flow')
-        },
-        r2w: {
-          static: document.getElementById('line-r2w-static'),
-          flow: document.getElementById('line-r2w-flow')
-        }
+        i2n: { static: document.getElementById('line-i2n-static'), flow: document.getElementById('line-i2n-flow') },
+        i2r: { static: document.getElementById('line-i2r-static'), flow: document.getElementById('line-i2r-flow') },
+        n2w: { static: document.getElementById('line-n2w-static'), flow: document.getElementById('line-n2w-flow') },
+        r2w: { static: document.getElementById('line-r2w-static'), flow: document.getElementById('line-r2w-flow') }
       },
       workspace: document.getElementById('workspace')
     };
 
-    // Helper utilities
-    function addClasses(node, classes) {
-      if (!node) return;
-      node.classList.add(...classes);
-    }
-    function removeClasses(node, classes) {
-      if (!node) return;
-      node.classList.remove(...classes);
-    }
+    // Helpers
+    function addClasses(node, classes) { if (node) node.classList.add(...classes); }
+    function removeClasses(node, classes) { if (node) node.classList.remove(...classes); }
     function show(elm) { if (elm) elm.classList.remove('hidden'); }
     function hide(elm) { if (elm) elm.classList.add('hidden'); }
     function setOpacity(node, value) { if (node) node.setAttribute('opacity', String(value)); }
     function setDashOffset(node, value) { if (node) node.setAttribute('stroke-dashoffset', String(value)); }
-    function clearTimers() {
-      while (STATE.timers.length) {
-        const t = STATE.timers.pop();
-        clearTimeout(t);
-      }
-    }
-    function stopAnim() {
-      if (STATE.rafId) cancelAnimationFrame(STATE.rafId);
-      STATE.rafId = null;
-    }
+    function clearTimers() { while (STATE.timers.length) clearTimeout(STATE.timers.pop()); }
+    function stopAnim() { if (STATE.rafId) cancelAnimationFrame(STATE.rafId); STATE.rafId = null; }
 
-    // Rendering logic
+    // Demo rendering
     function clearAllHighlights() {
-      const all = [el.cards.intune, el.cards.nerdio, el.cards.recast];
-      all.forEach(c => {
-        removeClasses(c, ['ring-emerald-400', 'ring-2', 'shadow-emerald-500/20', 'animate-pulse', 'scale-[1.01]', 'outline', 'outline-2', 'outline-emerald-300/30']);
+      [el.cards.intune, el.cards.nerdio, el.cards.recast].forEach(c => {
+        removeClasses(c, ['ring-emerald-400','ring-2','shadow-emerald-500/20','animate-pulse','scale-[1.01]']);
       });
-      // reset icon opacity
       [...el.icons.desktops, ...el.icons.apps].forEach(i => i.style.opacity = '0.7');
-      // hide all KPIs
       Object.values(el.kpis).flat().forEach(k => hide(k));
-      // workspace glow off
-      removeClasses(el.workspace, ['shadow-[0_0_0_2px_rgba(16,185,129,0.35)]', 'ring-1', 'ring-emerald-300/50']);
       el.workspace.style.boxShadow = '';
     }
 
     function renderFlows() {
-      // Defaults: light static lines visible; flow lines hidden unless current step needs them
       const enabled = new Set();
-      if (STATE.step === 2) {
-        enabled.add('i2n'); enabled.add('i2r');
-      } else if (STATE.step === 3) {
-        enabled.add('n2w'); enabled.add('r2w');
-      }
+      if (STATE.step === 2) { enabled.add('i2n'); enabled.add('i2r'); }
+      else if (STATE.step === 3) { enabled.add('n2w'); enabled.add('r2w'); }
       Object.entries(el.flows).forEach(([key, pair]) => {
-        // Static lines are lightly visible always on md+ screens
-        setOpacity(pair.static, window.innerWidth >= 768 ? 0.35 : 0); // hide lines on small screens (like original)
+        setOpacity(pair.static, window.innerWidth >= 768 ? 0.35 : 0);
         setOpacity(pair.flow, enabled.has(key) ? 1 : 0);
       });
     }
 
     function animateFlows() {
-      if (STATE.reducedMotion) return; // respect user preference
+      if (STATE.reducedMotion) return;
       const stepHasFlow = (STATE.step === 2 || STATE.step === 3);
       if (!stepHasFlow) { stopAnim(); return; }
       const tick = () => {
         STATE.flowOffset -= 2;
         ['i2n','i2r','n2w','r2w'].forEach(id => {
-          const flowNode = el.flows[id].flow;
-          if (flowNode && flowNode.getAttribute('opacity') !== '0') {
-            setDashOffset(flowNode, STATE.flowOffset);
-          }
+          const n = el.flows[id].flow;
+          if (n && n.getAttribute('opacity') !== '0') setDashOffset(n, STATE.flowOffset);
         });
         STATE.rafId = requestAnimationFrame(tick);
       };
@@ -244,120 +312,92 @@
     function renderStep() {
       clearAllHighlights();
       renderFlows();
-
       if (STATE.step === 1) {
-        // Spotlight Intune
-        addClasses(el.cards.intune, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20', 'animate-pulse']);
+        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20','animate-pulse']);
         show(el.kpis.intune[0]); show(el.kpis.intune[1]);
       }
-
       if (STATE.step === 2) {
-        // Intune + Nerdio + Recast active and showing flows outward
-        addClasses(el.cards.intune, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20']);
-        addClasses(el.cards.nerdio, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20', 'scale-[1.01]']);
-        addClasses(el.cards.recast, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20', 'scale-[1.01]']);
-        // Fade in icons progressively
-        [...el.icons.desktops, ...el.icons.apps].forEach((i, idx) => {
-          STATE.timers.push(setTimeout(() => { i.style.opacity = '1'; }, idx * 90));
-        });
-        // KPIs
+        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
+        addClasses(el.cards.nerdio, ['ring-2','ring-emerald-400','shadow-emerald-500/20','scale-[1.01]']);
+        addClasses(el.cards.recast, ['ring-2','ring-emerald-400','shadow-emerald-500/20','scale-[1.01]']);
+        [...el.icons.desktops, ...el.icons.apps].forEach((i, idx) => STATE.timers.push(setTimeout(() => { i.style.opacity = '1'; }, idx * 90)));
         el.kpis.nerdio.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 250 + i * 180)));
         el.kpis.recast.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 350 + i * 180)));
       }
-
       if (STATE.step === 3) {
-        // Flows into workspace and final KPIs
-        addClasses(el.cards.intune, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20']);
-        addClasses(el.cards.nerdio, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20']);
-        addClasses(el.cards.recast, ['ring-2', 'ring-emerald-400', 'shadow-emerald-500/20']);
+        addClasses(el.cards.intune, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
+        addClasses(el.cards.nerdio, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
+        addClasses(el.cards.recast, ['ring-2','ring-emerald-400','shadow-emerald-500/20']);
         el.workspace.style.boxShadow = '0 0 0 2px rgba(16,185,129,.35), 0 0 26px rgba(16,185,129,.35)';
         const all = [...el.kpis.intune, ...el.kpis.nerdio, ...el.kpis.recast];
         all.forEach((k, i) => STATE.timers.push(setTimeout(() => show(k), 150 + i * 120)));
-        // Make icons fully visible
         [...el.icons.desktops, ...el.icons.apps].forEach(i => i.style.opacity = '1');
       }
-
       animateFlows();
     }
 
     function renderControls() {
       const playLabel = STATE.playing ? 'Playing…' : 'Play';
-      el.play.querySelector('span').textContent = playLabel;
-      // Keep buttons accessible
-      el.play.setAttribute('aria-pressed', String(STATE.playing));
+      if (el.play) el.play.querySelector('span').textContent = playLabel;
+      if (el.play) el.play.setAttribute('aria-pressed', String(STATE.playing));
       [el.s1, el.s2, el.s3].forEach((b, idx) => {
+        if (!b) return;
         const active = STATE.step === (idx + 1);
         b.classList.toggle('ring-emerald-400', active);
         b.classList.toggle('ring-2', active);
       });
     }
 
-    function render() {
-      renderStep();
-      renderControls();
-    }
+    function renderDemo() { renderStep(); renderControls(); }
 
     // Actions
-    function toStep(step) {
-      STATE.step = step;
-      STATE.playing = false;
-      clearTimers();
-      render();
-    }
-
-    function reset() {
-      STATE.step = 1;
-      STATE.playing = false;
-      clearTimers();
-      stopAnim();
-      render();
-    }
-
-    function play() {
+    function toStep(step) { STATE.step = step; STATE.playing = false; clearTimers(); renderDemo(); }
+    function resetDemo() { STATE.step = 1; STATE.playing = false; clearTimers(); stopAnim(); renderDemo(); }
+    function playDemo() {
       if (STATE.playing) return;
       STATE.playing = true;
-      STATE.step = 1;
-      render();
-      STATE.timers.push(setTimeout(() => { STATE.step = 2; render(); }, 1500));
-      STATE.timers.push(setTimeout(() => { STATE.step = 3; render(); }, 3200));
-      STATE.timers.push(setTimeout(() => { STATE.playing = false; render(); }, 5200));
+      STATE.step = 1; renderDemo();
+      STATE.timers.push(setTimeout(() => { STATE.step = 2; renderDemo(); }, 1500));
+      STATE.timers.push(setTimeout(() => { STATE.step = 3; renderDemo(); }, 3200));
+      STATE.timers.push(setTimeout(() => { STATE.playing = false; renderDemo(); }, 5200));
     }
 
-    // Event listeners
-    el.play.addEventListener('click', play);
-    el.s1.addEventListener('click', () => toStep(1));
-    el.s2.addEventListener('click', () => toStep(2));
-    el.s3.addEventListener('click', () => toStep(3));
-    el.reset.addEventListener('click', reset);
+    // Listeners
+    tabs.demo.addEventListener('click', () => switchTab('demo'));
+    tabs.better.addEventListener('click', () => switchTab('better'));
 
-    // Keyboard shortcuts
+    if (el.play) el.play.addEventListener('click', playDemo);
+    if (el.s1) el.s1.addEventListener('click', () => toStep(1));
+    if (el.s2) el.s2.addEventListener('click', () => toStep(2));
+    if (el.s3) el.s3.addEventListener('click', () => toStep(3));
+    if (el.reset) el.reset.addEventListener('click', resetDemo);
+
     document.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
-      if (k === '1') toStep(1);
-      if (k === '2') toStep(2);
-      if (k === '3') toStep(3);
-      if (k === 'p') play();
-      if (k === 'r') reset();
+      if (STATE.tab === 'demo') {
+        if (k === '1') toStep(1);
+        if (k === '2') toStep(2);
+        if (k === '3') toStep(3);
+        if (k === 'p') playDemo();
+        if (k === 'r') resetDemo();
+      }
+      if (k === 'b') switchTab('better');
+      if (k === 'd') switchTab('demo');
     });
 
-    // Responsive handling for lines visibility (match original behavior)
-    window.addEventListener('resize', () => {
-      renderFlows();
-    });
+    window.addEventListener('resize', () => { if (STATE.tab === 'demo') renderFlows(); });
 
-    // Init icons (graceful fallback if CDN fails)
+    // Init icons (graceful fallback)
     try {
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
         window.lucide.createIcons();
       } else {
-        // Try again after a tick in case script loads slightly later
         setTimeout(() => window.lucide && window.lucide.createIcons && window.lucide.createIcons(), 50);
       }
-    } catch (_) {
-      // If Lucide fails, the text labels remain visible.
-    }
+    } catch (_) {}
 
     // Boot
+    switchTab('demo');
     toStep(1);
   </script>
 </body>
