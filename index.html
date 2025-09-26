@@ -2,283 +2,347 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nerdio + Recast + Intune — Better Together & Click-Through Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nerdio + Recast — Better Together (Single Page)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=DM+Sans:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&family=DM+Sans:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  </noscript>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { theme: { extend: {} } };
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            nerdioTeal: '#00A5B5',
+            nerdioLime: '#C4D600',
+            recastNavy: '#1F2937',
+            recastPurple: '#A855F7',
+            recastCyan: '#00AEEF',
+            recastYellow: '#FDCB0A',
+            deepNavyBg: '#1B1F29'
+          },
+          fontFamily: {
+            heading: ['Inter','DM Sans','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Arial','sans-serif'],
+            body: ['IBM Plex Sans','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Arial','sans-serif']
+          },
+          boxShadow: {
+            'glow-teal': '0 0 0 2px rgba(0,165,181,.25), 0 0 40px rgba(0,165,181,.25)',
+            'glow-purple': '0 0 0 2px rgba(168,85,247,.25), 0 0 40px rgba(168,85,247,.25)'
+          }
+        }
+      }
+    }
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 antialiased selection:bg-cyan-300/30 selection:text-white">
-  <main class="w-full flex items-center justify-center py-8">
-    <section class="w-[92vw] max-w-[1280px] bg-slate-900/60 backdrop-blur rounded-2xl shadow-2xl ring-1 ring-slate-800">
-      <header class="p-5 pb-3">
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div class="space-y-1">
-            <h1 class="text-xl font-bold tracking-tight">Nerdio + Recast + Intune</h1>
-            <p class="text-slate-400 text-sm">Strategy brief in <em>Better Together</em> • Click-through demo shows how we support <strong>Intune</strong> across desktops and apps.</p>
-          </div>
-          <nav role="tablist" aria-label="Pages" class="flex items-center gap-2">
-            <button id="tab-better" role="tab" aria-controls="panel-better" aria-selected="true" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-slate-800/80 ring-1 ring-slate-700 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-              <i data-lucide="sparkles" class="w-4 h-4"></i><span>Better Together</span>
-            </button>
-            <button id="tab-demo" role="tab" aria-controls="panel-demo" aria-selected="false" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-slate-800/50 ring-1 ring-slate-700 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-              <i data-lucide="play-circle" class="w-4 h-4"></i><span>Demo</span>
-            </button>
-          </nav>
-        </div>
+<body class="min-h-screen bg-deepNavyBg text-white antialiased font-body selection:bg-nerdioTeal/30 selection:text-white">
+  <main class="relative w-full flex items-center justify-center py-8">
+    <!-- Recast-inspired subtle hex watermark -->
+    <svg class="pointer-events-none absolute inset-0 -z-10 opacity-[0.06]" aria-hidden="true">
+      <defs>
+        <pattern id="hexPattern" width="40" height="34.64" patternUnits="userSpaceOnUse" patternTransform="translate(0,0)">
+          <g transform="translate(0,0)">
+            <polygon points="20,0 40,8.66 40,25.98 20,34.64 0,25.98 0,8.66" fill="none" stroke="#ffffff" stroke-width="1"/>
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#hexPattern)"></rect>
+    </svg>
+
+    <section class="w-[92vw] max-w-[1280px] bg-recastNavy/60 backdrop-blur rounded-2xl shadow-2xl ring-1 ring-white/10">
+      <!-- Header -->
+      <header class="p-6 pb-3">
+        <h1 class="font-heading text-3xl md:text-4xl font-extrabold tracking-tight">
+          <span class="bg-gradient-to-r from-nerdioTeal via-recastYellow to-recastPurple bg-clip-text text-transparent">Nerdio + Recast</span>
+        </h1>
+        <p class="text-slate-200 text-base mt-1">One Intune-governed workspace. Day one.</p>
+        <p class="text-slate-400 text-sm mt-0.5">Intune at the center. Powered by Nerdio + Recast.</p>
       </header>
 
-      <!-- Better Together (default) -->
-      <div id="panel-better" role="tabpanel" aria-labelledby="tab-better" class="block">
-        <div class="p-6 pt-4 space-y-6">
-          <header class="space-y-2">
-            <h2 class="text-2xl font-extrabold tracking-tight">Better Together | Nerdio + Recast</h2>
-            <p class="text-slate-300 text-base">“One Intune-governed workspace. Desktops right-sized. Apps delivered and patched. Day one.”</p>
-          </header>
+      <!-- Partner badges -->
+      <section aria-label="Overview" class="px-6 pb-6 space-y-5">
+        <div class="flex flex-wrap items-center gap-2 text-[13px]">
+          <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 bg-white/5 ring-1 ring-white/10">
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-sky-300"></i><span class="text-slate-200">Intune — Control Plane</span>
+          </span>
+          <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 bg-nerdioTeal/10 ring-1 ring-nerdioTeal/40">
+            <i data-lucide="monitor" class="w-3.5 h-3.5 text-nerdioTeal"></i><span class="text-slate-200">Nerdio — Desktop Automation</span>
+          </span>
+          <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 bg-recastYellow/10 ring-1 ring-recastYellow/40">
+            <i data-lucide="hexagon" class="w-3.5 h-3.5 text-recastYellow"></i><span class="text-slate-200">Recast — Application Management</span>
+          </span>
+        </div>
 
-          <!-- 3x2 bucket grid to avoid scrolling -->
-          <div class="grid md:grid-cols-3 gap-4">
-            <!-- The Offer -->
-            <section aria-labelledby="offer" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="handshake" class="w-5 h-5 text-emerald-300"></i>
-                <h3 id="offer" class="text-lg font-semibold">The Offer</h3>
-              </div>
-              <ul class="space-y-2 text-slate-300 text-sm">
-                <li class="flex items-start gap-2"><i data-lucide="shield" class="w-4 h-4 mt-0.5 text-blue-300"></i><span>One workspace governed by Intune — desktops + apps together.</span></li>
-                <li class="flex items-start gap-2"><i data-lucide="zap" class="w-4 h-4 mt-0.5 text-emerald-300"></i><span>One motion — provisioned, right-sized, patched, policy-compliant.</span></li>
-                <li class="flex items-start gap-2"><i data-lucide="microsoft" class="w-4 h-4 mt-0.5 text-indigo-300"></i><span>Azure-native, Intune-driven, Marketplace/MACC eligible.</span></li>
-              </ul>
-            </section>
+        <!-- Page 1: Current State — Problems & Why Better Together -->
+        <div class="grid md:grid-cols-4 gap-3">
+          <article class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-orange-400/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="git-merge" class="w-4 h-4 text-recastCyan"></i>
+              <h3 class="font-heading font-semibold text-nerdioTeal">Fragmented Delivery</h3>
+            </div>
+            <p class="text-sm text-slate-200">Desktops in one system, apps in another; policy drift grows.</p>
+          </article>
+          <article class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-amber-400/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="box" class="w-4 h-4 text-recastYellow"></i>
+              <h3 class="font-heading font-semibold text-nerdioTeal">Packaging Backlog</h3>
+            </div>
+            <p class="text-sm text-slate-200">Teams burn 5–10 hrs per app repeating work; migrations stall.</p>
+          </article>
+          <article class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-rose-400/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-flex items-center -space-x-1">
+                <i data-lucide="shield" class="w-4 h-4 text-nerdioTeal"></i>
+                <i data-lucide="clock" class="w-4 h-4 text-recastYellow"></i>
+              </span>
+              <h3 class="font-heading font-semibold text-nerdioTeal">Zero-day Exposure</h3>
+            </div>
+            <p class="text-sm text-slate-200">Third-party apps + OS unpatched = risk window measured in days.</p>
+          </article>
+          <article class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-orange-500/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="gauge" class="w-4 h-4 text-recastPurple"></i>
+              <h3 class="font-heading font-semibold text-nerdioTeal">Azure Overspend</h3>
+            </div>
+            <p class="text-sm text-slate-200">Idle host pools & static capacity push spend up to 55% higher.</p>
+          </article>
+        </div>
+        <p class="text-[13px] text-slate-300">Too many apps, too many versions — IT can’t keep up. Desktops and apps drift apart; security and cost suffer.</p>
 
-            <!-- Why Change -->
-            <section aria-labelledby="why-change" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-300"></i>
-                <h3 id="why-change" class="text-lg font-semibold">Why Change</h3>
-              </div>
-              <ol class="list-decimal pl-4 space-y-2 text-slate-300 text-sm">
-                <li>Manual app delivery stalls projects.</li>
-                <li>Overprovisioned infra wastes money (up to 55%).</li>
-                <li>Fragmented governance = compliance drift.</li>
-              </ol>
-            </section>
+        <div class="grid md:grid-cols-3 gap-3">
+          <section class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-slate-300/70"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="help-circle" class="w-4 h-4 text-slate-200"></i>
+              <h3 class="font-heading font-semibold text-recastYellow">Why Change</h3>
+            </div>
+            <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-200">
+              <li>Apps are the bottleneck — packaging/patching slow projects.</li>
+              <li>Infra sprawl & idle capacity drive Azure overspend.</li>
+              <li>Innovation waits until desktops + apps are governed together.</li>
+            </ol>
+          </section>
+          <section class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-sky-300/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="timer" class="w-4 h-4 text-recastCyan"></i>
+              <h3 class="font-heading font-semibold text-recastYellow">Why Now</h3>
+            </div>
+            <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-200">
+              <li>Faster release cycles demand automation over manual work.</li>
+              <li>Zero-day & compliance pressure make patch deadlines non-negotiable.</li>
+              <li>Do more with less — automation is the lever left.</li>
+            </ol>
+          </section>
+          <section class="relative rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
+            <div class="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-emerald-400/80"></div>
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="layers" class="w-4 h-4 text-nerdioTeal"></i>
+              <h3 class="font-heading font-semibold text-recastYellow">Why Better Together</h3>
+            </div>
+            <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-200">
+              <li>Complete the workspace — infra + apps in one Intune-governed flow.</li>
+              <li>Measurable impact — autoscale savings + packaging time avoided.</li>
+              <li>Migrate without disruption — &gt;95% patch targets, consistent access.</li>
+            </ol>
+          </section>
+        </div>
+      </section>
 
-            <!-- Why Now -->
-            <section aria-labelledby="why-now" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="timer" class="w-5 h-5 text-sky-300"></i>
-                <h3 id="why-now" class="text-lg font-semibold">Why Now</h3>
-              </div>
-              <ol class="list-decimal pl-4 space-y-2 text-slate-300 text-sm">
-                <li>Faster OS/SaaS/AI updates.</li>
-                <li>Zero-day pressure & audits.</li>
-                <li>Do more with less via automation.</li>
-              </ol>
-            </section>
-
-            <!-- Why Better Together -->
-            <section aria-labelledby="why-better" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="layers" class="w-5 h-5 text-indigo-300"></i>
-                <h3 id="why-better" class="text-lg font-semibold">Why Better Together</h3>
-              </div>
-              <ul class="space-y-2 text-slate-300 text-sm">
-                <li>Complete the workspace — desktops + apps governed by Intune from day one.</li>
-                <li>ROI in days — &lt;1 hr to live desktops + apps, &gt;95% patch compliance, 30–40% lower ops (up to 55% Azure savings).</li>
-                <li>Migration-safe & MSP-ready — repeatable across tenants.</li>
-              </ul>
-            </section>
-
-            <!-- Use Cases (split) -->
-            <section aria-labelledby="use-cases" class="rounded-2xl ring-1 ring-slate-800 bg-slate-900/70 p-5 md:col-span-2">
-              <div class="flex items-center gap-2 mb-3">
-                <i data-lucide="check-square" class="w-5 h-5 text-emerald-300"></i>
-                <h3 id="use-cases" class="text-lg font-semibold">Use Cases</h3>
-              </div>
-              <div class="grid sm:grid-cols-2 gap-3 text-sm text-slate-300">
-                <ul class="list-disc pl-5 space-y-2">
-                  <li>Windows 365 / AVD rollout — desktops + apps + policy via Intune.</li>
-                  <li>SCCM → Intune modernization.</li>
-                  <li>Zero-day compliance — coordinated patching.</li>
-                </ul>
-                <ul class="list-disc pl-5 space-y-2">
-                  <li>M&amp;A / rapid onboarding — governed desktops + apps in &lt;1 hr.</li>
-                  <li>MSP multi-tenant enablement — repeatable “workspace in a box”.</li>
-                </ul>
-              </div>
-            </section>
+      <!-- Page 2: Approach (Nerdio + Recast) -->
+      <section aria-label="Approach Demo" class="p-6 pt-2 space-y-4">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div class="space-y-0.5">
+            <h2 class="font-heading text-2xl font-bold tracking-tight text-nerdioTeal">Approach</h2>
+            <p class="text-slate-300 text-sm">Intune → <span class="text-nerdioTeal font-semibold">Nerdio</span> → <span class="text-recastYellow font-semibold">Recast</span> → Day One Workspace. Press <strong>Start</strong>.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-start" class="inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-nerdioTeal via-nerdioLime to-recastPurple shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-nerdioTeal">
+              <i data-lucide="play" class="w-4 h-4"></i><span>Start</span>
+            </button>
+            <button id="btn-reset" class="inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 font-semibold tracking-wide text-slate-100 bg-white/10 hover:bg-white/15 active:translate-y-px ring-1 ring-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-recastYellow">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Demo -->
-      <div id="panel-demo" role="tabpanel" aria-labelledby="tab-demo" class="hidden">
-        <div class="flex flex-col gap-4 p-5 pt-2">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div class="space-y-0.5">
-              <h2 class="text-lg font-bold tracking-tight">Demo — Intune-governed delivery across desktops (Nerdio) and apps (Recast)</h2>
-              <p class="text-slate-400 text-sm">Click <strong>Start</strong> to highlight each role and outcome.</p>
+        <div id="stage" class="relative overflow-hidden rounded-3xl p-4 md:p-6 min-h-[700px] bg-gradient-to-b from-[#1B1F29] to-[#12151D] ring-1 ring-white/10" aria-live="polite">
+          <!-- Intune control plane -->
+          <div id="intune-bar" class="mx-auto max-w-xl rounded-2xl bg-sky-950/50 ring-2 ring-sky-500/60 shadow-xl px-4 py-3 text-center">
+            <div class="inline-flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-sky-300"></i>
+              <span class="text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-sky-950 bg-sky-300">INTUNE — Control Plane</span>
             </div>
-            <nav aria-label="Demo controls" class="flex items-center gap-2">
-              <button id="btn-start" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-                <i data-lucide="play" class="w-4 h-4"></i><span>Start</span>
-              </button>
-              <button id="btn-reset" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-slate-100 bg-slate-800/70 hover:bg-slate-800 active:translate-y-px ring-1 ring-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Reset</span>
-              </button>
-            </nav>
+            <div class="text-sm font-semibold mt-1 text-slate-100">One workspace, governed by Intune.</div>
           </div>
 
-          <!-- Click-through canvas -->
-          <div id="stage" class="relative overflow-hidden rounded-2xl p-4 md:p-6 min-h-[620px] bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800" aria-live="polite">
-            <!-- Intune governance bar -->
-            <div id="intune-bar" class="mx-auto max-w-xl rounded-xl bg-blue-950/60 ring-2 ring-blue-600 shadow-xl px-4 py-3 text-center">
-              <div class="inline-flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-4 h-4 text-blue-300"></i>
-                <span class="text-xs font-black tracking-wide px-2.5 py-1 rounded-full text-blue-950 bg-blue-300">INTUNE — Control Plane</span>
+          <!-- Split-screen -->
+          <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <!-- Nerdio (left) -->
+            <section id="col-nerdio" class="rounded-2xl ring-1 ring-nerdioTeal/40 bg-nerdioTeal/5 p-4">
+              <header class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="monitor" class="w-5 h-5 text-nerdioTeal"></i>
+                  <h3 class="font-heading font-bold text-nerdioTeal">Nerdio — Desktop Orchestration</h3>
+                </div>
+                <span class="text-xs text-nerdioTeal/90 ring-1 ring-nerdioTeal/60 rounded-full px-2 py-0.5 bg-nerdioTeal/10">Right-sized Desktops</span>
+              </header>
+              <div class="mt-4 grid gap-3">
+                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-3">
+                  <div class="flex items-center justify-between text-xs text-slate-200 mb-2"><span>Cloud PC Pools</span><span>Windows 365</span></div>
+                  <div id="nerdio-cloudpc" class="grid grid-cols-8 gap-1.5"></div>
+                </div>
+                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-3">
+                  <div class="flex items-center justify-between text-xs text-slate-200 mb-2"><span>AVD Host Pools</span><span>Autoscale</span></div>
+                  <div id="nerdio-avd" class="grid grid-cols-8 gap-1.5"></div>
+                </div>
+                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-3">
+                  <div class="flex items-center justify-between text-xs text-slate-200 mb-2"><span>Policy via Intune</span><span class="flex items-center gap-1"><i data-lucide="shield" class="w-3.5 h-3.5"></i>Identity-driven</span></div>
+                  <div id="nerdio-policy" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-200/90">Benefit</span>
+                  <span id="metric-savings" class="text-xs font-semibold rounded-full bg-nerdioTeal/10 ring-1 ring-nerdioTeal/50 px-2 py-0.5 opacity-90">Up to 55% Azure savings</span>
+                </div>
               </div>
-              <div class="text-sm font-semibold mt-1">One workspace, governed by Intune.</div>
-            </div>
+            </section>
 
-            <!-- Two-column approach -->
-            <div class="grid md:grid-cols-2 gap-6 mt-6">
-              <!-- Nerdio column -->
-              <section id="col-nerdio" class="rounded-2xl ring-1 ring-emerald-600/40 bg-emerald-950/30 p-4">
-                <header class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="monitor" class="w-5 h-5 text-emerald-300"></i>
-                    <h3 class="font-bold text-emerald-200">Nerdio — Desktop Orchestration</h3>
-                  </div>
-                  <span class="text-xs text-emerald-200/90 ring-1 ring-emerald-600 rounded-full px-2 py-0.5">Right-sized Desktops</span>
-                </header>
-
-                <div class="mt-4 grid gap-3">
-                  <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>Cloud PC Pools</span><span>Windows 365</span></div>
-                    <div id="nerdio-cloudpc" class="grid grid-cols-8 gap-1.5"></div>
-                  </div>
-                  <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>AVD Host Pools</span><span>Autoscale</span></div>
-                    <div id="nerdio-avd" class="grid grid-cols-8 gap-1.5"></div>
-                  </div>
-                  <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>Policy via Intune</span><span class="flex items-center gap-1"><i data-lucide="shield" class="w-3.5 h-3.5"></i>Identity-driven</span></div>
-                    <div id="nerdio-policy" class="flex flex-wrap gap-1.5"></div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-emerald-200/90">Benefit</span>
-                    <span id="metric-savings" class="text-xs font-semibold rounded-full bg-emerald-900/40 ring-1 ring-emerald-600 px-2 py-0.5 opacity-80">Up to 55% Azure savings</span>
-                  </div>
+            <!-- Recast (right) -->
+            <section id="col-recast" class="rounded-2xl ring-1 ring-recastYellow/40 bg-recastNavy/40 p-4">
+              <header class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="hexagon" class="w-5 h-5 text-recastYellow"></i>
+                  <h3 class="font-heading font-bold text-recastYellow">Recast — Application Workspace</h3>
                 </div>
-              </section>
+                <span class="text-xs text-recastYellow/90 ring-1 ring-recastYellow/60 rounded-full px-2 py-0.5 bg-recastYellow/10">Apps Delivered &amp; Patched</span>
+              </header>
 
-              <!-- Recast column -->
-              <section id="col-recast" class="rounded-2xl ring-1 ring-amber-600/40 bg-amber-950/20 p-4">
-                <header class="flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="package" class="w-5 h-5 text-amber-300"></i>
-                    <h3 class="font-bold text-amber-100">Recast — Application Workspace</h3>
-                  </div>
-                  <span class="text-xs text-amber-200/90 ring-1 ring-amber-500 rounded-full px-2 py-0.5">Apps Delivered &amp; Patched</span>
-                </header>
-
-                <div class="mt-4 grid gap-3">
-                  <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="text-xs text-slate-300 mb-2">Curated Catalog + Status</div>
-                    <div id="app-icons" class="flex flex-wrap gap-1.5"></div>
-                  </div>
-
-                  <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="text-xs text-slate-300 mb-2">Rings &amp; Policy via Intune</div>
-                    <div id="recast-rings" class="grid grid-cols-3 gap-2"></div>
-                  </div>
-
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-amber-200/90">Benefit</span>
-                    <span id="metric-compliance" class="text-xs font-semibold rounded-full bg-amber-900/40 ring-1 ring-amber-500 px-2 py-0.5 opacity-80">&gt;95% compliance</span>
-                  </div>
+              <div class="mt-4 grid gap-3">
+                <!-- Hex tile grid -->
+                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-3">
+                  <div class="text-xs text-slate-200 mb-2">Catalog &amp; Status (Hex Grid)</div>
+                  <div id="app-hexgrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3"></div>
                 </div>
-              </section>
-            </div>
+                <!-- Rings -->
+                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-3">
+                  <div class="text-xs text-slate-200 mb-2">Rings &amp; Policy via Intune</div>
+                  <div id="recast-rings" class="grid grid-cols-3 gap-2"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-200/90">Benefit</span>
+                  <span id="metric-compliance" class="text-xs font-semibold rounded-full bg-recastYellow/10 ring-1 ring-recastYellow/50 px-2 py-0.5 opacity-90">&gt;95% compliance</span>
+                </div>
+              </div>
+            </section>
+          </div>
 
-            <!-- Outcome band -->
-            <div id="outcome" class="mt-6 mx-auto max-w-3xl rounded-2xl border border-emerald-300/40 bg-emerald-900/20 px-6 py-4 flex items-center justify-center gap-3 text-center">
-              <span class="w-3 h-3 rounded-full bg-emerald-300 shadow-[0_0_14px_3px] shadow-emerald-300/60"></span>
-              <strong class="text-xl md:text-3xl font-extrabold text-emerald-100">Day One Workspace</strong>
-            </div>
+          <!-- Integration flow lines (teal -> purple) -->
+          <svg class="pointer-events-none absolute inset-0" viewBox="0 0 1280 760" aria-hidden="true">
+            <defs>
+              <linearGradient id="gradTealPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00A5B5"></stop>
+                <stop offset="100%" stop-color="#A855F7"></stop>
+              </linearGradient>
+              <linearGradient id="gradPurpleTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#A855F7"></stop>
+                <stop offset="100%" stop-color="#00A5B5"></stop>
+              </linearGradient>
+              <linearGradient id="gradSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#93c5fd"></stop>
+                <stop offset="100%" stop-color="#38bdf8"></stop>
+              </linearGradient>
+              <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#00A5B5"></path>
+              </marker>
+              <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#A855F7"></path>
+              </marker>
+              <marker id="arrowSky" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"></path>
+              </marker>
+            </defs>
+            <path id="beam-intune" d="M640,130 L640,322" fill="none" stroke="url(#gradSky)" stroke-width="10" stroke-linecap="round" opacity="0"></path>
+            <path id="path-n2w" d="M260,420 C 480,460 560,460 640,430" fill="none" stroke="url(#gradTealPurple)" stroke-width="3" marker-end="url(#arrowTeal)" opacity="0.28"></path>
+            <circle id="energy-n" r="5" fill="#00A5B5" opacity="0"></circle>
+            <path id="path-r2w" d="M1020,420 C 800,460 720,460 640,430" fill="none" stroke="url(#gradPurpleTeal)" stroke-width="3" marker-end="url(#arrowPurple)" opacity="0.28"></path>
+            <circle id="energy-r" r="5" fill="#A855F7" opacity="0"></circle>
+            <path id="path-i2w" d="M640,160 C 640,220 640,260 640,300" fill="none" stroke="url(#gradSky)" stroke-width="3" marker-end="url(#arrowSky)" opacity="0.28"></path>
+            <circle id="energy-i" r="5" fill="#93c5fd" opacity="0"></circle>
+          </svg>
 
-            <!-- Step text -->
-            <p id="step-caption" class="mt-3 text-center text-sm text-slate-300">Ready to start</p>
-
-            <!-- Energy arrows overlay -->
-            <svg class="pointer-events-none absolute inset-0" viewBox="0 0 1280 700" aria-hidden="true">
-              <defs>
-                <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                  <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"></path>
-                </marker>
-                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                  <path d="M0,0 L10,5 L0,10 z" fill="#6ee7b7"></path>
-                </marker>
-                <marker id="arrowYellow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                  <path d="M0,0 L10,5 L0,10 z" fill="#fde68a"></path>
-                </marker>
-              </defs>
-              <!-- Intune beam (top center down) -->
-              <path id="beam-intune" d="M640,130 L640,310" fill="none" stroke="#93c5fd" stroke-width="10" stroke-linecap="round" opacity="0"></path>
-              <!-- Nerdio -> Outcome -->
-              <path id="path-n2w" d="M260,390 C 460,430 560,430 640,400" fill="none" stroke="#34d399" stroke-width="3" marker-end="url(#arrowGreen)" opacity="0.25"></path>
-              <circle id="energy-n" r="5" fill="#6ee7b7" opacity="0"></circle>
-              <!-- Recast -> Outcome -->
-              <path id="path-r2w" d="M1020,390 C 820,430 720,430 640,400" fill="none" stroke="#fbbf24" stroke-width="3" marker-end="url(#arrowYellow)" opacity="0.25"></path>
-              <circle id="energy-r" r="5" fill="#fde68a" opacity="0"></circle>
-              <!-- Intune -> Outcome link -->
-              <path id="path-i2w" d="M640,160 C 640,220 640,260 640,300" fill="none" stroke="#93c5fd" stroke-width="3" marker-end="url(#arrowBlue)" opacity="0.25"></path>
-              <circle id="energy-i" r="5" fill="#93c5fd" opacity="0"></circle>
+          <!-- End user success card with iconographic illustration -->
+          <div id="outcome" class="mt-6 mx-auto max-w-3xl rounded-3xl border border-nerdioLime/40 bg-emerald-900/20 px-4 sm:px-6 py-4 flex items-center justify-center gap-3 text-center">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12" viewBox="0 0 64 64" role="img" aria-label="Happy user at a desk">
+              <g fill="none" stroke="#C4D600" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="22" cy="18" r="6" fill="rgba(196,214,0,0.15)"></circle>
+                <rect x="6" y="36" width="52" height="12" rx="3" fill="rgba(0,165,181,0.15)" stroke="#00A5B5"></rect>
+                <path d="M22 24c-6 0-10 6-10 12v2h20v-2c0-6-4-12-10-12z" fill="rgba(196,214,0,0.1)"></path>
+                <path d="M40 42h10M12 42h10"></path>
+                <rect x="30" y="14" width="24" height="12" rx="2" fill="rgba(168,85,247,0.15)" stroke="#A855F7"></rect>
+                <path d="M34 20h8M44 20h6"></path>
+              </g>
             </svg>
+            <strong class="text-xl md:text-3xl font-heading font-extrabold text-emerald-100">Day One Workspace</strong>
           </div>
+          <p id="step-caption" class="mt-3 text-center text-sm text-slate-300">Ready to start</p>
+
+          <!-- CTA -->
+          <div class="mt-4 flex items-center justify-center">
+            <button id="btn-copy" class="inline-flex items-center gap-2 rounded-2xl px-4 py-2 font-semibold text-white bg-gradient-to-r from-nerdioTeal via-nerdioLime to-recastPurple shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-recastPurple">
+              <i data-lucide="clipboard-copy" class="w-4 h-4"></i><span>Copy Summary</span>
+            </button>
+          </div>
+          <div id="announce" class="sr-only" role="status" aria-live="polite"></div>
         </div>
-      </div>
+      </section>
     </section>
+
+    <!-- CDN failure banner -->
+    <div id="cdn-fail" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92vw] max-w-md rounded-xl bg-rose-900/80 ring-1 ring-rose-600 text-white px-4 py-3">
+      <div class="flex items-start gap-2">
+        <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        <p class="text-sm">Some UI assets failed to load. The page will still function, but styles or icons may appear degraded.</p>
+      </div>
+    </div>
   </main>
 
   <script>
     // ---------- STATE ----------
     const STATE = {
-      tab: 'better',
+      reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       playing: false,
-      step: 0,
       timers: [],
       raf: null,
-      reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      tiles: [],
+      categories: {
+        Productivity: { color: 'recastCyan' },
+        Collaboration: { color: 'recastPurple' },
+        Core: { color: 'recastYellow' }
+      }
     };
 
     // ---------- ELEMENTS ----------
-    const tabs = {
-      better: document.getElementById('tab-better'),
-      demo: document.getElementById('tab-demo')
-    };
-    const panels = {
-      better: document.getElementById('panel-better'),
-      demo: document.getElementById('panel-demo')
-    };
-
     const btnStart = document.getElementById('btn-start');
     const btnReset = document.getElementById('btn-reset');
-
+    const btnCopy = document.getElementById('btn-copy');
     const caption = document.getElementById('step-caption');
     const intuneBar = document.getElementById('intune-bar');
     const colN = document.getElementById('col-nerdio');
     const colR = document.getElementById('col-recast');
     const outcome = document.getElementById('outcome');
+    const announce = document.getElementById('announce');
 
-    const neridioCloud = document.getElementById('nerdio-cloudpc');
-    const neridioAvd = document.getElementById('nerdio-avd');
-    const neridioPolicy = document.getElementById('nerdio-policy');
+    const nerdioCloud = document.getElementById('nerdio-cloudpc');
+    const nerdioAvd = document.getElementById('nerdio-avd');
+    const nerdioPolicy = document.getElementById('nerdio-policy');
+
     const recastRings = document.getElementById('recast-rings');
-    const appIcons = document.getElementById('app-icons');
+    const hexGrid = document.getElementById('app-hexgrid');
 
     const paths = {
       beam: document.getElementById('beam-intune'),
@@ -292,228 +356,317 @@
       r: document.getElementById('energy-r')
     };
 
+    // ---------- DATA ----------
+    const CATALOG = [
+      { name: 'M365', cat: 'Productivity' },
+      { name: 'Teams', cat: 'Collaboration' },
+      { name: 'Edge', cat: 'Core' },
+      { name: 'Chrome', cat: 'Core' },
+      { name: 'Zoom', cat: 'Collaboration' },
+      { name: 'Slack', cat: 'Collaboration' },
+      { name: 'SAP', cat: 'Productivity' },
+      { name: 'Adobe', cat: 'Productivity' },
+      { name: 'Box', cat: 'Collaboration' },
+      { name: 'Okta', cat: 'Core' },
+      { name: 'VLC', cat: 'Core' },
+      { name: 'Notepad++', cat: 'Productivity' }
+    ];
+
     // ---------- HELPERS ----------
-    function switchTab(to) {
-      STATE.tab = to;
-      Object.keys(tabs).forEach(k => {
-        const sel = (k === to);
-        tabs[k].setAttribute('aria-selected', String(sel));
-        tabs[k].classList.toggle('bg-slate-800/80', sel);
-        tabs[k].classList.toggle('bg-slate-800/50', !sel);
-        panels[k].classList.toggle('hidden', !sel);
-        panels[k].classList.toggle('block', sel);
-      });
-      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
+    function clearTimers(){ while(STATE.timers.length) clearTimeout(STATE.timers.pop()); }
+    function stopRAF(){ if(STATE.raf) cancelAnimationFrame(STATE.raf); STATE.raf=null; }
+    function setOpacity(el, v){ if(el) el.setAttribute('opacity', String(v)); }
+    function moveAlongPath(circle, path, p){ const len=path.getTotalLength(); const pt=path.getPointAtLength(p*len); circle.setAttribute('cx', pt.x); circle.setAttribute('cy', pt.y); }
+    function dot(active=false){ const d=document.createElement('span'); d.className='w-2 h-2 rounded-full ' + (active?'bg-nerdioTeal':'bg-white/20'); return d; }
+    function sr(msg){ announce.textContent=''; setTimeout(()=> announce.textContent=msg, 0); }
+
+    function colorForCategory(cat){
+      const map = {
+        Productivity: '#00AEEF',
+        Collaboration: '#A855F7',
+        Core: '#FDCB0A'
+      };
+      return map[cat] || '#94a3b8';
     }
-    function clearTimers() { while (STATE.timers.length) clearTimeout(STATE.timers.pop()); }
-    function stopRAF() { if (STATE.raf) cancelAnimationFrame(STATE.raf); STATE.raf = null; }
-    function setOpacity(el, v){ if (el) el.setAttribute('opacity', String(v)); }
-    function moveAlongPath(circle, path, progress){
-      const len = path.getTotalLength();
-      const pt = path.getPointAtLength(progress * len);
-      circle.setAttribute('cx', pt.x);
-      circle.setAttribute('cy', pt.y);
-    }
-    function pill(name, status='Queued') {
-      const s = document.createElement('span');
-      s.className = 'flex items-center gap-1 text-[10px] md:text-xs rounded-md px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60';
+
+    function buildHexTile(label, category){
+      const fill = colorForCategory(category);
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'group relative isolate inline-flex items-center justify-center aspect-[1.1547] w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80';
+      tile.setAttribute('aria-label', `${label} — ${category}`);
+      tile.dataset.name = label;
+      tile.dataset.cat = category;
+      tile.dataset.phase = 'queued';
+
+      // Tile SVG hexagon
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox','0 0 100 86.6');
+      svg.setAttribute('class','absolute inset-0 w-full h-full transition-transform duration-200 group-hover:scale-[1.03]');
+
+      const hex = document.createElementNS(svgNS, 'polygon');
+      hex.setAttribute('points','50,0 100,25 100,61.6 50,86.6 0,61.6 0,25');
+      hex.setAttribute('fill', fill);
+      hex.setAttribute('fill-opacity','0.18');
+      hex.setAttribute('stroke', fill);
+      hex.setAttribute('stroke-opacity','0.6');
+      hex.setAttribute('stroke-width','2');
+
+      const glow = document.createElementNS(svgNS, 'polygon');
+      glow.setAttribute('points','50,0 100,25 100,61.6 50,86.6 0,61.6 0,25');
+      glow.setAttribute('fill', fill);
+      glow.setAttribute('opacity','0');
+      glow.setAttribute('class','transition-opacity duration-300');
+      svg.appendChild(glow);
+      svg.appendChild(hex);
+
+      // Content
+      const inner = document.createElement('div');
+      inner.className = 'relative z-10 flex flex-col items-center justify-center text-center px-1';
       const icon = document.createElement('i');
-      icon.setAttribute('data-lucide','circle-dot');
-      icon.className = 'w-3.5 h-3.5';
-      const label = document.createElement('span');
-      label.textContent = name;
+      icon.setAttribute('data-lucide','hexagon');
+      icon.className = 'w-4 h-4 mb-1';
+      icon.style.color = fill;
+      const name = document.createElement('div');
+      name.className = 'text-xs font-medium text-slate-100';
+      name.textContent = label;
       const badge = document.createElement('span');
-      badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-slate-700 bg-slate-900/70';
-      badge.textContent = status;
-      s.appendChild(icon); s.appendChild(label); s.appendChild(badge);
-      return s;
+      badge.className = 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-white/20 bg-white/10 text-slate-100';
+      badge.textContent = 'Queued';
+
+      inner.appendChild(icon);
+      inner.appendChild(name);
+      inner.appendChild(badge);
+
+      tile.appendChild(svg);
+      tile.appendChild(inner);
+
+      // Hover effect
+      tile.addEventListener('mouseenter', ()=>{ glow.setAttribute('opacity','0.12'); });
+      tile.addEventListener('mouseleave', ()=>{ glow.setAttribute('opacity','0'); });
+
+      // Store refs
+      tile._els = { badge, icon, glow, svg, hex };
+      return tile;
     }
-    function setPillPhase(p, phase) {
-      // phases: provisioning -> patched -> updated
-      const badge = p.lastChild;
-      const icon = p.firstChild;
-      if (phase === 'provisioning') {
-        p.style.background = 'linear-gradient(90deg, rgba(251,191,36,0.15), rgba(56,189,248,0.10))';
-        p.classList.add('ring-amber-400');
+
+    function setTilePhase(tile, phase){
+      const { badge, icon } = tile._els;
+      tile.dataset.phase = phase;
+      if(phase === 'provisioning'){
         badge.textContent = 'Provisioning';
-        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-amber-400/60 bg-amber-900/40';
+        badge.className = 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-recastYellow/60 bg-recastYellow/10 text-recastYellow';
         icon.setAttribute('data-lucide','download');
-      } else if (phase === 'patched') {
-        p.style.background = 'linear-gradient(90deg, rgba(16,185,129,0.22), rgba(59,130,246,0.12))';
-        p.classList.remove('ring-amber-400');
-        p.classList.add('ring-emerald-400');
+      }else if(phase === 'patched'){
         badge.textContent = 'Patched';
-        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-emerald-400/60 bg-emerald-900/40';
+        badge.className = 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-emerald-400/60 bg-emerald-400/10 text-emerald-300';
         icon.setAttribute('data-lucide','shield-check');
-      } else if (phase === 'updated') {
-        p.style.background = 'linear-gradient(90deg, rgba(56,189,248,0.22), rgba(147,197,253,0.18))';
-        p.classList.remove('ring-emerald-400');
-        p.classList.add('ring-sky-400');
+      }else if(phase === 'updated'){
         badge.textContent = 'Updated';
-        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-sky-400/60 bg-sky-900/40';
+        badge.className = 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-sky-400/60 bg-sky-400/10 text-sky-300';
         icon.setAttribute('data-lucide','refresh-ccw');
+      }else{
+        badge.textContent = 'Queued';
+        badge.className = 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-white/20 bg-white/10 text-slate-100';
+        icon.setAttribute('data-lucide','hexagon');
       }
-      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons({attrs:{}}); } catch(_) {}
-    }
-    function dot(active=false) {
-      const d = document.createElement('span');
-      d.className = 'w-2 h-2 rounded-full ' + (active ? 'bg-emerald-300' : 'bg-slate-700');
-      return d;
-    }
-    function bar(fill=0) {
-      const wrap = document.createElement('div');
-      wrap.className = 'h-2 rounded-md bg-slate-800 overflow-hidden';
-      const b = document.createElement('div');
-      b.style.width = fill + '%';
-      b.className = 'h-full bg-gradient-to-r from-amber-300 via-emerald-300 to-sky-300';
-      wrap.appendChild(b);
-      return wrap;
-    }
-
-    // ---------- BUILD STATIC CELLS ----------
-    for (let i=0;i<16;i++){ const c=document.createElement('div'); c.className='h-5 rounded-md bg-slate-800'; neridioCloud.appendChild(c); }
-    for (let i=0;i<16;i++){ const c=document.createElement('div'); c.className='h-5 rounded-md bg-slate-800'; neridioAvd.appendChild(c); }
-    for (let i=0;i<24;i++) neridioPolicy.appendChild(dot(false));
-    for (let c=0;c<3;c++){ const card=document.createElement('div'); card.className='rounded-lg ring-1 ring-slate-700 p-3 bg-slate-950/50'; const t=document.createElement('div'); t.className='text-[11px] text-slate-300 mb-2'; t.textContent=['Business Unit','Subsidiary','Region'][c]; card.appendChild(t); card.appendChild(bar(0)); recastRings.appendChild(card); }
-    // Catalog examples (animated during Step 3)
-    const CATALOG = ['M365','Teams','Edge','Chrome','Zoom','Slack','SAP','Adobe','Box','Okta'];
-    const PILLS = CATALOG.map(n => { const s = pill(n); appIcons.appendChild(s); return s; });
-
-    // ---------- RENDER STEPS ----------
-    function resetVisual() {
-      caption.textContent = 'Ready to start';
-      intuneBar.classList.remove('ring-4','ring-offset-2','ring-offset-slate-900','animate-pulse');
-      colN.classList.remove('ring-2','ring-emerald-400','shadow-emerald-500/20');
-      colR.classList.remove('ring-2','ring-amber-400','shadow-amber-500/20');
-      outcome.style.boxShadow = '';
-      outcome.style.transform = 'scale(1)';
-      setOpacity(paths.beam, 0);
-      setOpacity(energy.i, 0); setOpacity(energy.n, 0); setOpacity(energy.r, 0);
-      Array.from(neridioCloud.children).forEach(c=> c.style.background = 'rgb(30 41 59)');
-      Array.from(neridioAvd.children).forEach(c=> c.style.background = 'rgb(30 41 59)');
-      Array.from(neridioPolicy.children).forEach(d=> d.className = 'w-2 h-2 rounded-full bg-slate-700');
-      Array.from(recastRings.children).forEach(card=> { const b=card.querySelector('div > div'); if (b) b.style.width='0%'; });
-      PILLS.forEach(p => { p.className='flex items-center gap-1 text-[10px] md:text-xs rounded-md px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60'; p.style.background=''; setPillPhase(p,'queued'); });
       try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
     }
 
-    function step1() {
-      caption.textContent = 'Step 1 — Intune Foundation: governance “brain” is active.';
-      intuneBar.classList.add('animate-pulse','ring-4','ring-offset-2','ring-offset-slate-900');
-      setOpacity(paths.beam, 0.85);
-      if (STATE.reduced) return;
-      const start = performance.now(), dur = 900;
-      const tick = (t)=>{
-        const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.i, 1); moveAlongPath(energy.i, paths.i2w, p);
-        if (p<1) STATE.raf = requestAnimationFrame(tick);
-      };
-      STATE.raf = requestAnimationFrame(tick);
+    function initNerdioGrids(){
+      while(nerdioCloud.firstChild) nerdioCloud.removeChild(nerdioCloud.firstChild);
+      while(nerdioAvd.firstChild) nerdioAvd.removeChild(nerdioAvd.firstChild);
+      while(nerdioPolicy.firstChild) nerdioPolicy.removeChild(nerdioPolicy.firstChild);
+
+      for (let i=0;i<16;i++){
+        const c=document.createElement('div');
+        c.className='h-5 rounded-md bg-white/10 ring-1 ring-white/10';
+        nerdioCloud.appendChild(c);
+      }
+      for (let i=0;i<16;i++){
+        const c=document.createElement('div');
+        c.className='h-5 rounded-md bg-white/10 ring-1 ring-white/10';
+        nerdioAvd.appendChild(c);
+      }
+      for (let i=0;i<24;i++) nerdioPolicy.appendChild(dot(false));
     }
 
-    function step2() {
-      caption.textContent = 'Step 2 — Nerdio right-sizes desktops; Azure cost reduced up to 55%.';
-      colN.classList.add('ring-2','ring-emerald-400','shadow-emerald-500/20');
-      Array.from(neridioCloud.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(129,140,248,0.8), rgba(16,185,129,0.8))', i*40));
-      Array.from(neridioAvd.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(129,140,248,0.8), rgba(16,185,129,0.8))', i*40));
-      Array.from(neridioPolicy.children).forEach((d,i)=> setTimeout(()=> d.className='w-2 h-2 rounded-full bg-emerald-300', i*30));
-      if (STATE.reduced) return;
-      const start = performance.now(), dur = 900;
-      const tick = (t)=>{
-        const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.n, 1); moveAlongPath(energy.n, paths.n2w, p);
-        if (p<1) STATE.raf = requestAnimationFrame(tick);
-      };
-      STATE.raf = requestAnimationFrame(tick);
-    }
-
-    // --- Enhanced Recast animation: colorful provisioning -> patched -> updated ---
-    function step3() {
-      caption.textContent = 'Step 3 — Recast provisions apps, applies patches, and updates; compliance >95%.';
-      colR.classList.add('ring-2','ring-amber-400','shadow-amber-500/20');
-
-      // Stagger pill phases to show flow of work
-      PILLS.forEach((p, i) => {
-        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'provisioning'); }, 80*i));
-        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'patched'); }, 80*i + 550));
-        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'updated'); }, 80*i + 1100));
+    function initRings(){
+      while(recastRings.firstChild) recastRings.removeChild(recastRings.firstChild);
+      ['Business Unit','Subsidiary','Region'].forEach(label=>{
+        const card=document.createElement('div');
+        card.className='rounded-xl ring-1 ring-white/10 p-3 bg-white/5';
+        const t=document.createElement('div'); t.className='text-[11px] text-slate-200 mb-2'; t.textContent=label; card.appendChild(t);
+        const track=document.createElement('div'); track.className='h-2 rounded bg-white/10 overflow-hidden';
+        const bar=document.createElement('div'); bar.className='h-full w-0'; // will set gradient class below
+        // dual-brand gradient fill
+        bar.style.background = 'linear-gradient(90deg, rgba(0,165,181,0.9), rgba(168,85,247,0.9))';
+        track.appendChild(bar); card.appendChild(track); recastRings.appendChild(card);
       });
+    }
 
-      // Animate rings to represent staged rollout with colorful gradient fills
-      Array.from(recastRings.children).forEach((card,i)=>{
-        const barEl = card.querySelector('div > div');
-        STATE.timers.push(setTimeout(()=> barEl.style.width = ['70%','85%','95%'][i], i*150));
+    function buildHexGrid(){
+      while(hexGrid.firstChild) hexGrid.removeChild(hexGrid.firstChild);
+      STATE.tiles = CATALOG.map(({name,cat})=>{
+        const tile = buildHexTile(name, cat);
+        hexGrid.appendChild(tile);
+        return tile;
       });
-
-      // Energy arrow to outcome
-      if (STATE.reduced) return;
-      const start = performance.now(), dur = 900;
-      const tick = (t)=>{
-        const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.r, 1); moveAlongPath(energy.r, paths.r2w, p);
-        if (p<1) STATE.raf = requestAnimationFrame(tick);
-      };
-      STATE.raf = requestAnimationFrame(tick);
+      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
     }
 
-    function step4() {
-      caption.textContent = 'Step 4 — Convergence: desktops + apps provisioned, patched, and governed in one motion.';
-      outcome.style.boxShadow = '0 0 0 4px rgba(52,211,153,.45), 0 0 52px rgba(52,211,153,.35)';
-      outcome.style.transform = 'scale(1.04)';
-    }
-
-    function step5() {
-      caption.textContent = 'Step 5 — Migration-safe • MSP-ready • Intune-driven. Loop or Reset to replay.';
-    }
-
-    // ---------- ORCHESTRATION ----------
-    function startDemo() {
-      if (STATE.playing) return;
-      STATE.playing = true;
-      btnStart.querySelector('span').textContent = 'Playing…';
-      btnStart.setAttribute('aria-pressed', 'true');
-      clearTimers(); stopRAF(); resetVisual();
-
-      const t1=0, t2=1200, t3=2400, t4=3800, t5=5200, stopAt=7200;
-      STATE.timers.push(setTimeout(step1, t1));
-      STATE.timers.push(setTimeout(step2, t2));
-      STATE.timers.push(setTimeout(step3, t3));
-      STATE.timers.push(setTimeout(step4, t4));
-      STATE.timers.push(setTimeout(step5, t5));
-      STATE.timers.push(setTimeout(()=> {
-        STATE.playing=false;
-        btnStart.querySelector('span').textContent='Start';
-        btnStart.setAttribute('aria-pressed', 'false');
-      }, stopAt));
-    }
-
-    function resetDemo() {
-      STATE.playing = false;
+    // ---------- DEMO CONTROL ----------
+    function resetDemo(){
       btnStart.querySelector('span').textContent='Start';
       btnStart.setAttribute('aria-pressed','false');
-      clearTimers(); stopRAF(); resetVisual();
+      clearTimers(); stopRAF();
+      caption.textContent='Ready to start';
+      intuneBar.classList.remove('ring-4','ring-offset-2','ring-offset-[#1B1F29]','animate-pulse');
+      colN.classList.remove('shadow-glow-teal');
+      colR.classList.remove('shadow-glow-purple');
+      outcome.style.boxShadow=''; outcome.style.transform='scale(1)';
+      setOpacity(paths.beam,0); setOpacity(energy.i,0); setOpacity(energy.n,0); setOpacity(energy.r,0);
+      initNerdioGrids();
+      initRings();
+      buildHexGrid();
+      // Reset Nerdio blocks to neutral; Policy dots off
+      Array.from(nerdioCloud.children).forEach(c=> c.style.background='rgba(255,255,255,0.06)');
+      Array.from(nerdioAvd.children).forEach(c=> c.style.background='rgba(255,255,255,0.06)');
+      Array.from(nerdioPolicy.children).forEach(d=> d.className='w-2 h-2 rounded-full bg-white/20');
+      // Reset tile phases
+      STATE.tiles.forEach(t=> setTilePhase(t,'queued'));
     }
 
-    // ---------- EVENTS ----------
-    tabs.better.addEventListener('click', ()=> switchTab('better'));
-    tabs.demo.addEventListener('click', ()=> switchTab('demo'));
-    btnStart.addEventListener('click', startDemo);
-    btnReset.addEventListener('click', resetDemo);
-    document.addEventListener('keydown', (e)=>{
-      const k = e.key.toLowerCase();
-      if (k==='b') switchTab('better');
-      if (k==='d') switchTab('demo');
-      if (k==='s') startDemo();
-      if (k==='r') resetDemo();
-    });
+    function step1(){
+      caption.textContent='Step 1 — Intune Foundation';
+      intuneBar.classList.add('animate-pulse','ring-4','ring-offset-2');
+      intuneBar.classList.add('ring-offset-[#1B1F29]');
+      setOpacity(paths.beam,0.85);
+      if(STATE.reduced) return;
+      const start=performance.now(), dur=900;
+      const tick=(t)=>{ const p=Math.min(1,(t-start)/dur); setOpacity(energy.i,1); moveAlongPath(energy.i,paths.i2w,p); if(p<1) STATE.raf=requestAnimationFrame(tick); };
+      STATE.raf=requestAnimationFrame(tick);
+    }
+
+    function step2(){
+      caption.textContent='Step 2 — Nerdio Right-sizes Desktops';
+      colN.classList.add('shadow-glow-teal');
+      // Activate Nerdio blocks with teal → lime gradient + glow
+      Array.from(nerdioCloud.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(0,165,181,0.8), rgba(196,214,0,0.7))', i*40));
+      Array.from(nerdioAvd.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(0,165,181,0.8), rgba(196,214,0,0.7))', i*40));
+      Array.from(nerdioPolicy.children).forEach((d,i)=> setTimeout(()=> d.className='w-2 h-2 rounded-full bg-nerdioTeal', i*30));
+      if(STATE.reduced) return;
+      const start=performance.now(), dur=900;
+      const tick=(t)=>{ const p=Math.min(1,(t-start)/dur); setOpacity(energy.n,1); moveAlongPath(energy.n,paths.n2w,p); if(p<1) STATE.raf=requestAnimationFrame(tick); };
+      STATE.raf=requestAnimationFrame(tick);
+    }
+
+    function step3(){
+      caption.textContent='Step 3 — Recast Delivers & Patches Apps';
+      colR.classList.add('shadow-glow-purple');
+      // Flow through tile phases
+      STATE.tiles.forEach((tile,i)=>{
+        STATE.timers.push(setTimeout(()=> setTilePhase(tile,'provisioning'), 90*i));
+        STATE.timers.push(setTimeout(()=> setTilePhase(tile,'patched'), 90*i + 600));
+        STATE.timers.push(setTimeout(()=> setTilePhase(tile,'updated'), 90*i + 1200));
+      });
+      // Rings fill
+      Array.from(recastRings.children).forEach((card,i)=>{
+        const bar=card.querySelector('div > div');
+        STATE.timers.push(setTimeout(()=> bar.style.width=['72%','86%','95%'][i], i*150));
+      });
+      if(STATE.reduced) return;
+      const start=performance.now(), dur=900;
+      const tick=(t)=>{ const p=Math.min(1,(t-start)/dur); setOpacity(energy.r,1); moveAlongPath(energy.r,paths.r2w,p); if(p<1) STATE.raf=requestAnimationFrame(tick); };
+      STATE.raf=requestAnimationFrame(tick);
+    }
+
+    function step4(){
+      caption.textContent='Step 4 — Day One Workspace';
+      outcome.style.boxShadow='0 0 0 4px rgba(196,214,0,.35), 0 0 52px rgba(0,165,181,.35)';
+      outcome.style.transform='scale(1.04)';
+    }
+    function step5(){ caption.textContent='Step 5 — Migration-safe • MSP-ready • Intune-driven'; }
+
+    function startDemo(){
+      if(STATE.playing) return;
+      STATE.playing=true; btnStart.querySelector('span').textContent='Playing…'; btnStart.setAttribute('aria-pressed','true');
+      clearTimers(); stopRAF(); resetDemo();
+      const t1=0,t2=1200,t3=2400,t4=3800,t5=5200,stopAt=7200;
+      STATE.timers.push(setTimeout(step1,t1));
+      STATE.timers.push(setTimeout(step2,t2));
+      STATE.timers.push(setTimeout(step3,t3));
+      STATE.timers.push(setTimeout(step4,t4));
+      STATE.timers.push(setTimeout(step5,t5));
+      STATE.timers.push(setTimeout(()=>{ STATE.playing=false; btnStart.querySelector('span').textContent='Start'; btnStart.setAttribute('aria-pressed','false'); }, stopAt));
+    }
+
+    // ---------- COPY SUMMARY ----------
+    function summaryText(){
+      const tiles = STATE.tiles.map(t=> `${t.dataset.name}:${t.dataset.phase}`).join(', ');
+      return [
+        'Nerdio + Recast — Better Together',
+        'Intune-governed workspace (Day One).',
+        '- Nerdio: Right-sized desktops (Cloud PC + AVD autoscale).',
+        '- Recast: App catalog delivered & patched via rings.',
+        `Compliance: >95% • Savings: Up to 55%`,
+        `Tiles: ${tiles}`
+      ].join('\n');
+    }
+
+    async function handleCopy(){
+      const text = summaryText();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.setAttribute('readonly','');
+          ta.style.position='absolute'; ta.style.left='-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+        }
+        sr('Summary copied to clipboard.');
+      } catch (e) {
+        sr('Copy failed. Select and copy manually.');
+        alert('Copy failed. Here is the summary:\n\n' + text);
+      }
+    }
 
     // ---------- INIT ----------
-    try {
-      if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
-      else setTimeout(()=> window.lucide && window.lucide.createIcons && window.lucide.createIcons(), 60);
-    } catch(_) {}
-    switchTab('better');
+    function ensureIcons(){
+      try {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        } else {
+          setTimeout(ensureIcons, 60);
+        }
+      } catch(_) {}
+    }
+
+    function checkCDNs(){
+      let failed = false;
+      if (typeof tailwind === 'undefined') failed = true;
+      if (!window.lucide) failed = true;
+      if (failed){
+        const bar = document.getElementById('cdn-fail');
+        bar.classList.remove('hidden');
+      }
+    }
+
+    // Event listeners
+    btnStart.addEventListener('click', startDemo);
+    btnReset.addEventListener('click', resetDemo);
+    btnCopy.addEventListener('click', handleCopy);
+    document.addEventListener('keydown', (e)=>{ const k=e.key.toLowerCase(); if(k==='s') startDemo(); if(k==='r') resetDemo(); if((e.ctrlKey||e.metaKey)&&k==='c') handleCopy(); });
+
+    // Boot
+    ensureIcons();
+    initNerdioGrids();
+    initRings();
+    buildHexGrid();
     resetDemo();
+    setTimeout(checkCDNs, 1200);
   </script>
 </body>
 </html>
