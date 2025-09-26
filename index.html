@@ -120,7 +120,7 @@
           <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div class="space-y-0.5">
               <h2 class="text-lg font-bold tracking-tight">Demo — Intune-governed delivery across desktops (Nerdio) and apps (Recast)</h2>
-              <p class="text-slate-400 text-sm">Click <strong>Start</strong> to highlight each role and outcome. <span class="hidden sm:inline">We support Intune as the governance “brain.”</span></p>
+              <p class="text-slate-400 text-sm">Click <strong>Start</strong> to highlight each role and outcome.</p>
             </div>
             <nav aria-label="Demo controls" class="flex items-center gap-2">
               <button id="btn-start" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 font-semibold tracking-wide text-white bg-gradient-to-r from-indigo-500 to-emerald-400 shadow ring-1 ring-white/10 hover:brightness-110 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
@@ -143,7 +143,7 @@
               <div class="text-sm font-semibold mt-1">One workspace, governed by Intune.</div>
             </div>
 
-            <!-- Two-column approach (world-class slide style) -->
+            <!-- Two-column approach -->
             <div class="grid md:grid-cols-2 gap-6 mt-6">
               <!-- Nerdio column -->
               <section id="col-nerdio" class="rounded-2xl ring-1 ring-emerald-600/40 bg-emerald-950/30 p-4">
@@ -158,25 +158,16 @@
                 <div class="mt-4 grid gap-3">
                   <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
                     <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>Cloud PC Pools</span><span>Windows 365</span></div>
-                    <div id="nerdio-cloudpc" class="grid grid-cols-8 gap-1.5">
-                      <!-- slots filled by JS -->
-                    </div>
+                    <div id="nerdio-cloudpc" class="grid grid-cols-8 gap-1.5"></div>
                   </div>
-
                   <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
                     <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>AVD Host Pools</span><span>Autoscale</span></div>
-                    <div id="nerdio-avd" class="grid grid-cols-8 gap-1.5">
-                      <!-- slots filled by JS -->
-                    </div>
+                    <div id="nerdio-avd" class="grid grid-cols-8 gap-1.5"></div>
                   </div>
-
                   <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
                     <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span>Policy via Intune</span><span class="flex items-center gap-1"><i data-lucide="shield" class="w-3.5 h-3.5"></i>Identity-driven</span></div>
-                    <div id="nerdio-policy" class="flex flex-wrap gap-1.5">
-                      <!-- dots by JS -->
-                    </div>
+                    <div id="nerdio-policy" class="flex flex-wrap gap-1.5"></div>
                   </div>
-
                   <div class="flex items-center justify-between">
                     <span class="text-xs text-emerald-200/90">Benefit</span>
                     <span id="metric-savings" class="text-xs font-semibold rounded-full bg-emerald-900/40 ring-1 ring-emerald-600 px-2 py-0.5 opacity-80">Up to 55% Azure savings</span>
@@ -196,17 +187,13 @@
 
                 <div class="mt-4 grid gap-3">
                   <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
-                    <div class="text-xs text-slate-300 mb-2">Curated Catalog (examples)</div>
-                    <div id="app-icons" class="flex flex-wrap gap-1.5">
-                      <!-- app pills by JS -->
-                    </div>
+                    <div class="text-xs text-slate-300 mb-2">Curated Catalog + Status</div>
+                    <div id="app-icons" class="flex flex-wrap gap-1.5"></div>
                   </div>
 
                   <div class="rounded-xl bg-slate-900/60 ring-1 ring-slate-800 p-3">
                     <div class="text-xs text-slate-300 mb-2">Rings &amp; Policy via Intune</div>
-                    <div id="recast-rings" class="grid grid-cols-3 gap-2">
-                      <!-- rings by JS -->
-                    </div>
+                    <div id="recast-rings" class="grid grid-cols-3 gap-2"></div>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -260,9 +247,9 @@
   <script>
     // ---------- STATE ----------
     const STATE = {
-      tab: 'better',       // Better Together opens first
+      tab: 'better',
       playing: false,
-      step: 0,             // 0 idle, 1..5 steps
+      step: 0,
       timers: [],
       raf: null,
       reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -327,11 +314,46 @@
       circle.setAttribute('cx', pt.x);
       circle.setAttribute('cy', pt.y);
     }
-    function pill(txt) {
+    function pill(name, status='Queued') {
       const s = document.createElement('span');
-      s.className = 'text-[10px] md:text-xs rounded-md px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60';
-      s.textContent = txt;
+      s.className = 'flex items-center gap-1 text-[10px] md:text-xs rounded-md px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60';
+      const icon = document.createElement('i');
+      icon.setAttribute('data-lucide','circle-dot');
+      icon.className = 'w-3.5 h-3.5';
+      const label = document.createElement('span');
+      label.textContent = name;
+      const badge = document.createElement('span');
+      badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-slate-700 bg-slate-900/70';
+      badge.textContent = status;
+      s.appendChild(icon); s.appendChild(label); s.appendChild(badge);
       return s;
+    }
+    function setPillPhase(p, phase) {
+      // phases: provisioning -> patched -> updated
+      const badge = p.lastChild;
+      const icon = p.firstChild;
+      if (phase === 'provisioning') {
+        p.style.background = 'linear-gradient(90deg, rgba(251,191,36,0.15), rgba(56,189,248,0.10))';
+        p.classList.add('ring-amber-400');
+        badge.textContent = 'Provisioning';
+        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-amber-400/60 bg-amber-900/40';
+        icon.setAttribute('data-lucide','download');
+      } else if (phase === 'patched') {
+        p.style.background = 'linear-gradient(90deg, rgba(16,185,129,0.22), rgba(59,130,246,0.12))';
+        p.classList.remove('ring-amber-400');
+        p.classList.add('ring-emerald-400');
+        badge.textContent = 'Patched';
+        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-emerald-400/60 bg-emerald-900/40';
+        icon.setAttribute('data-lucide','shield-check');
+      } else if (phase === 'updated') {
+        p.style.background = 'linear-gradient(90deg, rgba(56,189,248,0.22), rgba(147,197,253,0.18))';
+        p.classList.remove('ring-emerald-400');
+        p.classList.add('ring-sky-400');
+        badge.textContent = 'Updated';
+        badge.className = 'ml-1 rounded-full px-1.5 py-0.5 text-[10px] ring-1 ring-sky-400/60 bg-sky-900/40';
+        icon.setAttribute('data-lucide','refresh-ccw');
+      }
+      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons({attrs:{}}); } catch(_) {}
     }
     function dot(active=false) {
       const d = document.createElement('span');
@@ -343,40 +365,19 @@
       wrap.className = 'h-2 rounded-md bg-slate-800 overflow-hidden';
       const b = document.createElement('div');
       b.style.width = fill + '%';
-      b.className = 'h-full bg-gradient-to-r from-indigo-400 to-emerald-400';
+      b.className = 'h-full bg-gradient-to-r from-amber-300 via-emerald-300 to-sky-300';
       wrap.appendChild(b);
       return wrap;
     }
 
     // ---------- BUILD STATIC CELLS ----------
-    // Nerdio pools cells
-    for (let i=0;i<16;i++){
-      const cell = document.createElement('div');
-      cell.className = 'h-5 rounded-md bg-slate-800';
-      neridioCloud.appendChild(cell);
-    }
-    for (let i=0;i<16;i++){
-      const cell = document.createElement('div');
-      cell.className = 'h-5 rounded-md bg-slate-800';
-      neridioAvd.appendChild(cell);
-    }
-    // Policy dots
+    for (let i=0;i<16;i++){ const c=document.createElement('div'); c.className='h-5 rounded-md bg-slate-800'; neridioCloud.appendChild(c); }
+    for (let i=0;i<16;i++){ const c=document.createElement('div'); c.className='h-5 rounded-md bg-slate-800'; neridioAvd.appendChild(c); }
     for (let i=0;i<24;i++) neridioPolicy.appendChild(dot(false));
-    // Recast rings (3 columns: Business Unit / Subsidiary / Region)
-    for (let c=0;c<3;c++){
-      const card = document.createElement('div');
-      card.className = 'rounded-lg ring-1 ring-slate-700 p-3 bg-slate-950/50';
-      const title = document.createElement('div');
-      title.className = 'text-[11px] text-slate-300 mb-2';
-      title.textContent = ['Business Unit','Subsidiary','Region'][c];
-      card.appendChild(title);
-      card.appendChild(bar(0));
-      recastRings.appendChild(card);
-    }
-    // Catalog examples (truthful placeholders)
-    ['M365','Teams','Edge','Chrome','Zoom','Slack','SAP','Adobe','Box','Okta'].forEach(name=>{
-      appIcons.appendChild(pill(name));
-    });
+    for (let c=0;c<3;c++){ const card=document.createElement('div'); card.className='rounded-lg ring-1 ring-slate-700 p-3 bg-slate-950/50'; const t=document.createElement('div'); t.className='text-[11px] text-slate-300 mb-2'; t.textContent=['Business Unit','Subsidiary','Region'][c]; card.appendChild(t); card.appendChild(bar(0)); recastRings.appendChild(card); }
+    // Catalog examples (animated during Step 3)
+    const CATALOG = ['M365','Teams','Edge','Chrome','Zoom','Slack','SAP','Adobe','Box','Okta'];
+    const PILLS = CATALOG.map(n => { const s = pill(n); appIcons.appendChild(s); return s; });
 
     // ---------- RENDER STEPS ----------
     function resetVisual() {
@@ -387,17 +388,13 @@
       outcome.style.boxShadow = '';
       outcome.style.transform = 'scale(1)';
       setOpacity(paths.beam, 0);
-      setOpacity(energy.i, 0);
-      setOpacity(energy.n, 0);
-      setOpacity(energy.r, 0);
-      // reset fills
+      setOpacity(energy.i, 0); setOpacity(energy.n, 0); setOpacity(energy.r, 0);
       Array.from(neridioCloud.children).forEach(c=> c.style.background = 'rgb(30 41 59)');
       Array.from(neridioAvd.children).forEach(c=> c.style.background = 'rgb(30 41 59)');
-      Array.from(neridioPolicy.children).forEach((d,i)=> d.className = 'w-2 h-2 rounded-full bg-slate-700');
-      Array.from(recastRings.children).forEach((card)=> {
-        const barEl = card.querySelector('div > div');
-        if (barEl) barEl.style.width = '0%';
-      });
+      Array.from(neridioPolicy.children).forEach(d=> d.className = 'w-2 h-2 rounded-full bg-slate-700');
+      Array.from(recastRings.children).forEach(card=> { const b=card.querySelector('div > div'); if (b) b.style.width='0%'; });
+      PILLS.forEach(p => { p.className='flex items-center gap-1 text-[10px] md:text-xs rounded-md px-2 py-1 ring-1 ring-slate-700 bg-slate-950/60'; p.style.background=''; setPillPhase(p,'queued'); });
+      try { window.lucide && window.lucide.createIcons && window.lucide.createIcons(); } catch(_) {}
     }
 
     function step1() {
@@ -408,8 +405,7 @@
       const start = performance.now(), dur = 900;
       const tick = (t)=>{
         const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.i, 1);
-        moveAlongPath(energy.i, paths.i2w, p);
+        setOpacity(energy.i, 1); moveAlongPath(energy.i, paths.i2w, p);
         if (p<1) STATE.raf = requestAnimationFrame(tick);
       };
       STATE.raf = requestAnimationFrame(tick);
@@ -418,37 +414,43 @@
     function step2() {
       caption.textContent = 'Step 2 — Nerdio right-sizes desktops; Azure cost reduced up to 55%.';
       colN.classList.add('ring-2','ring-emerald-400','shadow-emerald-500/20');
-      // Fill pool cells to show autoscale
       Array.from(neridioCloud.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(129,140,248,0.8), rgba(16,185,129,0.8))', i*40));
       Array.from(neridioAvd.children).forEach((c,i)=> setTimeout(()=> c.style.background='linear-gradient(90deg, rgba(129,140,248,0.8), rgba(16,185,129,0.8))', i*40));
-      // Policy dots light up
       Array.from(neridioPolicy.children).forEach((d,i)=> setTimeout(()=> d.className='w-2 h-2 rounded-full bg-emerald-300', i*30));
-
       if (STATE.reduced) return;
       const start = performance.now(), dur = 900;
       const tick = (t)=>{
         const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.n, 1);
-        moveAlongPath(energy.n, paths.n2w, p);
+        setOpacity(energy.n, 1); moveAlongPath(energy.n, paths.n2w, p);
         if (p<1) STATE.raf = requestAnimationFrame(tick);
       };
       STATE.raf = requestAnimationFrame(tick);
     }
 
+    // --- Enhanced Recast animation: colorful provisioning -> patched -> updated ---
     function step3() {
-      caption.textContent = 'Step 3 — Recast delivers and patches apps; compliance >95%.';
+      caption.textContent = 'Step 3 — Recast provisions apps, applies patches, and updates; compliance >95%.';
       colR.classList.add('ring-2','ring-amber-400','shadow-amber-500/20');
-      // Advance rings bars to represent staged rollout
+
+      // Stagger pill phases to show flow of work
+      PILLS.forEach((p, i) => {
+        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'provisioning'); }, 80*i));
+        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'patched'); }, 80*i + 550));
+        STATE.timers.push(setTimeout(()=> { setPillPhase(p,'updated'); }, 80*i + 1100));
+      });
+
+      // Animate rings to represent staged rollout with colorful gradient fills
       Array.from(recastRings.children).forEach((card,i)=>{
         const barEl = card.querySelector('div > div');
-        setTimeout(()=> barEl.style.width = ['70%','85%','95%'][i], i*150);
+        STATE.timers.push(setTimeout(()=> barEl.style.width = ['70%','85%','95%'][i], i*150));
       });
+
+      // Energy arrow to outcome
       if (STATE.reduced) return;
       const start = performance.now(), dur = 900;
       const tick = (t)=>{
         const p = Math.min(1, (t-start)/dur);
-        setOpacity(energy.r, 1);
-        moveAlongPath(energy.r, paths.r2w, p);
+        setOpacity(energy.r, 1); moveAlongPath(energy.r, paths.r2w, p);
         if (p<1) STATE.raf = requestAnimationFrame(tick);
       };
       STATE.raf = requestAnimationFrame(tick);
@@ -472,8 +474,7 @@
       btnStart.setAttribute('aria-pressed', 'true');
       clearTimers(); stopRAF(); resetVisual();
 
-      // timings
-      const t1=0, t2=1200, t3=2400, t4=3600, t5=5000, stopAt=7000;
+      const t1=0, t2=1200, t3=2400, t4=3800, t5=5200, stopAt=7200;
       STATE.timers.push(setTimeout(step1, t1));
       STATE.timers.push(setTimeout(step2, t2));
       STATE.timers.push(setTimeout(step3, t3));
@@ -511,8 +512,8 @@
       if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
       else setTimeout(()=> window.lucide && window.lucide.createIcons && window.lucide.createIcons(), 60);
     } catch(_) {}
-    switchTab('better'); // Better Together first
-    resetDemo();         // prepare demo visuals
+    switchTab('better');
+    resetDemo();
   </script>
 </body>
 </html>
