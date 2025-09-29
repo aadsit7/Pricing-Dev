@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +52,7 @@
   <script>
     /* ---------- STATE ---------- */
     const STATE = {
-      activeTab: 'brief',
+      activeTab: 'problems',
       impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
       defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
       ctx: { device: 'Windows', network: 'Corporate', compliant: true },
@@ -62,15 +61,13 @@
       copied: false,
       showLabels: false,
       showSolutionCards: true,
-      openWhy: null,
-      brief: { expanded: true, text: '' }
+      openWhy: null, // ensures only one dropdown open at a time
     };
 
     const TABS = [
-      { id: 'brief',    label: 'Company Brief', icon: 'sticky-note' },
       { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
       { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-      { id: 'roi',      label: 'Impact & ROI', icon: 'bar-chart-3' }
+      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
     ];
 
     /* ---------- Utils ---------- */
@@ -83,15 +80,6 @@
       return 'VDI';
     }
     function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
-    function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
-
-    /* Restore brief notes if present */
-    try {
-      const saved = localStorage.getItem('recast-brief-notes');
-      if (saved !== null) STATE.brief.text = saved;
-    } catch {}
 
     /* ---------- Root render ---------- */
     function render(){
@@ -107,13 +95,9 @@
               <span class="text-white">Recast Software</span>
             </h1>
             <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-slate-300">
-              ${
-                STATE.activeTab==='problems'
-                  ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
-                  : STATE.activeTab==='brief'
-                    ? 'Personalize this demo with customer-specific notes. Collapsible editor for pre-meeting prep.'
-                    : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
-              }
+              ${STATE.activeTab==='problems'
+                ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
+                : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
             </p>
           </div>
           <div class="relative mx-auto max-w-6xl px-4">
@@ -128,7 +112,7 @@
         </header>
 
         <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${(STATE.activeTab==='solution' || STATE.activeTab==='roi') ? `
+          ${STATE.activeTab!=='problems' ? `
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
             ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
@@ -139,13 +123,8 @@
       `;
       if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
-      if (STATE.activeTab === 'solution') { buildFlow(); }
-      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
-      // Live bind preview text (without forcing re-render on each keystroke)
-      const prev=document.getElementById('brief-preview');
-      const read=document.getElementById('brief-read');
-      if(prev){ prev.textContent = STATE.brief.text || 'Add your customer-specific notes on the left.'; }
-      if(read){ read.textContent = STATE.brief.text || 'Nothing here yet. Paste notes above.'; }
+      if (STATE.activeTab === 'solution') { buildFlow(); } // keep original order: flow left, cards right
+      if (STATE.activeTab === 'roi') { updateROIOutputs(); } // ensure math works
     }
 
     function chip(label,value,tone){
@@ -161,77 +140,13 @@
     }
 
     function renderActivePanel(){
-      if (STATE.activeTab==='brief') return renderBrief();
       if (STATE.activeTab==='problems') return renderProblems();
       if (STATE.activeTab==='solution') return renderSolution();
       if (STATE.activeTab==='roi') return renderROI();
       return '';
     }
 
-    /* ---------- NEW TAB: Company Brief (collapsible editor + live preview) ---------- */
-    function renderBrief(){
-      const expanded = STATE.brief.expanded;
-      const contentId = 'brief-content';
-      return `
-        <section id="panel-brief" class="space-y-4">
-          <div class="rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10">
-            <button
-              type="button"
-              class="w-full flex items-center justify-between px-5 bg-sky-900 hover:bg-sky-800 transition focus-ring"
-              data-action="toggle-brief"
-              aria-expanded="${expanded}"
-              aria-controls="${contentId}"
-            >
-              <div class="flex items-center gap-2">
-                <i data-lucide="sticky-note" class="w-5 h-5 text-white/95"></i>
-                <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">Company Brief</span>
-              </div>
-              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}"></i>
-            </button>
-
-            <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden transition-all duration-300 ease-out" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};">
-              <div class="p-5">
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <!-- Editor -->
-                  <div class="sub-card p-3 bg-[#0b1328] text-slate-200">
-                    <div class="text-sm font-semibold mb-2 flex items-center gap-2">
-                      <i data-lucide="edit-3" class="w-4 h-4"></i> Notes (paste/type)
-                    </div>
-                    <textarea
-                      class="w-full h-44 rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm focus-ring"
-                      placeholder="Audience, goals, key apps, pain points, success criteria…"
-                      data-action="set-brief-text"
-                      aria-label="Company brief notes"
-                    ">${STATE.brief.text}</textarea>
-                    <div class="mt-2 text-[11px] text-slate-400">Line breaks are preserved. Content is escaped (no HTML execution).</div>
-                  </div>
-
-                  <!-- Live Preview -->
-                  <div class="section-card p-4">
-                    <div class="flex items-center gap-2">
-                      <i data-lucide="presentation" class="w-5 h-5 text-sky-300"></i>
-                      <h3 class="text-base font-semibold">Presenter View</h3>
-                    </div>
-                    <div id="brief-preview" class="mt-2 text-sm text-slate-300 whitespace-pre-wrap">${escapeHtml(STATE.brief.text || 'Add your customer-specific notes on the left.')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Read card -->
-          <article class="section-card p-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="bookmark" class="w-5 h-5 text-sky-300"></i>
-              <h3 class="text-base font-semibold">Quick Read</h3>
-            </div>
-            <p id="brief-read" class="mt-2 text-sm text-slate-300 whitespace-pre-wrap">${escapeHtml(STATE.brief.text || 'Nothing here yet. Paste notes above.')}</p>
-          </article>
-        </section>
-      `;
-    }
-
-    /* ---------- Tab 1 (now 2nd): Current State ---------- */
+    /* ---------- Tab 1: Current State (with working dropdowns) ---------- */
     function renderProblems(){
       const items=[
         {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
@@ -240,7 +155,7 @@
         {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
       ];
       return `
-        <section id="panel-problems" class="space-y-3">
+        <section id="panel-problems" class="space-y-4">
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             ${items.map(p=>`
               <article class="section-card p-4">
@@ -251,7 +166,7 @@
           </div>
           <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
 
-          <!-- Three equal-width expandable dropdown cards -->
+          <!-- Dropdown cards: Why Change / Why Now / Why Recast (one open at a time) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
             ${calloutDropdown('change','alert-triangle','Why Change',[
               'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
@@ -279,24 +194,24 @@
       const expanded = STATE.openWhy === id;
       const contentId = `why-content-${id}`;
       return `
-        <div class="h-full flex flex-col rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10">
+        <div class="h-full flex flex-col">
           <button
             type="button"
-            class="w-full flex items-center justify-between px-5 ${headerTone} hover:brightness-110 transition focus-ring"
+            class="w-full rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10 focus-ring transition hover:ring-white/20"
             data-action="toggle-why"
             data-why="${id}"
             aria-expanded="${expanded}"
             aria-controls="${contentId}"
           >
-            <div class="flex items-center gap-2">
-              <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
-              <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">${label}</span>
+            <div class="${cx('flex items-center justify-between px-5', headerTone)}">
+              <div class="flex items-center gap-2">
+                <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
+                <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">${label}</span>
+              </div>
+              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
             </div>
-            <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
-          </button>
 
-          <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden transition-all duration-300 ease-out" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};">
-            <div class="px-6 py-5">
+            <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 280ms cubic-bezier(.2,.8,.2,1),opacity 280ms ease;padding:${expanded?'24px 20px':'0 20px'}">
               <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
                 ${bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
@@ -309,12 +224,12 @@
                 </div>
               `:''}
             </div>
-          </div>
+          </button>
         </div>
       `;
     }
 
-    /* ---------- Tab: Recast Approach (order preserved: flow left, cards right) ---------- */
+    /* ---------- Tab 2: Recast Approach (original order preserved) ---------- */
     function renderSolution(){
       const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
       const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
@@ -401,7 +316,7 @@
       `;
     }
 
-    /* ---------- Tab: Animated Flow (left side) ---------- */
+    /* ---------- Tab 2 left: Animated Flow (unchanged) ---------- */
     function renderFlow(){
       return `
         <div class="section-card p-4">
@@ -462,7 +377,6 @@
               `).join('')}
             </div>
 
-            <!-- End user -->
             <div class="mt-3">
               <div id="endUserCard" class="sub-card p-3">
                 <div class="flex items-center gap-3">
@@ -486,7 +400,7 @@
       `;
     }
 
-    /* ---------- Tab: Impact & ROI ---------- */
+    /* ---------- Tab 3: Impact & ROI (math working) ---------- */
     function renderROI(){
       const r = calcROI();
       return `
@@ -538,7 +452,7 @@
       `;
     }
 
-    /* ROI helpers */
+    /* ROI helpers (unchanged, verified) */
     function calcROI(){
       const i = STATE.roiInputs;
       const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
@@ -684,26 +598,10 @@
         render();
       }));
 
-      // NEW: Brief controls
-      const briefToggle = root.querySelector('[data-action="toggle-brief"]');
-      if (briefToggle) briefToggle.addEventListener('click', ()=>{
-        STATE.brief.expanded = !STATE.brief.expanded;
-        render();
-      });
-      const briefInput = root.querySelector('[data-action="set-brief-text"]');
-      if (briefInput) briefInput.addEventListener('input', e=>{
-        STATE.brief.text = e.target.value;
-        try { localStorage.setItem('recast-brief-notes', STATE.brief.text); } catch {}
-        const prev=document.getElementById('brief-preview');
-        const read=document.getElementById('brief-read');
-        if(prev){ prev.textContent = STATE.brief.text || 'Add your customer-specific notes on the left.'; }
-        if(read){ read.textContent = STATE.brief.text || 'Nothing here yet. Paste notes above.'; }
-      });
-
-      // Why* dropdowns (only one open at a time)
+      // Dropdown toggles (only one open at a time)
       root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
         const id=e.currentTarget.getAttribute('data-why');
-        STATE.openWhy = STATE.openWhy === id ? null : id;
+        STATE.openWhy = (STATE.openWhy === id) ? null : id;
         render();
       }));
 
@@ -740,7 +638,7 @@
       });
 
       const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      if (copyBtn) copyBtn.addEventListener('click', async ()=>{
+      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
         const i = STATE.roiInputs;
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
         const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
@@ -834,7 +732,6 @@ Notes: Illustrative; replace with your data.`;
       const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
       if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
       if(success) success.classList.add('hidden');
-      // Turn end user green after flow complete
       setTimeout(()=>{
         if(avatar){ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); }
         if(badge){ badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); }
@@ -846,7 +743,6 @@ Notes: Illustrative; replace with your data.`;
       const card=document.getElementById('flowCard'); if(!card) return;
       card.classList.remove('run');
       const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
-      // Reset end user to red
       const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
       if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
       if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
@@ -857,4 +753,3 @@ Notes: Illustrative; replace with your data.`;
   </script>
 </body>
 </html>
-```
