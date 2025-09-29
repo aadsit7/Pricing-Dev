@@ -16,6 +16,9 @@
     .section-card{border-radius:1rem;border:1px solid rgba(255,255,255,.08);background:#0c142b}
     .sub-card{border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:#0a1124}
 
+    /* Smooth collapses */
+    .collapse{overflow:hidden;transition:max-height 280ms cubic-bezier(.2,.8,.2,1),opacity 200ms ease,padding 200ms ease}
+
     /* Flow primitives */
     .tile{width:.45rem;height:.45rem;border-radius:.25rem;background:#334155;opacity:.9}
     .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
@@ -52,7 +55,7 @@
   <script>
     /* ---------- STATE ---------- */
     const STATE = {
-      activeTab: 'problems',
+      activeTab: 'brief', // start on overview for easier storytelling
       impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
       defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
       ctx: { device: 'Windows', network: 'Corporate', compliant: true },
@@ -61,13 +64,16 @@
       copied: false,
       showLabels: false,
       showSolutionCards: true,
-      openWhy: null, // ensures only one dropdown open at a time
+      openWhy: null,
+      brief: { expanded: true, text: '', lastSaved: null, saving: false }
     };
 
+    /* ---------- Tabs (order preserved; new Overview first) ---------- */
     const TABS = [
+      { id: 'brief',    label: 'Company Brief', icon: 'sticky-note' },
       { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
       { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
+      { id: 'roi',      label: 'Impact & ROI', icon: 'bar-chart-3' }
     ];
 
     /* ---------- Utils ---------- */
@@ -80,6 +86,16 @@
       return 'VDI';
     }
     function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function debounce(fn,ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); }; }
+
+    /* Restore brief notes if present */
+    try {
+      const saved = localStorage.getItem('recast-brief-notes');
+      if (saved !== null) STATE.brief.text = saved;
+      const ts = localStorage.getItem('recast-brief-notes-ts');
+      if (ts) STATE.brief.lastSaved = new Date(parseInt(ts,10)).toISOString();
+    } catch {}
 
     /* ---------- Root render ---------- */
     function render(){
@@ -95,9 +111,11 @@
               <span class="text-white">Recast Software</span>
             </h1>
             <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-slate-300">
-              ${STATE.activeTab==='problems'
-                ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
-                : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+              ${
+                STATE.activeTab==='brief'    ? 'Personalize this demo with customer-specific notes. Collapsible editor + clean presenter view.' :
+                STATE.activeTab==='problems' ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP' :
+                'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
+              }
             </p>
           </div>
           <div class="relative mx-auto max-w-6xl px-4">
@@ -112,19 +130,26 @@
         </header>
 
         <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${STATE.activeTab!=='problems' ? `
+          ${(STATE.activeTab==='solution' || STATE.activeTab==='roi') ? `
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
             ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
             ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
           </div>` : ''}
+
           <section class="mt-5">${renderActivePanel()}</section>
         </main>
       `;
       if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
-      if (STATE.activeTab === 'solution') { buildFlow(); } // keep original order: flow left, cards right
-      if (STATE.activeTab === 'roi') { updateROIOutputs(); } // ensure math works
+      if (STATE.activeTab === 'solution') { buildFlow(); }
+      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+
+      // Live bind preview/read without forcing a re-render every keystroke
+      const prev=document.getElementById('brief-preview');
+      const read=document.getElementById('brief-read');
+      if(prev){ prev.textContent = STATE.brief.text || 'Add your customer-specific notes on the left.'; }
+      if(read){ read.textContent = STATE.brief.text || 'Nothing here yet. Paste notes above.'; }
     }
 
     function chip(label,value,tone){
@@ -140,13 +165,88 @@
     }
 
     function renderActivePanel(){
+      if (STATE.activeTab==='brief') return renderBrief();
       if (STATE.activeTab==='problems') return renderProblems();
       if (STATE.activeTab==='solution') return renderSolution();
       if (STATE.activeTab==='roi') return renderROI();
       return '';
     }
 
-    /* ---------- Tab 1: Current State (with working dropdowns) ---------- */
+    /* ---------- OVERVIEW TAB: Company Brief (clean UX) ---------- */
+    function renderBrief(){
+      const expanded = STATE.brief.expanded;
+      const contentId = 'brief-content';
+      const length = STATE.brief.text.length;
+      const wordCount = (STATE.brief.text.trim().match(/\b[\w'-]+\b/g)||[]).length;
+      return `
+        <section id="panel-brief" class="space-y-4">
+          <div class="rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10">
+            <div class="w-full flex items-center justify-between px-5 bg-sky-900">
+              <div class="flex items-center gap-2">
+                <i data-lucide="sticky-note" class="w-5 h-5 text-white/95"></i>
+                <h2 class="py-4 text-[22px] font-extrabold tracking-tight text-white">Company Brief</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="hidden sm:inline text-xs text-white/80 tabular-nums">${wordCount} words • ${length} chars</span>
+                <span class="text-xs px-2 py-1 rounded-full ${STATE.brief.saving ? 'bg-white/20 text-white' : 'bg-white text-slate-900'}" aria-live="polite">
+                  ${STATE.brief.saving ? 'Saving…' : (STATE.brief.lastSaved ? 'Saved' : 'Not saved')}
+                </span>
+                <button type="button" class="rounded-full bg-white/10 text-white text-xs px-3 py-1 hover:bg-white/20 focus-ring" data-action="copy-brief">
+                  Copy
+                </button>
+                <button type="button" class="rounded-full bg-white text-slate-900 text-xs px-3 py-1 font-semibold hover:brightness-95 focus-ring" data-action="toggle-brief" aria-expanded="${expanded}" aria-controls="${contentId}">
+                  ${expanded ? 'Collapse' : 'Expand'}
+                </button>
+              </div>
+            </div>
+
+            <div id="${contentId}" class="bg-white text-slate-900 collapse ${expanded?'':'pointer-events-none'}" style="${expanded?'max-height:1200px;opacity:1;padding:20px;':'max-height:0;opacity:0;padding:0 20px;'}">
+              <div class="grid gap-4 lg:grid-cols-2">
+                <!-- Editor column -->
+                <div class="sub-card p-3 bg-[#0b1328] text-slate-200">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm font-semibold mb-2 flex items-center gap-2">
+                      <i data-lucide="edit-3" class="w-4 h-4"></i> Notes (paste/type)
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button type="button" class="rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20 focus-ring" data-action="brief-clear">Clear</button>
+                      <button type="button" class="rounded bg-white/10 px-2 py-1 text-xs hover:bg-white/20 focus-ring" data-action="brief-insert-template">Template</button>
+                    </div>
+                  </div>
+                  <textarea
+                    class="w-full h-52 rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm leading-[1.5] focus-ring"
+                    placeholder="Audience, goals, key apps, pain points, success criteria…"
+                    data-action="set-brief-text"
+                    aria-label="Company brief notes"
+                  >${STATE.brief.text}</textarea>
+                  <div class="mt-2 text-[11px] text-slate-400">Line breaks are preserved. Content is escaped (no HTML execution).</div>
+                </div>
+
+                <!-- Presenter preview -->
+                <div class="section-card p-4">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="presentation" class="w-5 h-5 text-sky-300"></i>
+                    <h3 class="text-base font-semibold">Presenter View</h3>
+                  </div>
+                  <div id="brief-preview" class="mt-2 text-sm text-slate-300 whitespace-pre-wrap">${escapeHtml(STATE.brief.text || 'Add your customer-specific notes on the left.')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clean read-only panel that mirrors the card look -->
+          <article class="section-card p-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="bookmark" class="w-5 h-5 text-sky-300"></i>
+              <h3 class="text-base font-semibold">Quick Read</h3>
+            </div>
+            <p id="brief-read" class="mt-2 text-sm text-slate-300 whitespace-pre-wrap">${escapeHtml(STATE.brief.text || 'Nothing here yet. Paste notes above.')}</p>
+          </article>
+        </section>
+      `;
+    }
+
+    /* ---------- CURRENT STATE (Why* dropdowns; one open at a time) ---------- */
     function renderProblems(){
       const items=[
         {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
@@ -164,22 +264,20 @@
               </article>
             `).join('')}
           </div>
+
           <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
 
-          <!-- Dropdown cards: Why Change / Why Now / Why Recast (one open at a time) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
             ${calloutDropdown('change','alert-triangle','Why Change',[
               'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
               'Too many apps, too many updates. Thousands of apps, constant versions — IT can’t keep up, slowing adoption and raising risk.',
               'Innovation waits on apps. Every transformation — cloud, security, AI — gets delayed if app delivery isn’t solved first.'
             ], 'bg-teal-900')}
-
             ${calloutDropdown('now','clock-4','Why Now',[
               'Faster change cycles. OS updates, AI tools, and SaaS shifts are constant — apps must keep pace.',
               'Rising risk. Zero-days and compliance rules make delayed patching unacceptable',
               'Shrinking teams. IT capacity isn’t growing, but demands are. Fix app management first, or nothing else moves.'
             ], 'bg-purple-900')}
-
             ${calloutDropdown('recast','sparkles','Why Recast',[
               'One platform for every app. Package, patch, and deliver from a single place across all devices and management tools.',
               'Proven scale. 7,000+ curated apps, automated updates, and instant delivery slash manual effort.',
@@ -194,42 +292,40 @@
       const expanded = STATE.openWhy === id;
       const contentId = `why-content-${id}`;
       return `
-        <div class="h-full flex flex-col">
+        <div class="h-full flex flex-col rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10">
           <button
             type="button"
-            class="w-full rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10 focus-ring transition hover:ring-white/20"
+            class="w-full flex items-center justify-between px-5 ${headerTone} hover:brightness-110 transition focus-ring"
             data-action="toggle-why"
             data-why="${id}"
             aria-expanded="${expanded}"
             aria-controls="${contentId}"
           >
-            <div class="${cx('flex items-center justify-between px-5', headerTone)}">
-              <div class="flex items-center gap-2">
-                <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
-                <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">${label}</span>
-              </div>
-              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
+            <div class="flex items-center gap-2">
+              <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
+              <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">${label}</span>
             </div>
-
-            <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 280ms cubic-bezier(.2,.8,.2,1),opacity 280ms ease;padding:${expanded?'24px 20px':'0 20px'}">
-              <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
-                ${bullets.map(b=>`<li>${b}</li>`).join('')}
-              </ul>
-              ${cta?`
-                <div class="mt-6 flex justify-end">
-                  <button type="button" data-action="advance" data-next="solution" class="inline-flex rounded-full bg-[#0b1020] text-white text-[14px] font-semibold px-4 py-2 items-center gap-2 hover:brightness-110 focus-ring">
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    How Recast solves it
-                  </button>
-                </div>
-              `:''}
-            </div>
+            <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
           </button>
+
+          <div id="${contentId}" class="bg-white text-slate-900 collapse" style="${expanded?'max-height:1200px;opacity:1;padding:20px;':'max-height:0;opacity:0;padding:0 20px;'}">
+            <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
+              ${bullets.map(b=>`<li>${b}</li>`).join('')}
+            </ul>
+            ${cta?`
+              <div class="mt-6 flex justify-end">
+                <button type="button" data-action="advance" data-next="solution" class="inline-flex rounded-full bg-[#0b1020] text-white text-[14px] font-semibold px-4 py-2 items-center gap-2 hover:brightness-110 focus-ring">
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                  How Recast solves it
+                </button>
+              </div>
+            `:''}
+          </div>
         </div>
       `;
     }
 
-    /* ---------- Tab 2: Recast Approach (original order preserved) ---------- */
+    /* ---------- RECAST APPROACH (original order preserved) ---------- */
     function renderSolution(){
       const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
       const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
@@ -316,7 +412,7 @@
       `;
     }
 
-    /* ---------- Tab 2 left: Animated Flow (unchanged) ---------- */
+    /* ---------- Animated Flow (left) ---------- */
     function renderFlow(){
       return `
         <div class="section-card p-4">
@@ -331,7 +427,7 @@
             <div class="flex items-center gap-2 text-[12px] text-slate-300">
               <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 hover:bg-white/20" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
               <button type="button" data-action="start-flow" class="rounded-full bg-white px-2.5 py-1.5 text-[12px] font-semibold text-slate-900 hover:brightness-95">Start</button>
-              <button type="button" data-action="reset-flow" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[12px] hover:bg-white/20">Reset</button>
+              <button type="button" data-action="reset-flow" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 hover:bg-white/20">Reset</button>
             </div>
           </div>
 
@@ -400,7 +496,7 @@
       `;
     }
 
-    /* ---------- Tab 3: Impact & ROI (math working) ---------- */
+    /* ---------- IMPACT & ROI (math + formatting) ---------- */
     function renderROI(){
       const r = calcROI();
       return `
@@ -411,7 +507,7 @@
             ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
             ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Illustrative only', 'kpi-year')}
             ${kpiId('percent','ROI', r.roiPct+'%', 'Net of subscription', 'kpi-roi')}
-            ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
+            ${kpiId('inbox','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
           </div>
 
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -452,7 +548,7 @@
       `;
     }
 
-    /* ROI helpers (unchanged, verified) */
+    /* ---------- ROI helpers ---------- */
     function calcROI(){
       const i = STATE.roiInputs;
       const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
@@ -598,20 +694,75 @@
         render();
       }));
 
-      // Dropdown toggles (only one open at a time)
+      // Brief controls
+      const briefToggle = root.querySelector('[data-action="toggle-brief"]');
+      if (briefToggle) briefToggle.addEventListener('click', ()=>{
+        STATE.brief.expanded = !STATE.brief.expanded;
+        render();
+      });
+
+      const briefInput = root.querySelector('[data-action="set-brief-text"]');
+      if (briefInput) {
+        const saveNow = ()=>{
+          try {
+            localStorage.setItem('recast-brief-notes', STATE.brief.text);
+            localStorage.setItem('recast-brief-notes-ts', String(Date.now()));
+          } catch {}
+          STATE.brief.saving=false;
+          STATE.brief.lastSaved = new Date().toISOString();
+          const badge = document.querySelector('[aria-live="polite"]');
+          if (badge) { badge.textContent = 'Saved'; badge.className = 'text-xs px-2 py-1 rounded-full bg-white text-slate-900'; }
+        };
+        const debouncedSave = debounce(saveNow, 450);
+
+        briefInput.addEventListener('input', e=>{
+          STATE.brief.text = e.target.value;
+          STATE.brief.saving=true;
+          const prev=document.getElementById('brief-preview');
+          const read=document.getElementById('brief-read');
+          if(prev){ prev.textContent = STATE.brief.text || 'Add your customer-specific notes on the left.'; }
+          if(read){ read.textContent = STATE.brief.text || 'Nothing here yet. Paste notes above.'; }
+          debouncedSave();
+        });
+      }
+
+      const briefClear = root.querySelector('[data-action="brief-clear"]');
+      if (briefClear) briefClear.addEventListener('click', ()=>{
+        STATE.brief.text = '';
+        render();
+      });
+
+      const briefTemplate = root.querySelector('[data-action="brief-insert-template"]');
+      if (briefTemplate) briefTemplate.addEventListener('click', ()=>{
+        const tpl = `Audience:\n- CIO / Director of EUC\n\nGoals:\n- Faster, safer app delivery across Windows/macOS/VDI\n\nPain Points:\n- Packaging backlog, zero-day exposure, stalled upgrades\n\nSuccess Criteria:\n- Cut packaging hours, reduce patch window, improve adoption\n\nKey Apps:\n- Office, Browsers, Security stack, Collaboration`;
+        STATE.brief.text = STATE.brief.text ? STATE.brief.text + '\n\n' + tpl : tpl;
+        render();
+      });
+
+      const copyBrief = root.querySelector('[data-action="copy-brief"]');
+      if (copyBrief) copyBrief.addEventListener('click', async ()=>{
+        try { await navigator.clipboard.writeText(STATE.brief.text || ''); } catch {
+          const ta=document.createElement('textarea'); ta.value=STATE.brief.text||''; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        copyBrief.textContent = 'Copied';
+        setTimeout(()=>{ copyBrief.textContent='Copy'; }, 900);
+      });
+
+      // Why* dropdowns (one open)
       root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
         const id=e.currentTarget.getAttribute('data-why');
-        STATE.openWhy = (STATE.openWhy === id) ? null : id;
+        STATE.openWhy = STATE.openWhy === id ? null : id;
         render();
       }));
 
+      // Solution interactivity
       root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
       root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
       root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
 
-      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); });
-      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); });
-      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); });
+      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); const saved=Math.max(0,STATE.packHrs-STATE.configHrs); const el=e.currentTarget.closest('.sub-card')?.querySelector('strong'); if(el) el.textContent = saved+' hrs saved'; });
+      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); const saved=Math.max(0,STATE.packHrs-STATE.configHrs); const el=e.currentTarget.closest('.sub-card')?.querySelector('strong'); if(el) el.textContent = saved+' hrs saved'; });
+      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); const reduced=Math.max(0,STATE.currentHrs-1.5); const el=e.currentTarget.closest('.sub-card')?.querySelector('strong'); if(el) el.textContent = round(reduced)+' hrs reduced'; });
 
       root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
         const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
@@ -622,6 +773,7 @@
         render();
       }));
 
+      // ROI listeners
       root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
         const key=e.currentTarget.getAttribute('data-key');
         const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); 
@@ -638,7 +790,7 @@
       });
 
       const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+      if (copyBtn) copyBtn.addEventListener('click', async ()=>{
         const i = STATE.roiInputs;
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
         const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
@@ -680,6 +832,7 @@ Notes: Illustrative; replace with your data.`;
         STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
       });
 
+      // Flow controls
       const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
       const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
       const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
