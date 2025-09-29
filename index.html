@@ -60,7 +60,8 @@
       roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
       copied: false,
       showLabels: false,
-      showSolutionCards: true
+      showSolutionCards: true,
+      openWhy: null
     };
 
     const TABS = [
@@ -165,51 +166,71 @@
           </div>
           <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
 
-          <!-- Boardroom-ready three-column cards -->
+          <!-- Three equal-width expandable dropdown cards -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
-            ${callout('alert-triangle','Why Change',[
+            ${calloutDropdown('change','alert-triangle','Why Change',[
               'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
               'Too many apps, too many updates. Thousands of apps, constant versions — IT can’t keep up, slowing adoption and raising risk.',
               'Innovation waits on apps. Every transformation — cloud, security, AI — gets delayed if app delivery isn’t solved first.'
-            ])}
+            ], 'bg-sky-900')}
 
-            ${callout('clock-4','Why Now',[
+            ${calloutDropdown('now','clock-4','Why Now',[
               'Faster change cycles. OS updates, AI tools, and SaaS shifts are constant — apps must keep pace.',
               'Rising risk. Zero-days and compliance rules make delayed patching unacceptable',
               'Shrinking teams. IT capacity isn’t growing, but demands are. Fix app management first, or nothing else moves.'
-            ])}
+            ], 'bg-indigo-900')}
 
-            ${callout('sparkles','Why Recast',[
+            ${calloutDropdown('recast','sparkles','Why Recast',[
               'One platform for every app. Package, patch, and deliver from a single place across all devices and management tools.',
               'Proven scale. 7,000+ curated apps, automated updates, and instant delivery slash manual effort.',
               'Fuel for innovation. By removing app friction, Recast lets enterprises adopt new tech faster, safer, and with less risk.'
-            ], true)}
+            ], 'bg-fuchsia-900', true)}
           </div>
         </section>
       `;
     }
 
-    /* Boardroom callout card per notes */
-    function callout(icon,label,bullets,cta=false){
+    /* Boardroom-ready expandable card */
+    function calloutDropdown(id, icon, label, bullets, headerTone, cta=false){
+      const expanded = STATE.openWhy === id;
+      const contentId = `why-content-${id}`;
       return `
-        <div class="bg-white text-slate-900 border border-slate-200 shadow-sm rounded-2xl p-6 h-full flex flex-col" role="group" aria-label="${label}">
-          <div class="inline-flex items-center gap-2">
-            <i data-lucide="${icon}" class="w-5 h-5 text-slate-700" aria-hidden="true"></i>
-            <span class="px-3 py-1.5 rounded-md bg-slate-100 text-[27px] font-bold leading-none">${label}</span>
-          </div>
-
-          <ul class="mt-5 list-disc pl-6 text-[22px] leading-[1.45] space-y-3 text-slate-800 flex-1">
-            ${bullets.map(b=>`<li class="text-left">${b}</li>`).join('')}
-          </ul>
-
-          ${cta?`
-            <div class="mt-6 flex justify-end">
-              <button type="button" data-action="advance" data-next="solution" class="rounded-full bg-[#0b1020] px-4 py-2 text-base font-semibold text-white focus-ring inline-flex items-center gap-2">
-                <i data-lucide="arrow-right" class="w-5 h-5" aria-hidden="true"></i>
-                <span>How Recast solves it</span>
-              </button>
+        <div class="h-full flex flex-col">
+          <button
+            type="button"
+            class="w-full rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10 focus-ring group"
+            data-action="toggle-why"
+            data-why="${id}"
+            aria-expanded="${expanded}"
+            aria-controls="${contentId}"
+          >
+            <div class="${cx('flex items-center justify-between px-5', headerTone)}">
+              <div class="flex items-center gap-2">
+                <i data-lucide="${icon}" class="w-5 h-5 text-white/90" aria-hidden="true"></i>
+                <span class="py-4 text-[22px] font-extrabold tracking-tight text-white sm:text-[24px]">${label}</span>
+              </div>
+              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
             </div>
-          `:''}
+
+            <div id="${contentId}" class="${cx(
+              'bg-white text-slate-900 transition-all duration-300 ease-in-out overflow-hidden',
+              expanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'
+            )}">
+              <div class="${cx('px-6', expanded ? 'py-6' : 'py-0')}">
+                <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
+                  ${bullets.map(b=>`<li>${b}</li>`).join('')}
+                </ul>
+                ${cta?`
+                  <div class="mt-6 flex justify-end">
+                    <span class="inline-flex rounded-full bg-[#0b1020] text-white text-sm font-semibold px-4 py-2 items-center gap-2">
+                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                      How Recast solves it
+                    </span>
+                  </div>
+                `:''}
+              </div>
+            </div>
+          </button>
         </div>
       `;
     }
@@ -565,7 +586,7 @@
       return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
     }
     function flameLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
+      return { name, svg: `<svg xmlns="http://www.w3.org/0/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
     }
     function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
 
@@ -581,6 +602,13 @@
       root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
         STATE.activeTab=e.currentTarget.getAttribute('data-next'); 
         if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
+        render();
+      }));
+
+      // Expand/collapse for Why* cards (only one open at a time)
+      root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
+        const id=e.currentTarget.getAttribute('data-why');
+        STATE.openWhy = STATE.openWhy === id ? null : id;
         render();
       }));
 
