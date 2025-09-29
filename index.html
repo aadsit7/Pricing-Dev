@@ -2,523 +2,759 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Recast + Microsoft Intune — Better Together</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Recast — Compact Click-Through (Realistic Catalog)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"></noscript>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            base: '#0B1220',
-            panel: '#0E1628',
-            line: 'rgba(255,255,255,.08)',
-            textDim: '#9aa5b1',
-            purple: '#7c3aed',
-            purpleDeep: '#5b21b6',
-            cyan: '#06b6d4',
-            yellow: '#facc15'
-          },
-          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'] },
-          boxShadow: {
-            card: '0 10px 28px rgba(0,0,0,.35)',
-            glowPurple: '0 0 0 3px rgba(124,58,237,.35), 0 0 40px rgba(124,58,237,.25)',
-            glowCyan: '0 0 0 3px rgba(6,182,212,.35), 0 0 40px rgba(6,182,212,.25)'
-          },
-          borderRadius: { '3xl': '1.5rem' }
-        }
-      }
-    };
-  </script>
+  <link rel="preconnect" href="https://unpkg.com">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .focus-ring:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+    html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+    .section-card{border-radius:1rem;border:1px solid rgba(255,255,255,.08);background:#0c142b}
+    .sub-card{border-radius:.75rem;border:1px solid rgba(255,255,255,.08);background:#0a1124}
+    .tile{width:.45rem;height:.45rem;border-radius:.25rem;background:#334155;opacity:.9}
+    .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
+    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
+    .flow-bar{height:.22rem;border-radius:.25rem;transform-origin:left center;transform:scaleX(0)}
+    .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
+    @keyframes barGrow{to{transform:scaleX(1)}}
+    .bolt-line{width:.22rem;border-radius:.25rem;transform-origin:top center;transform:scaleY(0)}
+    .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
+    @keyframes boltDrop{to{transform:scaleY(1)}}
+    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+    .logo-wrap{display:flex;align-items:center;gap:.4rem}
+    .logo-name{font-size:.7rem;color:#cbd5e1;white-space:nowrap}
+    .run .logo-ring{animation:appPop .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
+    @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.65}60%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
+    .user-beam{height:.38rem;border-radius:.38rem;transform-origin:left center;transform:scaleX(0)}
+    .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
+    .badge{width:1.15rem;height:1.15rem;border-radius:.3rem;opacity:0;transform:translateY(-6px) scale(.9)}
+    .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
+    @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
+    .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
+    .cat-title{font-size:.7rem;letter-spacing:.08em}
+  </style>
 </head>
-<body class="min-h-screen bg-base text-white font-sans antialiased selection:bg-purple/30 selection:text-white">
-  <header class="sticky top-0 z-30 border-b border-line bg-base/85 backdrop-blur">
-    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-4">
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="grid h-9 w-9 place-items-center rounded-2xl bg-purple/20 ring-1 ring-purple/40">
-            <i data-lucide="hexagon" class="h-5 w-5 text-purple"></i>
+<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
+  <div id="app" class="min-h-screen"></div>
+
+  <script>
+    const STATE = {
+      activeTab: 'problems',
+      impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
+      defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
+      ctx: { device: 'Windows', network: 'Corporate', compliant: true },
+      packHrs: 8, configHrs: 2, currentHrs: 24,
+      roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
+      copied: false,
+      showLabels: false,
+      showSolutionCards: true,
+      openWhy: null,
+    };
+
+    const TABS = [
+      { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
+      { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
+      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
+    ];
+
+    function cx(...a){ return a.filter(Boolean).join(' '); }
+    function round(n){ return Math.round(n*100)/100; }
+    function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
+    function routeRecommendation(ctx){
+      if(!ctx.compliant) return 'Web';
+      if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
+      return 'VDI';
+    }
+    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+
+    function render(){
+      const root=document.getElementById('app');
+      const isSolution = STATE.activeTab==='solution';
+      root.innerHTML = `
+        <header class="relative overflow-hidden">
+          <div aria-hidden="true" class="absolute inset-0">
+            <div class="absolute -top-40 -left-28 h-[420px] w-[420px] blur-[110px] rounded-full bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
+            <div class="absolute -top-16 right-0 h-[280px] w-[280px] blur-[110px] rounded-full bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
           </div>
-          <div>
-            <h1 class="text-xl sm:text-2xl font-extrabold leading-none">Recast + Microsoft Intune</h1>
-            <p class="text-xs text-textDim">Better Together • Application management accelerates Intune adoption</p>
+          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
+            <h1 class="text-[32px] font-extrabold leading-tight">
+              <span class="text-white">${isSolution ? 'The Fastest Path to Modern Management with Intune' : 'Recast Software'}</span>
+            </h1>
+            <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-slate-300">
+              ${STATE.activeTab==='problems'
+                ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
+                : isSolution
+                  ? 'Enterprises can’t fully adopt Intune until app delivery is solved. Recast eliminates that friction — delivering apps at scale, across every device, so modernization projects move forward without delay.'
+                  : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+            </p>
+          </div>
+          <div class="relative mx-auto max-w-6xl px-4">
+            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
+              ${TABS.map(t=>`
+                <button type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                  <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </header>
+
+        <main class="mx-auto max-w-6xl px-4 pb-16">
+          ${STATE.activeTab!=='problems' ? `
+          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
+            ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
+            ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+          </div>` : ''}
+          <section class="mt-5">${renderActivePanel()}</section>
+        </main>
+      `;
+      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+      attachEvents();
+      if (STATE.activeTab === 'solution') { buildFlow(); }
+      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+    }
+
+    function chip(label,value,tone){
+      const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
+      return `
+        <div class="section-card p-3">
+          <div class="text-[11px] text-slate-300">${label}</div>
+          <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
+            <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
           </div>
         </div>
-        <nav id="tabs" aria-label="Primary" class="flex items-center gap-2">
-          <button class="tab" data-tab="current" aria-controls="view" aria-selected="true">
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 ring-line bg-white/10 text-[13px]">
-              <i data-lucide="activity" class="h-4 w-4"></i> Current State
-            </span>
+      `;
+    }
+
+    function renderActivePanel(){
+      if (STATE.activeTab==='problems') return renderProblems();
+      if (STATE.activeTab==='solution') return renderSolution();
+      if (STATE.activeTab==='roi') return renderROI();
+      return '';
+    }
+
+    function renderProblems(){
+      const items=[
+        {t:'Inconsistent app experience',s:'Apps delivered differently across endpoints create complexity. Without unified delivery in Intune, IT is forced to manage multiple workflows, slowing adoption.',i:'layers'},
+        {t:'Intune migration bottlenecks',s:'Thousands of apps need to be rebuilt for Intune. Backlogs stall migrations, leaving customers stuck in co-management or delaying Intune cutover.',i:'boxes'},
+        {t:'Security gaps in Intune',s:'Delayed Intune app patching exposes enterprises to zero-day attacks and compliance failures — unacceptable in today’s threat landscape.',i:'shield'},
+        {t:'Stalled modernization',s:'App readiness is the #1 blocker to Windows and Intune upgrades. Without automated delivery, modernization stalls.',i:'layout-grid'}
+      ];
+      return `
+        <section id="panel-problems" class="space-y-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            ${items.map(p=>`
+              <article class="section-card p-4">
+                <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-sky-300"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
+                <p class="mt-1 text-sm text-slate-300">${p.s}</p>
+              </article>
+            `).join('')}
+          </div>
+          <p class="text-sm text-slate-300">Too many apps, too many updates — IT can’t keep up, leaving systems behind and security at risk.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
+            ${calloutDropdown(
+              'change',
+              'alert-triangle',
+              'Why Change',
+              [
+                'App delivery is the last barrier to Intune adoption. Customers can move devices and policies into Intune, but without a scalable way to package, patch, and deliver apps, rollouts stall.',
+                'Fragmentation slows Intune migrations. Too many apps, too many updates — IT can’t keep pace, which means Intune projects hit delays or require hybrid co-management for far too long.',
+                'Transformation depends on apps. Cloud security, AI, and Windows modernization all grind to a halt until apps are managed at scale in Intune.'
+              ],
+              'bg-teal-900',
+              false,
+              'This sets up app management as the hidden blocker to Microsoft’s own Intune growth targets.'
+            )}
+
+            ${calloutDropdown(
+              'now',
+              'clock-4',
+              'Why Now',
+              [
+                'Modern work moves fast. Windows updates, SaaS changes, and AI-powered tools update constantly. If apps don’t keep up, Intune adoption lags.',
+                'Security pressure is mounting. Zero-day attacks and compliance requirements make slow patching unacceptable — Intune needs apps delivered faster than legacy SCCM or manual packaging allows.',
+                'Capacity crunch. IT teams aren’t growing, but Microsoft keeps adding Intune workloads. If app management isn’t solved, enterprises delay migrations or underutilize Intune investments.'
+              ],
+              'bg-purple-900',
+              false,
+              'This creates urgency: Microsoft risks stalled Intune adoption without solving app delivery.'
+            )}
+
+            ${calloutDropdown(
+              'recast',
+              'sparkles',
+              'Why Recast',
+              [
+                'App management built for Intune. Recast delivers packaging, patching, and deployment from a single platform that extends Intune’s reach — no extra infrastructure, no hybrid reliance.',
+                'Enterprise scale, proven today. 7,000+ curated apps, automated updates, and instant delivery eliminate manual effort and let customers realize Intune value faster.',
+                'Accelerates Microsoft growth. By removing app friction, Recast helps Microsoft land Intune faster, expand workloads (security, compliance, AI), and increase cloud stickiness.'
+              ],
+              'bg-fuchsia-900',
+              true,
+              'This makes Recast a force multiplier for Microsoft’s Intune adoption strategy.'
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function calloutDropdown(id, icon, label, bullets, headerTone, cta=false, supportLine=''){
+      const expanded = STATE.openWhy === id;
+      const contentId = `why-content-${id}`;
+      return `
+        <div class="h-full flex flex-col">
+          <button
+            type="button"
+            class="w-full rounded-2xl overflow-hidden shadow-sm ring-1 ring-white/10 focus-ring transition hover:ring-white/20"
+            data-action="toggle-why"
+            data-why="${id}"
+            aria-expanded="${expanded}"
+            aria-controls="${contentId}"
+          >
+            <div class="${cx('flex items-center justify-between px-5', headerTone)}">
+              <div class="flex items-center gap-2">
+                <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
+                <span class="py-4 text-[22px] font-extrabold tracking-tight text-white">${label}</span>
+              </div>
+              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
+            </div>
+
+            <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 280ms cubic-bezier(.2,.8,.2,1),opacity 280ms ease;padding:${expanded?'24px 20px':'0 20px'}">
+              <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
+                ${bullets.map(b=>`<li>${b}</li>`).join('')}
+              </ul>
+              ${supportLine ? `<p class="mt-4 text-[14px] text-slate-700">${supportLine}</p>` : ''}
+              ${cta?`
+                <div class="mt-6 flex justify-end">
+                  <button type="button" data-action="advance" data-next="solution" class="inline-flex rounded-full bg-[#0b1020] text-white text-[14px] font-semibold px-4 py-2 items-center gap-2 hover:brightness-110 focus-ring">
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    How Recast solves it
+                  </button>
+                </div>
+              `:''}
+            </div>
           </button>
-          <button class="tab" data-tab="approach" aria-controls="view" aria-selected="false">
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 ring-line bg-white/5 text-[13px]">
-              <i data-lucide="workflow" class="h-4 w-4"></i> Recast Approach
-            </span>
-          </button>
-          <button class="tab" data-tab="impact" aria-controls="view" aria-selected="false">
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 ring-line bg-white/5 text-[13px]">
-              <i data-lucide="line-chart" class="h-4 w-4"></i> Impact & ROI
-            </span>
-          </button>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <main id="app" class="mx-auto max-w-6xl px-4 sm:px-6 py-6 md:py-8" role="main" aria-live="polite"></main>
-
-  <div id="cdn-banner" class="hidden fixed bottom-4 left-1/2 z-50 w-[92vw] max-w-lg -translate-x-1/2 rounded-xl bg-rose-900/90 ring-1 ring-rose-600 px-4 py-3">
-    <div class="flex items-start gap-2">
-      <i data-lucide="alert-triangle" class="h-5 w-5"></i>
-      <p class="text-sm">Some CDN assets failed to load. The page still works, but icons/styles may look different.</p>
-    </div>
-  </div>
-
-  <script>
-    // ========= GLOBAL STATE =========
-    const STATE = {
-      activeTab: 'current',
-      reducedMotion: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      metrics: { minutesPerUser: 9, packagingHours: 6, zeroDayHours: 0 },
-      roi: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
-      catalog: [
-        { name: 'Microsoft 365', cat: 'Core Productivity' },
-        { name: 'Teams', cat: 'Messaging' },
-        { name: 'Edge', cat: 'Browsers' },
-        { name: 'Chrome', cat: 'Browsers' },
-        { name: 'Zoom', cat: 'Messaging' },
-        { name: 'Slack', cat: 'Messaging' },
-        { name: 'SAP', cat: 'Enterprise' },
-        { name: 'Salesforce', cat: 'Enterprise' },
-        { name: 'Adobe Reader', cat: 'Creative' },
-        { name: 'Okta', cat: 'Security' },
-        { name: 'VLC', cat: 'Utilities' },
-        { name: 'Notepad++', cat: 'Utilities' }
-      ]
-    };
-
-    // ========= HELPERS =========
-    function el(tag, attrs = {}, children = []) {
-      const node = document.createElement(tag);
-      for (const [k, v] of Object.entries(attrs)) {
-        if (k === 'class') node.className = v;
-        else if (k === 'html') node.innerHTML = v;
-        else if (k === 'text') node.textContent = v;
-        else node.setAttribute(k, v);
-      }
-      (Array.isArray(children) ? children : [children]).filter(Boolean).forEach(c => node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
-      return node;
-    }
-    function icon(name, cls = 'h-4 w-4') { return el('i', { 'data-lucide': name, class: cls }); }
-    function fmt(num) { return Number(num).toLocaleString(); }
-    function safeLucide() { try { window.lucide && window.lucide.createIcons(); } catch (_) {} }
-    function field(id) { return document.getElementById(id); }
-
-    // ========= ROOT RENDER =========
-    function render() {
-      const root = field('app');
-      root.innerHTML = '';
-      root.appendChild(renderSummaryStrip());
-
-      if (STATE.activeTab === 'current') root.appendChild(renderCurrentState());
-      if (STATE.activeTab === 'approach') root.appendChild(renderApproach());
-      if (STATE.activeTab === 'impact') root.appendChild(renderImpact());
-
-      safeLucide();
+        </div>
+      `;
     }
 
-    // Top metric strip (consistent across tabs)
-    function renderSummaryStrip() {
-      const wrap = el('section', { class: 'mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3' });
-      wrap.appendChild(metricCard('Minutes saved (per user / mo)', STATE.metrics.minutesPerUser, 'timer', 'bg-emerald-400/10 ring-emerald-400/50 text-emerald-200'));
-      wrap.appendChild(metricCard('Packaging hours avoided', STATE.metrics.packagingHours, 'package', 'bg-cyan-400/10 ring-1 ring-cyan-400/50 text-cyan-200'));
-      wrap.appendChild(metricCard('Zero-day window reduced (hrs)', STATE.metrics.zeroDayHours, 'shield-alert', 'bg-yellow/10 ring-1 ring-yellow/50 text-yellow-200'));
-      return wrap;
-    }
-    function metricCard(label, value, iconName, toneClass) {
-      return el('div', { class: 'rounded-2xl ring-1 ring-line bg-white/5 px-4 py-3 flex items-center justify-between' }, [
-        el('div', { class: 'flex items-center gap-2' }, [icon(iconName), el('span', { class: 'text-sm text-slate-300' }, label)]),
-        el('span', { class: `text-xs font-semibold rounded-full px-2 py-0.5 ${toneClass}` }, typeof value === 'number' ? fmt(value) : value)
-      ]);
-    }
-
-    // ========= VIEW: CURRENT STATE =========
-    function renderCurrentState() {
-      const view = el('section', { class: 'space-y-5', 'aria-label': 'Current State' });
-
-      const hero = el('div', { class: 'rounded-3xl ring-1 ring-line bg-white/5 p-4 md:p-5 shadow-card' }, [
-        el('h2', { class: 'text-lg md:text-xl font-bold mb-2 flex items-center gap-2' }, [icon('map'), 'Current State: Intune adoption stalls on apps']),
-        el('div', { class: 'grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3' }, [
-          pill('Fragmented delivery', 'Windows / macOS / Web — users guess the right way.', 'split-square-vertical'),
-          pill('Packaging backlog', 'Rebuild per version; updates stall.', 'package-plus'),
-          pill('Zero-day exposure', 'Patching takes days, not minutes.', 'alarm-clock'),
-          pill('Slow upgrades', 'Stuck to old images; change is slow.', 'gauge')
-        ]),
-        el('p', { class: 'text-sm text-textDim' }, 'Too many apps and too many updates — IT can’t keep up. Without modern application management, Intune projects slow or stall and risk grows.')
-      ]);
-      view.appendChild(hero);
-
-      const grid = el('div', { class: 'grid md:grid-cols-3 gap-4' });
-      grid.appendChild(accordion('Why Change', [
-        'Apps are the #1 bottleneck. Devices and policy don’t matter if apps aren’t packaged, patched, and proven.',
-        'Constant version churn across thousands of apps slows IT and raises risk.',
-        'Every transformation (cloud, security, AI) waits until app delivery is solved.'
-      ], 'alert-triangle'));
-      grid.appendChild(accordion('Why Now', [
-        'OS, SaaS, and AI tools update faster than ever — manual work can’t keep pace.',
-        'Zero-days and compliance deadlines make slow patching unacceptable.',
-        'Teams are shrinking — automation is the only lever left.'
-      ], 'clock'));
-      grid.appendChild(accordion('Why Recast + Intune', [
-        'One platform for every app: package, patch, and deliver directly into Intune.',
-        'Proven scale with 7,000+ curated apps and automated updates.',
-        'Removes app friction, accelerating Intune migration and ongoing management.'
-      ], 'sparkles'));
-      view.appendChild(grid);
-
-      return view;
-    }
-    function pill(title, desc, iconName) {
-      return el('article', { class: 'rounded-2xl bg-white/5 ring-1 ring-line p-4' }, [
-        el('div', { class: 'flex items-center gap-2 mb-1.5' }, [icon(iconName, 'h-4 w-4 text-cyan'), el('h3', { class: 'text-sm font-semibold' }, title)]),
-        el('p', { class: 'text-xs text-textDim leading-relaxed' }, desc)
-      ]);
-    }
-    function accordion(title, bullets, iconName) {
-      const root = el('section', { class: 'rounded-2xl overflow-hidden ring-1 ring-line bg-white/5' });
-      const btn = el('button', {
-        class: 'w-full text-left bg-purple hover:bg-purpleDeep focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 px-4 py-2.5 flex items-center justify-between'
-      }, [
-        el('div', { class: 'flex items-center gap-2' }, [icon(iconName), el('span', { class: 'font-semibold' }, title)]),
-        icon('chevron-down')
-      ]);
-      const panel = el('div', { class: 'p-4 space-y-2 bg-white/5' });
-      const ul = el('ul', { class: 'list-disc pl-5 space-y-2 text-sm text-slate-200' });
-      bullets.forEach(b => ul.appendChild(el('li', {}, b)));
-      panel.appendChild(ul);
-      root.appendChild(btn);
-      root.appendChild(panel);
-      panel.style.display = 'block';
-      btn.addEventListener('click', () => { panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; });
-      return root;
+    function renderSolution(){
+      const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
+      const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
+      const route=routeRecommendation(STATE.ctx);
+      return `
+        <section id="panel-solution" class="space-y-3">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            ${renderFlow()}
+            <div class="flex flex-col gap-3">
+              ${STATE.showSolutionCards ? `
+                ${cardUpdateOnce(saved)}
+                ${cardZeroDay(reduced)}
+                ${cardOneIcon(route)}
+              ` : `
+                <div class="section-card p-4 flex items-center justify-center">
+                  <button type="button" data-action="show-solution-cards" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 focus-ring">Show</button>
+                </div>
+              `}
+            </div>
+          </div>
+        </section>
+      `;
     }
 
-    // ========= VIEW: APPROACH =========
-    function renderApproach() {
-      const view = el('section', { class: 'space-y-5', 'aria-label': 'Recast Approach' });
-
-      view.appendChild(el('div', { class: 'rounded-3xl ring-1 ring-line bg-white/5 p-4 md:p-5 shadow-card' }, [
-        el('h2', { class: 'text-lg md:text-xl font-bold mb-1 flex items-center gap-2' }, [icon('workflow'), 'How Recast + Intune Work Together']),
-        el('p', { class: 'text-sm text-textDim' }, 'Intune is the control plane. Recast is the application workspace that feeds Intune a curated catalog, automated patching, and targeted delivery with rings, policy, and proof.')
-      ]));
-
-      const grid = el('div', { class: 'grid lg:grid-cols-2 gap-4' });
-
-      // Workspace (left)
-      const left = el('section', { class: 'rounded-2xl ring-1 ring-line bg-white/5 p-4' });
-      left.appendChild(el('header', { class: 'flex items-center justify-between' }, [
-        el('div', { class: 'flex items-center gap-2' }, [icon('app-window', 'h-5 w-5 text-cyan'), el('h3', { class: 'font-bold text-cyan' }, 'Application Workspace')]),
-        el('span', { class: 'text-[11px] rounded-full px-2 py-0.5 ring-1 ring-cyan/60 bg-cyan/10 text-cyan-200' }, 'Curated & Secured')
-      ]));
-
-      left.appendChild(el('div', { class: 'mt-3 rounded-2xl bg-white/5 ring-1 ring-line p-3' }, [
-        el('div', { class: 'text-[11px] text-slate-300 mb-2' }, 'Catalog & Status'),
-        el('div', { id: 'hexgrid', class: 'grid grid-cols-3 sm:grid-cols-4 gap-3' })
-      ]));
-
-      left.appendChild(el('div', { class: 'mt-3 rounded-2xl bg-white/5 ring-1 ring-line p-3' }, [
-        el('div', { class: 'text-[11px] text-slate-300 mb-2' }, 'Staged Rings'),
-        el('div', { id: 'rings', class: 'grid grid-cols-3 gap-2' })
-      ]));
-
-      left.appendChild(el('div', { class: 'mt-3 grid grid-cols-3 gap-2' }, [
-        platformPill('Windows & macOS', 'computer'),
-        platformPill('VDI', 'pc-case'),
-        platformPill('Mobile', 'smartphone')
-      ]));
-
-      grid.appendChild(left);
-
-      // Outcomes (right)
-      const right = el('section', { class: 'rounded-2xl ring-1 ring-line bg-white/5 p-4 flex flex-col' });
-      right.appendChild(el('header', { class: 'flex items-center justify-between' }, [
-        el('div', { class: 'flex items-center gap-2' }, [icon('shield-check', 'h-5 w-5 text-emerald-300'), el('h3', { class: 'font-bold text-emerald-200' }, 'Intune Outcomes')]),
-        el('div', { class: 'flex items-center gap-2' }, [
-          primaryBtn('Start', 'play', () => workspaceDemo(), 'bg-cyan'),
-          secondaryBtn('Reset', 'rotate-ccw', () => buildWorkspace())
-        ])
-      ]));
-
-      right.appendChild(el('div', { id: 'outcomes', class: 'mt-3 space-y-3' }));
-      right.appendChild(el('p', { class: 'mt-auto text-[13px] text-textDim' }, 'Result: Complete, Intune-governed workspace on day one. Apps delivered and patched automatically with proof of compliance.'));
-
-      grid.appendChild(right);
-      view.appendChild(grid);
-
-      // Build interactive area NOW
-      setTimeout(buildWorkspace, 0);
-      return view;
+    function pill(label,active,action,value){
+      return `<button type="button" class="${cx('rounded-full px-3 py-1 border text-xs transition hover:bg-white/10',active?'bg-yellow-400 text-slate-900 border-transparent':'bg-[#0a1124] text-slate-200 border-white/10')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
     }
 
-    function platformPill(label, iconName) {
-      return el('div', { class: 'rounded-xl ring-1 ring-line bg-white/5 p-2.5 flex items-center gap-2' }, [icon(iconName), el('span', { class: 'text-xs text-slate-200' }, label)]);
+    function cardOneIcon(route){
+      return `
+        <div class="section-card p-4">
+          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
+          <p class="mt-1 text-sm text-slate-300">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
+          <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+            ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
+            ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
+            ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
+          </div>
+          <div class="mt-2 text-sm text-slate-300">Recommended route:</div>
+          <div class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-3 py-1 text-slate-900 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i>${route}</div>
+          <div class="mt-3"><button type="button" class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+        </div>
+      `;
     }
-    function primaryBtn(label, iconName, onClick, bg = 'bg-white/10') {
-      const b = el('button', { class: `inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-sm font-semibold ${bg} hover:brightness-110 ring-1 ring-line focus:outline-none focus-visible:ring-2 focus-visible:ring-purple` }, [icon(iconName), el('span', {}, label)]);
-      b.addEventListener('click', onClick);
-      return b;
+    function cardUpdateOnce(saved){
+      return `
+        <div class="section-card p-4">
+          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">Update Once, Deploy Everywhere</h3></div>
+          <p class="mt-1 text-sm text-slate-300">Package one time; push to cloud, on-prem, or hybrid with rings.</p>
+          <div class="sub-card p-3 text-sm">
+            <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
+            <label class="mt-2 flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Hours/package</span>
+              <input class="w-16 rounded bg-slate-950 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+              <span>→</span>
+              <input class="w-16 rounded bg-slate-950 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+            </label>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
+            <div class="mt-2 text-[12px] text-slate-300 flex flex-wrap gap-2">
+              <span class="rounded-full bg-black/30 px-2 py-1">☁️ Cloud</span>
+              <span class="rounded-full bg-black/30 px-2 py-1">🖥️ On-Prem</span>
+              <span class="rounded-full bg-black/30 px-2 py-1">🔀 Hybrid</span>
+            </div>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900 hover:brightness-95" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+          </div>
+        </div>
+      `;
     }
-    function secondaryBtn(label, iconName, onClick) {
-      return primaryBtn(label, iconName, onClick, 'bg-white/10');
+    function cardZeroDay(reduced){
+      return `
+        <div class="section-card p-4">
+          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
+          <p class="mt-1 text-sm text-slate-300">Security fixes deploy in 1–2 hours instead of a full day (~90% faster).</p>
+          <div class="sub-card p-3 text-sm">
+            <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
+            <label class="mt-2 flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Current hrs</span>
+              <input class="w-20 rounded bg-slate-950 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+            </label>
+            <div class="mt-2 flex items-center justify-between rounded bg-black/20 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
+            <button type="button" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-900 hover:brightness-95" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+          </div>
+        </div>
+      `;
     }
 
-    function buildWorkspace() {
-      const grid = field('hexgrid');
-      const rings = field('rings');
-      const outs = field('outcomes');
-      if (!grid || !rings || !outs) return;
+    function renderFlow(){
+      return `
+        <div class="section-card p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-fuchsia-500 grid place-items-center"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+              <div>
+                <h3 class="text-base font-semibold">Application Workspace</h3>
+                <div class="text-[12px] text-slate-400">Curated & secured catalog</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-[12px] text-slate-300">
+              <button type="button" class="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 hover:bg-white/20" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+              <button type="button" data-action="start-flow" class="rounded-full bg-white px-2.5 py-1.5 text-[12px] font-semibold text-slate-900 hover:brightness-95">Start</button>
+              <button type="button" data-action="reset-flow" class="rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[12px] hover:bg-white/20">Reset</button>
+            </div>
+          </div>
 
-      grid.innerHTML = '';
-      rings.innerHTML = '';
-      outs.innerHTML = '';
+          <div id="flowCard" class="mt-3 sub-card p-3" role="region" aria-label="Animated flow">
+            <div class="space-y-2">
+              ${CATALOG.map(s=>`
+                <div class="cat-row">
+                  <div class="cat-title text-slate-400 uppercase">${s.title}</div>
+                  <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                </div>
+              `).join('')}
+            </div>
 
-      // Catalog tiles
-      STATE.catalog.forEach(app => grid.appendChild(hexTile(app.name)));
+            <div id="flowHubFlash" class="mt-2 hidden text-amber-300 text-[12px] inline-flex items-center gap-1"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></div>
 
-      // Rings
-      ['Business Unit', 'Subsidiary', 'Region'].forEach((label) => {
-        const card = el('div', { class: 'rounded-xl ring-1 ring-line p-3 bg-white/5' }, [
-          el('div', { class: 'text-[11px] text-slate-300 mb-2' }, label),
-          el('div', { class: 'h-2 rounded bg-white/10 overflow-hidden' }, el('div', { class: 'h-full w-0', style: 'background:linear-gradient(90deg, rgba(124,58,237,.95), rgba(6,182,212,.95));' }))
-        ]);
-        rings.appendChild(card);
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['A','B','C'].map((k,i)=>`
+                <div class="sub-card p-2">
+                  <div class="text-[12px] text-slate-300">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                  <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                  <div class="mt-1 flow-bar w-full bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:${.55 + .12*i}s"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['A','B','C'].map((k,i)=>`
+                <div class="sub-card p-2">
+                  <div class="text-[12px] text-slate-300">${['Business Unit','Subsidiary','Region'][i]}</div>
+                  <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                  <div class="mx-auto mt-1 bolt-line h-16 w-1 bg-gradient-to-b from-amber-300 via-white to-amber-300" style="--d:${1 + .15*i}s"></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
+              ${['A','B','C'].map((k,i)=>`
+                <div class="sub-card p-2 text-center">
+                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-slate-300"></i>
+                  <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                  <div class="mt-1 text-[11px] text-slate-400">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="mt-3">
+              <div id="endUserCard" class="sub-card p-3">
+                <div class="flex items-center gap-3">
+                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-rose-600/90 grid place-items-center font-semibold">U</div>
+                  <div class="text-sm">
+                    <div class="font-medium text-slate-200">End user</div>
+                    <div class="text-slate-400">Apps on demand — no waiting, no tickets.</div>
+                  </div>
+                </div>
+                <div class="mt-3 user-beam bg-gradient-to-r from-sky-400 via-indigo-400 to-fuchsia-400" style="--d:2.1s"></div>
+                <div class="relative mt-2 rounded-lg border border-white/10 bg-[#0b1328] p-4">
+                  <i data-lucide="laptop" class="h-5 w-5 opacity-80"></i>
+                  <div id="endUserBadge" class="absolute right-2 top-2 badge bg-rose-500 text-black grid place-items-center font-bold" style="--d:2.4s">!</div>
+                  <div class="mt-1 text-[11px] text-slate-400">Workspace launches the correct app instantly</div>
+                </div>
+              </div>
+              <div id="flowSuccess" class="mt-2 hidden text-emerald-300 text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderROI(){
+      const r = calcROI();
+      return `
+        <section id="panel-roi" class="space-y-3">
+          <div class="section-card p-3"><div class="text-sm font-medium">Planting consistency in app delivery today is what prevents outages and chaos three years from now.</div></div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+            ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
+            ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Illustrative only', 'kpi-year')}
+            ${kpiId('percent','ROI', r.roiPct+'%', 'Net of subscription', 'kpi-roi')}
+            ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            <div class="section-card p-4 lg:col-span-2">
+              <h3 class="text-base font-semibold">Assumptions (edit)</h3>
+              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                ${numInput('# users','users', r.i.users)}
+                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
+                ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
+                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
+                ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
+              </div>
+              <div class="mt-3 text-[11px] text-slate-400">All values are examples. Replace with your data for accurate estimates.</div>
+            </div>
+
+            <div class="section-card p-4">
+              <h3 class="text-base font-semibold">Results</h3>
+              <div class="mt-3 space-y-2 text-sm">
+                ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
+                ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
+                ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
+                ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
+                ${kvId('ROI', r.roiPct+'%', 'res-roi')}
+                ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
+              </div>
+              <div class="mt-2 text-[11px] text-slate-400 italic">Add a short customer proof-point here (e.g., “Cut packaging time by 80% in first 30 days”).</div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 focus-ring">Reset</button>
+                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95 focus-ring">
+                  <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-400">Transparency: Recast AW complements device management (e.g., Intune). Windows/macOS focus. Metrics are illustrative; actuals vary.</p>
+        </section>
+      `;
+    }
+
+    function calcROI(){
+      const i = STATE.roiInputs;
+      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+      const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+      const dollarSavedYear = dollarSavedMonth * 12;
+      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+      const roiPct = i.recastAnnualCost ? round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
+      const fteHoursYear = 2080;
+      const fteEquivalent = round((totalHoursSavedMonth * 12) / fteHoursYear);
+      return {
+        i,
+        ticketsMonth,
+        hoursFromMinutes: round(hoursFromMinutes),
+        totalHoursSavedMonth: round(totalHoursSavedMonth),
+        dollarSavedMonth: round(dollarSavedMonth),
+        dollarSavedYear: round(dollarSavedYear),
+        netBenefitYear: round(netBenefitYear),
+        roiPct,
+        fteEquivalent
+      };
+    }
+    function updateROIOutputs(){
+      const r = calcROI();
+      setText('kpi-hours', r.totalHoursSavedMonth);
+      setText('kpi-year', '$'+num(r.dollarSavedYear));
+      setText('kpi-roi', r.roiPct+'%');
+      setText('kpi-tickets', num(r.ticketsMonth));
+      setText('res-hours', r.totalHoursSavedMonth);
+      setText('res-month', '$'+num(r.dollarSavedMonth));
+      setText('res-year', '$'+num(r.dollarSavedYear));
+      setText('res-net', '$'+num(r.netBenefitYear));
+      setText('res-roi', r.roiPct+'%');
+      setText('res-fte', r.fteEquivalent);
+    }
+    function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
+
+    function kpiId(icon,label,value,hint,id){
+      return `
+        <div class="section-card p-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-[11px] text-slate-300">${label}</div>
+              <div id="${id}" class="text-xl font-semibold tabular-nums">${value}</div>
+            </div>
+            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300"></i>
+          </div>
+          ${hint ? `<div class="mt-1 text-[11px] text-slate-400">${hint}</div>` : ''}
+        </div>
+      `;
+    }
+    function kvId(label,value,id){
+      return `<div class="flex items-center justify-between rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
+    }
+    function numInput(label,key,value){
+      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-slate-300">${label}</span><input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+    }
+
+    const CATALOG=[
+      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+        logo('Microsoft Word','W','#185ABD'),
+        logo('Microsoft Excel','X','#107C41'),
+        logo('PowerPoint','P','#D24726'),
+        logo('Outlook','O','#106EBE'),
+        logo('Microsoft Teams','T','#5B53D6'),
+        logo('Google Docs','Dc','#1A73E8'),
+        logo('Google Sheets','Sh','#1E8E3E'),
+        logo('Google Slides','Sl','#F9AB00')
+      ]},
+      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
+        multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
+        logo('Zoom','Z','#0B5CFF'),
+        logo('Gmail','G','#EA4335'),
+        logo('Google Meet','GM','#0F9D58')
+      ]},
+      {title:'WEB BROWSERS',id:'cat-browsers',items:[
+        triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
+        ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
+        flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+      ]},
+      {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
+        logo('Salesforce','SF','#00A1E0'),
+        logo('Workday','WD','#1F5BFF'),
+        logo('ServiceNow','SN','#81B29A'),
+        logo('SAP','SAP','#0A6ED1'),
+        logo('Oracle NetSuite','NS','#C74634')
+      ]},
+      {title:'SECURITY & ACCESS',id:'cat-security',items:[
+        logo('Duo','D','#3CB371'),
+        logo('Okta','O','#007DC1'),
+        logo('Ping Identity','P','#C0172C'),
+        logo('Cisco AnyConnect','AC','#00B5AD'),
+        logo('Microsoft Defender','MD','#0067B8'),
+        logo('CrowdStrike Falcon','CS','#D61F26')
+      ]},
+      {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
+        logo('Adobe Acrobat','A','#ED2224'),
+        logo('Dropbox','DB','#0061FF'),
+        logo('Box','BX','#0061D5'),
+        logo('OneDrive','OD','#0A5BD5'),
+        logo('ZoomIt / Sysinternals','ZI','#58595B')
+      ]}
+    ];
+
+    function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
+    function mark(letter,color){
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
+          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
+        </svg>`;
+    }
+    function multiLogo(name,colors){
+      const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/>${slices}</svg>` };
+    }
+    function triLogo(name,r1,r2,r3,r4){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
+    }
+    function ringLogo(name,c1,c2){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
+    }
+    function flameLogo(name,c1,c2){
+      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
+    }
+    function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+
+    function attachEvents(){
+      const root=document.getElementById('app');
+
+      root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
+        STATE.activeTab=e.currentTarget.getAttribute('data-tab');
+        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
+        render();
+      }));
+      root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
+        STATE.activeTab=e.currentTarget.getAttribute('data-next'); 
+        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
+        const id=e.currentTarget.getAttribute('data-why');
+        STATE.openWhy = (STATE.openWhy === id) ? null : id;
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
+      root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
+      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
+
+      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); });
+      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); });
+      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); });
+
+      root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
+        const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
+        if (kind==='minutes') STATE.impact.minutes+=val;
+        if (kind==='pkgHours') STATE.impact.pkgHours+=val;
+        if (kind==='riskHrs') STATE.impact.riskHrs+=val;
+        updateROIOutputs();
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
+        const key=e.currentTarget.getAttribute('data-key');
+        const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); 
+        STATE.roiInputs[key]=isFinite(v)?v:0;
+        updateROIOutputs();
+      }));
+
+      const resetCalc=root.querySelector('[data-action="reset-calculator"]');
+      if(resetCalc) resetCalc.addEventListener('click', ()=>{
+        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
+        STATE.impact = { ...STATE.defaults.impact };
+        STATE.copied = false;
+        render();
       });
 
-      // Outcome metrics
-      outs.appendChild(metricCard('Compliance', '> 95%', 'shield-check', 'bg-emerald-400/10 ring-emerald-400/50 text-emerald-200'));
-      outs.appendChild(metricCard('Time to value', 'Day 1', 'zap', 'bg-cyan-400/10 ring-1 ring-cyan-400/50 text-cyan-200'));
-      outs.appendChild(metricCard('Change risk', 'Reduced', 'shield', 'bg-yellow/10 ring-1 ring-yellow/50 text-yellow-200'));
+      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
+      ifcopy: if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+        const dollarSavedYear = dollarSavedMonth * 12;
+        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+        const fteHoursYear = 2080;
+        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+        const body =
+`Recast Application Workspace — Executive One-Pager
 
-      safeLucide();
-    }
+Assumptions
+ - Users: ${i.users}
+ - Tickets per user / month: ${i.ticketsPerUserPerMonth}
+ - Avg handle: ${i.avgHandleMins} mins
+ - Loaded cost: $${i.loadedCostPerHour}/hr
+ - Subscription (annual): $${i.recastAnnualCost}
 
-    function hexTile(label) {
-      const btn = el('button', { class: 'group relative isolate inline-flex items-center justify-center aspect-[1.1547] w-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80', 'aria-label': label });
+Observed demo impact (illustrative)
+ - Minutes saved per user (monthly): ${STATE.impact.minutes}
+ - Packaging hours avoided (org): ${STATE.impact.pkgHours}
+ - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
 
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 100 86.6');
-      svg.setAttribute('class', 'absolute inset-0 w-full h-full');
-      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      poly.setAttribute('points', '50,0 100,25 100,61.6 50,86.6 0,61.6 0,25');
-      poly.setAttribute('fill', '#7c3aed');
-      poly.setAttribute('fill-opacity', '0.15');
-      poly.setAttribute('stroke', '#7c3aed');
-      poly.setAttribute('stroke-opacity', '0.55');
-      poly.setAttribute('stroke-width', '2');
-      svg.appendChild(poly);
+Calculated outcomes
+ - Tickets / month: ${num(ticketsMonth)}
+ - Hours saved / month: ${round(totalHoursSavedMonth)}
+ - $ saved / month: $${num(dollarSavedMonth)}
+ - $ saved / year: $${num(dollarSavedYear)}
+ - Net benefit / year: $${num(netBenefitYear)}
+ - ROI: ${round(roiPct)}%
+ - Equivalent IT FTEs freed: ${round(fteEquivalent)}
 
-      const inner = el('div', { class: 'relative z-10 flex flex-col items-center justify-center text-center px-1' }, [
-        icon('hexagon', 'h-4 w-4 mb-1'),
-        el('div', { class: 'text-[11px] font-medium' }, label),
-        el('span', { class: 'mt-1 text-[10px] rounded-full px-1.5 py-0.5 ring-1 ring-white/20 bg-white/10' }, 'Queued')
-      ]);
-
-      btn.appendChild(svg);
-      btn.appendChild(inner);
-
-      btn.addEventListener('click', () => cycleTile(inner));
-      return btn;
-    }
-    function cycleTile(inner) {
-      const badge = inner.querySelector('span');
-      const i = inner.querySelector('i');
-      const states = ['Queued', 'Provisioning', 'Patched', 'Updated'];
-      const icons  = ['hexagon', 'download', 'shield-check', 'refresh-ccw'];
-      const next = (states.indexOf(badge.textContent) + 1) % states.length;
-      badge.textContent = states[next];
-      i.setAttribute('data-lucide', icons[next]);
-      safeLucide();
-    }
-    function workspaceDemo() {
-      if (STATE.reducedMotion) return;
-      // Animate rings
-      document.querySelectorAll('#rings > div > div > div').forEach((bar, i) => {
-        bar.style.width = '0%';
-        setTimeout(() => { bar.style.transition = 'width 900ms ease'; bar.style.width = ['70%','86%','95%'][i]; }, 100 * i);
+Notes: Illustrative; replace with your data.`;
+        try { await navigator.clipboard.writeText(body); } catch {
+          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
       });
-      // Walk tiles through states
-      Array.from(document.querySelectorAll('#hexgrid button')).forEach((btn, i) =>
-        setTimeout(() => btn.click(), 90 * i)
-      );
-      const outs = field('outcomes');
-      outs.classList.add('shadow-glowPurple');
-      setTimeout(() => outs.classList.remove('shadow-glowPurple'), 1200);
+
+      const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
+      const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
+      const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
+
+      const showCards=root.querySelector('[data-action="show-solution-cards"]');
+      if(showCards) showCards.addEventListener('click', ()=>{ STATE.showSolutionCards=true; render(); });
     }
 
-    // ========= VIEW: IMPACT & ROI =========
-    function renderImpact() {
-      const view = el('section', { class: 'space-y-5', 'aria-label': 'Impact & ROI' });
-
-      // KPIs
-      const r = calcResults();
-      view.appendChild(el('div', { class: 'grid md:grid-cols-4 gap-3' }, [
-        kpi('Hours saved / mo', r.hoursSavedPerMonth),
-        kpi('$ saved / yr', `$${fmt(r.dollarsSavedPerYear)}`, 'banknote'),
-        kpi('ROI', `${fmt(r.roiPct)}%`, 'percent'),
-        kpi('Tickets / mo', r.ticketsPerMonth, 'rocket')
-      ]));
-
-      // Assumptions + Results
-      const wrap = el('div', { class: 'rounded-3xl ring-1 ring-line bg-white/5 p-4 md:p-5 grid lg:grid-cols-2 gap-6' });
-
-      // Form
-      const form = el('div', {});
-      form.appendChild(el('h3', { class: 'font-bold text-lg mb-3 flex items-center gap-2' }, [icon('sliders-horizontal'), 'Assumptions']));
-      form.appendChild(numberInput('# users', 'users', STATE.roi.users));
-      form.appendChild(numberInput('Tickets per user / mo', 'ticketsPerUserPerMonth', STATE.roi.ticketsPerUserPerMonth, '0.001'));
-      form.appendChild(numberInput('Avg handle (mins)', 'avgHandleMins', STATE.roi.avgHandleMins));
-      form.appendChild(numberInput('Loaded cost ($/hr)', 'loadedCostPerHour', STATE.roi.loadedCostPerHour));
-      form.appendChild(numberInput('Recast annual cost ($)', 'recastAnnualCost', STATE.roi.recastAnnualCost));
-      form.appendChild(el('p', { class: 'mt-2 text-[13px] text-textDim' }, 'Values are examples. Replace with your data for accurate estimates.'));
-      wrap.appendChild(form);
-
-      // Results
-      const res = el('div', { class: 'space-y-4' });
-      res.appendChild(el('h3', { class: 'font-bold text-lg flex items-center gap-2' }, [icon('receipt'), 'Results']));
-      const box = el('div', { id: 'resultsBox', class: 'rounded-2xl ring-1 ring-line bg-white/5 p-4 space-y-2' });
-      res.appendChild(box);
-
-      const actions = el('div', { class: 'flex items-center gap-2' }, [
-        primaryBtn('Copy executive one-pager', 'clipboard-copy', async () => {
-          const rr = calcResults();
-          const text = [
-            'Recast + Microsoft Intune — Executive Summary',
-            '',
-            'Why application management drives Intune adoption:',
-            '- Apps are the #1 bottleneck to migration and ongoing management.',
-            '- Recast delivers and patches applications automatically into Intune with rings and proof.',
-            '- Result: faster rollouts, higher compliance, less risk, and measurable time savings.',
-            '',
-            'Impact (illustrative):',
-            `• Hours saved / month: ${fmt(rr.hoursSavedPerMonth)}`,
-            `• $ saved / year: $${fmt(rr.dollarsSavedPerYear)}`,
-            `• ROI: ${fmt(rr.roiPct)}%`,
-            `• Tickets / month: ${fmt(rr.ticketsPerMonth)}`,
-            '',
-            'Assumptions:',
-            JSON.stringify(STATE.roi, null, 2)
-          ].join('\n');
-          try {
-            if (navigator.clipboard && window.isSecureContext) {
-              await navigator.clipboard.writeText(text);
-            } else {
-              const ta = el('textarea', { style: 'position:absolute;left:-9999px;top:0;' });
-              ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-            }
-            toast('Copied summary to clipboard.');
-          } catch { toast('Copy failed.'); }
-        }, 'bg-yellow text-black'),
-        secondaryBtn('Reset', 'refresh-ccw', () => { STATE.roi = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 }; render(); })
-      ]);
-      res.appendChild(actions);
-
-      wrap.appendChild(res);
-      view.appendChild(wrap);
-
-      updateResultsBox();
-      return view;
-    }
-
-    function kpi(label, value, iconName = 'timer') {
-      return el('div', { class: 'rounded-2xl ring-1 ring-line bg-white/5 px-4 py-3 flex items-center justify-between' }, [
-        el('div', { class: 'flex items-center gap-2' }, [icon(iconName), el('span', { class: 'text-sm text-slate-300' }, label)]),
-        el('span', { class: 'text-base font-semibold' }, typeof value === 'number' ? fmt(value) : value)
-      ]);
-    }
-    function numberInput(label, key, value, step = '1') {
-      const id = `f_${key}`;
-      const row = el('div', { class: 'mb-2' }, [
-        el('label', { for: id, class: 'block text-[13px] text-slate-300 mb-1' }, label),
-        el('input', { id, type: 'number', step, value, class: 'w-full rounded-xl bg-panel ring-1 ring-line px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-purple' })
-      ]);
-      setTimeout(() => {
-        const input = row.querySelector('input');
-        input.addEventListener('input', () => {
-          const v = Number(input.value);
-          if (Number.isFinite(v)) { STATE.roi[key] = v; updateResultsBox(); }
+    function buildFlow(){
+      let base=0;
+      CATALOG.forEach(section=>{
+        const mount=document.getElementById(section.id); if(!mount) return;
+        mount.innerHTML='';
+        section.items.forEach((itm,idx)=>{
+          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
+          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+          wrap.appendChild(ring);
+          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
+          mount.appendChild(wrap);
         });
-      }, 0);
-      return row;
-    }
-    function calcResults() {
-      const r = STATE.roi;
-      const userHours = (STATE.metrics.minutesPerUser * r.users) / 60;
-      const ticketsPerMonth = Math.round(r.users * r.ticketsPerUserPerMonth);
-      const hoursFromTickets = (ticketsPerMonth * r.avgHandleMins) / 60 * 0.3; // assume 30% avoided by automation
-      const hoursSavedPerMonth = Math.round(userHours + hoursFromTickets + STATE.metrics.packagingHours);
-      const dollarsSavedPerMonth = Math.round(hoursSavedPerMonth * r.loadedCostPerHour);
-      const dollarsSavedPerYear = dollarsSavedPerMonth * 12;
-      const netBenefit = dollarsSavedPerYear - r.recastAnnualCost;
-      const roiPct = Math.round((netBenefit / r.recastAnnualCost) * 100);
-      return { hoursSavedPerMonth, dollarsSavedPerMonth, dollarsSavedPerYear, netBenefit, roiPct, ticketsPerMonth };
-    }
-    function updateResultsBox() {
-      const box = field('resultsBox'); if (!box) return;
-      const r = calcResults();
-      box.innerHTML = '';
-      [
-        ['Hours saved / month', fmt(r.hoursSavedPerMonth)],
-        ['$ saved / month', `$${fmt(r.dollarsSavedPerMonth)}`],
-        ['$ saved / year', `$${fmt(r.dollarsSavedPerYear)}`],
-        ['Net benefit / year', `$${fmt(r.netBenefit)}`],
-        ['ROI', `${fmt(r.roiPct)}%`],
-        ['Equivalent IT FTEs freed', (r.hoursSavedPerMonth / 160).toFixed(2)]
-      ].forEach(([k, v]) => {
-        box.appendChild(el('div', { class: 'flex items-center justify-between rounded-xl bg-white/5 ring-1 ring-line px-3 py-2' }, [
-          el('span', { class: 'text-sm text-slate-300' }, k),
-          el('span', { class: 'text-sm font-semibold' }, v)
-        ]));
+        base+=0.25;
       });
+
+      buildTiles(document.getElementById('flowConnA'), 14, .5);
+      buildTiles(document.getElementById('flowConnB'), 14, .56);
+      buildTiles(document.getElementById('flowConnC'), 14, .62);
+      buildTiles(document.getElementById('flowGrpA'), 18, .95);
+      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
+      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
+      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
+      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
+      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
+
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); avatar.textContent='U'; }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-rose-500'); }
+    }
+    function buildTiles(container,count,baseDelay){
+      if(!container) return; container.innerHTML='';
+      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
     }
 
-    // ========= NAV & INIT =========
-    function bindTabs() {
-      document.querySelectorAll('nav#tabs .tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-          STATE.activeTab = btn.dataset.tab;
-          document.querySelectorAll('nav#tabs button span').forEach(s => s.classList.replace('bg-white/10', 'bg-white/5'));
-          btn.querySelector('span').classList.replace('bg-white/5', 'bg-white/10');
-          document.querySelectorAll('nav#tabs .tab').forEach(b => b.setAttribute('aria-selected', b === btn ? 'true' : 'false'));
-          render();
-        });
-      });
+    function startFlow(){
+      const card=document.getElementById('flowCard'); if(!card) return;
+      card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
+      const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
+      if(success) success.classList.add('hidden');
+      setTimeout(()=>{
+        if(avatar){ avatar.classList.remove('bg-rose-600/90'); avatar.classList.add('bg-emerald-500'); }
+        if(badge){ badge.textContent='✓'; badge.classList.remove('bg-rose-500'); badge.classList.add('bg-green-500'); }
+      }, 2100);
+      setTimeout(()=> success && success.classList.remove('hidden'), 2500);
+      setTimeout(()=> card.classList.remove('run'), 6000);
     }
-    function toast(msg) {
-      const bar = el('div', { class: 'fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-emerald-900/90 ring-1 ring-emerald-600 px-4 py-2 text-sm' }, msg);
-      document.body.appendChild(bar);
-      setTimeout(() => bar.remove(), 2200);
-    }
-    function checkCDNs() {
-      let fail = false;
-      if (typeof tailwind === 'undefined') fail = true;
-      if (!window.lucide) fail = true;
-      if (fail) field('cdn-banner').classList.remove('hidden');
+    function resetFlow(){
+      const card=document.getElementById('flowCard'); if(!card) return;
+      card.classList.remove('run');
+      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.classList.remove('bg-emerald-500'); avatar.classList.add('bg-rose-600/90'); }
+      if(badge){ badge.textContent='!'; badge.classList.remove('bg-green-500'); badge.classList.add('bg-rose-500'); }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      bindTabs();
-      render();
-      setTimeout(() => safeLucide(), 60);
-      setTimeout(checkCDNs, 800);
-    });
+    document.addEventListener('DOMContentLoaded', render);
   </script>
-
-  <style>
-    .tab:focus-visible span { outline: 2px solid rgba(255,255,255,.75); outline-offset: 2px; }
-  </style>
 </body>
 </html>
