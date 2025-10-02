@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Recast Partner Program – Single File App</title>
+  <title>Recast Partner Program – Single File App (Fixed & Renamed)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,27 +37,27 @@
     }
     .surface { background: rgba(255,255,255,0.06); }
     .border-brand { border-color: rgba(255,255,255,0.12); }
-    .ring-primary { --tw-ring-color: color-mix(in oklab, #2F77F1, transparent 0%); }
+    .ring-primary { --tw-ring-color: #2F77F1; }
+    .grad-brand {
+      background:
+        radial-gradient(60% 60% at 20% 10%, rgba(47,119,241,.35) 0%, transparent 70%),
+        radial-gradient(60% 60% at 80% 0%, rgba(124,58,237,.35) 0%, transparent 70%),
+        radial-gradient(80% 80% at 50% 90%, rgba(245,200,76,.18) 0%, transparent 70%);
+    }
   </style>
   <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
   <script defer src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen">
   <header class="relative overflow-hidden">
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 blur-3xl"
-      style="background:
-        radial-gradient(60% 60% at 20% 10%, color-mix(in oklab, #2F77F1 35%, transparent) 0%, transparent 70%),
-        radial-gradient(60% 60% at 80% 0%, color-mix(in oklab, #7C3AED 35%, transparent) 0%, transparent 70%),
-        radial-gradient(80% 80% at 50% 90%, color-mix(in oklab, #F5C84C 18%, transparent) 0%, transparent 70%)">
-    </div>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 blur-3xl grad-brand"></div>
     <div class="relative mx-auto max-w-7xl px-4 pt-10 pb-8">
-      <div class="inline-flex items-center gap-2 rounded-full border border-brand surface px-3 py-1 text-xs backdrop-blur">
+      <div class="inline-flex items-center gap-2 rounded-full border border-brand surface px-3 py-1 text-xs backdrop-blur" aria-live="polite">
         <span class="inline-block h-1.5 w-1.5 rounded-full" style="background:#F5C84C"></span>
         <span>Partner-first GTM</span>
       </div>
       <h1 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-        Join <span class="text-transparent bg-clip-text"
-          style="background-image: linear-gradient(90deg, #2F77F1, #7C3AED);">Recast Partner Program</span>
+        Join <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(90deg, #2F77F1, #7C3AED);">Recast Partner Program</span>
       </h1>
       <p class="mt-2 max-w-3xl text-[color:#9aa4b2]">
         We put <span class="text-[color:#F5C84C] font-semibold">partnership</span> at the center of how we go to market.
@@ -69,24 +69,24 @@
     <div id="app" class="space-y-6"></div>
   </main>
 
-  <template id="icon-badge">
-    <span class="inline-flex shrink-0 items-center justify-center rounded-full border border-brand surface w-7 h-7">
-      <i data-lucide="star" class="w-4 h-4"></i>
-    </span>
-  </template>
-
   <script>
+    // ---------- Constants (renamed tiers) ----------
+    const TIERS = {
+      CONSULTANT: 'Recast Consultant Partner',   // Old: Registered
+      VALUE: 'Recast Value Partner',             // Old: Preferred
+      STRATEGIC: 'Recast Strategic Partner'      // Old: Premier
+    };
+    const ADVANCED_TIERS = [TIERS.VALUE, TIERS.STRATEGIC];
+
+    // ---------- Global STATE ----------
     const STATE = {
-      selectedTier: 'Preferred',
+      selectedTier: TIERS.VALUE,
       selectedTab: 'takes', // takes | gets | margins | onboarding | training | partnerTypes
       cdnErrors: [],
       model: {
         tiers: {
-          Registered: {
-            requirements: [
-              'Signed agreement',
-              'Vetted & approved'
-            ],
+          [TIERS.CONSULTANT]: {
+            requirements: ['Signed agreement', 'Vetted & approved'],
             benefits: [
               'Margin/referral on registered closed deals',
               'Partner portal access',
@@ -94,7 +94,7 @@
               'Program logo package + exposure on Recastsoftware.com'
             ]
           },
-          Preferred: {
+          [TIERS.VALUE]: {
             requirements: [
               'Signed agreement',
               'Vetted & approved',
@@ -119,7 +119,7 @@
               'Dedicated MDF funds'
             ]
           },
-          Premier: {
+          [TIERS.STRATEGIC]: {
             requirements: [
               'Signed agreement',
               'Vetted & approved',
@@ -149,41 +149,42 @@
             ]
           }
         },
+        // Margins structure (logic preserved, tier names updated)
         margins: {
           Annual: {
-            'Net New': {
-              'Preferred|Premier': [
+            NetNew: {
+              advanced: [
                 { band: 'Band 1', upTo: '30%', when: 'Partner originated AND Partner registered AND Recast approved' },
                 { band: 'Band 2', upTo: '15%', when: 'Recast originated/registered AND Recast approved' }
               ],
-              Registered: [
+              consultant: [
                 { band: 'Band 3', upTo: '5%', when: 'Partner originated AND Partner registered AND Recast approved' }
               ]
             },
             Renewal: {
-              'Preferred|Premier': [
+              advanced: [
                 { band: 'Band 1', upTo: '5%', when: 'Partner of Record OR Incumbent' },
                 { band: 'Band 2', upTo: '5%', when: 'Non-incumbent' }
               ],
-              Registered: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
+              consultant: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
             }
           },
           Monthly: {
-            'Net New': {
-              'Preferred|Premier': [
+            NetNew: {
+              advanced: [
                 { band: 'Band 1', upTo: '20%', when: 'Partner originated AND Partner registered AND Recast approved' },
                 { band: 'Band 2', upTo: '10%', when: 'Recast originated/registered AND Recast approved' }
               ],
-              Registered: [
+              consultant: [
                 { band: 'Band 3', upTo: '5%', when: 'Partner originated AND Partner registered AND Recast approved' }
               ]
             },
             Renewal: {
-              'Preferred|Premier': [
+              advanced: [
                 { band: 'Band 1', upTo: '5%', when: 'Partner of Record OR Incumbent' },
                 { band: 'Band 2', upTo: '5%', when: 'Non-incumbent' }
               ],
-              Registered: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
+              consultant: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
             }
           }
         },
@@ -211,6 +212,7 @@
             ]}
           ]
         },
+        // 4 Partner Types (from user brief)
         partnerTypes: [
           {
             key: 'MSP',
@@ -232,7 +234,7 @@
             pricing: 'Varies',
             fulfillment: 'Varies',
             training: 'Likely required for technical integration.',
-            requirements: 'Varies'
+            requirements: 'API alignment, sandbox usage, security review.'
           },
           {
             key: 'OEM',
@@ -243,7 +245,7 @@
             pricing: 'OEM manages',
             fulfillment: 'OEM manages',
             training: 'TBD',
-            requirements: 'TBD'
+            requirements: 'Embedding certification; support alignment.'
           },
           {
             key: 'Distributor',
@@ -251,22 +253,23 @@
             description: 'Distribute Recast products in specific regions.',
             revenueModel: 'Negotiated licensing or per-unit fee.',
             ordering: 'Yes (distributor transacts orders)',
-            pricing: 'Varies',
+            pricing: 'Varies by region and agreement',
             fulfillment: 'Varies',
             training: 'Yes, full onboarding needed',
-            requirements: 'Varies'
+            requirements: 'Territory coverage, compliance, reporting cadence.'
           }
         ],
+        // Training matrix aligned to new tiers
         trainingMatrix: {
-          Registered: {
+          [TIERS.CONSULTANT]: {
             sales: { required: false, count: 0, notes: 'Self-service training available.' },
             technical: { required: false, count: 0, notes: 'Optional accreditation.' }
           },
-          Preferred: {
+          [TIERS.VALUE]: {
             sales: { required: true, count: 1, notes: '1 certified sales required.' },
             technical: { required: true, count: 1, notes: '1 certified technical required.' }
           },
-          Premier: {
+          [TIERS.STRATEGIC]: {
             sales: { required: true, count: 2, notes: '2 certified sales required.' },
             technical: { required: true, count: 2, notes: '2 certified technical required.' }
           }
@@ -274,6 +277,7 @@
       }
     };
 
+    // ---------- Helpers ----------
     const $ = (sel, ctx = document) => ctx.querySelector(sel);
     const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
     const el = (tag, attrs = {}, children = []) => {
@@ -289,10 +293,7 @@
       });
       return node;
     };
-    const icon = (name, title = '') => {
-      const i = el('i', { 'data-lucide': name, class: 'w-4 h-4', 'aria-hidden': 'true', title });
-      return i;
-    };
+    const icon = (name, title = '') => el('i', { 'data-lucide': name, class: 'w-4 h-4', 'aria-hidden': 'true', title });
 
     function Card(titleEl, rightEl, bodyEl) {
       return el('div', { class: 'rounded-2xl border border-brand surface p-5 shadow-sm backdrop-blur' }, [
@@ -304,17 +305,18 @@
       ]);
     }
 
-    function renderListDots(items, colorVar) {
+    function renderListDots(items, colorHex) {
       return el('ul', { class: 'grid gap-2 sm:grid-cols-2' },
         items.map(txt => el('li', { class: 'flex items-start gap-2' }, [
-          el('span', { class: 'mt-1 inline-block h-2 w-2 rounded-full', style: `background:${colorVar}` }),
+          el('span', { class: 'mt-1 inline-block h-2 w-2 rounded-full', style: `background:${colorHex}` }),
           el('span', {}, txt)
         ]))
       );
     }
 
+    // ---------- UI Sections ----------
     function renderTierTiles() {
-      const tiers = ['Registered', 'Preferred', 'Premier'];
+      const tiers = [TIERS.CONSULTANT, TIERS.VALUE, TIERS.STRATEGIC];
       return el('section', { class: 'grid gap-3 sm:grid-cols-3', role: 'group', 'aria-label': 'Partner tiers' },
         tiers.map(t =>
           el('button', {
@@ -328,9 +330,9 @@
           }, [
             el('div', { class: 'text-xl font-semibold' }, t),
             el('div', { class: 'mt-1 text-sm text-[color:#9aa4b2]' },
-              t === 'Registered'
+              t === TIERS.CONSULTANT
                 ? 'Access & referral economics'
-                : t === 'Preferred'
+                : t === TIERS.VALUE
                 ? 'Pipeline tools, CRM access, joint motions'
                 : 'Campaigns + priority support'
             ),
@@ -378,26 +380,26 @@
 
     function renderMargins() {
       let commitment = 'Annual';
-      let dealType = 'Net New';
+      let dealType = 'NetNew'; // 'NetNew' or 'Renewal'
       let newPartner = false;
 
       const right = el('div', { class: 'flex flex-wrap items-center gap-3' }, [
         (() => {
           const label = el('label', {
-            class: ['flex items-center gap-2 text-sm', STATE.selectedTier === 'Registered' ? 'opacity-60' : ''].join(' '),
+            class: ['flex items-center gap-2 text-sm', !ADVANCED_TIERS.includes(STATE.selectedTier) ? 'opacity-60' : ''].join(' '),
             title: 'For your first 3 net-new deals, we co-sell end-to-end and you keep full margin.'
           }, []);
           const cb = el('input', {
             type: 'checkbox',
-            class: 'h-4 w-4',
-            disabled: STATE.selectedTier === 'Registered',
+            class: 'h-4 w-4 accent-[color:#2F77F1]',
+            disabled: !ADVANCED_TIERS.includes(STATE.selectedTier),
             onChange: (e) => { newPartner = e.target.checked; refresh(); }
           });
           label.append(cb, el('span', {}, 'New partner boost (first 3 net-new deals)'));
           return label;
         })(),
         (() => {
-          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm' }, [
+          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm', 'aria-label': 'Commitment' }, [
             el('option', {}, 'Annual'),
             el('option', {}, 'Monthly')
           ]);
@@ -405,9 +407,9 @@
           return sel;
         })(),
         (() => {
-          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm' }, [
-            el('option', {}, 'Net New'),
-            el('option', {}, 'Renewal')
+          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm', 'aria-label': 'Deal type' }, [
+            el('option', { value: 'NetNew' }, 'Net New'),
+            el('option', { value: 'Renewal' }, 'Renewal')
           ]);
           sel.addEventListener('change', () => { dealType = sel.value; refresh(); });
           return sel;
@@ -415,31 +417,36 @@
       ]);
 
       const container = el('div');
+
       const fullMarginValue = () => {
-        if (STATE.selectedTier === 'Preferred' || STATE.selectedTier === 'Premier') {
+        if (ADVANCED_TIERS.includes(STATE.selectedTier)) {
           return commitment === 'Annual' ? '30%' : '20%';
         }
         return '5%';
-        };
+      };
+
+      function getRules() {
+        const block = STATE.model.margins[commitment][dealType];
+        const key = ADVANCED_TIERS.includes(STATE.selectedTier) ? 'advanced' : 'consultant';
+        return block[key];
+      }
 
       function refresh() {
         container.innerHTML = '';
-        const universe = STATE.model.margins[commitment][dealType];
-        const key = (STATE.selectedTier === 'Preferred' || STATE.selectedTier === 'Premier') ? 'Preferred|Premier' : 'Registered';
-        const rules = universe[key];
+        const rules = getRules();
 
-        if (newPartner && dealType === 'Net New') {
+        if (newPartner && dealType === 'NetNew') {
           container.append(
             el('div', {
               class: 'rounded-xl border p-4',
-              style: 'border-color: color-mix(in oklab,#2F77F1,transparent 70%); background: color-mix(in oklab,#2F77F1,transparent 85%);'
+              style: 'border-color: rgba(47,119,241,.3); background: rgba(47,119,241,.15);'
             }, [
               el('div', { class: 'flex items-center justify-between' }, [
                 el('div', { class: 'font-semibold' }, 'New Partner Boost — Full Margin'),
                 el('span', { class: 'rounded-full border border-brand surface px-2.5 py-1 text-xs' }, `Up to ${fullMarginValue()}`)
               ]),
               el('p', { class: 'mt-2 text-sm text-[color:#9aa4b2]' },
-                `For your first three net-new opportunities, Recast will shadow and co-run the deal end-to-end while you retain full Band 1 margin. ${STATE.selectedTier === 'Registered' ? 'Upgrade to Preferred to unlock this boost.' : ''}`
+                `For your first three net-new opportunities, Recast will shadow and co-run the deal end-to-end while you retain full Band 1 margin. ${!ADVANCED_TIERS.includes(STATE.selectedTier) ? 'Upgrade to Recast Value Partner to unlock this boost.' : ''}`
               )
             ])
           );
@@ -469,26 +476,27 @@
       const steps = STATE.model.onboarding.steps;
 
       const right = el('div', { class: 'flex gap-2' },
-        steps.map((s, i) => {
-          const btn = el('button', {
+        steps.map((s, i) =>
+          el('button', {
             class: 'rounded-full px-3 py-1 text-sm transition surface hover:bg-white/15',
             onClick: () => { active = i; refresh(); }
-          }, s.name);
-          return btn;
-        })
+          }, s.name)
+        )
       );
 
       const listWrap = el('div');
       function refresh() {
         listWrap.innerHTML = '';
-        const items = steps[active].items;
-        listWrap.append(renderListDots(items, '#7C3AED'));
-        $$('.flex > button', right).forEach((b, idx) => {
-          b.className = 'rounded-full px-3 py-1 text-sm transition ' + (idx === active ? 'bg-[color:#F5C84C] text-[color:#0b1220]' : 'surface hover:bg-white/15');
+        listWrap.append(renderListDots(steps[active].items, '#7C3AED'));
+        // style active button
+        Array.from(right.children).forEach((btn, idx) => {
+          btn.className = 'rounded-full px-3 py-1 text-sm transition ' + (idx === active ? 'bg-[color:#F5C84C] text-[color:#0b1220]' : 'surface hover:bg-white/15');
         });
         if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
       }
-      const card = Card('Onboarding (Preferred & Premier)', right, listWrap);
+
+      const title = 'Onboarding (' + TIERS.VALUE + ' & ' + TIERS.STRATEGIC + ')';
+      const card = Card(title, right, listWrap);
       setTimeout(refresh);
       return card;
     }
@@ -502,7 +510,7 @@
       ];
 
       const table = el('div', { class: 'overflow-x-auto' },
-        el('table', { class: 'min-w-full text-sm' }, [
+        el('table', { class: 'min-w-full text-sm', role: 'table' }, [
           el('thead', {}, el('tr', {}, [
             el('th', { class: 'text-left py-2 pr-4 font-semibold' }, 'Track'),
             el('th', { class: 'text-left py-2 pr-4 font-semibold' }, 'Required'),
@@ -527,7 +535,7 @@
         ]),
         el('div', { class: 'rounded-xl border border-brand surface p-4' }, [
           el('div', { class: 'flex items-center gap-2 font-semibold' }, [icon('clock'), el('span', {}, 'Recertification')]),
-          el('p', { class: 'mt-2 text-[color:#9aa4b2]' }, 'Annual refresh aligned to roadmap updates; Premier includes deep-dive workshops.')
+          el('p', { class: 'mt-2 text-[color:#9aa4b2]' }, 'Annual refresh aligned to roadmap updates; Strategic includes deep-dive workshops.')
         ])
       ]);
 
@@ -538,7 +546,7 @@
       const grid = el('div', { class: 'grid gap-4 md:grid-cols-2' },
         STATE.model.partnerTypes.map(pt => {
           const pill = (txt) => el('span', { class: 'rounded-full border border-brand surface px-2.5 py-1 text-xs' }, txt);
-          return el('article', { class: 'rounded-2xl border border-brand surface p-5' }, [
+          return el('article', { class: 'rounded-2xl border border-brand surface p-5', role: 'article' }, [
             el('div', { class: 'flex items-start justify-between gap-3' }, [
               el('h4', { class: 'text-lg font-semibold' }, pt.name),
               pill(pt.key)
@@ -549,7 +557,7 @@
               el('div', { class: 'flex items-start gap-2' }, [icon('shopping-cart'), el('div', {}, el('strong', { class: 'mr-1' }, 'Ordering:' ), pt.ordering)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('tags'), el('div', {}, el('strong', { class: 'mr-1' }, 'Pricing:' ), pt.pricing)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('truck'), el('div', {}, el('strong', { class: 'mr-1' }, 'Fulfillment:' ), pt.fulfillment)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('graduation-cap'), el('div', {}, el('strong', { class: 'mr-1' }, 'Training:' ), pt.training)]),
+              el('div', { class: 'flex items-start gap-2' }, [icon('book'), el('div', {}, el('strong', { class: 'mr-1' }, 'Training:' ), pt.training)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('list-checks'), el('div', {}, el('strong', { class: 'mr-1' }, 'Requirements:' ), pt.requirements)])
             ])
           ]);
@@ -585,7 +593,7 @@
     }
 
     function renderApp() {
-      const root = $('#app');
+      const root = document.getElementById('app');
       root.innerHTML = '';
       const warn = renderCdnWarnings();
       if (warn) root.append(warn);
@@ -598,6 +606,7 @@
       if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     }
 
+    // ---------- Init & CDN fallback notices ----------
     window.addEventListener('error', (e) => {
       const src = (e && e.filename) || '';
       if (src.includes('lucide') || src.includes('tailwind')) {
