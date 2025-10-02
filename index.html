@@ -7,7 +7,6 @@
   <meta name="color-scheme" content="dark light">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tailwind config (runtime)
     tailwind.config = {
       theme: {
         extend: {
@@ -77,7 +76,6 @@
   </template>
 
   <script>
-    // ---------- STATE ----------
     const STATE = {
       selectedTier: 'Preferred',
       selectedTab: 'takes', // takes | gets | margins | onboarding | training | partnerTypes
@@ -213,7 +211,6 @@
             ]}
           ]
         },
-        // -------- Added 4 Partner Types --------
         partnerTypes: [
           {
             key: 'MSP',
@@ -222,18 +219,20 @@
             revenueModel: 'Likely subscription/service-based revenue share.',
             ordering: 'Varies',
             pricing: 'Varies',
+            fulfillment: 'Varies',
             training: 'Yes (as part of managed services)',
             requirements: 'TBD (depends on program design)'
           },
           {
             key: 'ISV',
             name: 'Technology Partner (ISV)',
-            description: 'Build complementary integrations/software with Recast or run joint GTM motions.',
+            description: 'Build complementary integrations/software with Recast or joint GTM motions.',
             revenueModel: 'Revenue sharing, licensing, or co-sell agreements.',
             ordering: 'Varies',
             pricing: 'Varies',
-            training: 'Varies; likely required for technical integration.',
-            requirements: 'Technical integration criteria; sandbox, API alignment, security review.'
+            fulfillment: 'Varies',
+            training: 'Likely required for technical integration.',
+            requirements: 'Varies'
           },
           {
             key: 'OEM',
@@ -241,22 +240,23 @@
             description: 'Bundle/embed Recast solutions into hardware/software offerings.',
             revenueModel: 'Negotiated licensing or per-unit fee.',
             ordering: 'Typically OEM handles orders.',
-            pricing: 'OEM manages pricing and packaging.',
+            pricing: 'OEM manages',
+            fulfillment: 'OEM manages',
             training: 'TBD',
-            requirements: 'OEM manages fulfillment and support alignment; embedding certification.'
+            requirements: 'TBD'
           },
           {
             key: 'Distributor',
             name: 'Distributor Partner',
             description: 'Distribute Recast products in specific regions.',
             revenueModel: 'Negotiated licensing or per-unit fee.',
-            ordering: 'Yes (distributor transacts orders).',
-            pricing: 'Varies by region and agreement.',
-            training: 'Yes, full onboarding needed.',
-            requirements: 'Territory coverage, compliance, enablement, reporting cadence.'
+            ordering: 'Yes (distributor transacts orders)',
+            pricing: 'Varies',
+            fulfillment: 'Varies',
+            training: 'Yes, full onboarding needed',
+            requirements: 'Varies'
           }
         ],
-        // Training matrix derived from program language
         trainingMatrix: {
           Registered: {
             sales: { required: false, count: 0, notes: 'Self-service training available.' },
@@ -274,7 +274,6 @@
       }
     };
 
-    // ---------- Helpers ----------
     const $ = (sel, ctx = document) => ctx.querySelector(sel);
     const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
     const el = (tag, attrs = {}, children = []) => {
@@ -295,7 +294,25 @@
       return i;
     };
 
-    // ---------- Components (render functions) ----------
+    function Card(titleEl, rightEl, bodyEl) {
+      return el('div', { class: 'rounded-2xl border border-brand surface p-5 shadow-sm backdrop-blur' }, [
+        el('div', { class: 'flex items-center justify-between gap-3' }, [
+          el('h3', { class: 'text-lg font-semibold' }, titleEl),
+          rightEl
+        ]),
+        el('div', { class: 'mt-3' }, bodyEl)
+      ]);
+    }
+
+    function renderListDots(items, colorVar) {
+      return el('ul', { class: 'grid gap-2 sm:grid-cols-2' },
+        items.map(txt => el('li', { class: 'flex items-start gap-2' }, [
+          el('span', { class: 'mt-1 inline-block h-2 w-2 rounded-full', style: `background:${colorVar}` }),
+          el('span', {}, txt)
+        ]))
+      );
+    }
+
     function renderTierTiles() {
       const tiers = ['Registered', 'Preferred', 'Premier'];
       return el('section', { class: 'grid gap-3 sm:grid-cols-3', role: 'group', 'aria-label': 'Partner tiers' },
@@ -329,8 +346,8 @@
         { key: 'gets', label: 'What you get' },
         { key: 'margins', label: 'Margins' },
         { key: 'onboarding', label: 'Onboarding' },
-        { key: 'training', label: 'Training' },        // Added tab
-        { key: 'partnerTypes', label: 'Partner Types' } // Added tab
+        { key: 'training', label: 'Training' },
+        { key: 'partnerTypes', label: 'Partner Types' }
       ];
       return el('nav', {
         role: 'tablist',
@@ -347,25 +364,6 @@
           onClick: () => { STATE.selectedTab = t.key; renderApp(); }
         }, t.label)
       ));
-    }
-
-    function Card(titleEl, rightEl, bodyEl) {
-      return el('div', { class: 'rounded-2xl border border-brand surface p-5 shadow-sm backdrop-blur' }, [
-        el('div', { class: 'flex items-center justify-between gap-3' }, [
-          el('h3', { class: 'text-lg font-semibold' }, titleEl),
-          rightEl
-        ]),
-        el('div', { class: 'mt-3' }, bodyEl)
-      ]);
-    }
-
-    function renderListDots(items, colorVar) {
-      return el('ul', { class: 'grid gap-2 sm:grid-cols-2' },
-        items.map(txt => el('li', { class: 'flex items-start gap-2' }, [
-          el('span', { class: 'mt-1 inline-block h-2 w-2 rounded-full', style: `background:${colorVar}` }),
-          el('span', {}, txt)
-        ]))
-      );
     }
 
     function renderTakes() {
@@ -422,7 +420,7 @@
           return commitment === 'Annual' ? '30%' : '20%';
         }
         return '5%';
-      };
+        };
 
       function refresh() {
         container.innerHTML = '';
@@ -485,7 +483,6 @@
         listWrap.innerHTML = '';
         const items = steps[active].items;
         listWrap.append(renderListDots(items, '#7C3AED'));
-        // Update button styles
         $$('.flex > button', right).forEach((b, idx) => {
           b.className = 'rounded-full px-3 py-1 text-sm transition ' + (idx === active ? 'bg-[color:#F5C84C] text-[color:#0b1220]' : 'surface hover:bg-white/15');
         });
@@ -548,10 +545,11 @@
             ]),
             el('p', { class: 'mt-1 text-sm text-[color:#9aa4b2]' }, pt.description),
             el('div', { class: 'mt-4 grid gap-2' }, [
-              el('div', { class: 'flex items-start gap-2' }, [icon('hand-coins'), el('div', {}, el('strong', { class: 'mr-1' }, 'Revenue Model:' ), pt.revenueModel)]),
+              el('div', { class: 'flex items-start gap-2' }, [icon('banknote'), el('div', {}, el('strong', { class: 'mr-1' }, 'Revenue Model:' ), pt.revenueModel)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('shopping-cart'), el('div', {}, el('strong', { class: 'mr-1' }, 'Ordering:' ), pt.ordering)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('tags'), el('div', {}, el('strong', { class: 'mr-1' }, 'Pricing:' ), pt.pricing)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('book-open-check'), el('div', {}, el('strong', { class: 'mr-1' }, 'Training:' ), pt.training)]),
+              el('div', { class: 'flex items-start gap-2' }, [icon('truck'), el('div', {}, el('strong', { class: 'mr-1' }, 'Fulfillment:' ), pt.fulfillment)]),
+              el('div', { class: 'flex items-start gap-2' }, [icon('graduation-cap'), el('div', {}, el('strong', { class: 'mr-1' }, 'Training:' ), pt.training)]),
               el('div', { class: 'flex items-start gap-2' }, [icon('list-checks'), el('div', {}, el('strong', { class: 'mr-1' }, 'Requirements:' ), pt.requirements)])
             ])
           ]);
@@ -586,7 +584,6 @@
       );
     }
 
-    // ---------- App Root ----------
     function renderApp() {
       const root = $('#app');
       root.innerHTML = '';
@@ -601,7 +598,6 @@
       if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     }
 
-    // ---------- Init ----------
     window.addEventListener('error', (e) => {
       const src = (e && e.filename) || '';
       if (src.includes('lucide') || src.includes('tailwind')) {
@@ -612,7 +608,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderApp();
       if (!window.lucide || !window.lucide.createIcons) {
-        // Note only a notice; UI works without icons
         STATE.cdnErrors.push('Lucide icons unavailable; using text only.');
         renderApp();
       } else {
