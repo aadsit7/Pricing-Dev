@@ -1,628 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Recast Partner Program – Single File App (Fixed & Renamed)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recast Partner Program – Branded Preview</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            rc: {
-              bg: '#0b1220',
-              text: '#e5e7eb',
-              muted: '#9aa4b2',
-              primary: '#2F77F1',
-              secondary: '#7C3AED',
-              accent: '#F5C84C',
-              surface: 'rgba(255,255,255,0.06)',
-              border: 'rgba(255,255,255,0.12)'
-            }
-          },
-          borderRadius: { '2xl': '1rem' }
-        }
-      }
-    }
-  </script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+
   <style>
+    :root{
+      --rc-bg:        #0b1220;
+      --rc-text:      #e5e7eb;
+      --rc-muted:     #9aa4b2;
+      --rc-primary:   #2F77F1;
+      --rc-primary-600:#2569d6;
+      --rc-secondary: #7C3AED;
+      --rc-accent:    #F5C84C;
+      --rc-surface:   rgba(255,255,255,0.06);
+      --rc-border:    rgba(255,255,255,0.12);
+    }
     :root { color-scheme: dark; }
-    html, body { height: 100%; }
-    body {
-      background: #0b1220;
-      color: #e5e7eb;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    html,body{ height:100%; }
+    body{
+      background:var(--rc-bg);
+      color:var(--rc-text);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
-    .surface { background: rgba(255,255,255,0.06); }
-    .border-brand { border-color: rgba(255,255,255,0.12); }
-    .ring-primary { --tw-ring-color: #2F77F1; }
-    .grad-brand {
-      background:
-        radial-gradient(60% 60% at 20% 10%, rgba(47,119,241,.35) 0%, transparent 70%),
-        radial-gradient(60% 60% at 80% 0%, rgba(124,58,237,.35) 0%, transparent 70%),
-        radial-gradient(80% 80% at 50% 90%, rgba(245,200,76,.18) 0%, transparent 70%);
-    }
+    .font-display{ font-family:'Poppins', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    .bg-primary    { background-color: var(--rc-primary) !important; }
+    .bg-secondary  { background-color: var(--rc-secondary) !important; }
+    .bg-accent     { background-color: var(--rc-accent) !important; }
+    .text-muted    { color: var(--rc-muted) !important; }
+    .ring-primary  { --tw-ring-color: color-mix(in oklab, var(--rc-primary), transparent 0%); }
+    .border-brand  { border-color: var(--rc-border) !important; }
+    .surface       { background: var(--rc-surface); }
   </style>
-  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
-  <script defer src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="min-h-screen">
   <header class="relative overflow-hidden">
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 blur-3xl grad-brand"></div>
+    <div aria-hidden class="pointer-events-none absolute inset-0 blur-3xl"
+         style="background:
+           radial-gradient(60% 60% at 20% 10%, color-mix(in oklab, var(--rc-primary) 35%, transparent) 0%, transparent 70%),
+           radial-gradient(60% 60% at 80% 0%, color-mix(in oklab, var(--rc-secondary) 35%, transparent) 0%, transparent 70%),
+           radial-gradient(80% 80% at 50% 90%, color-mix(in oklab, var(--rc-accent) 18%, transparent) 0%, transparent 70%)">
+    </div>
+
     <div class="relative mx-auto max-w-7xl px-4 pt-10 pb-8">
-      <div class="inline-flex items-center gap-2 rounded-full border border-brand surface px-3 py-1 text-xs backdrop-blur" aria-live="polite">
-        <span class="inline-block h-1.5 w-1.5 rounded-full" style="background:#F5C84C"></span>
-        <span>Partner-first GTM</span>
+      <div class="inline-flex items-center gap-2 rounded-full border border-brand surface px-3 py-1 text-xs backdrop-blur">
+        <span class="inline-block h-1.5 w-1.5 rounded-full bg-accent"></span>
       </div>
-      <h1 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-        Join <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(90deg, #2F77F1, #7C3AED);">Recast Partner Program</span>
+
+      <h1 class="mt-4 text-3xl font-display font-semibold tracking-tight sm:text-4xl">
+        Join <span class="text-transparent bg-clip-text"
+                   style="background-image: linear-gradient(90deg, var(--rc-primary), var(--rc-secondary));">Recast Partner Program</span>
       </h1>
-      <p class="mt-2 max-w-3xl text-[color:#9aa4b2]">
-        We put <span class="text-[color:#F5C84C] font-semibold">partnership</span> at the center of how we go to market.
+
+      <p class="mt-2 max-w-3xl text-muted">
+        We put <span class="text-[color:var(--rc-accent)] font-semibold">partnership</span> at the center of how we go to market.
       </p>
     </div>
   </header>
 
   <main class="relative mx-auto max-w-7xl px-4 pb-20">
-    <div id="app" class="space-y-6"></div>
+    <div id="root"></div>
   </main>
 
-  <script>
-    // ---------- Constants (renamed tiers) ----------
-    const TIERS = {
-      CONSULTANT: 'Recast Consultant Partner',   // Old: Registered
-      VALUE: 'Recast Value Partner',             // Old: Preferred
-      STRATEGIC: 'Recast Strategic Partner'      // Old: Premier
-    };
-    const ADVANCED_TIERS = [TIERS.VALUE, TIERS.STRATEGIC];
+  <script type="text/babel">
+    const { useMemo, useState } = React;
 
-    // ---------- Global STATE ----------
-    const STATE = {
-      selectedTier: TIERS.VALUE,
-      selectedTab: 'takes', // takes | gets | margins | onboarding | training | partnerTypes
-      cdnErrors: [],
-      model: {
-        tiers: {
-          [TIERS.CONSULTANT]: {
-            requirements: ['Signed agreement', 'Vetted & approved'],
-            benefits: [
-              'Margin/referral on registered closed deals',
-              'Partner portal access',
-              'Self-service training',
-              'Program logo package + exposure on Recastsoftware.com'
-            ]
-          },
-          [TIERS.VALUE]: {
-            requirements: [
-              'Signed agreement',
-              'Vetted & approved',
-              'Recast page on partner site',
-              'Active pipeline',
-              '1 certified technical',
-              '1 certified sales'
+    const MODEL = {
+      tiers: {
+        "Recast Consultant Partner": {
+          requirements: ["Signed agreement","Vetted & approved"],
+          benefits: [
+            "Margin/referral on registered closed deals",
+            "Partner portal access",
+            "Self-service training",
+            "Program logo package + exposure on Recastsoftware.com",
+          ],
+        },
+        "Recast Value Partner": {
+          requirements: [
+            "Signed agreement","Vetted & approved","Recast page on partner site",
+            "Active pipeline","1 certified technical","1 certified sales",
+          ],
+          benefits: [
+            "Margin/referral on registered closed deals","Partner portal access","Self-service training",
+            "Program logo package + exposure on Recastsoftware.com","Campaigns-in-a-box","Quarterly roadmap updates",
+            "Partner licensing","Pipeline management tools","Field management / managed status",
+            "Enhanced CRM access (e.g., quote-to-order)","Basic joint lead-gen support","Dedicated support line",
+            "Dedicated MDF funds",
+          ],
+        },
+        "Recast Strategic Partner": {
+          requirements: [
+            "Signed agreement","Vetted & approved","Recast page on partner site","Active pipeline",
+            "2 certified technical","2 certified sales","Sales targets","Business plan",
+          ],
+          benefits: [
+            "Margin/referral on registered closed deals","Partner portal access","Self-service training",
+            "Program logo package + exposure on Recastsoftware.com","Campaigns-in-a-box","Quarterly roadmap updates",
+            "Partner licensing","Pipeline management tools","Field management / managed status",
+            "Enhanced CRM access (e.g., quote-to-order)","Basic joint lead-gen support","Dedicated support line",
+            "Dedicated MDF funds","Joint lead-gen campaigns","Partner support line",
+            "Recast Account Manager cross-sell engagement",
+          ],
+        },
+      },
+      margins: {
+        Annual: {
+          "Net New": {
+            "Recast Value Partner|Recast Strategic Partner": [
+              { band: "Band 1", upTo: "30%", when: "Partner originated AND Partner registered AND Recast approved" },
+              { band: "Band 2", upTo: "15%", when: "Recast originated/registered AND Recast approved" },
             ],
-            benefits: [
-              'Margin/referral on registered closed deals',
-              'Partner portal access',
-              'Self-service training',
-              'Program logo package + exposure on Recastsoftware.com',
-              'Campaigns-in-a-box',
-              'Quarterly roadmap updates',
-              'Partner licensing',
-              'Pipeline management tools',
-              'Field management / managed status',
-              'Enhanced CRM access (e.g., quote-to-order)',
-              'Basic joint lead-gen support',
-              'Dedicated support line',
-              'Dedicated MDF funds'
-            ]
-          },
-          [TIERS.STRATEGIC]: {
-            requirements: [
-              'Signed agreement',
-              'Vetted & approved',
-              'Recast page on partner site',
-              'Active pipeline',
-              '2 certified technical',
-              '2 certified sales',
-              'Sales targets',
-              'Business plan'
+            "Recast Consultant Partner": [
+              { band: "Band 3", upTo: "5%", when: "Partner originated AND Partner registered AND Recast approved" },
             ],
-            benefits: [
-              'Margin/referral on registered closed deals',
-              'Partner portal access',
-              'Self-service training',
-              'Program logo package + exposure on Recastsoftware.com',
-              'Campaigns-in-a-box',
-              'Quarterly roadmap updates',
-              'Partner licensing',
-              'Pipeline management tools',
-              'Field management / managed status',
-              'Enhanced CRM access (e.g., quote-to-order)',
-              'Basic joint lead-gen support',
-              'Dedicated MDF funds',
-              'Joint lead-gen campaigns',
-              'Partner support line',
-              'Recast Account Manager cross-sell engagement'
-            ]
-          }
+          },
+          Renewal: {
+            "Recast Value Partner|Recast Strategic Partner": [
+              { band: "Band 1", upTo: "5%", when: "Partner of Record OR Incumbent" },
+              { band: "Band 2", upTo: "5%", when: "Non-incumbent" },
+            ],
+            "Recast Consultant Partner": [{ band: "Band 3", upTo: "0%", when: "NA" }],
+          },
         },
-        // Margins structure (logic preserved, tier names updated)
-        margins: {
-          Annual: {
-            NetNew: {
-              advanced: [
-                { band: 'Band 1', upTo: '30%', when: 'Partner originated AND Partner registered AND Recast approved' },
-                { band: 'Band 2', upTo: '15%', when: 'Recast originated/registered AND Recast approved' }
-              ],
-              consultant: [
-                { band: 'Band 3', upTo: '5%', when: 'Partner originated AND Partner registered AND Recast approved' }
-              ]
-            },
-            Renewal: {
-              advanced: [
-                { band: 'Band 1', upTo: '5%', when: 'Partner of Record OR Incumbent' },
-                { band: 'Band 2', upTo: '5%', when: 'Non-incumbent' }
-              ],
-              consultant: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
-            }
+        Monthly: {
+          "Net New": {
+            "Recast Value Partner|Recast Strategic Partner": [
+              { band: "Band 1", upTo: "20%", when: "Partner originated AND Partner registered AND Recast approved" },
+              { band: "Band 2", upTo: "10%", when: "Recast originated/registered AND Recast approved" },
+            ],
+            "Recast Consultant Partner": [
+              { band: "Band 3", upTo: "5%", when: "Partner originated AND Partner registered AND Recast approved" },
+            ],
           },
-          Monthly: {
-            NetNew: {
-              advanced: [
-                { band: 'Band 1', upTo: '20%', when: 'Partner originated AND Partner registered AND Recast approved' },
-                { band: 'Band 2', upTo: '10%', when: 'Recast originated/registered AND Recast approved' }
-              ],
-              consultant: [
-                { band: 'Band 3', upTo: '5%', when: 'Partner originated AND Partner registered AND Recast approved' }
-              ]
-            },
-            Renewal: {
-              advanced: [
-                { band: 'Band 1', upTo: '5%', when: 'Partner of Record OR Incumbent' },
-                { band: 'Band 2', upTo: '5%', when: 'Non-incumbent' }
-              ],
-              consultant: [{ band: 'Band 3', upTo: '0%', when: 'NA' }]
-            }
-          }
+          Renewal: {
+            "Recast Value Partner|Recast Strategic Partner": [
+              { band: "Band 1", upTo: "5%", when: "Partner of Record OR Incumbent" },
+              { band: "Band 2", upTo: "5%", when: "Non-incumbent" },
+            ],
+            "Recast Consultant Partner": [{ band: "Band 3", upTo: "0%", when: "NA" }],
+          },
         },
-        onboarding: {
-          steps: [
-            { name: 'Onboard', items: [
-              'Activate agreements & meeting cadence',
-              'Install partner licenses; demo-back',
-              'Technical accreditation (≥1)',
-              'Sales accreditation (≥1)'
-            ]},
-            { name: 'Activate', items: [
-              'Register leads in Partner Central',
-              'Use marketing resources',
-              'Develop opportunities with tools & demos',
-              'First deal achieved',
-              'Directory listing & website promotion'
-            ]},
-            { name: 'Accelerate', items: [
-              'Marketing plan & events/webinars',
-              'Create repeatable offer',
-              '≥6 licensing deals annually',
-              'Nominate for partner awards',
-              'Drive expansions & renewals'
-            ]}
-          ]
-        },
-        // 4 Partner Types (from user brief)
-        partnerTypes: [
-          {
-            key: 'MSP',
-            name: 'MSP (Managed Service Provider)',
-            description: 'Deliver managed services on top of Recast offerings.',
-            revenueModel: 'Likely subscription/service-based revenue share.',
-            ordering: 'Varies',
-            pricing: 'Varies',
-            fulfillment: 'Varies',
-            training: 'Yes (as part of managed services)',
-            requirements: 'TBD (depends on program design)'
-          },
-          {
-            key: 'ISV',
-            name: 'Technology Partner (ISV)',
-            description: 'Build complementary integrations/software with Recast or joint GTM motions.',
-            revenueModel: 'Revenue sharing, licensing, or co-sell agreements.',
-            ordering: 'Varies',
-            pricing: 'Varies',
-            fulfillment: 'Varies',
-            training: 'Likely required for technical integration.',
-            requirements: 'API alignment, sandbox usage, security review.'
-          },
-          {
-            key: 'OEM',
-            name: 'OEM Partner',
-            description: 'Bundle/embed Recast solutions into hardware/software offerings.',
-            revenueModel: 'Negotiated licensing or per-unit fee.',
-            ordering: 'Typically OEM handles orders.',
-            pricing: 'OEM manages',
-            fulfillment: 'OEM manages',
-            training: 'TBD',
-            requirements: 'Embedding certification; support alignment.'
-          },
-          {
-            key: 'Distributor',
-            name: 'Distributor Partner',
-            description: 'Distribute Recast products in specific regions.',
-            revenueModel: 'Negotiated licensing or per-unit fee.',
-            ordering: 'Yes (distributor transacts orders)',
-            pricing: 'Varies by region and agreement',
-            fulfillment: 'Varies',
-            training: 'Yes, full onboarding needed',
-            requirements: 'Territory coverage, compliance, reporting cadence.'
-          }
+      },
+      onboarding: {
+        steps: [
+          { name: "Onboard", items: [
+            "Activate agreements & meeting cadence",
+            "Install partner licenses; demo-back",
+            "Technical accreditation (≥1)",
+            "Sales accreditation (≥1)",
+          ]},
+          { name: "Activate", items: [
+            "Register leads in Partner Central",
+            "Use marketing resources",
+            "Develop opportunities with tools & demos",
+            "First deal achieved",
+            "Directory listing & website promotion",
+          ]},
+          { name: "Accelerate", items: [
+            "Marketing plan & events/webinars",
+            "Create repeatable offer",
+            "≥6 licensing deals annually",
+            "Nominate for partner awards",
+            "Drive expansions & renewals",
+          ]},
         ],
-        // Training matrix aligned to new tiers
-        trainingMatrix: {
-          [TIERS.CONSULTANT]: {
-            sales: { required: false, count: 0, notes: 'Self-service training available.' },
-            technical: { required: false, count: 0, notes: 'Optional accreditation.' }
-          },
-          [TIERS.VALUE]: {
-            sales: { required: true, count: 1, notes: '1 certified sales required.' },
-            technical: { required: true, count: 1, notes: '1 certified technical required.' }
-          },
-          [TIERS.STRATEGIC]: {
-            sales: { required: true, count: 2, notes: '2 certified sales required.' },
-            technical: { required: true, count: 2, notes: '2 certified technical required.' }
+      },
+    };
+
+    const TIERS = ["Recast Consultant Partner", "Recast Value Partner", "Recast Strategic Partner"];
+    const cx = (...a) => a.filter(Boolean).join(" ");
+
+    const Badge = ({ children }) => (
+      <span className="rounded-full border border-brand surface px-2.5 py-1 text-xs">{children}</span>
+    );
+
+    const Card = ({ title, right, children }) => (
+      <div className="rounded-2xl border border-brand surface p-5 shadow-sm backdrop-blur">
+        <div className="flex items-center justify-between">
+          {title && <h3 className="text-lg font-display font-semibold">{title}</h3>}
+          {right}
+        </div>
+        <div className="mt-3">{children}</div>
+      </div>
+    );
+
+    const Tile = ({ title, subtitle, active, onClick }) => (
+      <button
+        onClick={onClick}
+        className={cx(
+          "relative flex flex-col items-start rounded-2xl border p-5 text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ring-primary focus:ring-offset-[color:var(--rc-bg)]",
+          active ? "border-white/25 surface" : "border-brand surface hover:bg-white/10"
+        )}
+      >
+        <div className="text-xl font-display font-semibold">{title}</div>
+        {subtitle && <div className="mt-1 text-sm text-muted">{subtitle}</div>}
+        {active && (
+          <span className="absolute right-4 top-4 inline-flex h-2 w-2 rounded-full bg-primary" />
+        )}
+      </button>
+    );
+
+    function WhatItTakes({ tier }) {
+      const reqs = MODEL.tiers[tier].requirements;
+      return (
+        <Card title="What it takes">
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {reqs.map((r) => (
+              <li key={r} className="flex items-start gap-2">
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-accent" />
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      );
+    }
+
+    function WhatYouGet({ tier }) {
+      const bens = MODEL.tiers[tier].benefits;
+      return (
+        <Card title="What you get">
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {bens.map((b) => (
+              <li key={b} className="flex items-start gap-2">
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-primary" />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      );
+    }
+
+    function Margins({ tier }) {
+      const [commitment, setCommitment] = useState("Annual");
+      const [dealType, setDealType] = useState("Net New");
+      const [newPartner, setNewPartner] = useState(false);
+
+      const rules = useMemo(() => {
+        const universe = MODEL.margins[commitment][dealType];
+        const key = tier === "Recast Value Partner" || tier === "Recast Strategic Partner"
+          ? "Recast Value Partner|Recast Strategic Partner"
+          : "Recast Consultant Partner";
+        return universe[key];
+      }, [commitment, dealType, tier]);
+
+      const fullMarginValue = useMemo(() => {
+        if (tier === "Recast Value Partner" || tier === "Recast Strategic Partner") {
+          return commitment === "Annual" ? "30%" : "20%";
+        }
+        return commitment === "Annual" ? "5%" : "5%";
+      }, [tier, commitment]);
+
+      return (
+        <Card
+          title="Margins"
+          right={
+            <div className="flex flex-wrap items-center gap-3">
+              <label className={cx("flex items-center gap-2 text-sm", tier === 'Recast Consultant Partner' && 'opacity-60')}
+                     title="For your first 3 net-new deals, we co-sell end-to-end and you keep full margin.">
+                <input type="checkbox" className="h-4 w-4 accent-[color:var(--rc-primary)]"
+                       disabled={tier === 'Recast Consultant Partner'} checked={newPartner}
+                       onChange={(e) => setNewPartner(e.target.checked)} />
+                <span>New partner boost (first 3 net-new deals)</span>
+              </label>
+              <select className="rounded-xl border border-brand bg-[color:var(--rc-bg)] px-3 py-1 text-sm" value={commitment} onChange={(e) => setCommitment(e.target.value)}>
+                <option>Annual</option>
+                <option>Monthly</option>
+              </select>
+              <select className="rounded-xl border border-brand bg-[color:var(--rc-bg)] px-3 py-1 text-sm" value={dealType} onChange={(e) => setDealType(e.target.value)}>
+                <option>Net New</option>
+                <option>Renewal</option>
+              </select>
+            </div>
           }
-        }
-      }
-    };
-
-    // ---------- Helpers ----------
-    const $ = (sel, ctx = document) => ctx.querySelector(sel);
-    const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
-    const el = (tag, attrs = {}, children = []) => {
-      const node = document.createElement(tag);
-      Object.entries(attrs).forEach(([k, v]) => {
-        if (k === 'class') node.className = v;
-        else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
-        else if (v !== null && v !== undefined) node.setAttribute(k, v);
-      });
-      (Array.isArray(children) ? children : [children]).forEach(c => {
-        if (c == null) return;
-        node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-      });
-      return node;
-    };
-    const icon = (name, title = '') => el('i', { 'data-lucide': name, class: 'w-4 h-4', 'aria-hidden': 'true', title });
-
-    function Card(titleEl, rightEl, bodyEl) {
-      return el('div', { class: 'rounded-2xl border border-brand surface p-5 shadow-sm backdrop-blur' }, [
-        el('div', { class: 'flex items-center justify-between gap-3' }, [
-          el('h3', { class: 'text-lg font-semibold' }, titleEl),
-          rightEl
-        ]),
-        el('div', { class: 'mt-3' }, bodyEl)
-      ]);
-    }
-
-    function renderListDots(items, colorHex) {
-      return el('ul', { class: 'grid gap-2 sm:grid-cols-2' },
-        items.map(txt => el('li', { class: 'flex items-start gap-2' }, [
-          el('span', { class: 'mt-1 inline-block h-2 w-2 rounded-full', style: `background:${colorHex}` }),
-          el('span', {}, txt)
-        ]))
+        >
+          {newPartner && dealType === 'Net New' ? (
+            <div className="rounded-xl border border-[color:color-mix(in oklab,var(--rc-primary),transparent 70%)] bg-[color:color-mix(in oklab,var(--rc-primary),transparent 85%)] p-4">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">New Partner Boost — Full Margin</div>
+                <Badge>Up to {fullMarginValue}</Badge>
+              </div>
+              <p className="mt-2 text-sm text-muted">For your first <strong>three</strong> net-new opportunities, Recast will <strong>shadow and co-run the deal end-to-end</strong> (discovery → demo → proposal → close) while you retain <strong>full Band 1 margin</strong>. {tier === 'Recast Consultant Partner' ? 'Upgrade to Recast Value Partner to unlock this boost.' : ''}</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {rules.map((r) => (
+                  <div key={r.band + r.when} className="rounded-xl border border-brand surface p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">{r.band}</div>
+                      <Badge>Up to {r.upTo}</Badge>
+                    </div>
+                    <div className="mt-2 text-sm text-muted">{r.when}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-xs text-muted">“Up to” indicates the maximum eligible margin given qualifiers & program standing.</p>
+            </>
+          )}
+        </Card>
       );
     }
 
-    // ---------- UI Sections ----------
-    function renderTierTiles() {
-      const tiers = [TIERS.CONSULTANT, TIERS.VALUE, TIERS.STRATEGIC];
-      return el('section', { class: 'grid gap-3 sm:grid-cols-3', role: 'group', 'aria-label': 'Partner tiers' },
-        tiers.map(t =>
-          el('button', {
-            class: [
-              'relative flex flex-col items-start rounded-2xl border p-5 text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ring-primary focus:ring-offset-[color:#0b1220]',
-              'border-brand surface hover:bg-white/10',
-              STATE.selectedTier === t ? 'outline outline-1 outline-white/25' : ''
-            ].join(' '),
-            onClick: () => { STATE.selectedTier = t; renderApp(); },
-            'aria-pressed': String(STATE.selectedTier === t)
-          }, [
-            el('div', { class: 'text-xl font-semibold' }, t),
-            el('div', { class: 'mt-1 text-sm text-[color:#9aa4b2]' },
-              t === TIERS.CONSULTANT
-                ? 'Access & referral economics'
-                : t === TIERS.VALUE
-                ? 'Pipeline tools, CRM access, joint motions'
-                : 'Campaigns + priority support'
-            ),
-            STATE.selectedTier === t ? el('span', { class: 'absolute right-4 top-4 inline-flex h-2 w-2 rounded-full', style: 'background:#2F77F1' }) : null
-          ])
-        )
+    function Onboarding() {
+      const [active, setActive] = useState(0);
+      return (
+        <Card
+          title="Onboarding (Recast Value Partner & Recast Strategic Partner)"
+          right={
+            <div className="flex gap-2">
+              {MODEL.onboarding.steps.map((s, i) => (
+                <button
+                  key={s.name}
+                  onClick={() => setActive(i)}
+                  className={cx(
+                    "rounded-full px-3 py-1 text-sm transition",
+                    active === i ? "bg-accent text-[color:var(--rc-bg)]" : "surface hover:bg-white/15"
+                  )}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+          }
+        >
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {MODEL.onboarding.steps[active].items.map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <span className="mt-1 inline-block h-2 w-2 rounded-full bg-secondary" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
       );
     }
 
-    function renderTabs() {
-      const tabs = [
-        { key: 'takes', label: 'What it takes' },
-        { key: 'gets', label: 'What you get' },
-        { key: 'margins', label: 'Margins' },
-        { key: 'onboarding', label: 'Onboarding' },
-        { key: 'training', label: 'Training' },
-        { key: 'partnerTypes', label: 'Partner Types' }
-      ];
-      return el('nav', {
-        role: 'tablist',
-        'aria-label': 'Sections',
-        class: 'flex flex-wrap gap-2 rounded-full surface p-1 ring-1 border-brand'
-      }, tabs.map(t =>
-        el('button', {
-          role: 'tab',
-          'aria-selected': String(STATE.selectedTab === t.key),
-          class: [
-            'rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-primary',
-            STATE.selectedTab === t.key ? 'bg-[color:#F5C84C] text-[color:#0b1220]' : 'hover:bg-white/10'
-          ].join(' '),
-          onClick: () => { STATE.selectedTab = t.key; renderApp(); }
-        }, t.label)
-      ));
-    }
+    function App() {
+      const [tier, setTier] = useState("Recast Value Partner");
+      const [tab, setTab] = useState("takes");
 
-    function renderTakes() {
-      const reqs = STATE.model.tiers[STATE.selectedTier].requirements;
-      return Card('What it takes', null, renderListDots(reqs, '#F5C84C'));
-    }
+      return (
+        <div className="space-y-6">
+          <section className="grid gap-3 sm:grid-cols-3">
+            {["Recast Consultant Partner","Recast Value Partner","Recast Strategic Partner"].map((t) => (
+              <Tile
+                key={t}
+                title={t}
+                subtitle={
+                  t === "Recast Consultant Partner"
+                    ? "Access & referral economics"
+                    : t === "Recast Value Partner"
+                    ? "Pipeline tools, CRM access, joint motions"
+                    : "Campaigns + priority support"
+                }
+                active={tier === t}
+                onClick={() => setTier(t)}
+              />
+            ))}
+          </section>
 
-    function renderGets() {
-      const bens = STATE.model.tiers[STATE.selectedTier].benefits;
-      return Card('What you get', null, renderListDots(bens, '#2F77F1'));
-    }
+          <nav role="tablist" aria-label="Sections" className="flex flex-wrap gap-2 rounded-full surface p-1 ring-1 border-brand">
+            <button role="tab" aria-selected={tab==='takes'} className={cx("rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-primary",
+              tab==='takes' ? 'bg-accent text-[color:var(--rc-bg)]' : 'hover:bg-white/10')} onClick={() => setTab('takes')}>What it takes</button>
+            <button role="tab" aria-selected={tab==='gets'} className={cx("rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-primary",
+              tab==='gets' ? 'bg-accent text-[color:var(--rc-bg)]' : 'hover:bg-white/10')} onClick={() => setTab('gets')}>What you get</button>
+            <button role="tab" aria-selected={tab==='margins'} className={cx("rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-primary",
+              tab==='margins' ? 'bg-accent text-[color:var(--rc-bg)]' : 'hover:bg-white/10')} onClick={() => setTab('margins')}>Margins</button>
+            <button role="tab" aria-selected={tab==='onboarding'} className={cx("rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ring-primary",
+              tab==='onboarding' ? 'bg-accent text-[color:var(--rc-bg)]' : 'hover:bg-white/10')} onClick={() => setTab('onboarding')}>Onboarding</button>
+          </nav>
 
-    function renderMargins() {
-      let commitment = 'Annual';
-      let dealType = 'NetNew'; // 'NetNew' or 'Renewal'
-      let newPartner = false;
+          <div className="grid gap-4" aria-live="polite">
+            {tab === "takes" && <WhatItTakes tier={tier} />}
+            {tab === "gets" && <WhatYouGet tier={tier} />}
+            {tab === "margins" && <Margins tier={tier} />}
+            {tab === "onboarding" && <Onboarding />}
+          </div>
 
-      const right = el('div', { class: 'flex flex-wrap items-center gap-3' }, [
-        (() => {
-          const label = el('label', {
-            class: ['flex items-center gap-2 text-sm', !ADVANCED_TIERS.includes(STATE.selectedTier) ? 'opacity-60' : ''].join(' '),
-            title: 'For your first 3 net-new deals, we co-sell end-to-end and you keep full margin.'
-          }, []);
-          const cb = el('input', {
-            type: 'checkbox',
-            class: 'h-4 w-4 accent-[color:#2F77F1]',
-            disabled: !ADVANCED_TIERS.includes(STATE.selectedTier),
-            onChange: (e) => { newPartner = e.target.checked; refresh(); }
-          });
-          label.append(cb, el('span', {}, 'New partner boost (first 3 net-new deals)'));
-          return label;
-        })(),
-        (() => {
-          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm', 'aria-label': 'Commitment' }, [
-            el('option', {}, 'Annual'),
-            el('option', {}, 'Monthly')
-          ]);
-          sel.addEventListener('change', () => { commitment = sel.value; refresh(); });
-          return sel;
-        })(),
-        (() => {
-          const sel = el('select', { class: 'rounded-xl border border-brand bg-[color:#0b1220] px-3 py-1 text-sm', 'aria-label': 'Deal type' }, [
-            el('option', { value: 'NetNew' }, 'Net New'),
-            el('option', { value: 'Renewal' }, 'Renewal')
-          ]);
-          sel.addEventListener('change', () => { dealType = sel.value; refresh(); });
-          return sel;
-        })()
-      ]);
-
-      const container = el('div');
-
-      const fullMarginValue = () => {
-        if (ADVANCED_TIERS.includes(STATE.selectedTier)) {
-          return commitment === 'Annual' ? '30%' : '20%';
-        }
-        return '5%';
-      };
-
-      function getRules() {
-        const block = STATE.model.margins[commitment][dealType];
-        const key = ADVANCED_TIERS.includes(STATE.selectedTier) ? 'advanced' : 'consultant';
-        return block[key];
-      }
-
-      function refresh() {
-        container.innerHTML = '';
-        const rules = getRules();
-
-        if (newPartner && dealType === 'NetNew') {
-          container.append(
-            el('div', {
-              class: 'rounded-xl border p-4',
-              style: 'border-color: rgba(47,119,241,.3); background: rgba(47,119,241,.15);'
-            }, [
-              el('div', { class: 'flex items-center justify-between' }, [
-                el('div', { class: 'font-semibold' }, 'New Partner Boost — Full Margin'),
-                el('span', { class: 'rounded-full border border-brand surface px-2.5 py-1 text-xs' }, `Up to ${fullMarginValue()}`)
-              ]),
-              el('p', { class: 'mt-2 text-sm text-[color:#9aa4b2]' },
-                `For your first three net-new opportunities, Recast will shadow and co-run the deal end-to-end while you retain full Band 1 margin. ${!ADVANCED_TIERS.includes(STATE.selectedTier) ? 'Upgrade to Recast Value Partner to unlock this boost.' : ''}`
-              )
-            ])
-          );
-        } else {
-          const grid = el('div', { class: 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3' },
-            rules.map(r => el('div', { class: 'rounded-xl border border-brand surface p-4' }, [
-              el('div', { class: 'flex items-center justify-between' }, [
-                el('div', { class: 'font-semibold' }, r.band),
-                el('span', { class: 'rounded-full border border-brand surface px-2.5 py-1 text-xs' }, `Up to ${r.upTo}`)
-              ]),
-              el('div', { class: 'mt-2 text-sm text-[color:#9aa4b2]' }, r.when)
-            ]))
-          );
-          const note = el('p', { class: 'mt-3 text-xs text-[color:#9aa4b2]' }, '“Up to” indicates the maximum eligible margin given qualifiers & program standing.');
-          container.append(grid, note);
-        }
-        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-      }
-
-      const card = Card('Margins', right, container);
-      setTimeout(refresh);
-      return card;
-    }
-
-    function renderOnboarding() {
-      let active = 0;
-      const steps = STATE.model.onboarding.steps;
-
-      const right = el('div', { class: 'flex gap-2' },
-        steps.map((s, i) =>
-          el('button', {
-            class: 'rounded-full px-3 py-1 text-sm transition surface hover:bg-white/15',
-            onClick: () => { active = i; refresh(); }
-          }, s.name)
-        )
-      );
-
-      const listWrap = el('div');
-      function refresh() {
-        listWrap.innerHTML = '';
-        listWrap.append(renderListDots(steps[active].items, '#7C3AED'));
-        // style active button
-        Array.from(right.children).forEach((btn, idx) => {
-          btn.className = 'rounded-full px-3 py-1 text-sm transition ' + (idx === active ? 'bg-[color:#F5C84C] text-[color:#0b1220]' : 'surface hover:bg-white/15');
-        });
-        if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-      }
-
-      const title = 'Onboarding (' + TIERS.VALUE + ' & ' + TIERS.STRATEGIC + ')';
-      const card = Card(title, right, listWrap);
-      setTimeout(refresh);
-      return card;
-    }
-
-    function renderTraining() {
-      const tier = STATE.selectedTier;
-      const matrix = STATE.model.trainingMatrix[tier];
-      const rows = [
-        { role: 'Sales Accreditation', data: matrix.sales },
-        { role: 'Technical Accreditation', data: matrix.technical }
-      ];
-
-      const table = el('div', { class: 'overflow-x-auto' },
-        el('table', { class: 'min-w-full text-sm', role: 'table' }, [
-          el('thead', {}, el('tr', {}, [
-            el('th', { class: 'text-left py-2 pr-4 font-semibold' }, 'Track'),
-            el('th', { class: 'text-left py-2 pr-4 font-semibold' }, 'Required'),
-            el('th', { class: 'text-left py-2 pr-4 font-semibold' }, 'Count'),
-            el('th', { class: 'text-left py-2 font-semibold' }, 'Notes')
-          ])),
-          el('tbody', {}, rows.map(r =>
-            el('tr', { class: 'border-t border-brand' }, [
-              el('td', { class: 'py-2 pr-4' }, r.role),
-              el('td', { class: 'py-2 pr-4' }, r.data.required ? 'Yes' : 'No'),
-              el('td', { class: 'py-2 pr-4' }, String(r.data.count)),
-              el('td', { class: 'py-2' }, r.data.notes)
-            ])
-          ))
-        ])
-      );
-
-      const hints = el('div', { class: 'mt-3 grid gap-2 sm:grid-cols-2' }, [
-        el('div', { class: 'rounded-xl border border-brand surface p-4' }, [
-          el('div', { class: 'flex items-center gap-2 font-semibold' }, [icon('graduation-cap'), el('span', {}, 'Delivery')]),
-          el('p', { class: 'mt-2 text-[color:#9aa4b2]' }, 'Self-serve LMS with demo-back for competency validation.')
-        ]),
-        el('div', { class: 'rounded-xl border border-brand surface p-4' }, [
-          el('div', { class: 'flex items-center gap-2 font-semibold' }, [icon('clock'), el('span', {}, 'Recertification')]),
-          el('p', { class: 'mt-2 text-[color:#9aa4b2]' }, 'Annual refresh aligned to roadmap updates; Strategic includes deep-dive workshops.')
-        ])
-      ]);
-
-      return Card('Training', null, el('div', {}, [table, hints]));
-    }
-
-    function renderPartnerTypes() {
-      const grid = el('div', { class: 'grid gap-4 md:grid-cols-2' },
-        STATE.model.partnerTypes.map(pt => {
-          const pill = (txt) => el('span', { class: 'rounded-full border border-brand surface px-2.5 py-1 text-xs' }, txt);
-          return el('article', { class: 'rounded-2xl border border-brand surface p-5', role: 'article' }, [
-            el('div', { class: 'flex items-start justify-between gap-3' }, [
-              el('h4', { class: 'text-lg font-semibold' }, pt.name),
-              pill(pt.key)
-            ]),
-            el('p', { class: 'mt-1 text-sm text-[color:#9aa4b2]' }, pt.description),
-            el('div', { class: 'mt-4 grid gap-2' }, [
-              el('div', { class: 'flex items-start gap-2' }, [icon('banknote'), el('div', {}, el('strong', { class: 'mr-1' }, 'Revenue Model:' ), pt.revenueModel)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('shopping-cart'), el('div', {}, el('strong', { class: 'mr-1' }, 'Ordering:' ), pt.ordering)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('tags'), el('div', {}, el('strong', { class: 'mr-1' }, 'Pricing:' ), pt.pricing)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('truck'), el('div', {}, el('strong', { class: 'mr-1' }, 'Fulfillment:' ), pt.fulfillment)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('book'), el('div', {}, el('strong', { class: 'mr-1' }, 'Training:' ), pt.training)]),
-              el('div', { class: 'flex items-start gap-2' }, [icon('list-checks'), el('div', {}, el('strong', { class: 'mr-1' }, 'Requirements:' ), pt.requirements)])
-            ])
-          ]);
-        })
-      );
-      return Card('Partner Types (New)', null, grid);
-    }
-
-    function renderPanels() {
-      const region = el('div', { class: 'grid gap-4', 'aria-live': 'polite' });
-      if (STATE.selectedTab === 'takes') region.append(renderTakes());
-      if (STATE.selectedTab === 'gets') region.append(renderGets());
-      if (STATE.selectedTab === 'margins') region.append(renderMargins());
-      if (STATE.selectedTab === 'onboarding') region.append(renderOnboarding());
-      if (STATE.selectedTab === 'training') region.append(renderTraining());
-      if (STATE.selectedTab === 'partnerTypes') region.append(renderPartnerTypes());
-      return region;
-    }
-
-    function renderFooter() {
-      return el('footer', { class: 'pt-2 text-xs text-[color:#9aa4b2]' }, 'Preview purposes only. Program terms subject to agreement.');
-    }
-
-    function renderCdnWarnings() {
-      if (!STATE.cdnErrors.length) return null;
-      return el('div', { role: 'status', 'aria-live': 'polite', class: 'rounded-xl border border-brand surface p-4' },
-        [
-          el('div', { class: 'flex items-center gap-2 font-semibold' }, [icon('alert-triangle'), el('span', {}, 'CDN Notice')]),
-          el('p', { class: 'mt-1 text-sm text-[color:#9aa4b2]' }, 'Some CDN resources failed to load. The page may have reduced visuals.'),
-          el('ul', { class: 'mt-2 list-disc pl-6 text-sm' }, STATE.cdnErrors.map(e => el('li', {}, e)))
-        ]
+          <footer className="pt-2 text-xs text-muted">Preview purposes only. Program terms subject to agreement.</footer>
+        </div>
       );
     }
 
-    function renderApp() {
-      const root = document.getElementById('app');
-      root.innerHTML = '';
-      const warn = renderCdnWarnings();
-      if (warn) root.append(warn);
-      root.append(
-        renderTierTiles(),
-        renderTabs(),
-        renderPanels(),
-        renderFooter()
-      );
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
-    }
-
-    // ---------- Init & CDN fallback notices ----------
-    window.addEventListener('error', (e) => {
-      const src = (e && e.filename) || '';
-      if (src.includes('lucide') || src.includes('tailwind')) {
-        STATE.cdnErrors.push(`Resource failed: ${src.split('/').slice(-1)[0] || 'CDN'}`);
-      }
-    }, { capture: true });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderApp();
-      if (!window.lucide || !window.lucide.createIcons) {
-        STATE.cdnErrors.push('Lucide icons unavailable; using text only.');
-        renderApp();
-      } else {
-        window.lucide.createIcons();
-      }
-    });
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
