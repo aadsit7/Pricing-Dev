@@ -291,8 +291,7 @@
     function cardOneIcon(route){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
-          <p class="mt-1 text-sm opacity-90">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
+          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI</h3></div>
           <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
             ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
             ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
@@ -307,8 +306,7 @@
     function cardUpdateOnce(saved){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">Update Once, Deploy Everywhere</h3></div>
-          <p class="mt-1 text-sm opacity-90">Package one time; push to cloud, on-prem, or hybrid with rings.</p>
+          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">One package → Deploy anywhere (cloud / on-prem / hybrid)</h3></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
@@ -331,8 +329,7 @@
     function cardZeroDay(reduced){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
-          <p class="mt-1 text-sm opacity-90">Security fixes deploy in 1–2 hours instead of a full day (~90% faster).</p>
+          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Security fixes deploy in 1–2 hours instead of a full day</h3></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
