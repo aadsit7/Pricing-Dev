@@ -441,7 +441,7 @@
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
             ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
             ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Illustrative only', 'kpi-year')}
-            ${kpiId('percent','ROI', r.roiPct+'%', 'Net of subscription', 'kpi-roi')}
+            ${kpiId('users','FTEs freed', r.fteEquivalent, 'Equivalent IT capacity', 'kpi-fte')}
             ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
           </div>
 
@@ -512,7 +512,7 @@
       const r = calcROI();
       setText('kpi-hours', r.totalHoursSavedMonth);
       setText('kpi-year', '$'+num(r.dollarSavedYear));
-      setText('kpi-roi', r.roiPct+'%');
+      setText('kpi-fte', r.fteEquivalent);
       setText('kpi-tickets', num(r.ticketsMonth));
       setText('res-hours', r.totalHoursSavedMonth);
       setText('res-month', '$'+num(r.dollarSavedMonth));
