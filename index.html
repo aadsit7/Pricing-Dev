@@ -291,8 +291,7 @@
     function cardOneIcon(route){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Always the Right App, No Matter Where You Work.</h3></div>
-          <p class="mt-1 text-sm opacity-90">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI.</p>
+          <div class="flex items-center gap-2"><span>🖥️</span><h3 class="text-base font-semibold">Smart Icons open apps the best way for each user—on Windows, macOS, Web, VPN, or VDI</h3></div>
           <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
             ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
             ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
@@ -307,8 +306,7 @@
     function cardUpdateOnce(saved){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">Update Once, Deploy Everywhere</h3></div>
-          <p class="mt-1 text-sm opacity-90">Package one time; push to cloud, on-prem, or hybrid with rings.</p>
+          <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">One package → Deploy anywhere (cloud / on-prem / hybrid)</h3></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
@@ -331,8 +329,7 @@
     function cardZeroDay(reduced){
       return `
         <div class="section-card p-4">
-          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
-          <p class="mt-1 text-sm opacity-90">Security fixes deploy in 1–2 hours instead of a full day (~90% faster).</p>
+          <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Security fixes deploy in 1–2 hours instead of a full day</h3></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
@@ -689,8 +686,8 @@
       const ensure = v => v ?? '';
       return `
         <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 grid place-items-center">
-          <div class="absolute inset-0 bg-black/70" data-action="close-modal" aria-hidden="true"></div>
-          <div class="relative w-full max-w-5xl p-6" style="border-radius:var(--radius);background:#0b1328;border:1px solid var(--border-subtle)">
+          <div class="absolute inset-0 bg-black/60" data-action="close-modal" aria-hidden="true"></div>
+          <div class="relative w-full max-w-3xl p-5" style="border-radius:var(--radius);background:rgba(255,255,255,0.08);border:1px solid var(--border-subtle)">
             <div class="flex items-center justify-between">
               <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
               <button type="button" class="re-secondary p-2 focus-ring" data-action="close-modal" aria-label="Close">
@@ -698,13 +695,248 @@
               </button>
             </div>
             <p class="mt-1 text-sm opacity-90">Enter up to three bullet points per section. Each new line becomes a bullet.</p>
-            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
               ${editorBox('change','Why Change', ensure(buf.change) || toLines(STATE.currentStateTexts.change))}
               ${editorBox('now','Why Now', ensure(buf.now) || toLines(STATE.currentStateTexts.now))}
               ${editorBox('recast','Why Recast', ensure(buf.recast) || toLines(STATE.currentStateTexts.recast))}
             </div>
-            <div class="mt-6 flex flex-wrap gap-2">
+            <div class="mt-5 flex flex-wrap gap-2">
               <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 re-primary px-4 py-2 text-sm font-semibold focus-ring">
                 <i data-lucide="save" class="w-4 h-4"></i> Save
               </button>
-              <button id="btnResetCurrentState" type
+              <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 re-secondary px-4 py-2 text-sm font-semibold focus-ring">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function editorBox(key,label,value){
+      const idMap = { change:'whyChange', now:'whyNow', recast:'whyRecast' };
+      const tid = idMap[key] || ('why-'+key);
+      return `
+        <label class="flex flex-col gap-2">
+          <span class="text-sm font-semibold">${label}</span>
+          <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-white/20 bg-black/30 p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
+        </label>
+      `;
+    }
+
+    function attachEvents(){
+      const root=document.getElementById('app');
+
+      root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
+        STATE.activeTab=e.currentTarget.getAttribute('data-tab');
+        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
+        render();
+      }));
+      root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
+        STATE.activeTab=e.currentTarget.getAttribute('data-next'); 
+        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
+        const id=e.currentTarget.getAttribute('data-why');
+        STATE.openWhy = (STATE.openWhy === id) ? null : id;
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
+      root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
+      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
+
+      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); });
+      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); });
+      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); });
+
+      root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
+        const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
+        if (kind==='minutes') STATE.impact.minutes+=val;
+        if (kind==='pkgHours') STATE.impact.pkgHours+=val;
+        if (kind==='riskHrs') STATE.impact.riskHrs+=val;
+        updateROIOutputs();
+        render();
+      }));
+
+      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
+        const key=e.currentTarget.getAttribute('data-key');
+        const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); 
+        STATE.roiInputs[key]=isFinite(v)?v:0;
+        updateROIOutputs();
+      }));
+
+      const resetCalc=root.querySelector('[data-action="reset-calculator"]');
+      if(resetCalc) resetCalc.addEventListener('click', ()=>{
+        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
+        STATE.impact = { ...STATE.defaults.impact };
+        STATE.copied = false;
+        render();
+      });
+
+      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
+      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+        const dollarSavedYear = dollarSavedMonth * 12;
+        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+        const fteHoursYear = 2080;
+        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+        const body =
+`Recast Application Workspace — Executive One-Pager
+
+Assumptions
+ - Users: ${i.users}
+ - Tickets per user / month: ${i.ticketsPerUserPerMonth}
+ - Avg handle: ${i.avgHandleMins} mins
+ - Loaded cost: $${i.loadedCostPerHour}/hr
+ - Subscription (annual): $${i.recastAnnualCost}
+
+Observed demo impact (illustrative)
+ - Minutes saved per user (monthly): ${STATE.impact.minutes}
+ - Packaging hours avoided (org): ${STATE.impact.pkgHours}
+ - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
+
+Calculated outcomes
+ - Tickets / month: ${num(ticketsMonth)}
+ - Hours saved / month: ${round(totalHoursSavedMonth)}
+ - $ saved / month: $${num(dollarSavedMonth)}
+ - $ saved / year: $${num(dollarSavedYear)}
+ - Net benefit / year: $${num(netBenefitYear)}
+ - ROI: ${round(roiPct)}%
+ - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+
+Notes: Illustrative; replace with your data.`;
+        try { await navigator.clipboard.writeText(body); } catch {
+          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+      });
+
+      const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
+      const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
+      const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
+
+      const showCards=root.querySelector('[data-action="show-solution-cards"]');
+      if(showCards) showCards.addEventListener('click', ()=>{ STATE.showSolutionCards=true; render(); });
+
+      const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
+      if(openEditor) openEditor.addEventListener('click', ()=>{
+        STATE.modalOpen = true;
+        STATE.editBuffers = { change: '', now: '', recast: '' };
+        render();
+        setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+        setTimeout(()=>{ initCurrentStateModal(); }, 0);
+      });
+    }
+
+    function buildFlow(){
+      let base=0;
+      CATALOG.forEach(section=>{
+        const mount=document.getElementById(section.id); if(!mount) return;
+        mount.innerHTML='';
+        section.items.forEach((itm,idx)=>{
+          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
+          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+          wrap.appendChild(ring);
+          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
+          mount.appendChild(wrap);
+        });
+        base+=0.25;
+      });
+
+      buildTiles(document.getElementById('flowConnA'), 14, .5);
+      buildTiles(document.getElementById('flowConnB'), 14, .56);
+      buildTiles(document.getElementById('flowConnC'), 14, .62);
+      buildTiles(document.getElementById('flowGrpA'), 18, .95);
+      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
+      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
+      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
+      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
+      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
+
+      const avatar=document.getElementById('endUserAvatar');
+      const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.style.background='#EA4335'; avatar.textContent='U'; }
+      if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
+    }
+    function buildTiles(container,count,baseDelay){
+      if(!container) return; container.innerHTML='';
+      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
+    }
+
+    function startFlow(){
+      const card=document.getElementById('flowCard'); if(!card) return;
+      card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
+      const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
+      if(success) success.classList.add('hidden');
+      setTimeout(()=>{
+        if(avatar){ avatar.style.background='#10B981'; }
+        if(badge){ badge.textContent='✓'; badge.style.background='#10B981'; }
+      }, 2100);
+      setTimeout(()=> success && success.classList.remove('hidden'), 2500);
+      setTimeout(()=> card.classList.remove('run'), 6000);
+    }
+    function resetFlow(){
+      const card=document.getElementById('flowCard'); if(!card) return;
+      card.classList.remove('run');
+      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+      if(avatar){ avatar.style.background='#EA4335'; }
+      if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+
+    document.addEventListener('click', (e)=>{
+      const act = e.target.closest('[data-action]');
+      if(!act) return;
+      const action = act.getAttribute('data-action');
+
+      if(action==='close-modal'){
+        STATE.modalOpen=false; render();
+      }
+
+      if(action==='edit-buffer'){
+        const key = act.getAttribute('data-key');
+        act.addEventListener('input', (evt)=>{ STATE.editBuffers[key] = evt.target.value; });
+      }
+
+      if(action==='save-currentstate'){
+        const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
+        const change = parseLines($('#whyChange')?.value || '');
+        const now = parseLines($('#whyNow')?.value || '');
+        const recast = parseLines($('#whyRecast')?.value || '');
+        const fallback = STATE.defaultsCurrentState();
+        STATE.currentStateTexts = {
+          change: change.length?change:fallback.change,
+          now: now.length?now:fallback.now,
+          recast: recast.length?recast:fallback.recast
+        };
+        saveDraft({ whyChange: $('#whyChange')?.value || '', whyNow: $('#whyNow')?.value || '', whyRecast: $('#whyRecast')?.value || '' });
+        STATE.modalOpen=false;
+        STATE.activeTab='problems';
+        STATE.openWhy=null;
+        render();
+      }
+
+      if(action==='reset-currentstate-defaults'){
+        clearDraft();
+        captureDefaultsOnce();
+        writeFields(DEFAULT_CURRENT_STATE);
+      }
+    });
+
+    document.addEventListener('keydown',(e)=>{
+      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; render(); }
+    });
+  </script>
+</body>
+</html>
