@@ -251,7 +251,7 @@
               </ul>
               ${cta?`
                 <div class="mt-6 flex justify-end">
-                  <button type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-[14px] font-semibold px-4 py-2 items-center gap-2 focus-ring">
+                  <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-[14px] font-semibold px-4 py-2 items-center gap-2 focus-ring">
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     How Recast solves it
                   </button>
@@ -614,6 +614,77 @@
     }
     function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
 
+    /* ---------- Per-user cached Current State (IDs + storage) ---------- */
+    const USER_ID = String(window.APP_USER_ID || "guest");
+    const PAGE_SCOPE = location.origin + location.pathname + location.search;
+    const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
+    let DEFAULT_CURRENT_STATE = null;
+
+    const $ = (sel, ctx = document) => ctx.querySelector(sel);
+    const fields = {
+      whyChange: () => $('#whyChange'),
+      whyNow: () => $('#whyNow'),
+      whyRecast: () => $('#whyRecast'),
+    };
+
+    function captureDefaultsOnce(){
+      if (DEFAULT_CURRENT_STATE) return;
+      DEFAULT_CURRENT_STATE = {
+        whyChange: fields.whyChange()?.value ?? "",
+        whyNow: fields.whyNow()?.value ?? "",
+        whyRecast: fields.whyRecast()?.value ?? "",
+      };
+    }
+    function readFields(){
+      return {
+        whyChange: fields.whyChange()?.value ?? "",
+        whyNow: fields.whyNow()?.value ?? "",
+        whyRecast: fields.whyRecast()?.value ?? "",
+      };
+    }
+    function writeFields(data){
+      if(!data) return;
+      if(fields.whyChange()) fields.whyChange().value = data.whyChange ?? "";
+      if(fields.whyNow()) fields.whyNow().value = data.whyNow ?? "";
+      if(fields.whyRecast()) fields.whyRecast().value = data.whyRecast ?? "";
+    }
+    function loadDraft(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch{return null;}
+    }
+    function saveDraft(payload){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
+      catch(e){ console.warn('Save failed (storage blocked or full):', e); }
+    }
+    function clearDraft(){
+      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+    }
+    function initCurrentStateModal(){
+      captureDefaultsOnce();
+      const draft = loadDraft();
+      if(draft) writeFields(draft);
+      const saveBtn = $('#btnSaveCurrentState');
+      const resetBtn = $('#btnResetCurrentState');
+      if (saveBtn && !saveBtn.dataset.wired){
+        saveBtn.dataset.wired = "1";
+        saveBtn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          saveDraft(readFields());
+        });
+      }
+      if (resetBtn && !resetBtn.dataset.wired){
+        resetBtn.dataset.wired = "1";
+        resetBtn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          clearDraft();
+          writeFields(DEFAULT_CURRENT_STATE);
+        });
+      }
+    }
+    /* ------------------------------------------------------------------- */
+
     function renderModal(){
       if(!STATE.modalOpen) return '';
       const buf = STATE.editBuffers;
@@ -636,10 +707,10 @@
               ${editorBox('recast','Why Recast', ensure(buf.recast) || toLines(STATE.currentStateTexts.recast))}
             </div>
             <div class="mt-5 flex flex-wrap gap-2">
-              <button type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 re-primary px-4 py-2 text-sm font-semibold focus-ring">
+              <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 re-primary px-4 py-2 text-sm font-semibold focus-ring">
                 <i data-lucide="save" class="w-4 h-4"></i> Save
               </button>
-              <button type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 re-secondary px-4 py-2 text-sm font-semibold focus-ring">
+              <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 re-secondary px-4 py-2 text-sm font-semibold focus-ring">
                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
               </button>
             </div>
@@ -648,10 +719,12 @@
       `;
     }
     function editorBox(key,label,value){
+      const idMap = { change:'whyChange', now:'whyNow', recast:'whyRecast' };
+      const tid = idMap[key] || ('why-'+key);
       return `
         <label class="flex flex-col gap-2">
           <span class="text-sm font-semibold">${label}</span>
-          <textarea data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-white/20 bg-black/30 p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
+          <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-white/20 bg-black/30 p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
         </label>
       `;
     }
@@ -764,6 +837,7 @@ Notes: Illustrative; replace with your data.`;
         STATE.editBuffers = { change: '', now: '', recast: '' };
         render();
         setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+        setTimeout(()=>{ initCurrentStateModal(); }, 0);
       });
     }
 
@@ -842,16 +916,19 @@ Notes: Illustrative; replace with your data.`;
       }
 
       if(action==='save-currentstate'){
+        // Persist to STATE (existing behavior) + write per-user draft
         const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
-        const change = parseLines(STATE.editBuffers.change || document.querySelector('textarea[data-key="change"]')?.value || '');
-        const now = parseLines(STATE.editBuffers.now || document.querySelector('textarea[data-key="now"]')?.value || '');
-        const recast = parseLines(STATE.editBuffers.recast || document.querySelector('textarea[data-key="recast"]')?.value || '');
+        const change = parseLines($('#whyChange')?.value || '');
+        const now = parseLines($('#whyNow')?.value || '');
+        const recast = parseLines($('#whyRecast')?.value || '');
         const fallback = STATE.defaultsCurrentState();
         STATE.currentStateTexts = {
           change: change.length?change:fallback.change,
           now: now.length?now:fallback.now,
           recast: recast.length?recast:fallback.recast
         };
+        // save draft for this user/page
+        saveDraft({ whyChange: $('#whyChange')?.value || '', whyNow: $('#whyNow')?.value || '', whyRecast: $('#whyRecast')?.value || '' });
         STATE.modalOpen=false;
         STATE.activeTab='problems';
         STATE.openWhy=null;
@@ -859,14 +936,10 @@ Notes: Illustrative; replace with your data.`;
       }
 
       if(action==='reset-currentstate-defaults'){
-        STATE.currentStateTexts = STATE.defaultsCurrentState();
-        const areas = document.querySelectorAll('textarea[data-action="edit-buffer"]');
-        const src = STATE.currentStateTexts;
-        areas.forEach(a=>{
-          const k=a.getAttribute('data-key');
-          a.value = (src[k]||[]).join('\n');
-          STATE.editBuffers[k]='';
-        });
+        // Clear draft and restore the authored defaults exactly
+        clearDraft();
+        captureDefaultsOnce();
+        writeFields(DEFAULT_CURRENT_STATE);
       }
     });
 
