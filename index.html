@@ -13,7 +13,7 @@
   <style>
     :root{
       --re-navy:#1F289C;
-      --re-orange:#F05928;
+      --re-orange:#00E0FF;
       --re-blue-mid:#284CBA;
       --re-blue-bright:#0475FF;
       --re-blue-light:#679CE8;
@@ -57,7 +57,7 @@
     .cat-title{font-size:.7rem;letter-spacing:.08em}
 
     .re-primary{background:var(--re-orange)!important;color:#fff!important;border:0;border-radius:var(--radius)}
-    .re-primary:hover{background:#D64F22!important}
+    .re-primary:hover{background:#00CBE6!important}
     .re-primary:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
     .re-secondary{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:var(--radius)}
     .re-secondary:hover{color:var(--re-blue-light)!important;border-color:var(--re-blue-light)!important}
@@ -88,7 +88,7 @@
         ],
         now: [
           'App updates went from yearly to daily. IT must keep up or risk falling behind instantly.',
-          'Teams are shrinking, but the workload isn’t. IT is asked to do ten times more with fewer people. Every hour wasted on manual app management blocks everything else from moving forward.',
+          'IT is asked to do ten times more with fewer people. Every hour wasted on manual app management blocks everything else from moving forward.',
           'Security stakes are higher. Outdated apps are the fastest-growing attack surface.'
         ],
         recast: [
@@ -121,7 +121,7 @@
     const TABS = [
       { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
       { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-      { id: 'roi', label: 'Impact & ROI', icon: 'bar-chart-3' }
+      { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
     ];
 
     function cx(...a){ return a.filter(Boolean).join(' '); }
@@ -447,7 +447,7 @@
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
             ${kpiId('users','FTEs freed', r.fteEquivalent, 'Equivalent IT capacity', 'kpi-fte')}
             ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
-            ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Illustrative only', 'kpi-year')}
+            ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Productivity Impact', 'kpi-year')}
             ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
           </div>
 
