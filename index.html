@@ -73,25 +73,17 @@
       showSolutionCards: true,
       openWhy: null,
       modalOpen: false,
-      modalKind: null, // 'currentstate' | 'agenda'
+      modalKind: null,
+      invoker: null,
       editBuffers: { change: '', now: '', recast: '' },
-      // Today / Agenda editable content
       todayAgenda: {
         title: 'Agenda',
-        overview: [
-          'Why Change | Why Now | Why Recast',
-          'Our Approach',
-          'Business Impact'
-        ]
+        overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
       },
       defaultsAgenda() {
         return JSON.parse(JSON.stringify({
           title: 'Agenda',
-          overview: [
-            'Why Change | Why Now | Why Recast',
-            'Our Approach',
-            'Business Impact'
-          ]
+          overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
         }));
       },
       currentStateTexts: {
@@ -152,41 +144,52 @@
     function render(){
       const root=document.getElementById('app');
       root.innerHTML = `
-        <header class="relative">
-          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-            <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight">Recast Software</h1>
-            <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] opacity-90">
-              ${STATE.activeTab==='problems' || STATE.activeTab==='today'
-                ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
-                : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
-            </p>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4">
-            <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-[2px] bg-white/5 p-1 ring-1 ring-white/20">
-              ${TABS.map(t=>`
-                <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 're-primary' : 'text-white hover:bg-white/10 rounded-[2px]')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
-                  <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
-                </button>
-              `).join('')}
+        <div id="siteRoot" ${STATE.modalOpen ? 'inert aria-hidden="true"' : ''}>
+          <header class="relative">
+            <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight">Recast Software</h1>
+              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] opacity-90">
+                ${STATE.activeTab==='problems' || STATE.activeTab==='today'
+                  ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
+                  : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+              </p>
             </div>
-          </div>
-        </header>
+            <div class="relative mx-auto max-w-6xl px-4">
+              <div id="tablist" role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-[2px] bg-white/5 p-1 ring-1 ring-white/20">
+                ${TABS.map(t=>`
+                  <button type="button"
+                    id="tab-${t.id}"
+                    role="tab"
+                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 're-primary' : 'text-white hover:bg-white/10 rounded-[2px]')}"
+                    data-action="switch-tab" data-tab="${t.id}"
+                    aria-controls="panel-${t.id}"
+                    aria-selected="${STATE.activeTab===t.id}"
+                    tabindex="${STATE.activeTab===t.id? '0':'-1'}">
+                    <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </header>
 
-        <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${STATE.activeTab!=='problems' && STATE.activeTab!=='today' ? `
-          <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
-            ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
-            ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
-          </div>` : ''}
-          <section class="mt-5">${renderActivePanel()}</section>
-        </main>
+          <main class="mx-auto max-w-6xl px-4 pb-16">
+            ${STATE.activeTab!=='problems' && STATE.activeTab!=='today' ? `
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
+              ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
+              ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+            </div>` : ''}
+            <section class="mt-5">${renderActivePanel()}</section>
+          </main>
+        </div>
         ${renderModal()}
       `;
       if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
       attachEvents();
+      wireTabsKeyboard();
       if (STATE.activeTab === 'solution') { buildFlow(); }
       if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+      if (STATE.modalOpen) { setupModalA11y(); }
     }
 
     function chip(label,value,tone){
@@ -209,17 +212,50 @@
       return '';
     }
 
+    function mdInline(str){
+      return str
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>');
+    }
+    function parseBullets(text){
+      const lines = (text||'').split('\n').map(l=>l.replace(/\t/g,'  '));
+      const root = [];
+      const stack = [{level:0, children:root}];
+      lines.forEach(raw=>{
+        const m = raw.match(/^(\s*)(.*)$/);
+        const level = Math.floor((m[1]||'').length/2)+1;
+        const content = (m[2]||'').trim();
+        if(!content) return;
+        while(stack.length && stack[stack.length-1].level>=level) stack.pop();
+        const node = { text: content, children: [] };
+        stack[stack.length-1].children.push(node);
+        stack.push({level, children: node.children});
+      });
+      return root;
+    }
+    function bulletsToHTML(nodes){
+      if(!nodes.length) return '';
+      return `<ul class="mt-3 list-disc pl-6 text-xl leading-relaxed space-y-2">${nodes.map(n=>`
+        <li>${mdInline(n.text)}${n.children?.length?bulletsToHTMLSmall(n.children):''}</li>
+      `).join('')}</ul>`;
+    }
+    function bulletsToHTMLSmall(nodes){
+      return `<ul class="mt-2 list-[circle] pl-6 text-base leading-relaxed space-y-1">${nodes.map(n=>`
+        <li>${mdInline(n.text)}${n.children?.length?bulletsToHTMLSmall(n.children):''}</li>
+      `).join('')}</ul>`;
+    }
+
     function renderToday(){
       const a = STATE.todayAgenda;
+      const tree = parseBullets(a.overviewText);
       return `
-        <section id="panel-today" class="space-y-6">
+        <section id="panel-today" role="tabpanel" aria-labelledby="tab-today" class="space-y-6">
           <div class="flex items-start justify-between gap-3">
             <div>
-              <h2 class="text-[56px] md:text-[72px] font-semibold leading-none">${a.title}</h2>
+              <h2 class="text-[56px] md:text-[72px] font-semibold leading-none">${mdInline(a.title)}</h2>
               <h3 class="mt-6 text-2xl font-semibold">Overview</h3>
-              <ul class="mt-3 list-disc pl-6 text-xl leading-relaxed space-y-2">
-                ${a.overview.map(item=>`<li>${item}</li>`).join('')}
-              </ul>
+              ${bulletsToHTML(tree)}
             </div>
             <div class="shrink-0">
               <button type="button" data-action="open-agenda-editor" class="inline-flex items-center gap-2 re-secondary px-3 py-2 text-sm font-semibold focus-ring" aria-label="Edit Agenda">
@@ -228,7 +264,7 @@
             </div>
           </div>
           <div class="pt-20">
-            <div class="opacity-70 text-sm">Tip: Use the Edit button or the Agenda pencil in Business Impact to customize this page.</div>
+            <div class="opacity-70 text-sm">Tip: Use the Edit button or the Agenda pencil in Business Impact to customize this page. Use two leading spaces for sub-bullets. **Bold** and *italics* supported.</div>
           </div>
         </section>
       `;
@@ -242,7 +278,7 @@
         {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
       ];
       return `
-        <section id="panel-problems" class="space-y-4">
+        <section id="panel-problems" role="tabpanel" aria-labelledby="tab-problems" class="space-y-4">
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             ${items.map(p=>`
               <article class="section-card p-4">
@@ -306,7 +342,7 @@
       const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
       const route=routeRecommendation(STATE.ctx);
       return `
-        <section id="panel-solution" class="space-y-3">
+        <section id="panel-solution" role="tabpanel" aria-labelledby="tab-solution" class="space-y-3">
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             ${renderFlow()}
             <div class="flex flex-col gap-3">
@@ -482,7 +518,7 @@
     function renderROI(){
       const r = calcROI();
       return `
-        <section id="panel-roi" class="space-y-3">
+        <section id="panel-roi" role="tabpanel" aria-labelledby="tab-roi" class="space-y-3">
           <div class="section-card p-3"><div class="text-sm font-medium">Planting consistency in app delivery today is what prevents outages and chaos three years from now.</div></div>
 
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
@@ -664,7 +700,6 @@
     }
     function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
 
-    /* ---------- Per-user cached Current State (IDs + storage) ---------- */
     const USER_ID = String(window.APP_USER_ID || "guest");
     const PAGE_SCOPE = location.origin + location.pathname + location.search;
     const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
@@ -733,9 +768,7 @@
         });
       }
     }
-    /* ------------------------------------------------------------------- */
 
-    /* ---------- Agenda storage ---------- */
     const AGENDA_STORAGE_KEY = `agenda:${USER_ID}:${PAGE_SCOPE}`;
     function loadAgendaDraft(){
       try{ const raw = localStorage.getItem(AGENDA_STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch{return null;}
@@ -744,7 +777,6 @@
       try{ localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(payload)); }catch(e){ console.warn('Agenda save failed:', e); }
     }
     function clearAgendaDraft(){ try{ localStorage.removeItem(AGENDA_STORAGE_KEY); }catch{} }
-    /* ----------------------------------- */
 
     function renderModal(){
       if(!STATE.modalOpen) return '';
@@ -752,7 +784,7 @@
         const a = STATE.todayAgenda;
         const draft = loadAgendaDraft();
         const titleVal = draft?.title ?? a.title;
-        const overviewVal = (draft?.overview && Array.isArray(draft.overview) ? draft.overview : a.overview).join('\n');
+        const overviewVal = (draft?.overviewText ?? a.overviewText);
         return `
           <div role="dialog" aria-modal="true" aria-labelledby="agenda-editor-title" class="fixed inset-0 z-50">
             <div class="absolute inset-0 bg-white"></div>
@@ -764,7 +796,7 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                   </button>
                 </div>
-                <p class="mt-1 text-sm text-slate-600">Update the large agenda title and the Overview bullets (one per line).</p>
+                <p class="mt-1 text-sm text-slate-600">Update the agenda title and Overview bullets. Use two leading spaces for sub-bullets. Supports **bold** and *italics*.</p>
                 <div class="mt-5 grid grid-cols-1 gap-4">
                   <label class="flex flex-col gap-2">
                     <span class="text-sm font-medium">Agenda Title</span>
@@ -772,7 +804,7 @@
                   </label>
                   <label class="flex flex-col gap-2">
                     <span class="text-sm font-medium">Overview (bullets)</span>
-                    <textarea id="agendaOverview" class="min-h-[220px] rounded border border-slate-300 p-3 leading-6" aria-label="Agenda Overview bullets" placeholder="One item per line">${overviewVal}</textarea>
+                    <textarea id="agendaOverview" class="min-h-[220px] rounded border border-slate-300 p-3 leading-6" aria-label="Agenda Overview bullets" placeholder="One item per line. Use two spaces for sub-bullets.">${overviewVal}</textarea>
                   </label>
                 </div>
                 <div class="mt-6 flex flex-wrap gap-2">
@@ -838,11 +870,13 @@
         STATE.activeTab=e.currentTarget.getAttribute('data-tab');
         if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
         render();
+        $('#tab-'+STATE.activeTab)?.focus();
       }));
       root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
         STATE.activeTab=e.currentTarget.getAttribute('data-next'); 
         if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
         render();
+        $('#tab-'+STATE.activeTab)?.focus();
       }));
 
       root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
@@ -934,7 +968,8 @@ Notes: Illustrative; replace with your data.`;
       if(showCards) showCards.addEventListener('click', ()=>{ STATE.showSolutionCards=true; render(); });
 
       const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
-      if(openEditor) openEditor.addEventListener('click', ()=>{
+      if(openEditor) openEditor.addEventListener('click', (ev)=>{
+        STATE.invoker = ev.currentTarget;
         STATE.modalOpen = true;
         STATE.modalKind = 'currentstate';
         STATE.editBuffers = { change: '', now: '', recast: '' };
@@ -945,13 +980,54 @@ Notes: Illustrative; replace with your data.`;
 
       const openAgendaBtns = root.querySelectorAll('[data-action="open-agenda-editor"]');
       openAgendaBtns.forEach(btn=>{
-        btn.addEventListener('click', ()=>{
+        btn.addEventListener('click', (ev)=>{
+          STATE.invoker = ev.currentTarget;
           STATE.modalOpen = true;
           STATE.modalKind = 'agenda';
           render();
           setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
         });
       });
+    }
+
+    function wireTabsKeyboard(){
+      const tablist = document.getElementById('tablist');
+      if(!tablist || tablist.dataset.kb) return;
+      tablist.dataset.kb = "1";
+      tablist.addEventListener('keydown', (e)=>{
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        const current = document.activeElement;
+        const idx = tabs.indexOf(current);
+        if(idx===-1) return;
+        let next = idx;
+        if(e.key==='ArrowRight') { next = (idx+1)%tabs.length; e.preventDefault(); }
+        if(e.key==='ArrowLeft') { next = (idx-1+tabs.length)%tabs.length; e.preventDefault(); }
+        if(e.key==='Home') { next = 0; e.preventDefault(); }
+        if(e.key==='End') { next = tabs.length-1; e.preventDefault(); }
+        if(next!==idx){ tabs[next].focus(); }
+        if(e.key==='Enter' || e.key===' ') {
+          const tab = tabs[idx];
+          const id = tab.getAttribute('data-tab');
+          STATE.activeTab = id;
+          render();
+          $('#tab-'+STATE.activeTab)?.focus();
+          e.preventDefault();
+        }
+      });
+    }
+
+    function setupModalA11y(){
+      const dialog = document.querySelector('[role="dialog"]');
+      if(!dialog) return;
+      const focusables = dialog.querySelectorAll('button,[href],input,textarea,select,[tabindex]:not([tabindex="-1"])');
+      const first = focusables[0]; const last = focusables[focusables.length-1];
+      if(first) first.focus();
+      function trap(e){
+        if(e.key!=='Tab') return;
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+      }
+      dialog.addEventListener('keydown', trap);
     }
 
     function buildFlow(){
@@ -1021,6 +1097,7 @@ Notes: Illustrative; replace with your data.`;
 
       if(action==='close-modal'){
         STATE.modalOpen=false; STATE.modalKind=null; render();
+        setTimeout(()=>{ if(STATE.invoker && STATE.invoker.focus) STATE.invoker.focus(); },0);
       }
 
       if(action==='edit-buffer'){
@@ -1055,13 +1132,13 @@ Notes: Illustrative; replace with your data.`;
 
       if(action==='save-agenda'){
         const title = $('#agendaTitle')?.value?.trim() || 'Agenda';
-        const overview = ($('#agendaOverview')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,10);
+        const overviewText = ($('#agendaOverview')?.value || '').trim();
         const def = STATE.defaultsAgenda();
         STATE.todayAgenda = {
           title: title || def.title,
-          overview: overview.length?overview:def.overview
+          overviewText: overviewText || def.overviewText
         };
-        saveAgendaDraft({ title: $('#agendaTitle')?.value || '', overview: $('#agendaOverview')?.value?.split('\n') || [] });
+        saveAgendaDraft({ title: $('#agendaTitle')?.value || '', overviewText });
         STATE.modalOpen=false; STATE.modalKind=null; STATE.activeTab='today'; render();
       }
 
@@ -1070,12 +1147,12 @@ Notes: Illustrative; replace with your data.`;
         const def = STATE.defaultsAgenda();
         const titleEl = $('#agendaTitle'); const ovEl = $('#agendaOverview');
         if(titleEl) titleEl.value = def.title;
-        if(ovEl) ovEl.value = def.overview.join('\n');
+        if(ovEl) ovEl.value = def.overviewText;
       }
     });
 
     document.addEventListener('keydown',(e)=>{
-      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; STATE.modalKind=null; render(); }
+      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; STATE.modalKind=null; render(); setTimeout(()=>{ if(STATE.invoker && STATE.invoker.focus) STATE.invoker.focus(); },0); }
     });
   </script>
 </body>
