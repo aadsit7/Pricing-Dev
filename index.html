@@ -1,3 +1,16 @@
+Thoroughly analyze the code below and help me make one change. Prioritize accuracy over anything else. Before showing the final results to the user Loop through the code to make sure everything is functioning correctly. Then show the final functioning results to the user. Here are my notes on what I want to you change Notes = I want to add a new tab before the Current State Tab (see attached image). The tab will be labeled "Today" And it will be the default tab that loads. on the Today tab. See the attached example of the Today tab. The agenda As well as the overview in subbullets are fully editable. In the Business Impact tab under the Current state edit Pencil there will be an Agenda Edit Pencil when the user clicks on that it will pop up and give the user the ability to edit today agenda I want it to be similar dynamic text like the current state but I want it to be full screen with a white background pop out. The user can make edits to the agenda and click save Or reset to default. Thoroughly analyze the code below And make this change. those are my notes. HEre is the code to edit: 
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +26,7 @@
   <style>
     :root{
       --re-navy:#1F289C;
-      --re-orange:#00E0FF;
+      --re-orange:#F05928;
       --re-blue-mid:#284CBA;
       --re-blue-bright:#0475FF;
       --re-blue-light:#679CE8;
@@ -57,7 +70,7 @@
     .cat-title{font-size:.7rem;letter-spacing:.08em}
 
     .re-primary{background:var(--re-orange)!important;color:#fff!important;border:0;border-radius:var(--radius)}
-    .re-primary:hover{background:#00CBE6!important}
+    .re-primary:hover{background:#D64F22!important}
     .re-primary:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
     .re-secondary{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:var(--radius)}
     .re-secondary:hover{color:var(--re-blue-light)!important;border-color:var(--re-blue-light)!important}
