@@ -5,59 +5,158 @@
   <title>Recast — Compact Click-Through (Realistic Catalog)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://unpkg.com">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root{
-      --re-navy:#1F289C;
-      --re-orange:#F05928;
+      --re-navy:#0F1D6B;
+      --re-navy-2:#1F289C;
       --re-blue-mid:#284CBA;
-      --re-blue-bright:#0475FF;
-      --re-blue-light:#679CE8;
+      --re-blue-bright:#1D6BFF;
+      --re-blue-light:#5BA4FF;
+      --re-accent:#2D6BFF;
+      --re-orange:#F05928;
       --re-white:#FFFFFF;
-      --radius:2px;
-      --border-subtle:rgba(255,255,255,0.2);
+      --radius:10px;
+      --border-subtle:rgba(255,255,255,0.18);
     }
     html,body{
       background:var(--re-navy);
       color:var(--re-white);
-      font-family:Inter,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
-    .focus-ring:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
-    .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.08)}
-    .sub-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.06)}
-    .tile{width:.45rem;height:.45rem;border-radius:0;background:#334155;opacity:.9}
+    .focus-ring:focus-visible{outline:2px solid rgba(255,255,255,0.55);outline-offset:2px}
+    .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.06);backdrop-filter:saturate(140%) blur(2px)}
+    .sub-card{border-radius:calc(var(--radius) - 4px);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.05)}
+    .tile{width:.45rem;height:.45rem;border-radius:2px;background:#334155;opacity:.9}
     .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
-    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
-    .flow-bar{height:.22rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
+    @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#60A5FA;opacity:1}100%{background:#334155;opacity:.9}}
+    .flow-bar{height:.22rem;border-radius:9999px;transform-origin:left center;transform:scaleX(0)}
     .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
     @keyframes barGrow{to{transform:scaleX(1)}}
-    .bolt-line{width:.22rem;border-radius:0;transform-origin:top center;transform:scaleY(0)}
+    .bolt-line{width:.22rem;border-radius:9999px;transform-origin:top center;transform:scaleY(0)}
     .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
     @keyframes boltDrop{to{transform:scaleY(1)}}
-    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
-    .logo-wrap{display:flex;align-items:center;gap:.4rem}
-    .logo-name{font-size:.7rem;color:#e5e7eb;white-space:nowrap}
+    .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0b1445;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+    .logo-wrap{display:flex;align-items:center;gap:.5rem}
+    .logo-name{font-size:.72rem;color:#e5e7eb;white-space:nowrap}
     .run .logo-ring{animation:appPop .85s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
     @keyframes appPop{0%{transform:scale(.85);filter:saturate(.4);opacity:.65}60%{transform:scale(1.05);filter:saturate(1);opacity:1}100%{transform:scale(1)}}
-    .user-beam{height:.38rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
+    .user-beam{height:.38rem;border-radius:9999px;transform-origin:left center;transform:scaleX(0)}
     .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
-    .badge{width:1.15rem;height:1.15rem;border-radius:0;opacity:0;transform:translateY(-6px) scale(.9)}
+    .badge{width:1.15rem;height:1.15rem;border-radius:9999px;opacity:0;transform:translateY(-6px) scale(.9)}
     .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
     @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
-    .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
-    .cat-title{font-size:.7rem;letter-spacing:.08em}
-    .re-primary{background:var(--re-orange)!important;color:#fff!important;border:0;border-radius:var(--radius)}
-    .re-primary:hover{background:#D64F22!important}
-    .re-primary:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
-    .re-secondary{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:var(--radius)}
-    .re-secondary:hover{color:var(--re-blue-light)!important;border-color:var(--re-blue-light)!important}
+    .cat-row{display:grid;grid-template-columns:16ch 1fr;gap:.6rem;align-items:center}
+    .cat-title{font-size:.72rem;letter-spacing:.08em}
+    .re-primary{background:var(--re-accent)!important;color:#fff!important;border:0;border-radius:10px;box-shadow:0 6px 16px rgba(29,107,255,.32)}
+    .re-primary:hover{background:#1559ff!important}
+    .re-primary:active{transform:translateY(1px)}
+    .re-secondary{background:transparent!important;color:#fff!important;border:1px solid #ffffff33!important;border-radius:10px}
+    .re-secondary:hover{color:#dbeafe!important;border-color:#dbeafe!important}
+    .hero-wrap{
+      background:
+        radial-gradient(1000px 400px at -10% -20%, #2341c9 0%, transparent 60%),
+        radial-gradient(800px 500px at 120% 20%, #1d6bff 0%, transparent 60%),
+        linear-gradient(180deg, var(--re-navy-2), var(--re-navy));
+    }
+    .topbar-shadow{box-shadow:0 1px 0 #e5e7eb}
+    .brand-chip{border-radius:24px;border:1px solid #cbd5e1;background:#fff}
+    .hero-spark{opacity:.8}
   </style>
 </head>
 <body class="min-h-screen antialiased">
+  <header class="bg-white topbar-shadow sticky top-0 z-40" role="banner" aria-label="Global">
+    <div class="mx-auto max-w-7xl px-4">
+      <div class="flex items-center justify-between py-3">
+        <a href="#" class="inline-flex items-center gap-3 focus-ring" aria-label="Recast home">
+          <div class="brand-chip grid place-items-center px-2 py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="108" height="26" viewBox="0 0 108 26" role="img" aria-label="Recast">
+              <g fill="none" fill-rule="evenodd">
+                <g transform="translate(0 2)">
+                  <rect width="26" height="22" rx="6" fill="#1D6BFF"></rect>
+                  <rect x="4" y="4" width="18" height="14" rx="2.5" fill="#fff"></rect>
+                  <path d="M9 8h8v2H9zm0 4h8v2H9z" fill="#1D6BFF"></path>
+                </g>
+                <g transform="translate(32 1)" fill="#1F289C">
+                  <path d="M5.7 18.6V6.1H9c1.8 0 3 .7 3.6 1.9.6-1.2 1.9-1.9 3.7-1.9 3 0 4.8 2 4.8 5.2v7.3h-3.3v-6.9c0-1.7-.8-2.7-2.2-2.7-1.5 0-2.4 1-2.4 2.7v6.9H9.9v-6.9c0-1.7-.8-2.7-2.2-2.7s-2.3 1-2.3 2.7v6.9H2.2v-12H0v-2.4h5.7v14.4h0zM28.7 18.9c-3.7 0-6.2-2.5-6.2-6.4s2.6-6.4 6.3-6.4c3.7 0 6.2 2.5 6.2 6.4s-2.6 6.4-6.3 6.4zm0-2.8c1.9 0 3.2-1.6 3.2-3.7 0-2.1-1.3-3.7-3.2-3.7-1.9 0-3.2 1.6-3.2 3.7 0 2.1 1.3 3.7 3.2 3.7zM46.6 18.6h-3.2V6.1h3.2l.1 1.5c.9-1.2 2.2-1.9 3.9-1.9 3.1 0 5.2 2.4 5.2 6.2v6.7h-3.2V12c0-2.2-1.1-3.6-3.2-3.6-1.9 0-3.1 1.4-3.1 3.6v6.6zM67.6 6.1c3.5 0 5.6 1.8 5.6 4.8v.3h-3.1v-.2c0-1.2-.9-2-2.4-2-1.6 0-2.7.8-2.7 2.1 0 1 .7 1.7 2.1 2.1l2.3.6c2.9.8 4.2 2.2 4.2 4.3 0 3-2.4 4.9-6.1 4.9-3.6 0-5.8-1.8-5.9-5.1v-.4h3.2v.3c.1 1.3 1.1 2.1 2.7 2.1 1.8 0 2.9-.8 2.9-2.1 0-1-.7-1.6-2.2-2l-2.3-.7c-2.6-.7-4.2-2.2-4.2-4.6 0-2.8 2.3-4.5 5.4-4.5zM80.4 3.5c0-1 .8-1.8 1.9-1.8s1.9.8 1.9 1.8c0 1.1-.8 1.9-1.9 1.9s-1.9-.8-1.9-1.9zm.4 15.1V6.1H84v12.5h-3.2zM92.7 21.6l2.2-4.3h-1.2l-4.9-11.2h3.4l3 7.5 3-7.5h3.3L96.4 21.6h-3.7z"></path>
+                </g>
+                <g transform="translate(101 1)">
+                  <path d="M3.5 0 4.7 2.1 7 3 4.7 4 3.5 6.1 2.5 4 0 3l2.5-.9L3.5 0z" fill="#1D6BFF"></path>
+                </g>
+              </g>
+            </svg>
+          </div>
+        </a>
+        <nav aria-label="Primary">
+          <ul class="hidden md:flex items-center gap-2">
+            <li><a href="#" class="px-3 py-2 text-[15px] text-slate-700 hover:text-slate-900 focus-ring rounded">Products</a></li>
+            <li><a href="#" class="px-3 py-2 text-[15px] text-slate-700 hover:text-slate-900 focus-ring rounded">Solutions</a></li>
+            <li><a href="#" class="px-3 py-2 text-[15px] text-slate-700 hover:text-slate-900 focus-ring rounded">Resources</a></li>
+            <li><a href="#" class="px-3 py-2 text-[15px] text-slate-700 hover:text-slate-900 focus-ring rounded">Company</a></li>
+          </ul>
+        </nav>
+        <div class="flex items-center gap-2">
+          <a href="#" class="hidden sm:inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-ring">
+            <i data-lucide="download" class="w-4 h-4"></i> Download Free Tools
+          </a>
+          <a href="#" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold hover:bg-black focus-ring" aria-label="Pricing">Pricing</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-wrap relative isolate">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="hidden md:block absolute left-6 top-16 hero-spark">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M13 1v24M1 13h24" stroke="#5BA4FF" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="hidden md:block absolute right-10 top-24 hero-spark">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M13 1v24M1 13h24" stroke="#5BA4FF" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="mx-auto max-w-7xl px-4 pt-14 pb-8">
+      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/20 px-3 py-1 text-sm">
+            <i data-lucide="app-window" class="w-4 h-4"></i>
+            <span class="opacity-90">Application Workspace</span>
+          </div>
+          <h1 class="mt-4 text-4xl md:text-6xl font-extrabold leading-[1.05] tracking-tight">Modern Application Delivery, Simplified</h1>
+          <p class="mt-3 max-w-2xl text-white/90">Same package, any workspace: laptops, Cloud PCs, and virtual desktops (AVD, Citrix, Omnissa). Built for enterprise scale and speed.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#" class="re-primary inline-flex items-center gap-2 px-4 py-2 text-[15px] font-semibold focus-ring">
+              <i data-lucide="calendar-check" class="w-4 h-4"></i> Request a Demo
+            </a>
+            <a href="#" class="re-secondary inline-flex items-center gap-2 px-4 py-2 text-[15px] font-semibold focus-ring">
+              <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i> Get Pricing
+            </a>
+          </div>
+        </div>
+        <div class="mt-6 md:mt-0">
+          <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 p-4 max-w-sm">
+            <div class="text-sm font-semibold">System Events</div>
+            <ul class="mt-2 space-y-2 text-sm opacity-90">
+              <li class="flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full bg-green-400"></span> Launch Package</li>
+              <li class="flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full bg-blue-400"></span> Success</li>
+              <li class="flex items-center gap-2"><span class="inline-block h-2 w-2 rounded-full bg-yellow-300"></span> Ring-Based Update</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div id="app" class="min-h-screen"></div>
 
   <script>
@@ -78,12 +177,12 @@
       editBuffers: { change: '', now: '', recast: '' },
       todayAgenda: {
         title: 'Agenda',
-        overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
+        overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\\n')
       },
       defaultsAgenda() {
         return JSON.parse(JSON.stringify({
           title: 'Agenda',
-          overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
+          overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\\n')
         }));
       },
       currentStateTexts: {
@@ -139,14 +238,14 @@
       if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
       return 'VDI';
     }
-    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\\-]/g,'')); return isFinite(v) ? v : 0; }
 
     function render(){
       const root=document.getElementById('app');
       root.innerHTML = `
         <div id="siteRoot" ${STATE.modalOpen ? 'inert aria-hidden="true"' : ''}>
           <header class="relative">
-            <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
+            <div class="relative mx-auto max-w-6xl px-4 pt-10 pb-6">
               <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight">Recast Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] opacity-90">
                 ${STATE.activeTab==='problems' || STATE.activeTab==='today'
@@ -155,12 +254,12 @@
               </p>
             </div>
             <div class="relative mx-auto max-w-6xl px-4">
-              <div id="tablist" role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-[2px] bg-white/5 p-1 ring-1 ring-white/20">
+              <div id="tablist" role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded-2xl bg-white/10 p-1 ring-1 ring-white/20">
                 ${TABS.map(t=>`
                   <button type="button"
                     id="tab-${t.id}"
                     role="tab"
-                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 're-primary' : 'text-white hover:bg-white/10 rounded-[2px]')}"
+                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 're-primary' : 'text-white hover:bg-white/10 rounded-2xl')}"
                     data-action="switch-tab" data-tab="${t.id}"
                     aria-controls="panel-${t.id}"
                     aria-selected="${STATE.activeTab===t.id}"
@@ -197,7 +296,7 @@
       return `
         <div class="section-card p-3">
           <div class="text-[11px] opacity-90">${label}</div>
-          <div class="mt-1 inline-flex items-center gap-2 rounded-[2px] bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
+          <div class="mt-1 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
             <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
           </div>
         </div>
@@ -215,15 +314,15 @@
     function mdInline(str){
       return str
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>');
+        .replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>')
+        .replace(/\\*(.+?)\\*/g,'<em>$1</em>');
     }
     function parseBullets(text){
-      const lines = (text||'').split('\n').map(l=>l.replace(/\t/g,'  '));
+      const lines = (text||'').split('\\n').map(l=>l.replace(/\\t/g,'  '));
       const root = [];
       const stack = [{level:0, children:root}];
       lines.forEach(raw=>{
-        const m = raw.match(/^(\s*)(.*)$/);
+        const m = raw.match(/^(\\s*)(.*)$/);
         const level = Math.floor((m[1]||'').length/2)+1;
         const content = (m[2]||'').trim();
         if(!content) return;
@@ -253,7 +352,7 @@
         <section id="panel-today" role="tabpanel" aria-labelledby="tab-today" class="space-y-6">
           <div class="flex items-start justify-between gap-3">
             <div>
-   <h2 class="text-6xl font-semibold leading-none">${mdInline(a.title)}</h2>
+              <h2 class="text-6xl font-semibold leading-none">${mdInline(a.title)}</h2>
               <h3 class="mt-6 text-2xl font-semibold">Overview</h3>
               ${bulletsToHTML(tree)}
             </div>
@@ -263,8 +362,7 @@
               </button>
             </div>
           </div>
-          <div class="pt-20">
-          </div>
+          <div class="pt-20"></div>
         </section>
       `;
     }
@@ -361,7 +459,7 @@
     }
 
     function pill(label,active,action,value){
-      return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'re-primary border-transparent':'bg-transparent text-white border-white/20 hover:border-white')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+      return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'re-primary border-transparent':'bg-transparent text-white border-white/20 hover:border-white')} rounded-2xl" data-action="${action}" data-value="${String(value)}">${label}</button>`;
     }
 
     function cardOneIcon(route){
@@ -389,9 +487,7 @@
       return `
         <div class="section-card p-4">
           <div class="flex items-center gap-2"><span>⚙️</span><h3 class="text-base font-semibold">One package → Deploy anywhere (cloud / on-prem / hybrid)</h3></div>
-        <div class="sub-card p-3 text-sm mt-2">
-  
-</div>
+          <div class="sub-card p-3 text-sm mt-2"></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-2" class="w-4 h-4"></i> Critical app updates</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
@@ -415,9 +511,7 @@
       return `
         <div class="section-card p-4">
           <div class="flex items-center gap-2"><span>🛡️</span><h3 class="text-base font-semibold">Zero-Day Patches in Hours</h3></div>
-        <div class="sub-card p-3 text-sm mt-2">
-  
-</div>
+          <div class="sub-card p-3 text-sm mt-2"></div>
           <div class="sub-card p-3 text-sm">
             <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
             <label class="mt-2 flex items-center gap-2 text-xs">
@@ -436,7 +530,7 @@
         <div class="section-card p-4">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-              <div class="h-6 w-6 rounded-[2px] grid place-items-center" style="background:var(--re-blue-mid)"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+              <div class="h-6 w-6 rounded-2xl grid place-items-center" style="background:var(--re-blue-mid)"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
               <div>
                 <h3 class="text-base font-semibold">Application Workspace</h3>
                 <div class="text-[12px] opacity-80">Curated & secured catalog</div>
@@ -623,10 +717,10 @@
       `;
     }
     function kvId(label,value,id){
-      return `<div class="flex items-center justify-between rounded-[2px] bg-black/30 px-3 py-2"><span class="opacity-90">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
+      return `<div class="flex items-center justify-between rounded-2xl bg-black/30 px-3 py-2"><span class="opacity-90">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
     }
     function numInput(label,key,value){
-      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] opacity-90">${label}</span><input class="rounded-[2px] border border-white/20 bg-black/30 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+      return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] opacity-90">${label}</span><input class="rounded-2xl border border-white/20 bg-black/30 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
     }
 
     const CATALOG=[
@@ -679,8 +773,8 @@
     function mark(letter,color){
       return `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
-          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
-          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
+          <defs><linearGradient id="g${letter.replace(/\\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
+          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
           <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
         </svg>`;
     }
@@ -802,7 +896,7 @@
                     <input id="agendaTitle" class="rounded border border-slate-300 px-3 py-2" value="${titleVal}" aria-label="Agenda Title">
                   </label>
                   <label class="flex flex-col gap-2">
-                    <span class="text-sm font-medium">Todays Topics (bullets)</span>
+                    <span class="text-sm font-medium">Overview (bullets)</span>
                     <textarea id="agendaOverview" class="min-h-[220px] rounded border border-slate-300 p-3 leading-6" aria-label="Agenda Overview bullets" placeholder="One item per line. Use two spaces for sub-bullets.">${overviewVal}</textarea>
                   </label>
                 </div>
@@ -821,7 +915,7 @@
       }
 
       const buf = STATE.editBuffers;
-      const toLines = arr => arr.join('\n');
+      const toLines = arr => arr.join('\\n');
       const ensure = v => v ?? '';
       return `
         <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 grid place-items-center">
@@ -857,7 +951,7 @@
       return `
         <label class="flex flex-col gap-2">
           <span class="text-sm font-semibold">${label}</span>
-          <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-white/20 bg-black/30 p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
+          <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-2xl border border-white/20 bg-black/30 p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
         </label>
       `;
     }
@@ -903,7 +997,7 @@
 
       root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
         const key=e.currentTarget.getAttribute('data-key');
-        const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,'')); 
+        const v=Number(String(e.target.value).replace(/[^0-9.\\-]/g,'')); 
         STATE.roiInputs[key]=isFinite(v)?v:0;
         updateROIOutputs();
       }));
@@ -1105,7 +1199,7 @@ Notes: Illustrative; replace with your data.`;
       }
 
       if(action==='save-currentstate'){
-        const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
+        const parseLines = (s)=> (s||'').split('\\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
         const change = parseLines($('#whyChange')?.value || '');
         const now = parseLines($('#whyNow')?.value || '');
         const recast = parseLines($('#whyRecast')?.value || '');
