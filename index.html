@@ -21,18 +21,14 @@
       --radius:2px;
       --border-subtle:rgba(255,255,255,0.2);
     }
-
     html,body{
       background:var(--re-navy);
       color:var(--re-white);
       font-family:Inter,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     }
-
     .focus-ring:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
-
     .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.08)}
     .sub-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:rgba(255,255,255,0.06)}
-
     .tile{width:.45rem;height:.45rem;border-radius:0;background:#334155;opacity:.9}
     .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
     @keyframes tilePulse{0%{transform:scale(.7);background:#334155;opacity:.4}60%{transform:scale(1);background:#38bdf8;opacity:1}100%{background:#334155;opacity:.9}}
@@ -42,7 +38,6 @@
     .bolt-line{width:.22rem;border-radius:0;transform-origin:top center;transform:scaleY(0)}
     .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
     @keyframes boltDrop{to{transform:scaleY(1)}}
-
     .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#0a1226;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
     .logo-wrap{display:flex;align-items:center;gap:.4rem}
     .logo-name{font-size:.7rem;color:#e5e7eb;white-space:nowrap}
@@ -55,7 +50,6 @@
     @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
     .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
     .cat-title{font-size:.7rem;letter-spacing:.08em}
-
     .re-primary{background:var(--re-orange)!important;color:#fff!important;border:0;border-radius:var(--radius)}
     .re-primary:hover{background:#D64F22!important}
     .re-primary:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
@@ -68,7 +62,7 @@
 
   <script>
     const STATE = {
-      activeTab: 'problems',
+      activeTab: 'today',
       impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
       defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
       ctx: { device: 'Windows', network: 'Corporate', compliant: true },
@@ -79,7 +73,27 @@
       showSolutionCards: true,
       openWhy: null,
       modalOpen: false,
+      modalKind: null, // 'currentstate' | 'agenda'
       editBuffers: { change: '', now: '', recast: '' },
+      // Today / Agenda editable content
+      todayAgenda: {
+        title: 'Agenda',
+        overview: [
+          'Why Change | Why Now | Why Recast',
+          'Our Approach',
+          'Business Impact'
+        ]
+      },
+      defaultsAgenda() {
+        return JSON.parse(JSON.stringify({
+          title: 'Agenda',
+          overview: [
+            'Why Change | Why Now | Why Recast',
+            'Our Approach',
+            'Business Impact'
+          ]
+        }));
+      },
       currentStateTexts: {
         change: [
           'Apps have become the new supply chain bottleneck. Business initiatives stall when applications aren’t packaged, patched, and ready.',
@@ -119,6 +133,7 @@
     };
 
     const TABS = [
+      { id: 'today', label: 'Today', icon: 'calendar-clock' },
       { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
       { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
       { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
@@ -141,7 +156,7 @@
           <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
             <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight">Recast Software</h1>
             <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] opacity-90">
-              ${STATE.activeTab==='problems'
+              ${STATE.activeTab==='problems' || STATE.activeTab==='today'
                 ? 'Application deployment isn’t the problem. Doing it fast, consistently, and securely across the business is. — Microsoft MVP'
                 : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
             </p>
@@ -158,7 +173,7 @@
         </header>
 
         <main class="mx-auto max-w-6xl px-4 pb-16">
-          ${STATE.activeTab!=='problems' ? `
+          ${STATE.activeTab!=='problems' && STATE.activeTab!=='today' ? `
           <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
             ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
@@ -187,10 +202,36 @@
     }
 
     function renderActivePanel(){
+      if (STATE.activeTab==='today') return renderToday();
       if (STATE.activeTab==='problems') return renderProblems();
       if (STATE.activeTab==='solution') return renderSolution();
       if (STATE.activeTab==='roi') return renderROI();
       return '';
+    }
+
+    function renderToday(){
+      const a = STATE.todayAgenda;
+      return `
+        <section id="panel-today" class="space-y-6">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-[56px] md:text-[72px] font-semibold leading-none">${a.title}</h2>
+              <h3 class="mt-6 text-2xl font-semibold">Overview</h3>
+              <ul class="mt-3 list-disc pl-6 text-xl leading-relaxed space-y-2">
+                ${a.overview.map(item=>`<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="shrink-0">
+              <button type="button" data-action="open-agenda-editor" class="inline-flex items-center gap-2 re-secondary px-3 py-2 text-sm font-semibold focus-ring" aria-label="Edit Agenda">
+                <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
+              </button>
+            </div>
+          </div>
+          <div class="pt-20">
+            <div class="opacity-70 text-sm">Tip: Use the Edit button or the Agenda pencil in Business Impact to customize this page.</div>
+          </div>
+        </section>
+      `;
     }
 
     function renderProblems(){
@@ -461,9 +502,12 @@
                 ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
                 ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
               </div>
-              <div class="mt-4">
+              <div class="mt-4 flex flex-wrap gap-2">
                 <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 re-secondary px-4 py-2 text-sm font-semibold focus-ring">
                   <i data-lucide="edit-3" class="w-4 h-4"></i> Current State
+                </button>
+                <button type="button" data-action="open-agenda-editor" class="inline-flex items-center gap-2 re-secondary px-4 py-2 text-sm font-semibold focus-ring">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i> Agenda
                 </button>
               </div>
             </div>
@@ -691,8 +735,60 @@
     }
     /* ------------------------------------------------------------------- */
 
+    /* ---------- Agenda storage ---------- */
+    const AGENDA_STORAGE_KEY = `agenda:${USER_ID}:${PAGE_SCOPE}`;
+    function loadAgendaDraft(){
+      try{ const raw = localStorage.getItem(AGENDA_STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch{return null;}
+    }
+    function saveAgendaDraft(payload){
+      try{ localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(payload)); }catch(e){ console.warn('Agenda save failed:', e); }
+    }
+    function clearAgendaDraft(){ try{ localStorage.removeItem(AGENDA_STORAGE_KEY); }catch{} }
+    /* ----------------------------------- */
+
     function renderModal(){
       if(!STATE.modalOpen) return '';
+      if (STATE.modalKind === 'agenda') {
+        const a = STATE.todayAgenda;
+        const draft = loadAgendaDraft();
+        const titleVal = draft?.title ?? a.title;
+        const overviewVal = (draft?.overview && Array.isArray(draft.overview) ? draft.overview : a.overview).join('\n');
+        return `
+          <div role="dialog" aria-modal="true" aria-labelledby="agenda-editor-title" class="fixed inset-0 z-50">
+            <div class="absolute inset-0 bg-white"></div>
+            <div class="relative h-full w-full overflow-auto">
+              <div class="mx-auto max-w-5xl px-6 py-6 text-slate-900">
+                <div class="flex items-center justify-between">
+                  <h2 id="agenda-editor-title" class="text-2xl font-semibold">Edit Today Agenda</h2>
+                  <button type="button" class="px-2 py-2 rounded border border-slate-300 focus-ring" data-action="close-modal" aria-label="Close">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                  </button>
+                </div>
+                <p class="mt-1 text-sm text-slate-600">Update the large agenda title and the Overview bullets (one per line).</p>
+                <div class="mt-5 grid grid-cols-1 gap-4">
+                  <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium">Agenda Title</span>
+                    <input id="agendaTitle" class="rounded border border-slate-300 px-3 py-2" value="${titleVal}" aria-label="Agenda Title">
+                  </label>
+                  <label class="flex flex-col gap-2">
+                    <span class="text-sm font-medium">Overview (bullets)</span>
+                    <textarea id="agendaOverview" class="min-h-[220px] rounded border border-slate-300 p-3 leading-6" aria-label="Agenda Overview bullets" placeholder="One item per line">${overviewVal}</textarea>
+                  </label>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-2">
+                  <button type="button" data-action="save-agenda" class="inline-flex items-center gap-2 bg-[var(--re-orange)] text-white px-4 py-2 rounded focus-ring">
+                    <i data-lucide="save" class="w-4 h-4"></i> Save
+                  </button>
+                  <button type="button" data-action="reset-agenda-defaults" class="inline-flex items-center gap-2 border border-slate-300 px-4 py-2 rounded focus-ring">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       const buf = STATE.editBuffers;
       const toLines = arr => arr.join('\n');
       const ensure = v => v ?? '';
@@ -840,10 +936,21 @@ Notes: Illustrative; replace with your data.`;
       const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
       if(openEditor) openEditor.addEventListener('click', ()=>{
         STATE.modalOpen = true;
+        STATE.modalKind = 'currentstate';
         STATE.editBuffers = { change: '', now: '', recast: '' };
         render();
         setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
         setTimeout(()=>{ initCurrentStateModal(); }, 0);
+      });
+
+      const openAgendaBtns = root.querySelectorAll('[data-action="open-agenda-editor"]');
+      openAgendaBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          STATE.modalOpen = true;
+          STATE.modalKind = 'agenda';
+          render();
+          setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+        });
       });
     }
 
@@ -913,7 +1020,7 @@ Notes: Illustrative; replace with your data.`;
       const action = act.getAttribute('data-action');
 
       if(action==='close-modal'){
-        STATE.modalOpen=false; render();
+        STATE.modalOpen=false; STATE.modalKind=null; render();
       }
 
       if(action==='edit-buffer'){
@@ -934,6 +1041,7 @@ Notes: Illustrative; replace with your data.`;
         };
         saveDraft({ whyChange: $('#whyChange')?.value || '', whyNow: $('#whyNow')?.value || '', whyRecast: $('#whyRecast')?.value || '' });
         STATE.modalOpen=false;
+        STATE.modalKind=null;
         STATE.activeTab='problems';
         STATE.openWhy=null;
         render();
@@ -944,10 +1052,30 @@ Notes: Illustrative; replace with your data.`;
         captureDefaultsOnce();
         writeFields(DEFAULT_CURRENT_STATE);
       }
+
+      if(action==='save-agenda'){
+        const title = $('#agendaTitle')?.value?.trim() || 'Agenda';
+        const overview = ($('#agendaOverview')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,10);
+        const def = STATE.defaultsAgenda();
+        STATE.todayAgenda = {
+          title: title || def.title,
+          overview: overview.length?overview:def.overview
+        };
+        saveAgendaDraft({ title: $('#agendaTitle')?.value || '', overview: $('#agendaOverview')?.value?.split('\n') || [] });
+        STATE.modalOpen=false; STATE.modalKind=null; STATE.activeTab='today'; render();
+      }
+
+      if(action==='reset-agenda-defaults'){
+        clearAgendaDraft();
+        const def = STATE.defaultsAgenda();
+        const titleEl = $('#agendaTitle'); const ovEl = $('#agendaOverview');
+        if(titleEl) titleEl.value = def.title;
+        if(ovEl) ovEl.value = def.overview.join('\n');
+      }
     });
 
     document.addEventListener('keydown',(e)=>{
-      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; render(); }
+      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; STATE.modalKind=null; render(); }
     });
   </script>
 </body>
