@@ -10,9 +10,7 @@
   <style>
     :root {
       color-scheme: dark;
-      /* Exact background sampled from the provided screenshot (RGB 28,40,156) */
       --c-bg: #1C289C;
-      /* Harmonized surfaces for contrast on the brand background */
       --c-surface: #2F39A3;
       --c-surface-2: #2A35A1;
       --c-surface-3: #8085C7;
@@ -25,7 +23,6 @@
       --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       --shadow-soft: 0 10px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.18);
     }
-    /* Graceful fallback if Tailwind fails to load */
     body:not(.tw-ready) {
       background: var(--c-bg);
       color: var(--c-text);
@@ -144,14 +141,11 @@
       <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mb-6 ring-1 ring-[color:var(--c-surface-3)]/40">
         <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
         <div class="overflow-x-auto -mx-2 sm:mx-0">
-          <table class="w-full text-left border-collapse min-w-[760px]">
+          <table class="w-full text-left border-collapse min-w-[560px]">
             <thead class="text-[var(--c-muted)] text-sm">
               <tr>
                 <th class="pb-2 font-medium">Product</th>
                 <th class="pb-2 font-medium">Users</th>
-                <th class="pb-2 font-medium">MSRP (List)</th>
-                <th class="pb-2 font-medium">Net New Margin %</th>
-                <th class="pb-2 font-medium">Net New Margin $</th>
                 <th class="pb-2 font-medium">Net New Partner Price</th>
                 <th class="pb-2 font-medium">Sales Rep Commission (10%)</th>
               </tr>
@@ -160,9 +154,6 @@
               <tr class="border-t border-[color:var(--c-surface-3)]/50">
                 <td>Application Workspace</td>
                 <td id="partnerUsers">0</td>
-                <td id="partnerMsrp">$0.00</td>
-                <td>30%</td>
-                <td id="partnerMargin">$0.00</td>
                 <td id="partnerPrice">$0.00</td>
                 <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
               </tr>
@@ -202,35 +193,6 @@
               <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Acceptance Criteria</td><td>Customer validates readiness for production AVD use following guided implementation</td></tr>
               <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Dependencies</td><td>Customer provides infrastructure access and participates in scheduled onboarding sessions</td></tr>
               <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Pricing</td><td>Included in onboarding engagement (non-standalone service)</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="tab-sla" role="tabpanel" aria-labelledby="tab-sla-btn" class="tab-content hidden">
-      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
-        <h2 class="text-lg font-semibold mb-4">Support SLA Comparison</h2>
-        <div class="overflow-x-auto -mx-2 sm:mx-0">
-          <table class="w-full text-left border-collapse min-w-[560px]">
-            <thead class="text-[var(--c-muted)] text-sm">
-              <tr>
-                <th class="pb-2 font-medium">Support Level</th>
-                <th class="pb-2 font-medium">Basic</th>
-                <th class="pb-2 font-medium">Premium</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2">Urgent Severity</td><td>1 Business Day</td><td>2 Business Hours</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Normal Severity</td><td>2 Business Days</td><td>4 Business Hours</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Low Severity</td><td>3 Business Days</td><td>8 Business Hours</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Availability</td><td>8am – 5pm CT/CET</td><td>24/7</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Support Hours</td><td>Unlimited</td><td>Unlimited</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Dedicated CSM</td><td>✔</td><td>✔</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Environment Audit</td><td>—</td><td>1× / year</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Configuration Audit</td><td>—</td><td>1× / year</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Upgrade Assistance</td><td>—</td><td>2× / year</td></tr>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Pricing</td><td>Included</td><td>+20% ARR (min $6,000)</td></tr>
             </tbody>
           </table>
         </div>
@@ -359,8 +321,6 @@
 
     function renderPartnerTable() {
       document.getElementById('partnerUsers').textContent = String(STATE.users);
-      document.getElementById('partnerMsrp').textContent = formatCurrency(STATE.totals.totalContract);
-      document.getElementById('partnerMargin').textContent = formatCurrency(STATE.totals.margin);
       document.getElementById('partnerPrice').textContent = formatCurrency(STATE.totals.partnerPrice);
       document.getElementById('salesCommission').textContent = formatCurrency(STATE.totals.salesCommission);
     }
@@ -415,9 +375,6 @@
         `- Total Contract Value (${STATE.term}): ${formatCurrency(STATE.totals.totalContract)}`,
         '',
         'Partner Pricing',
-        `- MSRP (List): ${formatCurrency(STATE.totals.totalContract)}`,
-        `- Net New Margin %: 30%`,
-        `- Net New Margin $: ${formatCurrency(STATE.totals.margin)}`,
         `- Net New Partner Price: ${formatCurrency(STATE.totals.partnerPrice)}`,
         `- Sales Rep Commission (10%): ${formatCurrency(STATE.totals.salesCommission)}`
       ];
