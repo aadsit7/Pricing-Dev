@@ -60,7 +60,7 @@
     <div class="inline-flex rounded-[var(--radius-full)] bg-[var(--c-surface-2)] p-1 shadow-sm ring-1 ring-[color:var(--c-surface-3)]/40">
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="true" aria-controls="tab-customer" id="tab-customer-btn" data-tab="customer" data-active="true">
-        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
+        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>Pricing</span>
       </button>
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
@@ -76,7 +76,7 @@
   <main id="main" tabindex="-1" class="max-w-6xl mx-auto px-4 py-6">
     <section id="tab-customer" role="tabpanel" aria-labelledby="tab-customer-btn" class="tab-content">
       <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
-        <form id="customer-form" class="grid md:grid-cols-2 gap-6 mb-6" novalidate>
+        <form id="customer-form" class="grid md:grid-cols-2 gap-6 mb-4" novalidate>
           <div>
             <label for="currency" class="font-semibold block mb-2">Currency</label>
             <select id="currency" name="currency" class="w-40 rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
@@ -102,69 +102,52 @@
           </div>
         </form>
 
-        <div class="grid md:grid-cols-2 gap-6 border-t border-[color:var(--c-surface-3)]/50 pt-6">
-          <div class="rounded-xl bg-[var(--c-surface-2)] p-4">
-            <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead class="text-[var(--c-muted)] text-sm">
-                  <tr>
-                    <th class="pb-2 font-medium">Product</th>
-                    <th class="pb-2 font-medium">Users</th>
-                    <th id="custPerUserHeader" class="pb-2 font-medium">Per User / month</th>
-                    <th id="thBaseCust" class="pb-2 font-medium">Base MRR</th>
-                    <th id="thTotalCust" class="pb-2 font-medium">Total Monthly</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-t border-[color:var(--c-surface-3)]/50">
-                    <td class="py-2">Application Workspace</td>
-                    <td id="custUsers">0</td>
-                    <td id="custPerUser">$0.00</td>
-                    <td id="custBase">$0.00</td>
-                    <td id="custTotal">$0.00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="rounded-xl bg-[var(--c-surface-2)] p-4">
-            <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead class="text-[var(--c-muted)] text-sm">
-                  <tr>
-                    <th class="pb-2 font-medium">Product</th>
-                    <th class="pb-2 font-medium">Users</th>
-                    <th id="partnerPerUserHeader" class="pb-2 font-medium">Per User / month</th>
-                    <th class="pb-2 font-medium">Nerdio Price</th>
-                    <th class="pb-2 font-medium">Sales Rep Commission</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-t border-[color:var(--c-surface-3)]/50">
-                    <td class="py-2">Application Workspace</td>
-                    <td id="partnerUsers">0</td>
-                    <td id="partnerPerUser">$0.00</td>
-                    <td id="partnerPrice">$0.00</td>
-                    <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <h2 class="text-lg font-semibold mb-4">Customer Price</h2>
+        <div class="overflow-x-auto -mx-6 sm:mx-0 mb-6">
+          <table class="w-full text-left border-collapse min-w-[640px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium px-6 sm:px-0">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th id="custPerUserHeader" class="pb-2 font-medium">Per User / month</th>
+                <th id="thBaseCust" class="pb-2 font-medium">Base MRR</th>
+                <th id="thTotalCust" class="pb-2 font-medium">Total Monthly</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td class="py-2 px-6 sm:px-0">Application Workspace</td>
+                <td id="custUsers">0</td>
+                <td id="custPerUser">$0.00</td>
+                <td id="custBase">$0.00</td>
+                <td id="custTotal">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between mt-6 pt-4 border-t border-[color:var(--c-surface-3)]/50">
-          <div>
-            <p id="baseLabel" class="text-[var(--c-muted)]">Base MRR</p>
-            <p id="baseArr" class="text-2xl font-bold tracking-tight">$0.00</p>
-          </div>
-          <div>
-            <p id="totalLabel" class="text-[var(--c-muted)]">Total Monthly</p>
-            <p id="totalContract" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
-          </div>
+        <h2 class="text-lg font-semibold mb-4">Nerdio Price (Not to be shared with customer)</h2>
+        <div class="overflow-x-auto -mx-6 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[640px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium px-6 sm:px-0">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th id="partnerPerUserHeader" class="pb-2 font-medium">Per User / month</th>
+                <th class="pb-2 font-medium">Nerdio Price</th>
+                <th class="pb-2 font-medium">Sales Rep Commission</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td class="py-2 px-6 sm:px-0">Application Workspace</td>
+                <td id="partnerUsers">0</td>
+                <td id="partnerPerUser">$0.00</td>
+                <td id="partnerPrice">$0.00</td>
+                <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -402,24 +385,6 @@
       };
     }
 
-    function renderSummary() {
-      const baseLabel = document.getElementById('baseLabel');
-      const totalLabel = document.getElementById('totalLabel');
-      const baseValue = document.getElementById('baseArr');
-      const totalValue = document.getElementById('totalContract');
-      if (STATE.term === 'Monthly') {
-        baseLabel.textContent = 'Base MRR';
-        totalLabel.textContent = 'Total Monthly';
-        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
-        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
-      } else {
-        baseLabel.textContent = 'Base ARR';
-        totalLabel.textContent = 'Total Annual';
-        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
-        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
-      }
-    }
-
     function renderCustomerTable() {
       const custPerUserHeader = document.getElementById('custPerUserHeader');
       const thBaseCust = document.getElementById('thBaseCust');
@@ -427,7 +392,8 @@
       document.getElementById('custUsers').textContent = String(STATE.users);
       const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const avgPerUserMonthly = monthlyCostUSD / STATE.users;
-      document.getElementById('custPerUser').textContent = formatCurrencyFromUSD(avgPerUserMonthly);
+      const perUser = STATE.term === 'Monthly' ? avgPerUserMonthly : avgPerUserMonthly * 12;
+      document.getElementById('custPerUser').textContent = formatCurrencyFromUSD(perUser);
       if (STATE.term === 'Monthly') {
         custPerUserHeader.textContent = 'Per User / month';
         thBaseCust.textContent = 'Base MRR';
@@ -448,7 +414,8 @@
       document.getElementById('partnerUsers').textContent = String(STATE.users);
       const monthlyPartnerPrice = STATE.totals.partnerPrice / (STATE.term === 'Monthly' ? 1 : 12);
       const avgPartnerPerUserMonthly = monthlyPartnerPrice / STATE.users;
-      document.getElementById('partnerPerUser').textContent = formatCurrencyFromUSD(avgPartnerPerUserMonthly);
+      const partnerPerUser = STATE.term === 'Monthly' ? avgPartnerPerUserMonthly : avgPartnerPerUserMonthly * 12;
+      document.getElementById('partnerPerUser').textContent = formatCurrencyFromUSD(partnerPerUser);
       document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
       document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
       if (STATE.term === 'Monthly') {
@@ -484,7 +451,6 @@
 
     function renderAll() {
       computeTotals();
-      renderSummary();
       renderCustomerTable();
       renderPartnerTable();
       renderForm();
