@@ -60,7 +60,7 @@
     <div class="inline-flex rounded-[var(--radius-full)] bg-[var(--c-surface-2)] p-1 shadow-sm ring-1 ring-[color:var(--c-surface-3)]/40">
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="true" aria-controls="tab-customer" id="tab-customer-btn" data-tab="customer" data-active="true">
-        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>Pricing</span>
+        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
       </button>
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
@@ -102,7 +102,7 @@
           </div>
         </form>
 
-        <h2 class="text-lg font-semibold mb-4">Customer Price</h2>
+        <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
         <div class="overflow-x-auto -mx-6 sm:mx-0 mb-6">
           <table class="w-full text-left border-collapse min-w-[640px]">
             <thead class="text-[var(--c-muted)] text-sm">
@@ -111,7 +111,7 @@
                 <th class="pb-2 font-medium">Users</th>
                 <th id="custPerUserHeader" class="pb-2 font-medium">Per User / month</th>
                 <th id="thBaseCust" class="pb-2 font-medium">Base MRR</th>
-                <th id="thTotalCust" class="pb-2 font-medium">Total Monthly</th>
+                <th id="thTotalCust" class="pb-2 font-medium">Total ARR</th>
               </tr>
             </thead>
             <tbody>
@@ -126,7 +126,7 @@
           </table>
         </div>
 
-        <h2 class="text-lg font-semibold mb-4">Nerdio Price (Not to be shared with customer)</h2>
+        <h2 class="text-lg font-semibold mb-4">Nerdio Pricing (Do not share with customer)</h2>
         <div class="overflow-x-auto -mx-6 sm:mx-0">
           <table class="w-full text-left border-collapse min-w-[640px]">
             <thead class="text-[var(--c-muted)] text-sm">
@@ -134,8 +134,8 @@
                 <th class="pb-2 font-medium px-6 sm:px-0">Product</th>
                 <th class="pb-2 font-medium">Users</th>
                 <th id="partnerPerUserHeader" class="pb-2 font-medium">Per User / month</th>
-                <th class="pb-2 font-medium">Nerdio Price</th>
-                <th class="pb-2 font-medium">Sales Rep Commission</th>
+                <th id="thNerdio" class="pb-2 font-medium">Nerdio Price</th>
+                <th id="thCommission" class="pb-2 font-medium">Sales Rep Commission</th>
               </tr>
             </thead>
             <tbody>
@@ -295,8 +295,6 @@
         baseAnnual: 0,
         totalMonthly: 0,
         totalAnnual: 0,
-        selectedTotal: 0,
-        margin: 0,
         partnerPrice: 0,
         salesCommission: 0
       }
@@ -367,19 +365,16 @@
       const annualCostUSD = monthlyCostUSD * 12;
       const baseMonthlyUSD = monthlyCostUSD;
       const baseAnnualUSD = annualCostUSD;
-      const totalMonthlyUSD = monthlyCostUSD;
-      const totalAnnualUSD = annualCostUSD;
-      const selectedTotalUSD = STATE.term === 'Annual' ? totalAnnualUSD : totalMonthlyUSD;
-      const marginUSD = selectedTotalUSD * 0.30;
-      const partnerPriceUSD = selectedTotalUSD - marginUSD;
-      const salesCommissionUSD = selectedTotalUSD * 0.10;
+      const totalMonthlyUSD = baseMonthlyUSD;
+      const totalAnnualUSD = baseAnnualUSD;
+      const marginUSD = totalAnnualUSD * 0.30;
+      const partnerPriceUSD = totalAnnualUSD - marginUSD;
+      const salesCommissionUSD = totalAnnualUSD * 0.10;
       STATE.totals = {
         baseMonthly: baseMonthlyUSD,
         baseAnnual: baseAnnualUSD,
         totalMonthly: totalMonthlyUSD,
         totalAnnual: totalAnnualUSD,
-        selectedTotal: selectedTotalUSD,
-        margin: marginUSD,
         partnerPrice: partnerPriceUSD,
         salesCommission: salesCommissionUSD
       };
@@ -397,13 +392,13 @@
       if (STATE.term === 'Monthly') {
         custPerUserHeader.textContent = 'Per User / month';
         thBaseCust.textContent = 'Base MRR';
-        thTotalCust.textContent = 'Total Monthly';
+        thTotalCust.textContent = 'Total ARR';
         document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
-        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
+        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
       } else {
         custPerUserHeader.textContent = 'Per User / year';
         thBaseCust.textContent = 'Base ARR';
-        thTotalCust.textContent = 'Total Annual';
+        thTotalCust.textContent = 'Total ARR';
         document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
         document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
       }
@@ -411,17 +406,22 @@
 
     function renderPartnerTable() {
       const partnerPerUserHeader = document.getElementById('partnerPerUserHeader');
+      const thNerdio = document.getElementById('thNerdio');
+      const thCommission = document.getElementById('thCommission');
       document.getElementById('partnerUsers').textContent = String(STATE.users);
-      const monthlyPartnerPrice = STATE.totals.partnerPrice / (STATE.term === 'Monthly' ? 1 : 12);
-      const avgPartnerPerUserMonthly = monthlyPartnerPrice / STATE.users;
-      const partnerPerUser = STATE.term === 'Monthly' ? avgPartnerPerUserMonthly : avgPartnerPerUserMonthly * 12;
+      const partnerPerUserMonthly = STATE.totals.partnerPrice / 12 / STATE.users;
+      const partnerPerUser = STATE.term === 'Monthly' ? partnerPerUserMonthly : partnerPerUserMonthly * 12;
       document.getElementById('partnerPerUser').textContent = formatCurrencyFromUSD(partnerPerUser);
       document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
       document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
       if (STATE.term === 'Monthly') {
         partnerPerUserHeader.textContent = 'Per User / month';
+        thNerdio.textContent = 'Nerdio Price (ARR)';
+        thCommission.textContent = 'Sales Rep Commission (ARR)';
       } else {
         partnerPerUserHeader.textContent = 'Per User / year';
+        thNerdio.textContent = 'Nerdio Price (ARR)';
+        thCommission.textContent = 'Sales Rep Commission (ARR)';
       }
     }
 
@@ -470,9 +470,9 @@
       const { code } = getCurrencyMeta();
       const termIsMonthly = STATE.term === 'Monthly';
       const baseLabel = termIsMonthly ? 'Base MRR' : 'Base ARR';
-      const totalLabel = termIsMonthly ? 'Total Monthly' : 'Total Annual';
+      const totalLabel = 'Total ARR';
       const baseValue = termIsMonthly ? STATE.totals.baseMonthly : STATE.totals.baseAnnual;
-      const totalValue = termIsMonthly ? STATE.totals.totalMonthly : STATE.totals.totalAnnual;
+      const totalValue = STATE.totals.totalAnnual;
       const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const averageMonthlyPerUser = monthlyCostUSD / STATE.users;
 
@@ -489,7 +489,7 @@
         `- ${baseLabel}: ${formatCurrencyFromUSD(baseValue)}`,
         `- ${totalLabel}: ${formatCurrencyFromUSD(totalValue)}`,
         '',
-        'Partner Pricing (based on selected term)',
+        'Partner Pricing (ARR)',
         `- Net New Partner Price: ${formatCurrencyFromUSD(STATE.totals.partnerPrice)}`,
         `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
       ];
