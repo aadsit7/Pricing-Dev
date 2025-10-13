@@ -204,6 +204,36 @@
         </div>
       </div>
     </section>
+
+    <section id="tab-sla" role="tabpanel" aria-labelledby="tab-sla-btn" class="tab-content hidden">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Support Service Levels</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]" aria-label="Support features and response times">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th scope="col" class="pb-2 font-medium">Feature</th>
+                <th scope="col" class="pb-2 font-medium">Support</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Urgent Severity</td><td>First response: <strong>1 Business Day</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Normal Severity</td><td>First response: <strong>2 Business Days</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Low Severity</td><td>First response: <strong>3 Business Days</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Availability</td><td>8am – 5pm CT/CET</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Support Hours</td><td>Unlimited</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Dedicated CSM</td><td>✔</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Support Call Scheduling</td><td>Based on availability</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Environment Audit</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Configuration Audit</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Upgrade Assistance</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">User Group Membership</td><td>Based on availability</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Pricing</td><td>Included with Nerdio Licensing</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-4 right-4 z-50 hidden">
@@ -269,8 +299,8 @@
 
     const CURRENCIES = {
       USD: { code: 'USD', label: 'USD', locale: 'en-US', rateFromUSD: 1.00 },
-      EUR: { code: 'EUR', label: 'EUR', locale: 'de-DE', rateFromUSD: 0.85 }, // 1 USD ≈ 0.85 EUR
-      GBP: { code: 'GBP', label: 'GBP', locale: 'en-GB', rateFromUSD: 0.77 }  // 1 USD ≈ 0.77 GBP
+      EUR: { code: 'EUR', label: 'EUR', locale: 'de-DE', rateFromUSD: 0.85 },
+      GBP: { code: 'GBP', label: 'GBP', locale: 'en-GB', rateFromUSD: 0.77 }
     };
 
     const STATE = {
@@ -284,7 +314,7 @@
         partnerPrice: 0,
         salesCommission: 0
       },
-      perUserMonthly: 4.00 // stored in USD; displayed using selected currency
+      perUserMonthly: 4.00
     };
 
     function getTierPricePerUserMonthly(users) {
@@ -318,7 +348,7 @@
     }
 
     function computeTotals() {
-      STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users); // USD
+      STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users);
       const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
       const annualCostUSD = monthlyCostUSD * 12;
 
