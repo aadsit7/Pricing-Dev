@@ -102,17 +102,17 @@
               <option value="Monthly" selected>Monthly</option>
               <option value="Annual">Annual</option>
             </select>
-            <p class="text-xs text-[var(--c-muted)] mt-1">Monthly shows monthly contract value. ARR is annualized.</p>
+            <p id="term-help" class="text-xs text-[var(--c-muted)] mt-1">When Monthly is selected, all MSRP values show monthly (MRR). When Annual is selected, only annual (ARR) values are shown.</p>
           </div>
         </form>
 
         <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between border-t border-[color:var(--c-surface-3)]/50 pt-4">
           <div>
-            <p class="text-[var(--c-muted)]">Base ARR</p>
+            <p id="baseLabel" class="text-[var(--c-muted)]">Base ARR</p>
             <p id="baseArr" class="text-2xl font-bold tracking-tight">$0.00</p>
           </div>
           <div>
-            <p class="text-[var(--c-muted)]">Total Contract Value</p>
+            <p id="totalLabel" class="text-[var(--c-muted)]">Total Contract Value</p>
             <p id="totalContract" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
           </div>
         </div>
@@ -126,8 +126,8 @@
               <tr>
                 <th class="pb-2 font-medium">Product</th>
                 <th class="pb-2 font-medium">Users</th>
-                <th class="pb-2 font-medium">Base ARR</th>
-                <th class="pb-2 font-medium">Total</th>
+                <th id="thBase" class="pb-2 font-medium">Base ARR</th>
+                <th id="thTotal" class="pb-2 font-medium">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -308,8 +308,11 @@
       users: 500,
       term: 'Monthly',
       totals: {
-        baseArr: 0,
-        totalContract: 0,
+        baseMonthly: 0,
+        baseAnnual: 0,
+        totalMonthly: 0,
+        totalAnnual: 0,
+        selectedTotal: 0,
         margin: 0,
         partnerPrice: 0,
         salesCommission: 0
@@ -349,19 +352,28 @@
 
     function computeTotals() {
       STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users);
+
       const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
       const annualCostUSD = monthlyCostUSD * 12;
 
-      const baseArrUSD = annualCostUSD;
-      const totalContractUSD = STATE.term === 'Annual' ? annualCostUSD : monthlyCostUSD;
+      const baseMonthlyUSD = monthlyCostUSD; // MRR
+      const baseAnnualUSD = annualCostUSD;   // ARR
 
-      const marginUSD = totalContractUSD * 0.30;
-      const partnerPriceUSD = totalContractUSD - marginUSD;
-      const salesCommissionUSD = totalContractUSD * 0.10;
+      const totalMonthlyUSD = monthlyCostUSD;
+      const totalAnnualUSD = annualCostUSD;
+
+      const selectedTotalUSD = STATE.term === 'Annual' ? totalAnnualUSD : totalMonthlyUSD;
+
+      const marginUSD = selectedTotalUSD * 0.30;
+      const partnerPriceUSD = selectedTotalUSD - marginUSD;
+      const salesCommissionUSD = selectedTotalUSD * 0.10;
 
       STATE.totals = {
-        baseArr: baseArrUSD,
-        totalContract: totalContractUSD,
+        baseMonthly: baseMonthlyUSD,
+        baseAnnual: baseAnnualUSD,
+        totalMonthly: totalMonthlyUSD,
+        totalAnnual: totalAnnualUSD,
+        selectedTotal: selectedTotalUSD,
         margin: marginUSD,
         partnerPrice: partnerPriceUSD,
         salesCommission: salesCommissionUSD
@@ -369,14 +381,40 @@
     }
 
     function renderSummary() {
-      document.getElementById('baseArr').textContent = formatCurrencyFromUSD(STATE.totals.baseArr);
-      document.getElementById('totalContract').textContent = formatCurrencyFromUSD(STATE.totals.totalContract);
+      const baseLabel = document.getElementById('baseLabel');
+      const totalLabel = document.getElementById('totalLabel');
+      const baseValue = document.getElementById('baseArr');
+      const totalValue = document.getElementById('totalContract');
+
+      if (STATE.term === 'Monthly') {
+        baseLabel.textContent = 'Base MRR';
+        totalLabel.textContent = 'Total Monthly';
+        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
+      } else {
+        baseLabel.textContent = 'Base ARR';
+        totalLabel.textContent = 'Total Annual';
+        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
+        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
+      }
     }
 
     function renderCustomerTable() {
+      const thBase = document.getElementById('thBase');
+      const thTotal = document.getElementById('thTotal');
       document.getElementById('custUsers').textContent = String(STATE.users);
-      document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseArr);
-      document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalContract);
+
+      if (STATE.term === 'Monthly') {
+        thBase.textContent = 'Base MRR';
+        thTotal.textContent = 'Total Monthly';
+        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
+      } else {
+        thBase.textContent = 'Base ARR';
+        thTotal.textContent = 'Total Annual';
+        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
+        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
+      }
     }
 
     function renderPartnerTable() {
@@ -389,9 +427,13 @@
       var usersInput = document.getElementById('users');
       var termSelect = document.getElementById('term');
       var currencySelect = document.getElementById('currency');
+      var termHelp = document.getElementById('term-help');
       if (Number(usersInput.value) !== STATE.users) usersInput.value = STATE.users;
       if (termSelect.value !== STATE.term) termSelect.value = STATE.term;
       if (currencySelect.value !== STATE.currency) currencySelect.value = STATE.currency;
+      if (termHelp) {
+        termHelp.textContent = 'When ' + STATE.term + ' is selected, all MSRP values show ' + (STATE.term === 'Monthly' ? 'monthly (MRR)' : 'annual (ARR)') + '.';
+      }
     }
 
     function renderTabs(active) {
@@ -425,6 +467,12 @@
     function copyEmailSummary() {
       const subject = 'Pricing Summary';
       const { code } = getCurrencyMeta();
+      const termIsMonthly = STATE.term === 'Monthly';
+      const baseLabel = termIsMonthly ? 'Base MRR' : 'Base ARR';
+      const totalLabel = termIsMonthly ? 'Total Monthly' : 'Total Annual';
+      const baseValue = termIsMonthly ? STATE.totals.baseMonthly : STATE.totals.baseAnnual;
+      const totalValue = termIsMonthly ? STATE.totals.totalMonthly : STATE.totals.totalAnnual;
+
       const lines = [
         'Recast Pricing Summary',
         '',
@@ -435,10 +483,10 @@
         `- Tiered MSRP (per-user monthly): ${formatCurrencyFromUSD(STATE.perUserMonthly)}`,
         '',
         'Customer Pricing',
-        `- Base ARR: ${formatCurrencyFromUSD(STATE.totals.baseArr)}`,
-        `- Total Contract Value (${STATE.term}): ${formatCurrencyFromUSD(STATE.totals.totalContract)}`,
+        `- ${baseLabel}: ${formatCurrencyFromUSD(baseValue)}`,
+        `- ${totalLabel}: ${formatCurrencyFromUSD(totalValue)}`,
         '',
-        'Partner Pricing',
+        'Partner Pricing (based on selected term)',
         `- Net New Partner Price: ${formatCurrencyFromUSD(STATE.totals.partnerPrice)}`,
         `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
       ];
