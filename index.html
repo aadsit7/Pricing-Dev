@@ -92,13 +92,8 @@
             <p id="users-error" class="hidden mt-1 text-xs text-red-300" role="alert">Please enter a valid user count (minimum 250).</p>
           </div>
           <div>
-            <label for="term" class="font-semibold block mb-2">Contract Term</label>
-            <select id="term" name="term"
-              class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
-              <option value="Monthly" selected>Monthly</option>
-              <option value="Annual">Annual</option>
-            </select>
-            <p id="term-help" class="text-xs text-[var(--c-muted)] mt-1">When Monthly is selected, all MSRP values show monthly (MRR). When Annual is selected, only annual (ARR) values are shown.</p>
+            <label class="font-semibold block mb-2">Sales Rep Commission (ARR)</label>
+            <p id="salesCommission" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
           </div>
         </form>
 
@@ -121,30 +116,6 @@
                 <td id="custPerUser">$0.00</td>
                 <td id="custBase">$0.00</td>
                 <td id="custTotal">$0.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h2 class="text-lg font-semibold mb-4">Nerdio Pricing (Do not share with customer)</h2>
-        <div class="overflow-x-auto -mx-6 sm:mx-0">
-          <table class="w-full text-left border-collapse min-w-[640px]">
-            <thead class="text-[var(--c-muted)] text-sm">
-              <tr>
-                <th class="pb-2 font-medium px-6 sm:px-0">Product</th>
-                <th class="pb-2 font-medium">Users</th>
-                <th id="partnerPerUserHeader" class="pb-2 font-medium">Per User / month</th>
-                <th id="thNerdio" class="pb-2 font-medium">Nerdio Price</th>
-                <th id="thCommission" class="pb-2 font-medium">Sales Rep Commission</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50">
-                <td class="py-2 px-6 sm:px-0">Application Workspace</td>
-                <td id="partnerUsers">0</td>
-                <td id="partnerPerUser">$0.00</td>
-                <td id="partnerPrice">$0.00</td>
-                <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
               </tr>
             </tbody>
           </table>
@@ -387,55 +358,24 @@
       document.getElementById('custUsers').textContent = String(STATE.users);
       const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const avgPerUserMonthly = monthlyCostUSD / STATE.users;
-      const perUser = STATE.term === 'Monthly' ? avgPerUserMonthly : avgPerUserMonthly * 12;
+      const perUser = avgPerUserMonthly;
       document.getElementById('custPerUser').textContent = formatCurrencyFromUSD(perUser);
-      if (STATE.term === 'Monthly') {
-        custPerUserHeader.textContent = 'Per User / month';
-        thBaseCust.textContent = 'Base MRR';
-        thTotalCust.textContent = 'Total ARR';
-        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
-        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
-      } else {
-        custPerUserHeader.textContent = 'Per User / year';
-        thBaseCust.textContent = 'Base ARR';
-        thTotalCust.textContent = 'Total ARR';
-        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
-        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
-      }
+      thBaseCust.textContent = 'Base MRR';
+      thTotalCust.textContent = 'Total ARR';
+      custPerUserHeader.textContent = 'Per User / month';
+      document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+      document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
     }
 
-    function renderPartnerTable() {
-      const partnerPerUserHeader = document.getElementById('partnerPerUserHeader');
-      const thNerdio = document.getElementById('thNerdio');
-      const thCommission = document.getElementById('thCommission');
-      document.getElementById('partnerUsers').textContent = String(STATE.users);
-      const partnerPerUserMonthly = STATE.totals.partnerPrice / 12 / STATE.users;
-      const partnerPerUser = STATE.term === 'Monthly' ? partnerPerUserMonthly : partnerPerUserMonthly * 12;
-      document.getElementById('partnerPerUser').textContent = formatCurrencyFromUSD(partnerPerUser);
-      document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
+    function renderCommission() {
       document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
-      if (STATE.term === 'Monthly') {
-        partnerPerUserHeader.textContent = 'Per User / month';
-        thNerdio.textContent = 'Nerdio Price (ARR)';
-        thCommission.textContent = 'Sales Rep Commission (ARR)';
-      } else {
-        partnerPerUserHeader.textContent = 'Per User / year';
-        thNerdio.textContent = 'Nerdio Price (ARR)';
-        thCommission.textContent = 'Sales Rep Commission (ARR)';
-      }
     }
 
     function renderForm() {
       var usersInput = document.getElementById('users');
-      var termSelect = document.getElementById('term');
       var currencySelect = document.getElementById('currency');
-      var termHelp = document.getElementById('term-help');
       if (Number(usersInput.value) !== STATE.users) usersInput.value = STATE.users;
-      if (termSelect.value !== STATE.term) termSelect.value = STATE.term;
       if (currencySelect.value !== STATE.currency) currencySelect.value = STATE.currency;
-      if (termHelp) {
-        termHelp.textContent = 'When ' + STATE.term + ' is selected, all MSRP values show ' + (STATE.term === 'Monthly' ? 'monthly (MRR)' : 'annual (ARR)') + '.';
-      }
     }
 
     function renderTabs(active) {
@@ -452,7 +392,7 @@
     function renderAll() {
       computeTotals();
       renderCustomerTable();
-      renderPartnerTable();
+      renderCommission();
       renderForm();
     }
 
@@ -468,10 +408,9 @@
     function copyEmailSummary() {
       const subject = 'Pricing Summary';
       const { code } = getCurrencyMeta();
-      const termIsMonthly = STATE.term === 'Monthly';
-      const baseLabel = termIsMonthly ? 'Base MRR' : 'Base ARR';
+      const baseLabel = 'Base MRR';
       const totalLabel = 'Total ARR';
-      const baseValue = termIsMonthly ? STATE.totals.baseMonthly : STATE.totals.baseAnnual;
+      const baseValue = STATE.totals.baseMonthly;
       const totalValue = STATE.totals.totalAnnual;
       const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const averageMonthlyPerUser = monthlyCostUSD / STATE.users;
@@ -481,7 +420,6 @@
         '',
         'Inputs',
         `- Users: ${STATE.users}`,
-        `- Term: ${STATE.term}`,
         `- Currency: ${code}`,
         `- Average MSRP (per-user monthly): ${formatCurrencyFromUSD(averageMonthlyPerUser)}`,
         '',
@@ -490,7 +428,6 @@
         `- ${totalLabel}: ${formatCurrencyFromUSD(totalValue)}`,
         '',
         'Partner Pricing (ARR)',
-        `- Net New Partner Price: ${formatCurrencyFromUSD(STATE.totals.partnerPrice)}`,
         `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
       ];
       const body = encodeURIComponent(lines.join('\n'));
@@ -506,7 +443,6 @@
     function initEvents() {
       const usersInput = document.getElementById('users');
       const usersError = document.getElementById('users-error');
-      const termSelect = document.getElementById('term');
       const currencySelect = document.getElementById('currency');
 
       usersInput.addEventListener('input', () => {
@@ -519,11 +455,6 @@
         }
         usersError.classList.add('hidden');
         STATE.users = n;
-        renderAll();
-      });
-
-      termSelect.addEventListener('change', () => {
-        STATE.term = termSelect.value;
         renderAll();
       });
 
