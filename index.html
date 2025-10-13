@@ -1,57 +1,269 @@
-<section class="bg-[#2F39A3] p-6 rounded-2xl mb-6">
-  <div class="grid md:grid-cols-2 gap-6">
-    <div>
-      <label for="currency" class="block font-semibold mb-2">Currency</label>
-      <select id="currency" class="bg-[#2A35A1] px-3 py-2 rounded-lg w-full">
-        <option value="USD" selected>USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recast Pricing Calculator</title>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --c-bg: #1C289C;
+      --c-surface: #2F39A3;
+      --c-surface-2: #2A35A1;
+      --c-surface-3: #8085C7;
+      --c-text: #FFFFFF;
+      --c-muted: #DFE0F1;
+      --c-primary: #F05928;
+      --c-primary-contrast: #FFFFFF;
+      --radius-lg: 1rem;
+      --shadow-soft: 0 10px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.18);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
+  <header class="max-w-6xl mx-auto px-4 pt-8 pb-4">
+    <div class="flex items-center justify-between gap-4">
+      <h1 class="text-3xl font-bold">Recast Pricing Calculator</h1>
+      <button id="copy-summary" class="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-[var(--c-primary)] text-[var(--c-primary-contrast)] hover:opacity-90 transition">
+        <i data-lucide="mail" class="w-4 h-4"></i><span>Copy</span>
+      </button>
+    </div>
+    <p class="mt-2 text-sm text-[var(--c-muted)]">Estimate only. Not a formal quote.</p>
+  </header>
 
-      <label for="users" class="block font-semibold mt-4 mb-2">User count</label>
-      <input id="users" type="number" value="500" min="1" class="bg-[#2A35A1] px-3 py-2 rounded-lg w-full" />
-    </div>
-    <div>
-      <label for="term" class="block font-semibold mb-2">Contract Term</label>
-      <select id="term" class="bg-[#2A35A1] px-3 py-2 rounded-lg w-full">
-        <option value="Monthly" selected>Monthly</option>
-        <option value="Annual">Annual</option>
-      </select>
-    </div>
-  </div>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section class="rounded-2xl bg-[var(--c-surface)] p-6 mb-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+      <form id="pricing-form" class="grid md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label for="currency" class="font-semibold block mb-2">Currency</label>
+          <select id="currency" class="w-40 rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
+            <option value="USD" selected>USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
 
-  <div class="flex flex-col sm:flex-row justify-between mt-6 border-t border-[#8085C7]/50 pt-4">
-    <div>
-      <p id="baseLabel" class="text-sm text-[#DFE0F1]">Base MRR</p>
-      <p id="baseValue" class="text-2xl font-bold">$0.00</p>
-    </div>
-    <div>
-      <p id="totalLabel" class="text-sm text-[#DFE0F1]">Total Monthly</p>
-      <p id="totalValue" class="text-2xl font-bold text-[#F05928]">$0.00</p>
-    </div>
-  </div>
-</section>
+          <label for="users" class="font-semibold block mt-4 mb-2">User count</label>
+          <input id="users" type="number" min="1" value="500"
+            class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
+          <p class="text-xs text-[var(--c-muted)] mt-1">Enter number of licensed users (minimum 250).</p>
+        </div>
 
-<section class="bg-[#2F39A3] p-6 rounded-2xl">
-  <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
-  <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse min-w-[560px]">
-      <thead class="text-[#DFE0F1] text-sm">
-        <tr>
-          <th class="pb-2">Product</th>
-          <th class="pb-2">Users</th>
-          <th class="pb-2">Price Per User</th>
-          <th id="totalHeader" class="pb-2">Total Monthly</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="border-t border-[#8085C7]/50">
-          <td class="py-2">Application Workspace</td>
-          <td id="quoteUsers">0</td>
-          <td id="pricePerUser">$0.00</td>
-          <td id="quoteTotal">$0.00</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+        <div>
+          <label for="term" class="font-semibold block mb-2">Contract Term</label>
+          <select id="term" class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
+            <option value="Monthly" selected>Monthly</option>
+            <option value="Annual">Annual</option>
+          </select>
+          <p class="text-xs text-[var(--c-muted)] mt-1">When Monthly is selected, all MSRP values show monthly (MRR). When Annual is selected, they show annual (ARR).</p>
+        </div>
+      </form>
+
+      <div class="flex flex-col sm:flex-row justify-between gap-6 border-t border-[var(--c-surface-3)] pt-4">
+        <div>
+          <p id="baseLabel" class="text-[var(--c-muted)]">Price per User</p>
+          <p id="basePrice" class="text-2xl font-bold tracking-tight">$0.00</p>
+        </div>
+        <div>
+          <p id="totalLabel" class="text-[var(--c-muted)]">Total</p>
+          <p id="totalPrice" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+      <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[560px]">
+          <thead class="text-[var(--c-muted)] text-sm">
+            <tr>
+              <th class="pb-2 font-medium">Product</th>
+              <th class="pb-2 font-medium">Users</th>
+              <th id="thBase" class="pb-2 font-medium">Price per User</th>
+              <th id="thTotal" class="pb-2 font-medium">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-[color:var(--c-surface-3)]/50">
+              <td>Application Workspace</td>
+              <td id="custUsers">0</td>
+              <td id="custBase">$0.00</td>
+              <td id="custTotal">$0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="text-base font-semibold mt-6 mb-2">Tier Breakdown</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[560px]" id="tierTable">
+          <thead class="text-[var(--c-muted)] text-sm">
+            <tr>
+              <th class="pb-2 font-medium">Tier Range</th>
+              <th class="pb-2 font-medium">Users in Tier</th>
+              <th class="pb-2 font-medium">Price per User</th>
+              <th class="pb-2 font-medium">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="tierBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const CURRENCIES = {
+      USD: { code: 'USD', locale: 'en-US', rate: 1 },
+      EUR: { code: 'EUR', locale: 'de-DE', rate: 0.85 },
+      GBP: { code: 'GBP', locale: 'en-GB', rate: 0.77 }
+    };
+
+    const TIERS = [
+      { max: 999, price: 4.00 },
+      { max: 4999, price: 3.50 },
+      { max: 9999, price: 3.00 },
+      { max: 24999, price: 2.50 },
+      { max: 49999, price: 2.00 },
+      { max: Infinity, price: 1.50 }
+    ];
+
+    const STATE = {
+      users: 500,
+      term: 'Monthly',
+      currency: 'USD',
+      totals: { perUser: 0, total: 0 },
+      tierBreakdown: []
+    };
+
+    function formatCurrency(amountUSD) {
+      const { code, locale, rate } = CURRENCIES[STATE.currency];
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: code
+      }).format(amountUSD * rate);
+    }
+
+    function calculateCumulativePricing(users) {
+      let remaining = users;
+      let total = 0;
+      let breakdown = [];
+
+      for (let i = 0; i < TIERS.length; i++) {
+        const prevMax = i === 0 ? 0 : TIERS[i - 1].max;
+        const currentMax = TIERS[i].max;
+        if (remaining <= 0) break;
+        const inTier = Math.min(remaining, currentMax - prevMax);
+        const cost = inTier * TIERS[i].price;
+        breakdown.push({
+          range: `${prevMax + 1}-${currentMax === Infinity ? '∞' : currentMax}`,
+          users: inTier,
+          price: TIERS[i].price,
+          subtotal: cost
+        });
+        total += cost;
+        remaining -= inTier;
+      }
+
+      const avgPrice = total / users;
+      return { total, perUser: avgPrice, breakdown };
+    }
+
+    function computeTotals() {
+      const result = calculateCumulativePricing(STATE.users);
+      STATE.totals.total = STATE.term === 'Annual' ? result.total * 12 : result.total;
+      STATE.totals.perUser = STATE.term === 'Annual' ? result.perUser * 12 : result.perUser;
+      STATE.tierBreakdown = result.breakdown;
+    }
+
+    function renderSummary() {
+      document.getElementById('baseLabel').textContent =
+        STATE.term === 'Monthly' ? 'Price per User (Monthly)' : 'Price per User (Annual)';
+      document.getElementById('totalLabel').textContent =
+        STATE.term === 'Monthly' ? 'Total Monthly' : 'Total Annual';
+
+      document.getElementById('basePrice').textContent = formatCurrency(STATE.totals.perUser);
+      document.getElementById('totalPrice').textContent = formatCurrency(STATE.totals.total);
+    }
+
+    function renderCustomerTable() {
+      document.getElementById('custUsers').textContent = STATE.users;
+      document.getElementById('custBase').textContent = formatCurrency(STATE.totals.perUser);
+      document.getElementById('custTotal').textContent = formatCurrency(STATE.totals.total);
+
+      document.getElementById('thBase').textContent =
+        STATE.term === 'Monthly' ? 'Price per User (Monthly)' : 'Price per User (Annual)';
+      document.getElementById('thTotal').textContent =
+        STATE.term === 'Monthly' ? 'Total Monthly' : 'Total Annual';
+    }
+
+    function renderTierBreakdown() {
+      const tbody = document.getElementById('tierBody');
+      tbody.innerHTML = '';
+      STATE.tierBreakdown.forEach(tier => {
+        const tr = document.createElement('tr');
+        tr.className = "border-t border-[color:var(--c-surface-3)]/50";
+        tr.innerHTML = `
+          <td class="py-2">${tier.range}</td>
+          <td>${tier.users}</td>
+          <td>${formatCurrency(tier.price)}</td>
+          <td>${formatCurrency(tier.subtotal)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAll() {
+      computeTotals();
+      renderSummary();
+      renderCustomerTable();
+      renderTierBreakdown();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+
+      const usersInput = document.getElementById('users');
+      const termSelect = document.getElementById('term');
+      const currencySelect = document.getElementById('currency');
+      const copyBtn = document.getElementById('copy-summary');
+
+      usersInput.addEventListener('input', e => {
+        const val = parseInt(e.target.value, 10);
+        STATE.users = Math.max(1, val || 1);
+        renderAll();
+      });
+
+      termSelect.addEventListener('change', e => {
+        STATE.term = e.target.value;
+        renderAll();
+      });
+
+      currencySelect.addEventListener('change', e => {
+        STATE.currency = e.target.value;
+        renderAll();
+      });
+
+      copyBtn.addEventListener('click', () => {
+        const summary = `
+Recast Pricing Summary
+----------------------
+Users: ${STATE.users}
+Term: ${STATE.term}
+Currency: ${STATE.currency}
+
+Price per user: ${formatCurrency(STATE.totals.perUser)}
+Total: ${formatCurrency(STATE.totals.total)}
+
+Tier Breakdown:
+${STATE.tierBreakdown.map(t => `${t.range}: ${t.users} users × ${formatCurrency(t.price)} = ${formatCurrency(t.subtotal)}`).join('\n')}
+        `.trim();
+        navigator.clipboard.writeText(summary);
+        alert('Summary copied to clipboard');
+      });
+
+      renderAll();
+    });
+  </script>
+</body>
+</html>
