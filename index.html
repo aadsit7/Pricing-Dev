@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recast Pricing Calculator</title>
+  <meta name="description" content="Instantly estimate customer and partner pricing with an accessible, brand-aware calculator." />
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://cdn.tailwindcss.com" defer></script>
   <style>
@@ -18,252 +19,520 @@
       --c-primary: #F05928;
       --c-primary-contrast: #FFFFFF;
       --radius-lg: 1rem;
+      --radius-full: 9999px;
+      --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       --shadow-soft: 0 10px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.18);
+    }
+    body:not(.tw-ready) {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 16px;
     }
   </style>
 </head>
 <body class="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
+  <div id="cdn-alert" role="alert" aria-live="polite" class="hidden fixed inset-x-0 top-0 z-40 mx-auto max-w-3xl rounded-b-[var(--radius-lg)] bg-[var(--c-surface)]/95 backdrop-blur px-4 py-3 shadow-md">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex size-5 items-center justify-center rounded-full bg-[var(--c-primary)]/20">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="block"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2z"/></svg>
+      </span>
+      <p class="text-sm"><strong>Heads up:</strong> Some styles or icons may look different if CDNs are blocked. The calculator still works.</p>
+    </div>
+  </div>
+
   <header class="max-w-6xl mx-auto px-4 pt-8 pb-4">
     <div class="flex items-center justify-between gap-4">
-      <h1 class="text-3xl font-bold">Recast Pricing Calculator</h1>
-      <button id="copy-summary" class="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-[var(--c-primary)] text-[var(--c-primary-contrast)] hover:opacity-90 transition">
-        <i data-lucide="mail" class="w-4 h-4"></i><span>Copy</span>
+      <div class="flex items-center gap-3">
+        <img id="brand-logo" alt="Brand logo" src="" class="hidden h-8 w-auto" />
+        <h1 id="brand-title" class="text-2xl sm:text-3xl font-bold tracking-[-0.02em]">Recast Pricing Calculator</h1>
+      </div>
+      <button id="copy-email" class="inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 bg-[var(--c-primary)] text-[var(--c-primary-contrast)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--c-primary)] focus:ring-offset-[var(--c-bg)] transition text-sm font-medium">
+        <i data-lucide="mail" aria-hidden="true" class="size-4"></i>
+        <span>Copy</span>
       </button>
     </div>
     <p class="mt-2 text-sm text-[var(--c-muted)]">Estimate only. Not a formal quote.</p>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-6">
-    <section class="rounded-2xl bg-[var(--c-surface)] p-6 mb-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
-      <form id="pricing-form" class="grid md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <label for="currency" class="font-semibold block mb-2">Currency</label>
-          <select id="currency" class="w-40 rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
-            <option value="USD" selected>USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
+  <nav class="max-w-6xl mx-auto px-4 mt-4" role="tablist" aria-label="Pricing sections">
+    <div class="inline-flex rounded-[var(--radius-full)] bg-[var(--c-surface-2)] p-1 shadow-sm ring-1 ring-[color:var(--c-surface-3)]/40">
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="true" aria-controls="tab-customer" id="tab-customer-btn" data-tab="customer" data-active="true">
+        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
+      </button>
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
+        <i data-lucide="rocket" class="size-4" aria-hidden="true"></i><span>Onboarding</span>
+      </button>
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="false" aria-controls="tab-sla" id="tab-sla-btn" data-tab="sla" data-active="false">
+        <i data-lucide="life-buoy" class="size-4" aria-hidden="true"></i><span>Support</span>
+      </button>
+    </div>
+  </nav>
 
-          <label for="users" class="font-semibold block mt-4 mb-2">User count</label>
-          <input id="users" type="number" min="1" value="500"
-            class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
-          <p class="text-xs text-[var(--c-muted)] mt-1">Enter number of licensed users (minimum 250).</p>
-        </div>
+  <main id="main" tabindex="-1" class="max-w-6xl mx-auto px-4 py-6">
+    <section id="tab-customer" role="tabpanel" aria-labelledby="tab-customer-btn" class="tab-content">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 mb-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <form id="customer-form" class="grid md:grid-cols-2 gap-6 mb-6" novalidate>
+          <div>
+            <label for="currency" class="font-semibold block mb-2">Currency</label>
+            <select id="currency" name="currency" class="w-40 rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
+              <option value="USD" selected>USD</option>
+              <option value="GBP">GBP (Pound)</option>
+              <option value="EUR">EUR (Euro)</option>
+            </select>
+            <label for="users" class="font-semibold block mt-4 mb-2">User count</label>
+            <input id="users" name="users" type="number" inputmode="numeric" min="1" value="500"
+              class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]"
+              aria-describedby="users-help" />
+            <p id="users-help" class="text-xs text-[var(--c-muted)] mt-1">Enter number of licensed users (minimum 250).</p>
+            <p id="users-error" class="hidden mt-1 text-xs text-red-300" role="alert">Please enter a valid user count (1 or more).</p>
+          </div>
+          <div>
+            <label for="term" class="font-semibold block mb-2">Contract Term</label>
+            <select id="term" name="term"
+              class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
+              <option value="Monthly" selected>Monthly</option>
+              <option value="Annual">Annual</option>
+            </select>
+            <p id="term-help" class="text-xs text-[var(--c-muted)] mt-1">When Monthly is selected, all MSRP values show monthly (MRR). When Annual is selected, only annual (ARR) values are shown.</p>
+          </div>
+        </form>
 
-        <div>
-          <label for="term" class="font-semibold block mb-2">Contract Term</label>
-          <select id="term" class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[var(--c-surface-3)] focus:ring-[var(--c-primary)]">
-            <option value="Monthly" selected>Monthly</option>
-            <option value="Annual">Annual</option>
-          </select>
-          <p class="text-xs text-[var(--c-muted)] mt-1">When Monthly is selected, all MSRP values show monthly (MRR). When Annual is selected, they show annual (ARR).</p>
+        <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between border-t border-[color:var(--c-surface-3)]/50 pt-4">
+          <div>
+            <p id="baseLabel" class="text-[var(--c-muted)]">Base ARR</p>
+            <p id="baseArr" class="text-2xl font-bold tracking-tight">$0.00</p>
+          </div>
+          <div>
+            <p id="totalLabel" class="text-[var(--c-muted)]">Total Contract Value</p>
+            <p id="totalContract" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
+          </div>
         </div>
-      </form>
+      </div>
 
-      <div class="flex flex-col sm:flex-row justify-between gap-6 border-t border-[var(--c-surface-3)] pt-4">
-        <div>
-          <p id="baseLabel" class="text-[var(--c-muted)]">Price per User</p>
-          <p id="basePrice" class="text-2xl font-bold tracking-tight">$0.00</p>
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th id="thBase" class="pb-2 font-medium">Base ARR</th>
+                <th id="thTotal" class="pb-2 font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td class="py-2">Application Workspace</td>
+                <td id="custUsers">0</td>
+                <td id="custBase">$0.00</td>
+                <td id="custTotal">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div>
-          <p id="totalLabel" class="text-[var(--c-muted)]">Total</p>
-          <p id="totalPrice" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
+      </div>
+
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mt-6 ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th class="pb-2 font-medium">Nerdio Price</th>
+                <th class="pb-2 font-medium">Sales Rep Commission </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td>Application Workspace</td>
+                <td id="partnerUsers">0</td>
+                <td id="partnerPrice">$0.00</td>
+                <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
 
-    <section class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
-      <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[560px]">
-          <thead class="text-[var(--c-muted)] text-sm">
-            <tr>
-              <th class="pb-2 font-medium">Product</th>
-              <th class="pb-2 font-medium">Users</th>
-              <th id="thBase" class="pb-2 font-medium">Price per User</th>
-              <th id="thTotal" class="pb-2 font-medium">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-t border-[color:var(--c-surface-3)]/50">
-              <td>Application Workspace</td>
-              <td id="custUsers">0</td>
-              <td id="custBase">$0.00</td>
-              <td id="custTotal">$0.00</td>
-            </tr>
-          </tbody>
-        </table>
+    <section id="tab-onboarding" role="tabpanel" aria-labelledby="tab-onboarding-btn" class="tab-content hidden">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-2">Recast Onboarding Overview</h2>
+        <p class="text-[var(--c-text)]/90 mb-2">Moving from Citrix to Azure Virtual Desktop (AVD) has never been easier.</p>
+        <p class="text-[var(--c-text)]/90 mb-4">Our onboarding is built to make your transition fast, predictable, and low-stress. You’ll work directly with Recast experts who guide your IT team step-by-step — from environment preparation to AVD configuration and go-live support. Within a few weeks, your environment will be fully optimized for AVD and ready for production use.</p>
+        <h3 class="text-base font-semibold mb-3">Onboarding Services Comparison</h3>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[640px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Onboarding Stage</th>
+                <th class="pb-2 font-medium">Citrix to AVD Transition Onboarding</th>
+              </tr>
+            </thead>
+            <tbody class="align-top">
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2">Project Duration</td><td>6–8 Weeks (max 40 consulting hours)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Go-Live Support Period</td><td>6 Weeks post-configuration (2 hrs/week of SME access)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Engagement Type</td><td>Advisory-led (Customer executes configurations under Recast guidance)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Scope of Support</td><td>Migration planning, AVD setup, and operational transition from Citrix</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Availability</td><td>Standard Business Hours (8am–5pm CT/CET)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Delivery Format</td><td>Remote consultation and documentation support</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Environment Preparation</td><td>Guidance for preparing infrastructure and identity access for AVD</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>AVD Configuration Assistance</td><td>Step-by-step guidance on configuring host pools, session management, and user access</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Policy &amp; Access Advisory</td><td>Consultation on conditional access, identity mapping, and application policies</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Modern Workplace Alignment</td><td>Optimization of AVD deployment for Windows endpoint environments</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Custom Branding (Optional)</td><td>Consultation on workspace look and feel to match corporate standards</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Consultation Deliverables</td><td>Custom configuration guide, training materials, and best-practice documentation</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Acceptance Criteria</td><td>Customer validates readiness for production AVD use following guided implementation</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Dependencies</td><td>Customer provides infrastructure access and participates in scheduled onboarding sessions</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Pricing</td><td>Included in onboarding engagement (non-standalone service)</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </section>
 
-      <h3 class="text-base font-semibold mt-6 mb-2">Tier Breakdown</h3>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[560px]" id="tierTable">
-          <thead class="text-[var(--c-muted)] text-sm">
-            <tr>
-              <th class="pb-2 font-medium">Tier Range</th>
-              <th class="pb-2 font-medium">Users in Tier</th>
-              <th class="pb-2 font-medium">Price per User</th>
-              <th class="pb-2 font-medium">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody id="tierBody"></tbody>
-        </table>
+    <section id="tab-sla" role="tabpanel" aria-labelledby="tab-sla-btn" class="tab-content hidden">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Support Service Levels</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]" aria-label="Support features and response times">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th scope="col" class="pb-2 font-medium">Feature</th>
+                <th scope="col" class="pb-2 font-medium">Support</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Urgent Severity</td><td>First response: <strong>1 Business Day</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Normal Severity</td><td>First response: <strong>2 Business Days</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Low Severity</td><td>First response: <strong>3 Business Days</strong></td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Availability</td><td>8am – 5pm CT/CET</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Support Hours</td><td>Unlimited</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Dedicated CSM</td><td>✔</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Support Call Scheduling</td><td>Based on availability</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Environment Audit</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Configuration Audit</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Upgrade Assistance</td><td>—</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">User Group Membership</td><td>Based on availability</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2 font-medium">Pricing</td><td>Included with Nerdio Licensing</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
 
-  <script>
-    const CURRENCIES = {
-      USD: { code: 'USD', locale: 'en-US', rate: 1 },
-      EUR: { code: 'EUR', locale: 'de-DE', rate: 0.85 },
-      GBP: { code: 'GBP', locale: 'en-GB', rate: 0.77 }
-    };
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-4 right-4 z-50 hidden">
+    <div class="rounded-[var(--radius-lg)] bg-[var(--c-surface)] px-4 py-3 shadow-[var(--shadow-soft)] text-sm flex items-center gap-2 ring-1 ring-[color:var(--c-surface-3)]/40">
+      <i data-lucide="check" class="size-4" aria-hidden="true"></i>
+      <span id="toast-msg">Copied to clipboard</span>
+    </div>
+  </div>
 
-    const TIERS = [
-      { max: 999, price: 4.00 },
-      { max: 4999, price: 3.50 },
-      { max: 9999, price: 3.00 },
-      { max: 24999, price: 2.50 },
-      { max: 49999, price: 2.00 },
-      { max: Infinity, price: 1.50 }
-    ];
+  <script>
+    (function applyBrandingFromGuide() {
+      try {
+        var guide = window.BRAND_GUIDE;
+        if (!guide || typeof guide !== 'object') return;
+        var root = document.documentElement;
+        var set = (k, v) => { if (v) root.style.setProperty(k, v); };
+        if (guide.colors) {
+          set('--c-bg', guide.colors.background);
+          set('--c-surface', guide.colors.surface);
+          set('--c-surface-2', guide.colors.surface2 || guide.colors.surface);
+          set('--c-surface-3', guide.colors.surface3 || '#8085C7');
+          set('--c-text', guide.colors.text || '#FFFFFF');
+          set('--c-muted', guide.colors.muted || '#DFE0F1');
+          set('--c-primary', guide.colors.primary || '#F05928');
+          set('--c-primary-contrast', guide.colors.onPrimary || '#FFFFFF');
+        }
+        if (guide.fontFamily) set('--font-sans', guide.fontFamily);
+        if (guide.radius) {
+          if (guide.radius.lg) set('--radius-lg', guide.radius.lg);
+          if (guide.radius.full) set('--radius-full', guide.radius.full);
+        }
+        if (guide.name) {
+          var title = document.getElementById('brand-title');
+          if (title) title.textContent = guide.name + ' Pricing Calculator';
+        }
+        if (guide.logoDataUrl) {
+          var logo = document.getElementById('brand-logo');
+          if (logo) {
+            logo.src = guide.logoDataUrl;
+            logo.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        console.error('Brand guide application error:', e);
+      }
+    })();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.body.classList.add('tw-ready');
+      setTimeout(function () {
+        var tailwindOk = !!window.tailwind;
+        var lucideOk = !!window.lucide;
+        if (!tailwindOk || !lucideOk) {
+          var alertEl = document.getElementById('cdn-alert');
+          if (alertEl) alertEl.classList.remove('hidden');
+        }
+      }, 400);
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+      initApp();
+    });
+
+    const CURRENCIES = {
+      USD: { code: 'USD', label: 'USD', locale: 'en-US', rateFromUSD: 1.00 },
+      EUR: { code: 'EUR', label: 'EUR', locale: 'de-DE', rateFromUSD: 0.85 },
+      GBP: { code: 'GBP', label: 'GBP', locale: 'en-GB', rateFromUSD: 0.77 }
+    };
 
     const STATE = {
+      currency: 'USD',
       users: 500,
       term: 'Monthly',
-      currency: 'USD',
-      totals: { perUser: 0, total: 0 },
-      tierBreakdown: []
+      totals: {
+        baseMonthly: 0,
+        baseAnnual: 0,
+        totalMonthly: 0,
+        totalAnnual: 0,
+        selectedTotal: 0,
+        margin: 0,
+        partnerPrice: 0,
+        salesCommission: 0
+      },
+      perUserMonthly: 4.00
     };
 
-    function formatCurrency(amountUSD) {
-      const { code, locale, rate } = CURRENCIES[STATE.currency];
-      return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: code
-      }).format(amountUSD * rate);
+    function getTierPricePerUserMonthly(users) {
+      if (!Number.isFinite(users) || users < 1) return 0;
+      if (users <= 999) return 4.00;
+      if (users <= 4999) return 3.50;
+      if (users <= 9999) return 3.00;
+      if (users <= 24999) return 2.50;
+      if (users <= 49999) return 2.00;
+      return 1.50;
     }
 
-    function calculateCumulativePricing(users) {
-      let remaining = users;
-      let total = 0;
-      let breakdown = [];
+    function getCurrencyMeta() {
+      return CURRENCIES[STATE.currency] || CURRENCIES.USD;
+    }
 
-      for (let i = 0; i < TIERS.length; i++) {
-        const prevMax = i === 0 ? 0 : TIERS[i - 1].max;
-        const currentMax = TIERS[i].max;
-        if (remaining <= 0) break;
-        const inTier = Math.min(remaining, currentMax - prevMax);
-        const cost = inTier * TIERS[i].price;
-        breakdown.push({
-          range: `${prevMax + 1}-${currentMax === Infinity ? '∞' : currentMax}`,
-          users: inTier,
-          price: TIERS[i].price,
-          subtotal: cost
-        });
-        total += cost;
-        remaining -= inTier;
-      }
+    function toSelectedCurrency(amountUSD) {
+      const { rateFromUSD } = getCurrencyMeta();
+      return amountUSD * rateFromUSD;
+    }
 
-      const avgPrice = total / users;
-      return { total, perUser: avgPrice, breakdown };
+    function formatCurrencyFromUSD(amountUSD) {
+      const { code, locale } = getCurrencyMeta();
+      const v = toSelectedCurrency(amountUSD) || 0;
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: code, maximumFractionDigits: 2 }).format(v);
+    }
+
+    function validateUsers(n) {
+      var valid = Number.isFinite(n) && n >= 1 && n <= 1000000;
+      return { valid, message: valid ? '' : 'Please enter a valid user count (1 or more).' };
     }
 
     function computeTotals() {
-      const result = calculateCumulativePricing(STATE.users);
-      STATE.totals.total = STATE.term === 'Annual' ? result.total * 12 : result.total;
-      STATE.totals.perUser = STATE.term === 'Annual' ? result.perUser * 12 : result.perUser;
-      STATE.tierBreakdown = result.breakdown;
+      STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users);
+      const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
+      const annualCostUSD = monthlyCostUSD * 12;
+      const baseMonthlyUSD = monthlyCostUSD;
+      const baseAnnualUSD = annualCostUSD;
+      const totalMonthlyUSD = monthlyCostUSD;
+      const totalAnnualUSD = annualCostUSD;
+      const selectedTotalUSD = STATE.term === 'Annual' ? totalAnnualUSD : totalMonthlyUSD;
+      const marginUSD = selectedTotalUSD * 0.30;
+      const partnerPriceUSD = selectedTotalUSD - marginUSD;
+      const salesCommissionUSD = selectedTotalUSD * 0.10;
+      STATE.totals = {
+        baseMonthly: baseMonthlyUSD,
+        baseAnnual: baseAnnualUSD,
+        totalMonthly: totalMonthlyUSD,
+        totalAnnual: totalAnnualUSD,
+        selectedTotal: selectedTotalUSD,
+        margin: marginUSD,
+        partnerPrice: partnerPriceUSD,
+        salesCommission: salesCommissionUSD
+      };
     }
 
     function renderSummary() {
-      document.getElementById('baseLabel').textContent =
-        STATE.term === 'Monthly' ? 'Price per User (Monthly)' : 'Price per User (Annual)';
-      document.getElementById('totalLabel').textContent =
-        STATE.term === 'Monthly' ? 'Total Monthly' : 'Total Annual';
-
-      document.getElementById('basePrice').textContent = formatCurrency(STATE.totals.perUser);
-      document.getElementById('totalPrice').textContent = formatCurrency(STATE.totals.total);
+      const baseLabel = document.getElementById('baseLabel');
+      const totalLabel = document.getElementById('totalLabel');
+      const baseValue = document.getElementById('baseArr');
+      const totalValue = document.getElementById('totalContract');
+      if (STATE.term === 'Monthly') {
+        baseLabel.textContent = 'Base MRR';
+        totalLabel.textContent = 'Total Monthly';
+        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
+      } else {
+        baseLabel.textContent = 'Base ARR';
+        totalLabel.textContent = 'Total Annual';
+        baseValue.textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
+        totalValue.textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
+      }
     }
 
     function renderCustomerTable() {
-      document.getElementById('custUsers').textContent = STATE.users;
-      document.getElementById('custBase').textContent = formatCurrency(STATE.totals.perUser);
-      document.getElementById('custTotal').textContent = formatCurrency(STATE.totals.total);
-
-      document.getElementById('thBase').textContent =
-        STATE.term === 'Monthly' ? 'Price per User (Monthly)' : 'Price per User (Annual)';
-      document.getElementById('thTotal').textContent =
-        STATE.term === 'Monthly' ? 'Total Monthly' : 'Total Annual';
+      const thBase = document.getElementById('thBase');
+      const thTotal = document.getElementById('thTotal');
+      document.getElementById('custUsers').textContent = String(STATE.users);
+      if (STATE.term === 'Monthly') {
+        thBase.textContent = 'Base MRR';
+        thTotal.textContent = 'Total Monthly';
+        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
+      } else {
+        thBase.textContent = 'Base ARR';
+        thTotal.textContent = 'Total Annual';
+        document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
+        document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
+      }
     }
 
-    function renderTierBreakdown() {
-      const tbody = document.getElementById('tierBody');
-      tbody.innerHTML = '';
-      STATE.tierBreakdown.forEach(tier => {
-        const tr = document.createElement('tr');
-        tr.className = "border-t border-[color:var(--c-surface-3)]/50";
-        tr.innerHTML = `
-          <td class="py-2">${tier.range}</td>
-          <td>${tier.users}</td>
-          <td>${formatCurrency(tier.price)}</td>
-          <td>${formatCurrency(tier.subtotal)}</td>
-        `;
-        tbody.appendChild(tr);
+    function renderPartnerTable() {
+      document.getElementById('partnerUsers').textContent = String(STATE.users);
+      document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
+      document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
+    }
+
+    function renderForm() {
+      var usersInput = document.getElementById('users');
+      var termSelect = document.getElementById('term');
+      var currencySelect = document.getElementById('currency');
+      var termHelp = document.getElementById('term-help');
+      if (Number(usersInput.value) !== STATE.users) usersInput.value = STATE.users;
+      if (termSelect.value !== STATE.term) termSelect.value = STATE.term;
+      if (currencySelect.value !== STATE.currency) currencySelect.value = STATE.currency;
+      if (termHelp) {
+        termHelp.textContent = 'When ' + STATE.term + ' is selected, all MSRP values show ' + (STATE.term === 'Monthly' ? 'monthly (MRR)' : 'annual (ARR)') + '.';
+      }
+    }
+
+    function renderTabs(active) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === active;
+        btn.setAttribute('data-active', String(isActive));
+        btn.setAttribute('aria-selected', String(isActive));
       });
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+      const panel = document.getElementById('tab-' + active);
+      if (panel) panel.classList.remove('hidden');
     }
 
     function renderAll() {
       computeTotals();
       renderSummary();
       renderCustomerTable();
-      renderTierBreakdown();
+      renderPartnerTable();
+      renderForm();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide) window.lucide.createIcons();
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      if (!toast || !msg) return;
+      msg.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 1800);
+    }
 
+    function copyEmailSummary() {
+      const subject = 'Pricing Summary';
+      const { code } = getCurrencyMeta();
+      const termIsMonthly = STATE.term === 'Monthly';
+      const baseLabel = termIsMonthly ? 'Base MRR' : 'Base ARR';
+      const totalLabel = termIsMonthly ? 'Total Monthly' : 'Total Annual';
+      const baseValue = termIsMonthly ? STATE.totals.baseMonthly : STATE.totals.baseAnnual;
+      const totalValue = termIsMonthly ? STATE.totals.totalMonthly : STATE.totals.totalAnnual;
+
+      const lines = [
+        'Recast Pricing Summary',
+        '',
+        'Inputs',
+        `- Users: ${STATE.users}`,
+        `- Term: ${STATE.term}`,
+        `- Currency: ${code}`,
+        `- Tiered MSRP (per-user monthly): ${formatCurrencyFromUSD(STATE.perUserMonthly)}`,
+        '',
+        'Customer Pricing',
+        `- ${baseLabel}: ${formatCurrencyFromUSD(baseValue)}`,
+        `- ${totalLabel}: ${formatCurrencyFromUSD(totalValue)}`,
+        '',
+        'Partner Pricing (based on selected term)',
+        `- Net New Partner Price: ${formatCurrencyFromUSD(STATE.totals.partnerPrice)}`,
+        `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
+      ];
+      const body = encodeURIComponent(lines.join('\n'));
+      const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+      try {
+        navigator.clipboard.writeText(lines.join('\n'));
+        showToast('Summary copied to clipboard');
+      } catch (_) {
+        window.location.href = mailto;
+      }
+    }
+
+    function initEvents() {
       const usersInput = document.getElementById('users');
+      const usersError = document.getElementById('users-error');
       const termSelect = document.getElementById('term');
       const currencySelect = document.getElementById('currency');
-      const copyBtn = document.getElementById('copy-summary');
 
-      usersInput.addEventListener('input', e => {
-        const val = parseInt(e.target.value, 10);
-        STATE.users = Math.max(1, val || 1);
+      usersInput.addEventListener('input', () => {
+        const n = parseInt(usersInput.value, 10);
+        const { valid, message } = validateUsers(n);
+        if (!valid) {
+          usersError.textContent = message;
+          usersError.classList.remove('hidden');
+          return;
+        }
+        usersError.classList.add('hidden');
+        STATE.users = n;
         renderAll();
       });
 
-      termSelect.addEventListener('change', e => {
-        STATE.term = e.target.value;
+      termSelect.addEventListener('change', () => {
+        STATE.term = termSelect.value;
         renderAll();
       });
 
-      currencySelect.addEventListener('change', e => {
-        STATE.currency = e.target.value;
+      currencySelect.addEventListener('change', () => {
+        STATE.currency = currencySelect.value;
         renderAll();
       });
 
-      copyBtn.addEventListener('click', () => {
-        const summary = `
-Recast Pricing Summary
-----------------------
-Users: ${STATE.users}
-Term: ${STATE.term}
-Currency: ${STATE.currency}
-
-Price per user: ${formatCurrency(STATE.totals.perUser)}
-Total: ${formatCurrency(STATE.totals.total)}
-
-Tier Breakdown:
-${STATE.tierBreakdown.map(t => `${t.range}: ${t.users} users × ${formatCurrency(t.price)} = ${formatCurrency(t.subtotal)}`).join('\n')}
-        `.trim();
-        navigator.clipboard.writeText(summary);
-        alert('Summary copied to clipboard');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          renderTabs(tab);
+        });
       });
 
+      document.getElementById('copy-email').addEventListener('click', (e) => {
+        e.preventDefault();
+        copyEmailSummary();
+      });
+    }
+
+    function initApp() {
+      initEvents();
+      renderTabs('customer');
       renderAll();
-    });
+    }
   </script>
 </body>
 </html>
