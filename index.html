@@ -1,562 +1,474 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Endpoint Pricing Calculator — Multi-Product + Partner Quote</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recast Pricing Calculator</title>
+  <meta name="description" content="Instantly estimate customer and partner pricing with an accessible, brand-aware calculator." />
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --c-bg: #1C289C;
+      --c-surface: #2F39A3;
+      --c-surface-2: #2A35A1;
+      --c-surface-3: #8085C7;
+      --c-text: #FFFFFF;
+      --c-muted: #DFE0F1;
+      --c-primary: #F05928;
+      --c-primary-contrast: #FFFFFF;
+      --radius-lg: 1rem;
+      --radius-full: 9999px;
+      --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      --shadow-soft: 0 10px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.18);
+    }
+    body:not(.tw-ready) {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 16px;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-[#0b1020] text-slate-100 antialiased">
-  <div id="app" class="min-h-screen"></div>
+<body class="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
+  <div id="cdn-alert" role="alert" aria-live="polite" class="hidden fixed inset-x-0 top-0 z-40 mx-auto max-w-3xl rounded-b-[var(--radius-lg)] bg-[var(--c-surface)]/95 backdrop-blur px-4 py-3 shadow-md">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex size-5 items-center justify-center rounded-full bg-[var(--c-primary)]/20">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" class="block"><path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2z"/></svg>
+      </span>
+      <p class="text-sm"><strong>Heads up:</strong> Some styles or icons may look different if CDNs are blocked. The calculator still works.</p>
+    </div>
+  </div>
+
+  <header class="max-w-6xl mx-auto px-4 pt-8 pb-4">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img id="brand-logo" alt="Brand logo" src="" class="hidden h-8 w-auto" />
+        <h1 id="brand-title" class="text-2xl sm:text-3xl font-bold tracking-[-0.02em]">Recast Pricing Calculator</h1>
+      </div>
+      <button id="copy-email" class="inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 bg-[var(--c-primary)] text-[var(--c-primary-contrast)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--c-primary)] focus:ring-offset-[var(--c-bg)] transition text-sm font-medium">
+        <i data-lucide="mail" aria-hidden="true" class="size-4"></i>
+        <span>Copy</span>
+      </button>
+    </div>
+    <p class="mt-2 text-sm text-[var(--c-muted)]">Estimate only. Not a formal quote.</p>
+  </header>
+
+  <nav class="max-w-6xl mx-auto px-4 mt-4" role="tablist" aria-label="Pricing sections">
+    <div class="inline-flex rounded-[var(--radius-full)] bg-[var(--c-surface-2)] p-1 shadow-sm ring-1 ring-[color:var(--c-surface-3)]/40">
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="true" aria-controls="tab-customer" id="tab-customer-btn" data-tab="customer" data-active="true">
+        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
+      </button>
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="false" aria-controls="tab-partner" id="tab-partner-btn" data-tab="partner" data-active="false">
+        <i data-lucide="handshake" class="size-4" aria-hidden="true"></i><span>Nerdio Pricing</span>
+      </button>
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
+        <i data-lucide="rocket" class="size-4" aria-hidden="true"></i><span>Onboarding</span>
+      </button>
+      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
+              role="tab" aria-selected="false" aria-controls="tab-sla" id="tab-sla-btn" data-tab="sla" data-active="false">
+        <i data-lucide="life-buoy" class="size-4" aria-hidden="true"></i><span>Support</span>
+      </button>
+    </div>
+  </nav>
+
+  <main id="main" tabindex="-1" class="max-w-6xl mx-auto px-4 py-6">
+    <section id="tab-customer" role="tabpanel" aria-labelledby="tab-customer-btn" class="tab-content">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 mb-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <form id="customer-form" class="grid md:grid-cols-2 gap-6 mb-6" novalidate>
+          <div>
+            <label for="currency" class="font-semibold block mb-2">Currency</label>
+            <select id="currency" name="currency" class="w-40 rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
+              <option value="USD" selected>USD</option>
+              <option value="GBP">GBP (Pound)</option>
+              <option value="EUR">EUR (Euro)</option>
+            </select>
+            <label for="users" class="font-semibold block mt-4 mb-2">User count</label>
+            <input id="users" name="users" type="number" inputmode="numeric" min="1" value="500"
+              class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]"
+              aria-describedby="users-help" />
+            <p id="users-help" class="text-xs text-[var(--c-muted)] mt-1">Enter number of licensed users (minimum 250).</p>
+            <p id="users-error" class="hidden mt-1 text-xs text-red-300" role="alert">Please enter a valid user count (1 or more).</p>
+          </div>
+          <div>
+            <label for="term" class="font-semibold block mb-2">Contract Term</label>
+            <select id="term" name="term"
+              class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]">
+              <option value="Monthly" selected>Monthly</option>
+              <option value="Annual">Annual</option>
+            </select>
+            <p class="text-xs text-[var(--c-muted)] mt-1">Monthly shows monthly contract value. ARR is annualized.</p>
+          </div>
+        </form>
+
+        <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between border-t border-[color:var(--c-surface-3)]/50 pt-4">
+          <div>
+            <p class="text-[var(--c-muted)]">Base ARR</p>
+            <p id="baseArr" class="text-2xl font-bold tracking-tight">$0.00</p>
+          </div>
+          <div>
+            <p class="text-[var(--c-muted)]">Total Contract Value</p>
+            <p id="totalContract" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th class="pb-2 font-medium">Base ARR</th>
+                <th class="pb-2 font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td class="py-2">Application Workspace</td>
+                <td id="custUsers">0</td>
+                <td id="custBase">$0.00</td>
+                <td id="custTotal">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-partner" role="tabpanel" aria-labelledby="tab-partner-btn" class="tab-content hidden">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mb-6 ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[560px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Product</th>
+                <th class="pb-2 font-medium">Users</th>
+                <th class="pb-2 font-medium">Nerdio Price</th>
+                <th class="pb-2 font-medium">Sales Rep Commission (10%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                <td>Application Workspace</td>
+                <td id="partnerUsers">0</td>
+                <td id="partnerPrice">$0.00</td>
+                <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-onboarding" role="tabpanel" aria-labelledby="tab-onboarding-btn" class="tab-content hidden">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+        <h2 class="text-lg font-semibold mb-2">Recast Onboarding Overview</h2>
+        <p class="text-[var(--c-text)]/90 mb-2">Moving from Citrix to Azure Virtual Desktop (AVD) has never been easier.</p>
+        <p class="text-[var(--c-text)]/90 mb-4">Our onboarding is built to make your transition fast, predictable, and low-stress. You’ll work directly with Recast experts who guide your IT team step-by-step — from environment preparation to AVD configuration and go-live support. Within a few weeks, your environment will be fully optimized for AVD and ready for production use.</p>
+        <h3 class="text-base font-semibold mb-3">Onboarding Services Comparison</h3>
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[640px]">
+            <thead class="text-[var(--c-muted)] text-sm">
+              <tr>
+                <th class="pb-2 font-medium">Onboarding Stage</th>
+                <th class="pb-2 font-medium">Citrix to AVD Transition Onboarding</th>
+              </tr>
+            </thead>
+            <tbody class="align-top">
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td class="py-2">Project Duration</td><td>6–8 Weeks (max 40 consulting hours)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Go-Live Support Period</td><td>6 Weeks post-configuration (2 hrs/week of SME access)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Engagement Type</td><td>Advisory-led (Customer executes configurations under Recast guidance)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Scope of Support</td><td>Migration planning, AVD setup, and operational transition from Citrix</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Availability</td><td>Standard Business Hours (8am–5pm CT/CET)</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Delivery Format</td><td>Remote consultation and documentation support</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Environment Preparation</td><td>Guidance for preparing infrastructure and identity access for AVD</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>AVD Configuration Assistance</td><td>Step-by-step guidance on configuring host pools, session management, and user access</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Policy &amp; Access Advisory</td><td>Consultation on conditional access, identity mapping, and application policies</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Modern Workplace Alignment</td><td>Optimization of AVD deployment for Windows endpoint environments</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Custom Branding (Optional)</td><td>Consultation on workspace look and feel to match corporate standards</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Consultation Deliverables</td><td>Custom configuration guide, training materials, and best-practice documentation</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Acceptance Criteria</td><td>Customer validates readiness for production AVD use following guided implementation</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Dependencies</td><td>Customer provides infrastructure access and participates in scheduled onboarding sessions</td></tr>
+              <tr class="border-t border-[color:var(--c-surface-3)]/50"><td>Pricing</td><td>Included in onboarding engagement (non-standalone service)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-4 right-4 z-50 hidden">
+    <div class="rounded-[var(--radius-lg)] bg-[var(--c-surface)] px-4 py-3 shadow-[var(--shadow-soft)] text-sm flex items-center gap-2 ring-1 ring-[color:var(--c-surface-3)]/40">
+      <i data-lucide="check" class="size-4" aria-hidden="true"></i>
+      <span id="toast-msg">Copied to clipboard</span>
+    </div>
+  </div>
 
   <script>
-    /* =======================
-       STATE
-    ======================= */
-    const STATE = {
-      items: [
-        { id: cryptoRandomId(), productKey: 'rct', endpointsText: '1000', addSupport: false }
-      ],
-      activeTab: 'customer',
-      copied: false,
-      showBreakdown: false
-    };
-
-    /* =======================
-       DATA
-    ======================= */
-    const TIERS_BASE5 = [
-      { max: 1000, rate: 5.00 }, { max: 2000, rate: 4.50 }, { max: 3000, rate: 4.25 }, { max: 4000, rate: 4.00 }, { max: 5000, rate: 3.75 },
-      { max: 6000, rate: 3.50 }, { max: 7000, rate: 3.25 }, { max: 8000, rate: 3.00 }, { max: 9000, rate: 2.75 }, { max: 10000, rate: 2.50 },
-      { max: 15000, rate: 2.25 }, { max: 20000, rate: 2.00 }, { max: 25000, rate: 1.75 }, { max: 30000, rate: 1.50 }, { max: 40000, rate: 1.25 },
-      { max: 50000, rate: 1.00 }, { max: 60000, rate: 0.75 }, { max: 70000, rate: 0.50 }, { max: 80000, rate: 0.40 }, { max: 90000, rate: 0.35 },
-      { max: 100000, rate: 0.30 }, { max: 120000, rate: 0.25 }, { max: 140000, rate: 0.20 }, { max: 160000, rate: 0.15 }, { max: 180000, rate: 0.10 },
-      { max: 200000, rate: 0.05 }, { max: Infinity, rate: 0.10 }
-    ];
-    const PRODUCTS = {
-      rct:       { name: 'Right Click Tools (Core)', baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
-      patch:     { name: 'Patching',                 baseFactor: 1,    platformFee: 7500, minTotal: 12500 },
-      insights:  { name: 'Insights',                 baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
-      priv:      { name: 'Privilege Manager',        baseFactor: 1,    platformFee: 0,    minTotal: 5000  },
-      aw_cloud:  { name: 'Application Workspace — Direct Cloud',  baseFactor: 11/5, platformFee: 15000, minTotal: 26000 },
-      aw_onprem: { name: 'Application Workspace — Direct On-Prem', baseFactor: 10/5, platformFee: 15000, minTotal: 25000 }
-    };
-
-    /* =======================
-       UTILS
-    ======================= */
-    function cx(...a){ return a.filter(Boolean).join(' '); }
-    function money(n){ return (!isFinite(n)) ? '—' : n.toLocaleString(undefined,{ style:'currency', currency:'USD' }); }
-    function int(n){ n = Number(String(n).replace(/[^0-9\-]/g,'')); return isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
-    function digitsOnly(text){ return String(text ?? '').replace(/[^\d]/g,''); }
-    function clampFloor(r){ return Math.max(r, 0.10); }
-    function tiersFor(key){
-      const f = (PRODUCTS[key] || PRODUCTS.rct).baseFactor;
-      return TIERS_BASE5.map(t => ({ max: t.max, rate: clampFloor(+(t.rate * f).toFixed(4)) }));
-    }
-    function graduatedSubtotal(units, tiers){
-      let rem = Math.max(0, Math.floor(units)), from = 0, sum = 0, lines = [];
-      for(const b of tiers){
-        if(rem<=0) break;
-        const c = Math.min(rem, b.max - from);
-        const ext = c * b.rate;
-        sum += ext;
-        lines.push({ band: `${from+1}–${from+c}`, units: c, rate: b.rate, extended: ext });
-        rem -= c; from = b.max;
+    (function applyBrandingFromGuide() {
+      try {
+        var guide = window.BRAND_GUIDE;
+        if (!guide || typeof guide !== 'object') return;
+        var root = document.documentElement;
+        var set = (k, v) => { if (v) root.style.setProperty(k, v); };
+        if (guide.colors) {
+          set('--c-bg', guide.colors.background);
+          set('--c-surface', guide.colors.surface);
+          set('--c-surface-2', guide.colors.surface2 || guide.colors.surface);
+          set('--c-surface-3', guide.colors.surface3 || '#8085C7');
+          set('--c-text', guide.colors.text || '#FFFFFF');
+          set('--c-muted', guide.colors.muted || '#DFE0F1');
+          set('--c-primary', guide.colors.primary || '#F05928');
+          set('--c-primary-contrast', guide.colors.onPrimary || '#FFFFFF');
+        }
+        if (guide.fontFamily) set('--font-sans', guide.fontFamily);
+        if (guide.radius) {
+          if (guide.radius.lg) set('--radius-lg', guide.radius.lg);
+          if (guide.radius.full) set('--radius-full', guide.radius.full);
+        }
+        if (guide.name) {
+          var title = document.getElementById('brand-title');
+          if (title) title.textContent = guide.name + ' Pricing Calculator';
+        }
+        if (guide.logoDataUrl) {
+          var logo = document.getElementById('brand-logo');
+          if (logo) {
+            logo.src = guide.logoDataUrl;
+            logo.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        console.error('Brand guide application error:', e);
       }
-      return { subtotal: sum, lines };
-    }
-    function premiumSupportCost(add, basePlusPlat){ return add ? Math.max(basePlusPlat * 0.20, 6000) : 0; }
-    function cryptoRandomId(){
-      try { return crypto.randomUUID(); } catch { return 'id-'+Math.random().toString(36).slice(2); }
+    })();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.body.classList.add('tw-ready');
+      setTimeout(function () {
+        var tailwindOk = !!window.tailwind;
+        var lucideOk = !!window.lucide;
+        if (!tailwindOk || !lucideOk) {
+          var alertEl = document.getElementById('cdn-alert');
+          if (alertEl) alertEl.classList.remove('hidden');
+        }
+      }, 400);
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+      initApp();
+    });
+
+    const CURRENCIES = {
+      USD: { code: 'USD', label: 'USD', locale: 'en-US', rateFromUSD: 1.00 },
+      EUR: { code: 'EUR', label: 'EUR', locale: 'de-DE', rateFromUSD: 0.85 }, // 1 USD ≈ 0.85 EUR
+      GBP: { code: 'GBP', label: 'GBP', locale: 'en-GB', rateFromUSD: 0.77 }  // 1 USD ≈ 0.77 GBP
+    };
+
+    const STATE = {
+      currency: 'USD',
+      users: 500,
+      term: 'Monthly',
+      totals: {
+        baseArr: 0,
+        totalContract: 0,
+        margin: 0,
+        partnerPrice: 0,
+        salesCommission: 0
+      },
+      perUserMonthly: 4.00 // stored in USD; displayed using selected currency
+    };
+
+    function getTierPricePerUserMonthly(users) {
+      if (!Number.isFinite(users) || users < 1) return 0;
+      if (users <= 999) return 4.00;
+      if (users <= 4999) return 3.50;
+      if (users <= 9999) return 3.00;
+      if (users <= 24999) return 2.50;
+      if (users <= 49999) return 2.00;
+      return 1.50;
     }
 
-    /* =======================
-       MODEL
-    ======================= */
-    function computeItem(item){
-      const endpoints = int(item.endpointsText);
-      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
-      const { subtotal: baseARR, lines } = graduatedSubtotal(endpoints, tiersFor(item.productKey));
-      const platformFeeApplied = baseARR >= 30000 ? 0 : meta.platformFee;
-      const basePlusPlatform = Math.max(baseARR + platformFeeApplied, meta.minTotal);
-      const support = premiumSupportCost(!!item.addSupport, basePlusPlatform);
-      const totalARR = basePlusPlatform + support;
-      const msrp = totalARR;
-      return {
-        id: item.id,
-        productKey: item.productKey,
-        productName: meta.name,
-        endpoints,
-        baseARR,
-        platformFeeApplied,
-        platformWaived: platformFeeApplied === 0,
-        basePlusPlatform,
-        support,
-        totalARR,
-        msrp,
-        partnerNewPrice: msrp * 0.70,
-        partnerRenPrice: msrp * 0.85,
-        marginNew$: msrp * 0.30,
-        marginRen$: msrp * 0.15,
-        addSupport: !!item.addSupport,
-        lines
+    function getCurrencyMeta() {
+      return CURRENCIES[STATE.currency] || CURRENCIES.USD;
+    }
+
+    function toSelectedCurrency(amountUSD) {
+      const { rateFromUSD } = getCurrencyMeta();
+      return amountUSD * rateFromUSD;
+    }
+
+    function formatCurrencyFromUSD(amountUSD) {
+      const { code, locale } = getCurrencyMeta();
+      const v = toSelectedCurrency(amountUSD) || 0;
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: code, maximumFractionDigits: 2 }).format(v);
+    }
+
+    function validateUsers(n) {
+      var valid = Number.isFinite(n) && n >= 1 && n <= 1000000;
+      return { valid, message: valid ? '' : 'Please enter a valid user count (1 or more).' };
+    }
+
+    function computeTotals() {
+      STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users); // USD
+      const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
+      const annualCostUSD = monthlyCostUSD * 12;
+
+      const baseArrUSD = annualCostUSD;
+      const totalContractUSD = STATE.term === 'Annual' ? annualCostUSD : monthlyCostUSD;
+
+      const marginUSD = totalContractUSD * 0.30;
+      const partnerPriceUSD = totalContractUSD - marginUSD;
+      const salesCommissionUSD = totalContractUSD * 0.10;
+
+      STATE.totals = {
+        baseArr: baseArrUSD,
+        totalContract: totalContractUSD,
+        margin: marginUSD,
+        partnerPrice: partnerPriceUSD,
+        salesCommission: salesCommissionUSD
       };
     }
 
-    function model(){
-      const items = STATE.items.map(computeItem);
-      const totals = items.reduce((a,it)=>({
-        endpoints: a.endpoints + it.endpoints,
-        baseARR: a.baseARR + it.baseARR,
-        platform: a.platform + it.platformFeeApplied,
-        support: a.support + it.support,
-        msrp: a.msrp + it.msrp,
-        partnerNew: a.partnerNew + it.partnerNewPrice,
-        partnerRen: a.partnerRen + it.partnerRenPrice,
-        marginNew$: a.marginNew$ + it.marginNew$,
-        marginRen$: a.marginRen$ + it.marginRen$
-      }), { endpoints:0, baseARR:0, platform:0, support:0, msrp:0, partnerNew:0, partnerRen:0, marginNew$:0, marginRen$:0 });
-      return { items, totals };
+    function renderSummary() {
+      document.getElementById('baseArr').textContent = formatCurrencyFromUSD(STATE.totals.baseArr);
+      document.getElementById('totalContract').textContent = formatCurrencyFromUSD(STATE.totals.totalContract);
     }
 
-    /* =======================
-       RENDER
-    ======================= */
-    function render(){
-      const m = model();
-      const root = document.getElementById('app');
-      root.innerHTML = `
-        <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-            <div class="absolute -top-40 -left-24 h-[420px] w-[420px] rounded-full blur-[110px] bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/30"></div>
-            <div class="absolute -top-10 right-0 h-[280px] w-[280px] rounded-full blur-[110px] bg-gradient-to-br from-fuchsia-400/25 via-purple-500/20 to-sky-500/25"></div>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-            <div class="flex items-center justify-between">
-              <h1 class="text-2xl sm:text-3xl font-extrabold">Recast Pricing Calculator</h1>
-              <button type="button" class="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95" data-action="copy">
-                <i data-lucide="clipboard" class="w-4 h-4"></i><span>${STATE.copied ? 'Copied!' : 'Copy Email'}</span>
-              </button>
-            </div>
-            <p class="mt-2 max-w-2xl text-slate-300">Estimate only. Not a formal quote.</p>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4">
-            <div role="tablist" aria-label="Views" class="flex w-full flex-wrap gap-2 rounded-full bg-[#0b152f] p-1 ring-1 ring-white/10">
-              ${tabBtn('customer','Customer Pricing')}
-              ${tabBtn('partner','Partner Pricing')}
-              ${tabBtn('sla','Support SLA')}
-            </div>
-          </div>
-        </header>
-
-        <main class="mx-auto max-w-6xl px-4 pb-16">
-          <section class="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
-            ${inputsCard(m)}
-            ${kpiCard('Total ARR (MSRP)', money(m.totals.msrp), 'calculator')}
-            ${kpiCard('Base ARR', money(m.totals.baseARR), 'badge-dollar-sign')}
-          </section>
-
-          <section class="mt-4">
-            ${STATE.activeTab==='customer' ? renderCustomer(m) : ''}
-            ${STATE.activeTab==='partner' ? renderPartner(m) : ''}
-            ${STATE.activeTab==='sla' ? renderSLA() : ''}
-          </section>
-        </main>
-      `;
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
-      attachEvents();
-      if (STATE.showBreakdown) updateBreakdownTable();
+    function renderCustomerTable() {
+      document.getElementById('custUsers').textContent = String(STATE.users);
+      document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseArr);
+      document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalContract);
     }
 
-    /* ---------- Sub-renders ---------- */
-    function tabBtn(id,label){
-      const active = STATE.activeTab===id;
-      return `
-        <button id="tab-${id}" type="button" class="${cx('inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm transition', active ? 'bg-yellow-400 text-slate-900' : 'text-slate-200 hover:bg-white/5')}"
-          data-action="switch" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${active}">
-          <i data-lucide="${id==='customer'?'calculator':id==='partner'?'users':'life-buoy'}" class="w-4 h-4"></i><span>${label}</span>
-        </button>
-      `;
+    function renderPartnerTable() {
+      document.getElementById('partnerUsers').textContent = String(STATE.users);
+      document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
+      document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
     }
 
-    function inputsCard(m){
-      return `
-        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4 lg:col-span-2" role="region" aria-label="Inputs">
-          <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold">Line Items</h2>
-            <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="add-item">
-              <i data-lucide="plus" class="w-4 h-4"></i>Add Product
-            </button>
-          </div>
-          <div class="mt-3 space-y-3">
-            ${STATE.items.map(itemRow).join('')}
-          </div>
-          <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-sm">
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Platform Fees</span><div class="font-semibold">${money(m.totals.platform)}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Support</span><div class="font-semibold">${money(m.totals.support)}</div></div>
-            <div class="rounded-lg bg-black/20 px-3 py-2"><span class="text-slate-300">Total Endpoints</span><div class="font-semibold">${m.totals.endpoints.toLocaleString()}</div></div>
-          </div>
-        </div>
-      `;
+    function renderForm() {
+      var usersInput = document.getElementById('users');
+      var termSelect = document.getElementById('term');
+      var currencySelect = document.getElementById('currency');
+      if (Number(usersInput.value) !== STATE.users) usersInput.value = STATE.users;
+      if (termSelect.value !== STATE.term) termSelect.value = STATE.term;
+      if (currencySelect.value !== STATE.currency) currencySelect.value = STATE.currency;
     }
 
-    function itemRow(item){
-      const meta = PRODUCTS[item.productKey] || PRODUCTS.rct;
-      return `
-        <div class="rounded-xl border border-white/10 bg-[#0b1328] p-3" data-item="${item.id}">
-          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2 items-end">
-            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
-              <span class="text-[12px] text-slate-300">Product</span>
-              <select class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm" data-action="change-product" aria-label="Product">
-                ${Object.entries(PRODUCTS).map(([k,v])=>`<option value="${k}" ${item.productKey===k?'selected':''}>${v.name}</option>`).join('')}
-              </select>
-            </label>
-            <label class="flex flex-col gap-1 text-sm sm:col-span-2">
-              <span class="text-[12px] text-slate-300">Endpoint count</span>
-              <input class="rounded-lg border border-white/10 bg-[#0b1328] px-3 py-2 text-sm"
-                     type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false"
-                     value="${item.endpointsText}" data-action="edit-endpoints" aria-label="Endpoint count">
-              <span class="text-[11px] text-slate-400">${meta.name}</span>
-            </label>
-            <label class="flex items-center gap-2 text-sm sm:col-span-1">
-              <input type="checkbox" ${item.addSupport?'checked':''} class="h-4 w-4 rounded border-white/20 bg-[#0b1328]" data-action="toggle-support" aria-label="Add premium support">
-              <span>Premium Support</span>
-            </label>
-            <div class="sm:col-span-1 flex justify-start sm:justify-end">
-              <button class="inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="remove-item" ${STATE.items.length===1?'disabled':''} aria-disabled="${STATE.items.length===1}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i><span>Remove</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+    function renderTabs(active) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === active;
+        btn.setAttribute('data-active', String(isActive));
+        btn.setAttribute('aria-selected', String(isActive));
+      });
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+      const panel = document.getElementById('tab-' + active);
+      if (panel) panel.classList.remove('hidden');
     }
 
-    function kpiCard(label,value,icon){
-      return `
-        <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4" role="region" aria-live="polite">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-[12px] text-slate-300">${label}</div>
-              <div class="text-xl font-semibold font-mono">${value}</div>
-            </div>
-            <i data-lucide="${icon}" class="w-5 h-5 text-sky-300" aria-hidden="true"></i>
-          </div>
-        </div>
-      `;
+    function renderAll() {
+      computeTotals();
+      renderSummary();
+      renderCustomerTable();
+      renderPartnerTable();
+      renderForm();
     }
 
-    function renderCustomer(m){
-      return `
-        <section id="panel-customer" role="tabpanel" aria-labelledby="tab-customer" class="mt-2 space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Customer Quote</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr>
-                    <th class="px-3 py-2 text-left">Product</th>
-                    <th class="px-3 py-2 text-left">Endpoints</th>
-                    <th class="px-3 py-2 text-left">Base ARR</th>
-                    <th class="px-3 py-2 text-left">Platform Fee</th>
-                    <th class="px-3 py-2 text-left">Premium Support</th>
-                    <th class="px-3 py-2 text-left">Line Total (MSRP)</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  ${m.items.map(it => `
-                    <tr>
-                      <td class="px-3 py-2">${it.productName}</td>
-                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.baseARR)}</td>
-                      <td class="px-3 py-2">${it.platformWaived ? '— (waived)' : `<span class="font-mono">${money(it.platformFeeApplied)}</span>`}</td>
-                      <td class="px-3 py-2">${it.addSupport ? `<span class="font-mono">${money(it.support)}</span>` : '—'}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.totalARR)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-                <tfoot class="bg-[#0b152f]">
-                  <tr>
-                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.baseARR)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.platform)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.support)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            <button type="button" class="mt-3 inline-flex items-center gap-2 text-sm rounded-full border border-white/15 bg-white/10 px-3 py-1.5 hover:bg-white/20" data-action="toggle-breakdown" aria-expanded="${STATE.showBreakdown}">
-              <i data-lucide="${STATE.showBreakdown?'chevron-up':'chevron-down'}" class="w-4 h-4"></i>
-              ${STATE.showBreakdown ? 'Hide tier calculation' : 'Show tier calculation'}
-            </button>
-            <div id="breakdown" class="${STATE.showBreakdown ? 'mt-3' : 'hidden'}">
-              ${m.items.map(it => tierTable(it)).join('')}
-            </div>
-          </div>
-        </section>
-      `;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      if (!toast || !msg) return;
+      msg.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 1800);
     }
 
-    function tierTable(it){
-      return `
-        <div class="mb-3 overflow-x-auto rounded-lg border border-white/10">
-          <table class="min-w-full text-sm">
-            <caption class="text-left px-3 py-2 bg-[#0b152f] font-semibold">${it.productName} — ${it.endpoints.toLocaleString()} endpoints</caption>
-            <thead class="bg-[#0b152f] text-slate-300">
-              <tr><th class="px-3 py-2 text-left">Band</th><th class="px-3 py-2 text-left">Units</th><th class="px-3 py-2 text-left">$ / Unit</th><th class="px-3 py-2 text-left">Extended</th></tr>
-            </thead>
-            <tbody class="bg-[#0b1328]">
-              ${it.lines.map(r=>`
-                <tr>
-                  <td class="px-3 py-2">${r.band}</td>
-                  <td class="px-3 py-2">${r.units.toLocaleString()}</td>
-                  <td class="px-3 py-2 font-mono">${money(r.rate)}</td>
-                  <td class="px-3 py-2 font-mono">${money(r.extended)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-            <tfoot class="bg-[#0b152f]">
-              <tr><th class="px-3 py-2 text-right" colspan="3">Base ARR Subtotal</th><th class="px-3 py-2 text-left font-mono">${money(it.baseARR)}</th></tr>
-            </tfoot>
-          </table>
-        </div>
-      `;
-    }
-
-    function renderPartner(m){
-      return `
-        <section id="panel-partner" role="tabpanel" aria-labelledby="tab-partner" class="space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Partner Quote (Per Line Item)</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr>
-                    <th class="px-3 py-2 text-left">Product</th>
-                    <th class="px-3 py-2 text-left">Endpoints</th>
-                    <th class="px-3 py-2 text-left">MSRP (List)</th>
-                    <th class="px-3 py-2 text-left">Net New Margin %</th>
-                    <th class="px-3 py-2 text-left">Net New Margin $</th>
-                    <th class="px-3 py-2 text-left">Net New Partner Price</th>
-                    <th class="px-3 py-2 text-left">Renewal Margin %</th>
-                    <th class="px-3 py-2 text-left">Renewal Margin $</th>
-                    <th class="px-3 py-2 text-left">Renewal Partner Price</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  ${m.items.map(it => `
-                    <tr>
-                      <td class="px-3 py-2">${it.productName}</td>
-                      <td class="px-3 py-2">${it.endpoints.toLocaleString()}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.msrp)}</td>
-                      <td class="px-3 py-2">30%</td>
-                      <td class="px-3 py-2 font-mono">${money(it.marginNew$)}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.partnerNewPrice)}</td>
-                      <td class="px-3 py-2">15%</td>
-                      <td class="px-3 py-2 font-mono">${money(it.marginRen$)}</td>
-                      <td class="px-3 py-2 font-mono">${money(it.partnerRenPrice)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-                <tfoot class="bg-[#0b152f]">
-                  <tr>
-                    <th class="px-3 py-2 text-right" colspan="2">Totals</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.msrp)}</th>
-                    <th class="px-3 py-2 text-left">—</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginNew$)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerNew)}</th>
-                    <th class="px-3 py-2 text-left">—</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.marginRen$)}</th>
-                    <th class="px-3 py-2 text-left font-mono">${money(m.totals.partnerRen)}</th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            <p class="mt-2 text-[12px] text-slate-400">MSRP includes platform fee (if not waived) and premium support (if selected) per line item. Partner prices reflect margins applied to each line.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    function renderSLA(){
-      return `
-        <section id="panel-sla" role="tabpanel" aria-labelledby="tab-sla" class="space-y-3">
-          <div class="rounded-2xl border border-white/10 bg-[#0c142b] p-4">
-            <h3 class="text-base font-semibold">Support SLA</h3>
-            <div class="mt-3 overflow-x-auto rounded-lg border border-white/10">
-              <table class="min-w-full text-sm">
-                <thead class="bg-[#0b152f] text-slate-300">
-                  <tr><th class="px-3 py-2 text-left">Support Level</th><th class="px-3 py-2 text-left">Basic</th><th class="px-3 py-2 text-left">Premium</th></tr>
-                </thead>
-                <tbody class="bg-[#0b1328]">
-                  <tr><td class="px-3 py-2">Urgent Severity</td><td class="px-3 py-2">First response: <strong>1 Business Day</strong></td><td class="px-3 py-2">First & update: <strong>2 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Normal Severity</td><td class="px-3 py-2">First response: <strong>2 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>4 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Low Severity</td><td class="px-3 py-2">First response: <strong>3 Business Days</strong></td><td class="px-3 py-2">First & update: <strong>8 Business Hours</strong></td></tr>
-                  <tr><td class="px-3 py-2">Availability</td><td class="px-3 py-2" colspan="2">8am – 5pm CT/CET</td></tr>
-                  <tr><td class="px-3 py-2">Support Hours</td><td class="px-3 py-2" colspan="2">Unlimited</td></tr>
-                  <tr><td class="px-3 py-2">Dedicated CSM</td><td class="px-3 py-2">✔</td><td class="px-3 py-2">✔</td></tr>
-                  <tr><td class="px-3 py-2">Support Call Scheduling</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Urgent within 2 business days; Normal within 4; Low based on availability</td></tr>
-                  <tr><td class="px-3 py-2">Environment Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
-                  <tr><td class="px-3 py-2">Configuration Audit</td><td class="px-3 py-2">—</td><td class="px-3 py-2">1× / year</td></tr>
-                  <tr><td class="px-3 py-2">Upgrade Assistance</td><td class="px-3 py-2">—</td><td class="px-3 py-2">2× / year</td></tr>
-                  <tr><td class="px-3 py-2">User Group Membership</td><td class="px-3 py-2">Based on availability</td><td class="px-3 py-2">Priority recruitment</td></tr>
-                  <tr><td class="px-3 py-2">Pricing</td><td class="px-3 py-2">Included with Enterprise License</td><td class="px-3 py-2">+20% of total ARR (minimum $6,000)</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="mt-2 text-[12px] text-slate-400">Note: Response-time commitments do not guarantee time to resolution.</p>
-          </div>
-        </section>
-      `;
-    }
-
-    /* =======================
-       EMAIL COPY (multi-item)
-    ======================= */
-    function buildEmailText(m, clientName){
-      const name = clientName && clientName.trim() ? clientName.trim() : '[Client Name]';
-      const subject = `Subject: Pricing Estimate for ${m.items.length>1?'Multiple Products':m.items[0]?.productName || 'Products'}`;
+    function copyEmailSummary() {
+      const subject = 'Pricing Summary';
+      const { code } = getCurrencyMeta();
       const lines = [
-        subject,
-        `Hi ${name},`,
+        'Recast Pricing Summary',
         '',
-        'As requested, here is a high-level pricing estimate based on your requirements:',
+        'Inputs',
+        `- Users: ${STATE.users}`,
+        `- Term: ${STATE.term}`,
+        `- Currency: ${code}`,
+        `- Tiered MSRP (per-user monthly): ${formatCurrencyFromUSD(STATE.perUserMonthly)}`,
+        '',
+        'Customer Pricing',
+        `- Base ARR: ${formatCurrencyFromUSD(STATE.totals.baseArr)}`,
+        `- Total Contract Value (${STATE.term}): ${formatCurrencyFromUSD(STATE.totals.totalContract)}`,
+        '',
+        'Partner Pricing',
+        `- Net New Partner Price: ${formatCurrencyFromUSD(STATE.totals.partnerPrice)}`,
+        `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
       ];
-      m.items.forEach((it, idx) => {
-        lines.push(
-          `Product ${idx+1}: ${it.productName}`,
-          `Endpoints: ${it.endpoints.toLocaleString()}`,
-          `Platform Fee: ${it.platformWaived ? '— (waived)' : money(it.platformFeeApplied)}`,
-          `Premium Support: ${it.addSupport ? money(it.support) : '—'}`,
-          `Base Total ARR (graduated): ${money(it.baseARR)}`,
-          `Line Total (MSRP): ${money(it.msrp)}`,
-          ''
-        );
-      });
-      lines.push(
-        'Order Totals:',
-        `Base ARR: ${money(m.totals.baseARR)}`,
-        `Platform Fees: ${money(m.totals.platform)}`,
-        `Premium Support: ${money(m.totals.support)}`,
-        `Total ARR (MSRP): ${money(m.totals.msrp)}`,
-        '',
-        'Below is a breakdown of pricing with MSRP, partner margin, and partner price:',
-        '| Type       | MSRP (List) | Margin % | Margin $  | Partner Price |',
-        '|------------|-------------|----------|-----------|---------------|',
-        `| Net New    | ${money(m.totals.msrp)}  | 30%      | ${money(m.totals.marginNew$)}| ${money(m.totals.partnerNew)}    |`,
-        `| Renewal    | ${money(m.totals.msrp)}  | 15%      | ${money(m.totals.marginRen$)}| ${money(m.totals.partnerRen)}    |`,
-        `| **Total**  | ${money(m.totals.msrp)}  | –        | –         | –             |`,
-        '',
-        'Please note this is an estimate only and should not be considered a formal quote.',
-        'Let me know if you’d like me to prepare a formal proposal or discuss package options.',
-        'Best regards,',
-        'Recast Partner Team'
-      );
-      return lines.join('\n');
+      const body = encodeURIComponent(lines.join('\n'));
+      const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+      try {
+        navigator.clipboard.writeText(lines.join('\n'));
+        showToast('Summary copied to clipboard');
+      } catch (_) {
+        window.location.href = mailto;
+      }
     }
 
-    /* =======================
-       EVENTS
-    ======================= */
-    function attachEvents(){
-      const root = document.getElementById('app');
+    function initEvents() {
+      const usersInput = document.getElementById('users');
+      const usersError = document.getElementById('users-error');
+      const termSelect = document.getElementById('term');
+      const currencySelect = document.getElementById('currency');
 
-      // Add item
-      const addBtn = root.querySelector('[data-action="add-item"]');
-      if(addBtn){
-        addBtn.addEventListener('click', () => {
-          STATE.items.push({ id: cryptoRandomId(), productKey: 'rct', endpointsText: '0', addSupport: false });
-          render();
-        });
-      }
-
-      // Delegate events per item
-      root.querySelectorAll('[data-item]').forEach(container => {
-        const id = container.getAttribute('data-item');
-        const item = STATE.items.find(x=>x.id===id);
-        if(!item) return;
-
-        // Product change
-        const sel = container.querySelector('[data-action="change-product"]');
-        if(sel) sel.addEventListener('change', e => { item.productKey = e.target.value; render(); });
-
-        // Support toggle
-        const sup = container.querySelector('[data-action="toggle-support"]');
-        if(sup) sup.addEventListener('change', e => { item.addSupport = !!e.target.checked; render(); });
-
-        // Endpoints input
-        const ep = container.querySelector('[data-action="edit-endpoints"]');
-        if(ep){
-          ep.addEventListener('beforeinput', e => { if(e.data && /\D/.test(e.data)) e.preventDefault(); });
-          ep.addEventListener('input', e => {
-            item.endpointsText = digitsOnly(e.target.value);
-            const caret = item.endpointsText.length;
-            render();
-            const repl = document.querySelector(`[data-item="${id}"] [data-action="edit-endpoints"]`);
-            if(repl){ repl.focus(); repl.setSelectionRange(caret, caret); }
-          });
-          ep.addEventListener('blur', e => { item.endpointsText = digitsOnly(e.target.value); render(); });
-          ep.addEventListener('keydown', e => { if(e.key==='Enter'){ e.currentTarget.blur(); } });
-          ep.addEventListener('wheel', e => { e.preventDefault(); }, { passive: false });
+      usersInput.addEventListener('input', () => {
+        const n = parseInt(usersInput.value, 10);
+        const { valid, message } = validateUsers(n);
+        if (!valid) {
+          usersError.textContent = message;
+          usersError.classList.remove('hidden');
+          return;
         }
+        usersError.classList.add('hidden');
+        STATE.users = n;
+        renderAll();
+      });
 
-        // Remove item
-        const rm = container.querySelector('[data-action="remove-item"]');
-        if(rm) rm.addEventListener('click', () => {
-          if(STATE.items.length<=1) return;
-          STATE.items = STATE.items.filter(x=>x.id!==id);
-          render();
+      termSelect.addEventListener('change', () => {
+        STATE.term = termSelect.value;
+        renderAll();
+      });
+
+      currencySelect.addEventListener('change', () => {
+        STATE.currency = currencySelect.value;
+        renderAll();
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          renderTabs(tab);
         });
       });
 
-      // Tab switching
-      root.querySelectorAll('[data-action="switch"]').forEach(b => b.addEventListener('click', e => {
-        STATE.activeTab = e.currentTarget.getAttribute('data-tab');
-        render();
-      }));
-
-      // Copy email
-      const copyBtn = root.querySelector('[data-action="copy"]');
-      if(copyBtn) copyBtn.addEventListener('click', async () => {
-        const m = model();
-        let clientName = '';
-        try { clientName = window.prompt('Client name for the email? (optional)', '') || ''; } catch {}
-        const text = buildEmailText(m, clientName);
-        try { await navigator.clipboard.writeText(text); }
-        catch {
-          try {
-            const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-            document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-          } catch {}
-        }
-        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+      document.getElementById('copy-email').addEventListener('click', (e) => {
+        e.preventDefault();
+        copyEmailSummary();
       });
-
-      // Show/Hide tier breakdown
-      const toggle = root.querySelector('[data-action="toggle-breakdown"]');
-      if(toggle) toggle.addEventListener('click', () => { STATE.showBreakdown = !STATE.showBreakdown; render(); });
     }
 
-    function updateBreakdownTable(){ /* populated during render via tierTable per item */ }
-
-    /* =======================
-       INIT
-    ======================= */
-    document.addEventListener('DOMContentLoaded', () => {
-      render();
-      if(!window.tailwind){
-        const b=document.createElement('div'); b.role='alert'; b.className='mx-auto max-w-6xl px-4 mt-3';
-        b.innerHTML='<div class="rounded-lg bg-amber-500/10 border border-amber-400/30 text-amber-200 px-3 py-2 text-sm">Styles failed to load. The calculator still works, but appearance may differ.</div>';
-        document.body.prepend(b);
-      }
-    });
+    function initApp() {
+      initEvents();
+      renderTabs('customer');
+      renderAll();
+    }
   </script>
 </body>
 </html>
