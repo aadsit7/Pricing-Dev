@@ -53,14 +53,14 @@
         <span>Copy</span>
       </button>
     </div>
-    <p class="mt-2 text-sm text-[var(--c-muted)]"> 1-Year Term Contract | Discounts increase with higher MAU tiers.</p>
+    <p class="mt-2 text-sm text-[var(--c-muted)]">Estimate only. Not a formal quote.</p>
   </header>
 
   <nav class="max-w-6xl mx-auto px-4 mt-4" role="tablist" aria-label="Pricing sections">
     <div class="inline-flex rounded-[var(--radius-full)] bg-[var(--c-surface-2)] p-1 shadow-sm ring-1 ring-[color:var(--c-surface-3)]/40">
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="true" aria-controls="tab-customer" id="tab-customer-btn" data-tab="customer" data-active="true">
-        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>Pricing</span>
+        <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
       </button>
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
@@ -406,34 +406,114 @@
     }
 
     function copyEmailSummary() {
-      const subject = 'Pricing Summary';
       const { code } = getCurrencyMeta();
-      const baseLabel = 'Base MRR';
-      const totalLabel = 'Total ARR';
-      const baseValue = STATE.totals.baseMonthly;
-      const totalValue = STATE.totals.totalAnnual;
       const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const averageMonthlyPerUser = monthlyCostUSD / STATE.users;
+      const formattedPerUser = formatCurrencyFromUSD(averageMonthlyPerUser);
+      const formattedMRR = formatCurrencyFromUSD(STATE.totals.baseMonthly);
+      const formattedARR = formatCurrencyFromUSD(STATE.totals.totalAnnual);
 
-      const lines = [
-        'Recast Pricing Summary',
-        '',
-        'Inputs',
-        `- Users: ${STATE.users}`,
-        `- Currency: ${code}`,
-        `- Average MSRP (per-user monthly): ${formatCurrencyFromUSD(averageMonthlyPerUser)}`,
-        '',
-        'Customer Pricing',
-        `- ${baseLabel}: ${formatCurrencyFromUSD(baseValue)}`,
-        `- ${totalLabel}: ${formatCurrencyFromUSD(totalValue)}`,
-        '',
-        'Partner Pricing (ARR)',
-        `- Sales Rep Commission (10%): ${formatCurrencyFromUSD(STATE.totals.salesCommission)}`
-      ];
-      const body = encodeURIComponent(lines.join('\n'));
-      const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+      const lines = `
+Thank you for your interest in Recast Application Workspace, our unified platform that simplifies application delivery across Citrix, Azure Virtual Desktop (AVD), and physical devices.
+
+Below is your tailored proposal summary:
+
+Product & Pricing
+
+Product: Application Workspace
+Contract Term: 1-Year (12-month commitment)
+User Count: ${STATE.users} Users
+Price per User / Month: ${formattedPerUser}
+Monthly Subscription (MRR): ${formattedMRR}
+Annual Contract Value (ARR): ${formattedARR}
+
+Pricing includes access to all core Application Workspace features, onboarding services, and ongoing support.
+
+Benefits & Entitlements
+
+Application Workspace provides a personalized, consistent experience for your users while giving IT complete control and visibility across all environments.
+
+Included Capabilities:
+
+Personalized app catalog – users only see what they’re entitled to.
+
+Smart app delivery – launches the best version automatically (local, cloud, or virtual).
+
+Pre-packaged app library – hundreds of ready-to-deploy installers.
+
+Safe app updates – staged deployment with rollback support.
+
+Full audit trail – complete visibility into all app actions.
+
+Remote management – launch remote sessions directly from the workspace.
+
+Diagnostics and troubleshooting – auto-capture logs and issue reports.
+
+Integrations – works seamlessly with Citrix, AVD, Nerdio, Intune, and SCCM.
+
+Browser and Teams access – easy access anywhere.
+
+Multi-platform support – Windows, macOS, cloud, and hybrid environments.
+
+Context-aware delivery – apps appear or hide based on user, device, or location.
+
+Onboarding Overview
+
+Our Citrix-to-AVD Transition Onboarding ensures a smooth go-live in approximately 6–8 weeks.
+Recast experts will guide your team step-by-step through environment preparation, AVD configuration, and go-live support.
+
+Included Capabilities:
+
+Up to 40 consulting hours over 6–8 weeks
+
+Step-by-step AVD setup and migration planning
+
+Identity and conditional access configuration
+
+Workspace customization and branding
+
+Custom configuration guide, training materials, and best practices
+
+Six-week post-go-live support window
+
+Support Summary
+
+All Application Workspace customers receive ongoing support as part of their subscription.
+
+Service Levels:
+
+Urgent issues: first response within 1 business day
+
+Normal issues: first response within 2 business days
+
+Low priority issues: first response within 3 business days
+
+Availability: 8am–5pm CT/CET, Monday–Friday
+
+Dedicated Customer Success Manager: included
+
+Unlimited support calls (scheduled based on availability)
+
+Included with Nerdio Licensing
+
+Summary
+
+Recast Application Workspace provides:
+
+A unified workspace for all applications
+
+Simplified management across Citrix, AVD, and local environments
+
+Fast, guided onboarding
+
+Integrated support with predictable pricing
+
+We are confident this solution will streamline your application delivery and enhance the user experience.`.trim();
+
+      const body = encodeURIComponent(lines);
+      const mailto = `mailto:?subject=${encodeURIComponent('Recast Pricing Summary')}&body=${body}`;
       try {
-        navigator.clipboard.writeText(lines.join('\n'));
+        navigator.clipboard.writeText(lines);
         showToast('Summary copied to clipboard');
       } catch (_) {
         window.location.href = mailto;
