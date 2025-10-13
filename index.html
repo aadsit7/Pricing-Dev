@@ -63,10 +63,6 @@
         <i data-lucide="user" class="size-4" aria-hidden="true"></i><span>MSRP Pricing</span>
       </button>
       <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
-              role="tab" aria-selected="false" aria-controls="tab-partner" id="tab-partner-btn" data-tab="partner" data-active="false">
-        <i data-lucide="handshake" class="size-4" aria-hidden="true"></i><span>Nerdio Pricing</span>
-      </button>
-      <button class="tab-btn inline-flex items-center gap-2 rounded-[var(--radius-full)] px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)] data-[active=true]:bg-[var(--c-primary)] data-[active=true]:text-[var(--c-primary-contrast)] text-[var(--c-text)]/95 hover:bg-[color:var(--c-surface-3)]/15 transition"
               role="tab" aria-selected="false" aria-controls="tab-onboarding" id="tab-onboarding-btn" data-tab="onboarding" data-active="false">
         <i data-lucide="rocket" class="size-4" aria-hidden="true"></i><span>Onboarding</span>
       </button>
@@ -141,10 +137,8 @@
           </table>
         </div>
       </div>
-    </section>
 
-    <section id="tab-partner" role="tabpanel" aria-labelledby="tab-partner-btn" class="tab-content hidden">
-      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mb-6 ring-1 ring-[color:var(--c-surface-3)]/40">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mt-6 ring-1 ring-[color:var(--c-surface-3)]/40">
         <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
         <div class="overflow-x-auto -mx-2 sm:mx-0">
           <table class="w-full text-left border-collapse min-w-[560px]">
@@ -153,7 +147,7 @@
                 <th class="pb-2 font-medium">Product</th>
                 <th class="pb-2 font-medium">Users</th>
                 <th class="pb-2 font-medium">Nerdio Price</th>
-                <th class="pb-2 font-medium">Sales Rep Commission (10%)</th>
+                <th class="pb-2 font-medium">Sales Rep Commission </th>
               </tr>
             </thead>
             <tbody>
@@ -352,22 +346,16 @@
 
     function computeTotals() {
       STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users);
-
       const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
       const annualCostUSD = monthlyCostUSD * 12;
-
-      const baseMonthlyUSD = monthlyCostUSD; // MRR
-      const baseAnnualUSD = annualCostUSD;   // ARR
-
+      const baseMonthlyUSD = monthlyCostUSD;
+      const baseAnnualUSD = annualCostUSD;
       const totalMonthlyUSD = monthlyCostUSD;
       const totalAnnualUSD = annualCostUSD;
-
       const selectedTotalUSD = STATE.term === 'Annual' ? totalAnnualUSD : totalMonthlyUSD;
-
       const marginUSD = selectedTotalUSD * 0.30;
       const partnerPriceUSD = selectedTotalUSD - marginUSD;
       const salesCommissionUSD = selectedTotalUSD * 0.10;
-
       STATE.totals = {
         baseMonthly: baseMonthlyUSD,
         baseAnnual: baseAnnualUSD,
@@ -385,7 +373,6 @@
       const totalLabel = document.getElementById('totalLabel');
       const baseValue = document.getElementById('baseArr');
       const totalValue = document.getElementById('totalContract');
-
       if (STATE.term === 'Monthly') {
         baseLabel.textContent = 'Base MRR';
         totalLabel.textContent = 'Total Monthly';
@@ -403,7 +390,6 @@
       const thBase = document.getElementById('thBase');
       const thTotal = document.getElementById('thTotal');
       document.getElementById('custUsers').textContent = String(STATE.users);
-
       if (STATE.term === 'Monthly') {
         thBase.textContent = 'Base MRR';
         thTotal.textContent = 'Total Monthly';
