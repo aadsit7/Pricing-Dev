@@ -75,7 +75,7 @@
 
   <main id="main" tabindex="-1" class="max-w-6xl mx-auto px-4 py-6">
     <section id="tab-customer" role="tabpanel" aria-labelledby="tab-customer-btn" class="tab-content">
-      <div class="rounded-2xl bg-[var(--c-surface)] p-6 mb-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
+      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
         <form id="customer-form" class="grid md:grid-cols-2 gap-6 mb-6" novalidate>
           <div>
             <label for="currency" class="font-semibold block mb-2">Currency</label>
@@ -85,11 +85,11 @@
               <option value="EUR">EUR (Euro)</option>
             </select>
             <label for="users" class="font-semibold block mt-4 mb-2">User count</label>
-            <input id="users" name="users" type="number" inputmode="numeric" min="1" value="500"
+            <input id="users" name="users" type="number" inputmode="numeric" min="250" value="500"
               class="w-full rounded-lg px-3 py-2 bg-[var(--c-surface-2)] ring-1 ring-[color:var(--c-surface-3)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--c-primary)]"
               aria-describedby="users-help" />
             <p id="users-help" class="text-xs text-[var(--c-muted)] mt-1">Enter number of licensed users (minimum 250).</p>
-            <p id="users-error" class="hidden mt-1 text-xs text-red-300" role="alert">Please enter a valid user count (1 or more).</p>
+            <p id="users-error" class="hidden mt-1 text-xs text-red-300" role="alert">Please enter a valid user count (minimum 250).</p>
           </div>
           <div>
             <label for="term" class="font-semibold block mb-2">Contract Term</label>
@@ -102,63 +102,69 @@
           </div>
         </form>
 
-        <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between border-t border-[color:var(--c-surface-3)]/50 pt-4">
+        <div class="grid md:grid-cols-2 gap-6 border-t border-[color:var(--c-surface-3)]/50 pt-6">
+          <div class="rounded-xl bg-[var(--c-surface-2)] p-4">
+            <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="text-[var(--c-muted)] text-sm">
+                  <tr>
+                    <th class="pb-2 font-medium">Product</th>
+                    <th class="pb-2 font-medium">Users</th>
+                    <th id="custPerUserHeader" class="pb-2 font-medium">Per User / month</th>
+                    <th id="thBaseCust" class="pb-2 font-medium">Base MRR</th>
+                    <th id="thTotalCust" class="pb-2 font-medium">Total Monthly</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                    <td class="py-2">Application Workspace</td>
+                    <td id="custUsers">0</td>
+                    <td id="custPerUser">$0.00</td>
+                    <td id="custBase">$0.00</td>
+                    <td id="custTotal">$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="rounded-xl bg-[var(--c-surface-2)] p-4">
+            <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="text-[var(--c-muted)] text-sm">
+                  <tr>
+                    <th class="pb-2 font-medium">Product</th>
+                    <th class="pb-2 font-medium">Users</th>
+                    <th id="partnerPerUserHeader" class="pb-2 font-medium">Per User / month</th>
+                    <th class="pb-2 font-medium">Nerdio Price</th>
+                    <th class="pb-2 font-medium">Sales Rep Commission</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-[color:var(--c-surface-3)]/50">
+                    <td class="py-2">Application Workspace</td>
+                    <td id="partnerUsers">0</td>
+                    <td id="partnerPerUser">$0.00</td>
+                    <td id="partnerPrice">$0.00</td>
+                    <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between mt-6 pt-4 border-t border-[color:var(--c-surface-3)]/50">
           <div>
-            <p id="baseLabel" class="text-[var(--c-muted)]">Base ARR</p>
+            <p id="baseLabel" class="text-[var(--c-muted)]">Base MRR</p>
             <p id="baseArr" class="text-2xl font-bold tracking-tight">$0.00</p>
           </div>
           <div>
-            <p id="totalLabel" class="text-[var(--c-muted)]">Total Contract Value</p>
+            <p id="totalLabel" class="text-[var(--c-muted)]">Total Monthly</p>
             <p id="totalContract" class="text-2xl font-bold tracking-tight text-[var(--c-primary)]">$0.00</p>
           </div>
-        </div>
-      </div>
-
-      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] ring-1 ring-[color:var(--c-surface-3)]/40">
-        <h2 class="text-lg font-semibold mb-4">Customer Quote</h2>
-        <div class="overflow-x-auto -mx-2 sm:mx-0">
-          <table class="w-full text-left border-collapse min-w-[560px]">
-            <thead class="text-[var(--c-muted)] text-sm">
-              <tr>
-                <th class="pb-2 font-medium">Product</th>
-                <th class="pb-2 font-medium">Users</th>
-                <th id="thBase" class="pb-2 font-medium">Base ARR</th>
-                <th id="thTotal" class="pb-2 font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50">
-                <td class="py-2">Application Workspace</td>
-                <td id="custUsers">0</td>
-                <td id="custBase">$0.00</td>
-                <td id="custTotal">$0.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="rounded-2xl bg-[var(--c-surface)] p-6 shadow-[var(--shadow-soft)] mt-6 ring-1 ring-[color:var(--c-surface-3)]/40">
-        <h2 class="text-lg font-semibold mb-4">Partner Quote (Per Line Item)</h2>
-        <div class="overflow-x-auto -mx-2 sm:mx-0">
-          <table class="w-full text-left border-collapse min-w-[560px]">
-            <thead class="text-[var(--c-muted)] text-sm">
-              <tr>
-                <th class="pb-2 font-medium">Product</th>
-                <th class="pb-2 font-medium">Users</th>
-                <th class="pb-2 font-medium">Nerdio Price</th>
-                <th class="pb-2 font-medium">Sales Rep Commission </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-t border-[color:var(--c-surface-3)]/50">
-                <td>Application Workspace</td>
-                <td id="partnerUsers">0</td>
-                <td id="partnerPrice">$0.00</td>
-                <td id="salesCommission" class="font-semibold text-red-300">$0.00</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </section>
@@ -310,18 +316,47 @@
         margin: 0,
         partnerPrice: 0,
         salesCommission: 0
-      },
-      perUserMonthly: 4.00
+      }
     };
 
-    function getTierPricePerUserMonthly(users) {
+    function calculateMonthlyCost(users) {
       if (!Number.isFinite(users) || users < 1) return 0;
-      if (users <= 999) return 4.00;
-      if (users <= 4999) return 3.50;
-      if (users <= 9999) return 3.00;
-      if (users <= 24999) return 2.50;
-      if (users <= 49999) return 2.00;
-      return 1.50;
+      let total = 0;
+      let remaining = users;
+
+      // Tier 1: 1-999 @ $4.00
+      let tier1 = Math.min(remaining, 999);
+      total += tier1 * 4.00;
+      remaining -= tier1;
+      if (remaining <= 0) return total;
+
+      // Tier 2: 1000-4999 @ $3.50 (4000 users)
+      let tier2 = Math.min(remaining, 4000);
+      total += tier2 * 3.50;
+      remaining -= tier2;
+      if (remaining <= 0) return total;
+
+      // Tier 3: 5000-9999 @ $3.00 (5000 users)
+      let tier3 = Math.min(remaining, 5000);
+      total += tier3 * 3.00;
+      remaining -= tier3;
+      if (remaining <= 0) return total;
+
+      // Tier 4: 10000-24999 @ $2.50 (15000 users)
+      let tier4 = Math.min(remaining, 15000);
+      total += tier4 * 2.50;
+      remaining -= tier4;
+      if (remaining <= 0) return total;
+
+      // Tier 5: 25000-49999 @ $2.00 (25000 users)
+      let tier5 = Math.min(remaining, 25000);
+      total += tier5 * 2.00;
+      remaining -= tier5;
+      if (remaining <= 0) return total;
+
+      // Tier 6: 50000+ @ $1.50
+      total += remaining * 1.50;
+      return total;
     }
 
     function getCurrencyMeta() {
@@ -340,13 +375,12 @@
     }
 
     function validateUsers(n) {
-      var valid = Number.isFinite(n) && n >= 1 && n <= 1000000;
-      return { valid, message: valid ? '' : 'Please enter a valid user count (1 or more).' };
+      var valid = Number.isFinite(n) && n >= 250 && n <= 1000000;
+      return { valid, message: valid ? '' : 'Please enter a valid user count (minimum 250).' };
     }
 
     function computeTotals() {
-      STATE.perUserMonthly = getTierPricePerUserMonthly(STATE.users);
-      const monthlyCostUSD = STATE.perUserMonthly * STATE.users;
+      const monthlyCostUSD = calculateMonthlyCost(STATE.users);
       const annualCostUSD = monthlyCostUSD * 12;
       const baseMonthlyUSD = monthlyCostUSD;
       const baseAnnualUSD = annualCostUSD;
@@ -387,26 +421,41 @@
     }
 
     function renderCustomerTable() {
-      const thBase = document.getElementById('thBase');
-      const thTotal = document.getElementById('thTotal');
+      const custPerUserHeader = document.getElementById('custPerUserHeader');
+      const thBaseCust = document.getElementById('thBaseCust');
+      const thTotalCust = document.getElementById('thTotalCust');
       document.getElementById('custUsers').textContent = String(STATE.users);
+      const monthlyCostUSD = calculateMonthlyCost(STATE.users);
+      const avgPerUserMonthly = monthlyCostUSD / STATE.users;
+      document.getElementById('custPerUser').textContent = formatCurrencyFromUSD(avgPerUserMonthly);
       if (STATE.term === 'Monthly') {
-        thBase.textContent = 'Base MRR';
-        thTotal.textContent = 'Total Monthly';
+        custPerUserHeader.textContent = 'Per User / month';
+        thBaseCust.textContent = 'Base MRR';
+        thTotalCust.textContent = 'Total Monthly';
         document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseMonthly);
         document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalMonthly);
       } else {
-        thBase.textContent = 'Base ARR';
-        thTotal.textContent = 'Total Annual';
+        custPerUserHeader.textContent = 'Per User / year';
+        thBaseCust.textContent = 'Base ARR';
+        thTotalCust.textContent = 'Total Annual';
         document.getElementById('custBase').textContent = formatCurrencyFromUSD(STATE.totals.baseAnnual);
         document.getElementById('custTotal').textContent = formatCurrencyFromUSD(STATE.totals.totalAnnual);
       }
     }
 
     function renderPartnerTable() {
+      const partnerPerUserHeader = document.getElementById('partnerPerUserHeader');
       document.getElementById('partnerUsers').textContent = String(STATE.users);
+      const monthlyPartnerPrice = STATE.totals.partnerPrice / (STATE.term === 'Monthly' ? 1 : 12);
+      const avgPartnerPerUserMonthly = monthlyPartnerPrice / STATE.users;
+      document.getElementById('partnerPerUser').textContent = formatCurrencyFromUSD(avgPartnerPerUserMonthly);
       document.getElementById('partnerPrice').textContent = formatCurrencyFromUSD(STATE.totals.partnerPrice);
       document.getElementById('salesCommission').textContent = formatCurrencyFromUSD(STATE.totals.salesCommission);
+      if (STATE.term === 'Monthly') {
+        partnerPerUserHeader.textContent = 'Per User / month';
+      } else {
+        partnerPerUserHeader.textContent = 'Per User / year';
+      }
     }
 
     function renderForm() {
@@ -458,6 +507,8 @@
       const totalLabel = termIsMonthly ? 'Total Monthly' : 'Total Annual';
       const baseValue = termIsMonthly ? STATE.totals.baseMonthly : STATE.totals.baseAnnual;
       const totalValue = termIsMonthly ? STATE.totals.totalMonthly : STATE.totals.totalAnnual;
+      const monthlyCostUSD = calculateMonthlyCost(STATE.users);
+      const averageMonthlyPerUser = monthlyCostUSD / STATE.users;
 
       const lines = [
         'Recast Pricing Summary',
@@ -466,7 +517,7 @@
         `- Users: ${STATE.users}`,
         `- Term: ${STATE.term}`,
         `- Currency: ${code}`,
-        `- Tiered MSRP (per-user monthly): ${formatCurrencyFromUSD(STATE.perUserMonthly)}`,
+        `- Average MSRP (per-user monthly): ${formatCurrencyFromUSD(averageMonthlyPerUser)}`,
         '',
         'Customer Pricing',
         `- ${baseLabel}: ${formatCurrencyFromUSD(baseValue)}`,
