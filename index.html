@@ -13,7 +13,6 @@
   <style>
     :root{
       --re-navy:#1F289C;
-      --re-orange:#F05928;
       --re-blue-mid:#284CBA;
       --re-blue-bright:#0475FF;
       --re-blue-light:#679CE8;
@@ -50,8 +49,8 @@
     @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
     .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center}
     .cat-title{font-size:.7rem;letter-spacing:.08em}
-    .re-primary{background:var(--re-orange)!important;color:#fff!important;border:0;border-radius:var(--radius)}
-    .re-primary:hover{background:#D64F22!important}
+    .re-primary{background:var(--re-blue-bright)!important;color:#fff!important;border:0;border-radius:var(--radius)}
+    .re-primary:hover{background:#0360D9!important}
     .re-primary:focus-visible{outline:2px solid rgba(255,255,255,0.5);outline-offset:2px}
     .re-secondary{background:transparent!important;color:#fff!important;border:2px solid #fff!important;border-radius:var(--radius)}
     .re-secondary:hover{color:var(--re-blue-light)!important;border-color:var(--re-blue-light)!important}
@@ -77,37 +76,37 @@
       editBuffers: { change: '', now: '', recast: '' },
       currentStateTexts: {
         change: [
-          'Apps have become the new supply chain bottleneck. Business initiatives stall when applications aren’t packaged, patched, and ready.',
-          'Scale has outgrown people. Thousands of apps and constant updates can’t be managed manually anymore.',
-          'Innovation depends on delivery. Cloud, AI, and security investments fail if apps lag behind.'
+          'Teams spend more time troubleshooting compatibility and packaging than deploying.',
+          'Application readiness is now the biggest reason pilots and rollouts miss timelines.',
+          'Security teams must patch faster while delivery remains manual and fragmented.'
         ],
         now: [
-          'App updates went from yearly to daily. IT must keep up or risk falling behind instantly.',
-          'IT is asked to do ten times more with fewer people. Every hour wasted on manual app management blocks everything else from moving forward.',
-          'Security stakes are higher. Outdated apps are the fastest-growing attack surface.'
+          'The platform is ready — but the applications aren’t.',
+          'Simplifying app delivery can cut pilot timelines by 50–70%.',
+          'As orgs move from SCCM to Intune, complexity is in app readiness — not infra.'
         ],
         recast: [
-          'One platform, Complete control. Package, patch, and deliver 7,000+ apps from one workspace.',
-          'Scale without strain. Automates what people can’t keep up with manually.',
-          'Apps stop blocking innovation. By removing friction, Recast clears the path for cloud, security, and AI projects to move faster, safer, with less risk.'
+          'Control layer that eliminates application friction.',
+          'End-to-end lifecycle: package → deploy → update → retire.',
+          'One platform, complete control. Package, patch, and deliver 7,500+ curated enterprise apps from one workspace.'
         ]
       },
       defaultsCurrentState() {
         return JSON.parse(JSON.stringify({
           change: [
-            'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
-            'Too many apps, too many updates. Thousands of apps, constant versions — IT can’t keep up, slowing adoption and raising risk.',
-            'Innovation waits on apps. Every transformation — cloud, security, AI — gets delayed if app delivery isn’t solved first.'
+            'Teams spend more time troubleshooting compatibility and packaging than deploying.',
+            'Application readiness is now the biggest reason pilots and rollouts miss timelines.',
+            'Security teams must patch faster while delivery remains manual and fragmented.'
           ],
           now: [
-            'Faster change cycles. OS updates, AI tools, and SaaS shifts are constant — apps must keep pace.',
-            'Rising risk. Zero-days and compliance rules make delayed patching unacceptable',
-            'Shrinking teams. IT capacity isn’t growing, but demands are. Fix app management first, or nothing else moves.'
+            'The platform is ready — but the applications aren’t.',
+            'Simplifying app delivery can cut pilot timelines by 50–70%.',
+            'As orgs move from SCCM to Intune, complexity is in app readiness — not infra.'
           ],
           recast: [
-            'One platform for every app. Package, patch, and deliver from a single place across all devices and management tools.',
-            'Proven scale. 7,000+ curated apps, automated updates, and instant delivery slash manual effort.',
-            'Fuel for innovation. By removing app friction, Recast lets enterprises adopt new tech faster, safer, and with less risk.'
+            'Control layer that eliminates application friction.',
+            'End-to-end lifecycle: package → deploy → update → retire.',
+            'One platform, complete control. Package, patch, and deliver 7,500+ curated enterprise apps from one workspace.'
           ]
         }));
       }
