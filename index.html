@@ -202,7 +202,7 @@
               <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:var(--re-blue-bright)">Re</span><span style="color:var(--re-white)">cast</span> Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] opacity-90">
                 ${STATE.activeTab==='problems'
-                  ? '“Managing applications shouldn’t be harder than using them — AI-powered, end-to-end application management is where IT is headed.”  — Forrester”
+                  ? '“Managing applications shouldn’t be harder than using them — AI-powered, end-to-end application management is where IT is headed.”  — Forrester'
                   : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
               </p>
             </div>
@@ -318,9 +318,14 @@
                 </button>
               </div>
               <div class="p-8 bg-[rgba(255,255,255,0.04)]">
-                <ul class="list-disc pl-8 space-y-4 text-lg leading-relaxed text-white/90 marker:text-[var(--re-blue-light)]">
-                  ${bullets.map(b=>`<li class="pl-2">${b}</li>`).join('')}
-                </ul>
+                <div class="space-y-4">
+                  ${bullets.map(b=>`
+                    <div class="flex items-start gap-3">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-[var(--re-blue-light)] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-lg leading-relaxed text-white/90">${b}</p>
+                    </div>
+                  `).join('')}
+                </div>
                 ${cta?`
                   <div class="mt-8 flex justify-center">
                     <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg transition-shadow">
@@ -425,7 +430,7 @@
           <div class="p-4">
             <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Critical app updates</div>
-              <label class="mt-2 flex items-center gap-2 text-xs">
+              <label class="mt-2 flexitems-center gap-2 text-xs">
                 <span class="opacity-80">Hours/package</span>
                 <input class="w-16 rounded bg-black/30 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
                 <span>→</span>
