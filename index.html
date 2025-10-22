@@ -65,6 +65,10 @@
       @media (prefers-reduced-motion: reduce) {
         .accordion-content { transition: none !important; }
       }
+      .modal-overlay { transition: opacity 300ms ease; }
+      .modal-content { transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease; }
+      .modal-open .modal-content { transform: scale(1); opacity: 1; }
+      .modal-closed .modal-content { transform: scale(0.95); opacity: 0; }
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -81,6 +85,7 @@
         showLabels: false,
         showSolutionCards: true,
         openWhy: null,
+        openWhyModal: null,
         openCards: { core: false, onboarding: false, trust: false },
         visitedCards: [],
         openBuckets: { one: false, zero: false, per: false },
@@ -132,16 +137,16 @@
         {
           id: 'core',
           icon: 'layers',
-          title: 'Unified App Delivery (Cross-Platform)',
-          summary: 'Package once, deploy everywhere across endpoints.',
-          outcome: 'Deploy apps in minutes across SCCM/Intune.',
+          title: 'How Recast Does It.',
           bullets: [
-            '7,500+ pre-tested enterprise apps',
-            '>60% fewer manual steps',
-            'Unified dashboard for visibility'
+            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
+            '7,500+ pre-tested enterprise apps ready to deploy instantly.',
+            'Automated patching and validation keep apps secure and compliant.',
+            'Unified dashboard for visibility and governance across all environments.',
+            'Policy-driven automation reduces manual work by over 60%.',
+            'End users get the right app instantly — no tickets, no delays.'
           ],
-          miniCta: 'See 90-sec demo',
-          closer: 'Configured once → Delivered everywhere.',
+          closer: 'Configured once — Delivered everywhere.',
           timeline: false,
           bgHeader: 'bg-[var(--re-navy)]',
           bgContent: 'bg-[rgba(255,255,255,0.1)]'
@@ -149,15 +154,14 @@
         {
           id: 'onboarding',
           icon: 'clock',
-          title: 'Rapid Onboarding (4-6 Weeks)',
-          summary: 'Guided setup with minimal resources.',
-          outcome: 'From kickoff to production quickly.',
+          title: 'Onboard & Up to Speed Fast.',
           bullets: [
-            'No new infrastructure required',
-            'Dedicated success manager',
-            'Includes training and certification'
+            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
+            'No new infrastructure — integrates with your existing management tools.',
+            'Guided setup with dedicated Customer Success Manager.',
+            'Typical resource: 1–2 IT engineers part-time.',
+            'Enablement includes training, certification, and success planning.'
           ],
-          miniCta: 'View rollout guide',
           closer: 'From first call to production in weeks, not months.',
           timeline: true,
           bgHeader: 'bg-[var(--re-blue-mid)]',
@@ -166,15 +170,14 @@
         {
           id: 'trust',
           icon: 'shield-check',
-          title: 'Enterprise-Grade Trust (60M+ Endpoints)',
-          summary: 'Proven for regulated industries.',
-          outcome: 'Secure management at global scale.',
+          title: 'Trusted by Customers',
           bullets: [
-            'SOC 2, ISO 27001 compliant',
-            'Trusted by gov, finance, healthcare',
-            'Scalable from pilot to enterprise'
+            'Secures and manages 60M+ endpoints across 130+ countries.',
+            '70k+ Customers & Trusted by organizations including: Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Texas A&M, and the Government of Canada.',
+            'Built for regulated industries — finance, healthcare, education, and public sector.',
+            'Proven scalability from small pilots to global deployments.',
+            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
           ],
-          miniCta: 'Read case studies',
           closer: 'Trusted by organizations that can’t afford downtime.',
           timeline: false,
           bgHeader: 'bg-[var(--re-blue-bright)]',
@@ -223,6 +226,7 @@
             <section class="mt-5">${renderActivePanel()}</section>
           </main>
           ${renderModal()}
+          ${renderWhyModal()}
         `;
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
         attachEvents();
@@ -265,25 +269,21 @@
               `).join('')}
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
-              ${calloutDropdown('change','alert-triangle','Why Change',STATE.currentStateTexts.change, 'bg-[rgba(255,255,255,0.06)]')}
-              ${calloutDropdown('now','clock-4','Why Now',STATE.currentStateTexts.now, 'bg-[rgba(255,255,255,0.06)]')}
-              ${calloutDropdown('recast','sparkles','Why Recast',STATE.currentStateTexts.recast, 'bg-[rgba(255,255,255,0.06)]', true)}
+              ${calloutDropdown('change','alert-triangle','Why Change','bg-[rgba(255,255,255,0.06)]')}
+              ${calloutDropdown('now','clock-4','Why Now','bg-[rgba(255,255,255,0.06)]')}
+              ${calloutDropdown('recast','sparkles','Why Recast','bg-[rgba(255,255,255,0.06)]', true)}
             </div>
           </section>
         `;
       }
-      function calloutDropdown(id, icon, label, bullets, headerTone, cta=false){
-        const expanded = STATE.openWhy === id;
-        const contentId = `why-content-${id}`;
+      function calloutDropdown(id, icon, label, headerTone, cta=false){
         return `
           <div class="h-full flex flex-col">
             <button
               type="button"
               class="w-full overflow-hidden ring-1 ring-white/20 focus-ring transition hover:ring-white/30 shadow-sm"
-              data-action="toggle-why"
+              data-action="open-why-modal"
               data-why="${id}"
-              aria-expanded="${expanded}"
-              aria-controls="${contentId}"
               style="border-radius:var(--radius)"
             >
               <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
@@ -291,22 +291,46 @@
                   <i data-lucide="${icon}" class="w-5 h-5 text-white/95" aria-hidden="true"></i>
                   <span class="text-[22px] font-semibold tracking-normal text-white">${label}</span>
                 </div>
-                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-white/90 transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-white/90 transition-transform duration-150" aria-hidden="true"></i>
               </div>
-              <div id="${contentId}" class="bg-white text-slate-900 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease;padding:${expanded?'24px 20px':'0 20px'}">
-                <ul class="list-disc pl-6 text-[18px] leading-[1.45] space-y-3 text-slate-800 text-left">
-                  ${bullets.map(b=>`<li>${b}</li>`).join('')}
+            </button>
+          </div>
+        `;
+      }
+      function renderWhyModal(){
+        if(!STATE.openWhyModal) return '';
+        const id = STATE.openWhyModal;
+        const iconMap = { change: 'alert-triangle', now: 'clock-4', recast: 'sparkles' };
+        const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
+        const bullets = STATE.currentStateTexts[id];
+        const headerTone = 'bg-[rgba(255,255,255,0.06)]';
+        const cta = id === 'recast';
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-3xl mx-4 bg-[var(--re-navy)] rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 90vh; overflow-y: auto;">
+              <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-white/95" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-white">${labelMap[id]}</h2>
+                </div>
+                <button type="button" class="text-white/90 hover:text-white focus-ring p-2" data-action="close-why-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+              </div>
+              <div class="p-8 bg-[rgba(255,255,255,0.04)]">
+                <ul class="list-disc pl-8 space-y-4 text-lg leading-relaxed text-white/90 marker:text-[var(--re-blue-light)]">
+                  ${bullets.map(b=>`<li class="pl-2">${b}</li>`).join('')}
                 </ul>
                 ${cta?`
-                  <div class="mt-6 flex justify-end">
-                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-[14px] font-semibold px-4 py-2 items-center gap-2 focus-ring">
-                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                  <div class="mt-8 flex justify-center">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg transition-shadow">
+                      <i data-lucide="arrow-right" class="w-5 h-5"></i>
                       How Recast solves it
                     </button>
                   </div>
                 `:''}
               </div>
-            </button>
+            </div>
           </div>
         `;
       }
@@ -335,16 +359,13 @@
                     <i data-lucide="chevron-down" class="w-5 h-5 text-white/90 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
                   </div>
                 </div>
-                <p class="mt-1 text-sm opacity-80 text-left">${card.summary}</p>
               </div>
             </button>
             <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[var(--re-blue-bright)]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
-              <p class="font-bold text-base mb-3">${card.outcome}</p>
               <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-white/90 text-left">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
               ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
-              <p class="mt-3"><a href="#" class="text-[var(--re-blue-light)] underline">${card.miniCta}</a></p>
               <p class="mt-4 italic text-[16px] opacity-90">${card.closer}</p>
             </div>
           </div>
@@ -466,14 +487,14 @@
               <div class="flex flex-col gap-3 relative">
                 <div class="sticky top-0 z-10 bg-[var(--re-navy)] py-2 shadow-sm">
                   <div class="flex justify-between items-center text-sm">
-                    <span class="font-semibold">How Recast Does It</span>
+                    <span class="font-semibold">Recast Approach</span>
                     <span class="opacity-90">${STATE.visitedCards.length} of 3 explored</span>
                   </div>
                 </div>
                 <button type="button" class="md:hidden re-secondary py-2 text-sm" data-action="expand-all">Expand All</button>
                 ${NEW_CARDS.map(card => popoutCard(card)).join('')}
                 <div class="sticky bottom-0 bg-[var(--re-navy)] py-3 shadow-lg mt-3">
-                  <button type="button" class="re-primary w-full py-2 font-semibold">Onboard Now</button>
+                  <button type="button" class="re-primary px-4 py-2 text-sm font-semibold" data-action="advance" data-next="roi">See Business Impact</button>
                 </div>
               </div>
             </div>
@@ -719,7 +740,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
             <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
             <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.15)"/>
-            <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
           </svg>`;
       }
       function multiLogo(name,colors){
@@ -855,11 +876,16 @@
         }));
         root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
           STATE.activeTab=e.currentTarget.getAttribute('data-next');
+          STATE.openWhyModal = null;
           render();
         }));
-        root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
+        root.querySelectorAll('[data-action="open-why-modal"]').forEach(b=>b.addEventListener('click',e=>{
           const id=e.currentTarget.getAttribute('data-why');
-          STATE.openWhy = (STATE.openWhy === id) ? null : id;
+          STATE.openWhyModal = id;
+          render();
+        }));
+        root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.openWhyModal = null;
           render();
         }));
         root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1080,7 +1106,11 @@
         }
       });
       document.addEventListener('keydown',(e)=>{
-        if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; render(); }
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){ 
+          STATE.modalOpen=false; 
+          STATE.openWhyModal=null; 
+          render(); 
+        }
       });
     </script>
   </body>
