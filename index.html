@@ -82,6 +82,8 @@
         visitedCards: [],
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
+        solutionModalOpen: false,
+        editCardId: null,
         editBuffers: { change: '', now: '', recast: '' },
         currentStateTexts: {
           change: [
@@ -127,7 +129,7 @@
         { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
         { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
       ];
-      const NEW_CARDS = [
+      const DEFAULT_SOLUTION_CARDS = [
         {
           id: 'core',
           icon: 'layers',
@@ -178,6 +180,20 @@
           bgContent: 'bg-slate-50'
         }
       ];
+      const USER_ID = String(window.APP_USER_ID || "guest");
+      const PAGE_SCOPE = location.origin + location.pathname + location.search;
+      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
+      const STORAGE_KEY_SOLUTION = `solutionCards:${USER_ID}:${PAGE_SCOPE}`;
+      STATE.solutionCards = loadSolutionDraft() || DEFAULT_SOLUTION_CARDS;
+      function loadSolutionDraft() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY_SOLUTION);
+          return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+      }
+      function saveSolutionDraft(cards) {
+        try { localStorage.setItem(STORAGE_KEY_SOLUTION, JSON.stringify(cards)); } catch {}
+      }
       const onboardingMiniTimelineEnabled = true;
       function cx(...a){ return a.filter(Boolean).join(' '); }
       function round(n){ return Math.round(n*100)/100; }
@@ -221,6 +237,7 @@
           </main>
           ${renderModal()}
           ${renderWhyModal()}
+          ${renderSolutionModal()}
         `;
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
         attachEvents();
@@ -354,6 +371,9 @@
                     <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">${card.title}</span>
                   </div>
                   <div class="flex items-center gap-2">
+                    <button data-action="edit-card" data-card="${card.id}" class="text-[#4A5568] hover:text-[#0070F3] focus-ring p-1" aria-label="Edit ${card.title}">
+                      <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
                     <span class="text-sm text-[#4A5568]">${expanded ? 'Collapse' : 'Expand'}</span>
                     <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
                   </div>
@@ -481,7 +501,7 @@
       function renderSolution(){
         return `
           <section id="panel-solution" class="space-y-3">
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <div class="grid grid-cols-1 gap-3">
               ${renderFlow()}
               <div class="flex flex-col gap-3 relative">
                 <div class="sticky top-0 z-10 bg-[#F7F9FB] py-2 shadow-sm">
@@ -491,7 +511,7 @@
                   </div>
                 </div>
                 <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
-                ${NEW_CARDS.map(card => popoutCard(card)).join('')}
+                ${STATE.solutionCards.map(card => popoutCard(card)).join('')}
                 <div class="sticky bottom-0 bg-[#F7F9FB] py-3 shadow-lg mt-3">
                   <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
                 </div>
@@ -757,9 +777,6 @@
       }
       function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
       /* ---------- Per-user cached Current State (IDs + storage) ---------- */
-      const USER_ID = String(window.APP_USER_ID || "guest");
-      const PAGE_SCOPE = location.origin + location.pathname + location.search;
-      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
       let DEFAULT_CURRENT_STATE = null;
       const $ = (sel, ctx = document) => ctx.querySelector(sel);
       const fields = {
@@ -865,6 +882,55 @@
             <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
           </label>
         `;
+      }
+      function renderSolutionModal() {
+        if (!STATE.solutionModalOpen || !STATE.editCardId) return '';
+        const card = STATE.solutionCards.find(c => c.id === STATE.editCardId);
+        if (!card) return '';
+        return `
+          <div role="dialog" aria-modal="true" aria-labelledby="solution-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
+            <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6">
+              <div class="flex items-center justify-between">
+                <h2 id="solution-editor-title" class="text-xl font-semibold tracking-normal">Edit Card</h2>
+                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-solution-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-[#4A5568]">Edit the title, bullets (one per line, max 6), and closer.</p>
+              <div class="mt-4 space-y-3">
+                <label class="flex flex-col gap-2">
+                  <span class="text-sm font-semibold">Title</span>
+                  <input id="editTitle" class="rounded-[2px] border border-slate-200 bg-white p-3 text-sm focus-ring" value="${card.title}">
+                </label>
+                <label class="flex flex-col gap-2">
+                  <span class="text-sm font-semibold">Bullets</span>
+                  <textarea id="editBullets" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" placeholder="One bullet per line (max 6)">${card.bullets.join('\n')}</textarea>
+                </label>
+                <label class="flex flex-col gap-2">
+                  <span class="text-sm font-semibold">Closer</span>
+                  <input id="editCloser" class="rounded-[2px] border border-slate-200 bg-white p-3 text-sm focus-ring" value="${card.closer}">
+                </label>
+                ${card.id === 'onboarding' ? `
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" id="editTimeline" ${card.timeline ? 'checked' : ''}>
+                    <span class="text-sm">Show timeline</span>
+                  </label>
+                ` : ''}
+              </div>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <button type="button" data-action="save-solution-card" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
+                  <i data-lucide="save" class="w-4 h-4"></i> Save
+                </button>
+                <button type="button" data-action="reset-solution-card" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
+                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      function parseLines(s, max = 6) {
+        return (s || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, max);
       }
       function attachEvents(){
         const root=document.getElementById('app');
@@ -1077,6 +1143,11 @@
         if(action==='close-modal'){
           STATE.modalOpen=false; render();
         }
+        if(action==='close-solution-modal'){
+          STATE.solutionModalOpen = false;
+          STATE.editCardId = null;
+          render();
+        }
         if(action==='edit-buffer'){
           const key = act.getAttribute('data-key');
           act.addEventListener('input', (evt)=>{ STATE.editBuffers[key] = evt.target.value; });
@@ -1103,11 +1174,44 @@
           captureDefaultsOnce();
           writeFields(DEFAULT_CURRENT_STATE);
         }
+        if (action === 'edit-card') {
+          STATE.editCardId = act.getAttribute('data-card');
+          STATE.solutionModalOpen = true;
+          render();
+        }
+        if (action === 'save-solution-card') {
+          const idx = STATE.solutionCards.findIndex(c => c.id === STATE.editCardId);
+          if (idx > -1) {
+            const card = STATE.solutionCards[idx];
+            const title = $('#editTitle')?.value.trim() || card.title;
+            const bullets = parseLines($('#editBullets')?.value, 6);
+            const closer = $('#editCloser')?.value.trim() || card.closer;
+            const timeline = $('#editTimeline')?.checked ?? card.timeline;
+            STATE.solutionCards[idx] = { ...card, title, bullets: bullets.length ? bullets : card.bullets, closer, timeline };
+            saveSolutionDraft(STATE.solutionCards);
+          }
+          STATE.solutionModalOpen = false;
+          STATE.editCardId = null;
+          render();
+        }
+        if (action === 'reset-solution-card') {
+          const idx = STATE.solutionCards.findIndex(c => c.id === STATE.editCardId);
+          const defaultIdx = DEFAULT_SOLUTION_CARDS.findIndex(c => c.id === STATE.editCardId);
+          if (idx > -1 && defaultIdx > -1) {
+            STATE.solutionCards[idx] = { ...DEFAULT_SOLUTION_CARDS[defaultIdx] };
+            saveSolutionDraft(STATE.solutionCards);
+          }
+          STATE.solutionModalOpen = false;
+          STATE.editCardId = null;
+          render();
+        }
       });
       document.addEventListener('keydown',(e)=>{
-        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal || STATE.solutionModalOpen)){
           STATE.modalOpen=false;
           STATE.openWhyModal=null;
+          STATE.solutionModalOpen = false;
+          STATE.editCardId = null;
           render();
         }
       });
