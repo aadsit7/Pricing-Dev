@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="light dark">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -89,36 +89,33 @@
     };
     const DEFAULT_WHY_SECTIONS = {
       change: {
-        subtitle: 'Freedom from Vendor Lock-In',
-        intro: 'The old model is broken — and customers know it.\nCitrix and other legacy workspace vendors are exploiting dependency, not delivering innovation.',
+        subtitle: 'The problem isn’t hardware anymore — it’s application drag.',
+        intro: '',
         bullets: [
-          'Escaping lock-in: Citrix is raising renewals 30%+ simply because they assume customers are trapped. Microsoft’s cloud workspace breaks that dependency with an open, identity-driven model that scales — not squeezes.',
-          'Modernize to Microsoft’s cloud workspace: Unify desktop automation (Nerdio) and app lifecycle (Recast) so migrations are predictable, not painful.',
-          'Standardize delivery: One catalog, one process, all users, all devices.',
-          'Operate lean: Fewer images, fewer manual approvals, measurable Azure efficiency.'
+          'Networks are fast, endpoints are reliable, but IT teams are buried keeping thousands of apps updated and secure with the same headcount.',
+          'That friction blocks every big initiative — whether it’s moving from Citrix to AVD, SCCM to Intune, or piloting new hardware.',
+          'It’s not that teams can’t modernize — they’re just stuck maintaining what already exists.'
         ],
-        conclusion: 'The change isn’t just about technology — it’s about regaining control from platforms that have stopped earning their keep.'
+        conclusion: ''
       },
       now: {
-        subtitle: 'Don’t Let Legacy Vendors Tax Your Future',
-        intro: 'The longer you wait, the more you’ll pay — in both dollars and flexibility.',
+        subtitle: 'The math has stopped working.',
+        intro: '',
         bullets: [
-          'Renewal shock is real: Citrix and others are inflating renewals precisely because they believe customers are too entangled to leave.',
-          'Budget and risk windows are tight: Manual operations and outdated contracts can’t keep up.',
-          'Security and compliance won’t wait: Integrated patch cadence and governed access must be built-in, not bolted on.',
-          'Microsoft momentum: Capitalize on license and infrastructure consolidation now while cloud incentives are high and funding is available.'
+          'Workloads have doubled, but teams haven’t.',
+          'Renewals are rising, security risks grow with every delayed update, and users expect everything to “just work” from anywhere.',
+          'Every month you wait makes modernization harder — but in six weeks, you can prove there’s a faster, safer way forward.'
         ],
-        conclusion: 'Every renewal you delay is another year paying a “legacy tax.” Every modernization step you take now compounds future savings.'
+        conclusion: ''
       },
       better: {
-        subtitle: 'Microsoft + Nerdio + Recast',
-        intro: 'You’re not just replacing Citrix; you’re upgrading to a modern, automated model.',
+        subtitle: 'Nerdio + Recast remove the three blockers to change — cost, risk, and time.',
+        intro: '',
         bullets: [
-          'Complete the Microsoft workspace: Nerdio optimizes Azure/AVD; Recast governs applications and access in one flow.',
-          'Accelerate time-to-AVD: Pre-curated apps, staged deployment, and self-service slash migration lead time and ticket load.',
-          'Run with confidence: Integrated patching and SSO keep apps compliant and users productive post-cutover.'
+          'Nerdio automates Azure Virtual Desktop and Intune — fast, scalable desktop orchestration.',
+          'Recast automates application installs, updates, and access — across AVD, ConfigMgr, and Intune.'
         ],
-        conclusion: 'Together, Microsoft, Nerdio, and Recast make modern workspace management fast, flexible, and future-proof — without the legacy tax.'
+        conclusion: 'Together, they deliver one workspace for every app and every user, no matter the platform.\n\nIT moves from months of packaging and patching to minutes.\n\nEnd users never notice the shift — everything just works.\n\nModernization without the chaos.'
       }
     };
     const STATE = {
@@ -160,7 +157,7 @@
           <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
             <h1 class="text-3xl sm:text-4xl font-bold">Nerdio + Recast — Better Together</h1>
             <p class="mt-2 max-w-3xl text-secondary-text">
-              Nerdio orchestrates Cloud PCs/AVD/Intune. Recast controls the apps. Together we deliver one governed, identity-driven workspace—desktops and applications provisioned, patched, and ready in a single flow.
+              According to Gartner’s Magic Quadrant 2025, over the past three years Microsoft’s leadership position has accelerated while legacy and niche VDI vendors have steadily declined in both vision and execution
             </p>
             <nav class="mt-5 flex w-full flex-wrap gap-2 rounded-full bg-bg-card p-1 border border-border shadow-sm" role="tablist" aria-label="Primary">
               ${tabBtn('current','Current State','alert-circle')}
@@ -173,7 +170,7 @@
               </div>` : ''}
               ${STATE.tab==='current' ? `
               <div class="ml-auto flex items-center gap-2">
-                <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="open-modal" data-id="edit-why">Edit Why Sections</button>
+                <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="open-modal" data-id="edit-why">+</button>
               </div>` : ''}
             </nav>
             ${STATE.tab==='approach' ? `
@@ -199,6 +196,7 @@
       if (STATE.tab==='approach'){ buildNerdio(); buildRecast(); }
       const modalContent = document.querySelector('[data-modal-content]');
       if (modalContent) setTimeout(() => modalContent.classList.add('scale-100', 'opacity-100'), 0);
+      if (STATE.tab==='outcomes') animateKPIs();
     }
     function tabBtn(id,label,icon){
       const active=STATE.tab===id;
@@ -244,7 +242,7 @@
         <h4 class="text-base font-semibold mt-2">${sec.subtitle}</h4>
         <p class="mt-2 text-sm text-secondary-text">${sec.intro.replace(/\n/g, '<br>')}</p>
         <ul class="mt-2 list-disc pl-5 text-sm text-secondary-text">${sec.bullets.map(li => `<li>${li}</li>`).join('')}</ul>
-        <p class="mt-2 text-sm text-secondary-text">${sec.conclusion}</p>
+        <p class="mt-2 text-sm text-secondary-text">${sec.conclusion.replace(/\n/g, '<br>')}</p>
       `;
     }
     function accordion(id, title, icon, body) {
@@ -280,9 +278,6 @@
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             ${renderNerdio()}
             ${renderRecast()}
-          </div>
-          <div class="bg-bg-card rounded-2xl border border-border shadow-md p-4 text-sm text-secondary-text">
-            <span class="font-medium text-primary-text">Put Simply</span> — Nerdio makes the right Cloud PC or AVD session appear—right-sized and policy-compliant. Recast puts the right apps on it and keeps them patched. The user signs in once and it’s all there.
           </div>
         </section>
       `;
@@ -323,7 +318,7 @@
                 <div class="mt-2 grid grid-cols-10 gap-1.5" id="policyDots"></div>
               </div>
               <div class="rounded-xl border border-border p-3">
-                <div class="flex items-center gap-2 text-sm font-medium"><i data-lucide="chart-no-axes-combined" class="w-4 h-4 text-accent" aria-hidden="true"></i>Insights</div>
+                <div class="flex items-center gap-2 text-sm"><i data-lucide="chart-no-axes-combined" class="w-4 h-4 text-accent" aria-hidden="true"></i><span>Insights</div>
                 <div class="mt-2 h-2 rounded-full overflow-hidden bg-gray-100"><div class="bar h-full bg-gradient-to-r from-recast-from via-recast-via to-recast-to scale-x-0 origin-left" style="--d:0.9s"></div></div>
               </div>
               <div class="rounded-xl border border-border p-3">
@@ -414,45 +409,95 @@
       return `
         <section id="panel-outcomes" class="space-y-4" aria-label="ROI & Outcomes">
           <div class="bg-bg-card rounded-2xl border border-border shadow-md p-4">
-            <h2 class="text-xl font-semibold">ROI — Nerdio + Recast (Better Together)</h2>
+            <div class="-mx-4 -mt-4 h-1 rounded-t-2xl bg-gradient-to-r from-accent/30 via-accent to-accent/30"></div>
+            <h2 class="mt-3 text-2xl md:text-3xl font-extrabold text-primary-text">ROI — Nerdio + Recast (Better Together)</h2>
             <p class="mt-1 text-secondary-text">From desktop orchestration to application governance — one flow, measurable return.</p>
             <div aria-live="polite" class="mt-4">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="col-span-1 md:col-span-3">
-                  <div class="text-5xl font-bold text-accent">${Math.round(calc.netROI)}%</div>
-                  <p class="text-sm text-secondary-text">Net ROI</p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="col-span-1 md:col-span-3 text-center">
+                  <div class="inline-flex items-baseline gap-2">
+                    <div class="text-6xl md:text-7xl font-extrabold text-accent tracking-tight leading-none" data-kpi data-delay="0">${Math.round(calc.netROI)}%</div>
+                    <button type="button" class="align-middle text-secondary-text" aria-label="What is Net ROI?" title="(Total savings - subscription) ÷ subscription">
+                      <i data-lucide="info" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                  <p class="mt-1 text-sm text-secondary-text">Net ROI</p>
                 </div>
-                <div>
-                  <div class="text-3xl font-semibold">${fmtCurrencyShort(calc.totalAnnualSavings)}</div>
+                <div class="text-right" data-kpi data-delay="100">
+                  <div class="flex items-center justify-end gap-2">
+                    <div class="text-4xl font-bold text-accent">${fmtCurrencyShort(calc.totalAnnualSavings)}</div>
+                    <button type="button" class="text-secondary-text" aria-label="Total annual savings info" title="Labor + Azure autoscale savings">
+                      <i data-lucide="info" class="w-4 h-4"></i>
+                    </button>
+                  </div>
                   <p class="text-sm text-secondary-text">Total Annual Savings</p>
                 </div>
-                <div>
-                  <div class="text-3xl font-semibold">${isFinite(calc.paybackMonths) ? `~${calc.paybackMonths.toFixed(1)}` : 'N/A'}</div>
+                <div class="text-right" data-kpi data-delay="200">
+                  <div class="flex items-center justify-end gap-2">
+                    <div class="text-4xl font-bold text-accent">${isFinite(calc.paybackMonths) ? `~${calc.paybackMonths.toFixed(1)}` : 'N/A'}</div>
+                    <button type="button" class="text-secondary-text" aria-label="Payback months info" title="Months to recoup subscription via savings">
+                      <i data-lucide="info" class="w-4 h-4"></i>
+                    </button>
+                  </div>
                   <p class="text-sm text-secondary-text">Payback (months)</p>
                 </div>
               </div>
-              <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <article class="bg-bg-card rounded-xl border border-border p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-accent" aria-hidden="true"></i><h3 class="font-semibold">Productivity</h3></div>
-                  <div class="mt-2 text-2xl font-bold">${fmtNumberShort(calc.totalHoursSavedAnnual)} hrs / yr</div>
-                  <p class="text-sm text-secondary-text">(≈ ${Math.round(calc.equivalentFTEs)} FTEs)</p>
-                </article>
-                <article class="bg-bg-card rounded-xl border border-border p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="trending-down" class="w-5 h-5 text-accent" aria-hidden="true"></i><h3 class="font-semibold">Cost Efficiency</h3></div>
-                  <div class="mt-2 text-2xl font-bold">${fmtCurrencyShort(calc.azureSavingsAnnual)}</div>
-                  <p class="text-sm text-secondary-text">Azure savings / yr</p>
-                </article>
-                <article class="bg-bg-card rounded-xl border border-border p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5 text-accent" aria-hidden="true"></i><h3 class="font-semibold">Compliance Readiness</h3></div>
-                  <div class="mt-2 text-2xl font-bold">&gt;95%</div>
-                  <p class="text-sm text-secondary-text flex items-center gap-1">patch compliance maintained <i data-lucide="help-circle" class="w-4 h-4 text-secondary-text" title="Driven by integrated release & patch orchestration + SSO governance." aria-hidden="true"></i></p>
-                </article>
+
+              <div class="mt-6 pt-6 border-t border-border">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                  <article class="bg-bg-card rounded-xl border border-border p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <i data-lucide="users" class="w-5 h-5 text-accent" aria-hidden="true"></i>
+                        <h3 class="font-semibold">Productivity</h3>
+                      </div>
+                      <button type="button" class="text-secondary-text" aria-label="Productivity info" title="Packaging + admin + end-user time saved">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                      </button>
+                    </div>
+                    <div class="mt-2 text-right">
+                      <div class="text-2xl md:text-3xl font-bold text-accent">${fmtNumberShort(calc.totalHoursSavedAnnual)} hrs / yr</div>
+                      <p class="text-sm text-secondary-text">(≈ ${Math.round(calc.equivalentFTEs)} FTEs)</p>
+                    </div>
+                  </article>
+                  <article class="bg-bg-card rounded-xl border border-border p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <i data-lucide="trending-down" class="w-5 h-5 text-accent" aria-hidden="true"></i>
+                        <h3 class="font-semibold">Cost Efficiency</h3>
+                      </div>
+                      <button type="button" class="text-secondary-text" aria-label="Cost efficiency info" title="Azure autoscale & right-sizing savings">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                      </button>
+                    </div>
+                    <div class="mt-2 text-right">
+                      <div class="text-2xl md:text-3xl font-bold text-accent">${fmtCurrencyShort(calc.azureSavingsAnnual)}</div>
+                      <p class="text-sm text-secondary-text">Azure savings / yr</p>
+                    </div>
+                  </article>
+                  <article class="bg-bg-card rounded-xl border border-border p-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-accent" aria-hidden="true"></i>
+                        <h3 class="font-semibold">Compliance Readiness</h3>
+                      </div>
+                      <button type="button" class="text-secondary-text" aria-label="Compliance readiness info" title="Integrated release & patch orchestration + SSO governance">
+                        <i data-lucide="info" class="w-4 h-4"></i>
+                      </button>
+                    </div>
+                    <div class="mt-2 text-right">
+                      <div class="text-2xl md:text-3xl font-bold text-accent">&gt;95%</div>
+                      <p class="text-sm text-secondary-text">patch compliance maintained</p>
+                    </div>
+                  </article>
+                </div>
               </div>
             </div>
-            <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <section aria-label="Required Inputs">
+
+            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <section aria-label="Required Inputs" class="rounded-xl border border-border p-4 bg-white">
                 <h3 class="font-semibold flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-accent" aria-hidden="true"></i>Required Assumptions</h3>
-                <div class="mt-3 grid grid-cols-1 gap-3">
+                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                   ${numberInput('Users', 'users', STATE.inputs.users, 100, 200000, 100, 'Total AVD users in scope')}
                   ${numberInput('Unique applications', 'apps', STATE.inputs.apps, 20, 5000, 10, 'Apps that need packaging/governance')}
                   ${moneyInput('Avg loaded cost / hour', 'costPerHour', STATE.inputs.costPerHour, 30, 200, 1, 'Fully burdened IT cost (USD)')}
@@ -460,12 +505,13 @@
                   ${moneyInput('Combined subscription / year', 'subscriptionAnnual', STATE.inputs.subscriptionAnnual, 100000, 2000000, 10000, 'Nerdio + Recast combined (editable)')}
                 </div>
               </section>
-              <section aria-label="Advanced Assumptions">
+
+              <section aria-label="Advanced Assumptions" class="rounded-xl border border-border p-4 bg-gray-50">
                 <button type="button" class="w-full flex items-center justify-between rounded-lg border border-border bg-bg-card px-4 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="toggle-advanced">
                   Advanced Assumptions
                   <i data-lucide="${STATE.advancedOpen ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4" aria-hidden="true"></i>
                 </button>
-                <div class="${STATE.advancedOpen ? 'block' : 'hidden'} mt-3 grid grid-cols-1 gap-3">
+                <div class="${STATE.advancedOpen ? 'block' : 'hidden'} mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                   ${numberInput('Packaging hours avoided per app', 'hoursPerAppSaved', STATE.inputs.hoursPerAppSaved, 2, 12, 0.5, 'Time saved using curated catalog + automation')}
                   ${numberInput('Admin hours saved / 100 users / month', 'adminHoursPer100PerMonth', STATE.inputs.adminHoursPer100PerMonth, 10, 80, 1, 'Automation across imaging, policy, approvals')}
                   ${numberInput('End-user minutes saved / user / month', 'endUserMinsPerUserPerMonth', STATE.inputs.endUserMinsPerUserPerMonth, 0, 15, 1, 'Faster access + self-service')}
@@ -478,11 +524,15 @@
                 </div>
               </section>
             </div>
-            <div class="mt-6 rounded-lg border border-border bg-gray-50 p-4">
-              <h3 class="font-semibold text-sm">Methodology</h3>
-              <p class="mt-2 text-sm text-secondary-text">Calculations based on industry benchmarks for automation impact. Labor savings from packaging, admin, and end-user productivity. Azure savings via autoscale and optimization. Complete the Microsoft workspace — Nerdio orchestrates desktops; Recast governs applications and access. Contact us for customized analysis.</p>
-              <button type="button" class="mt-3 rounded-full border border-border bg-bg-card px-4 py-2 text-sm" data-action="reset-benchmarks">Reset to Benchmarks</button>
+
+            <div class="mt-6 rounded-lg border border-border bg-gray-50">
+              <details class="p-4">
+                <summary class="cursor-pointer font-semibold text-sm select-none">Methodology</summary>
+                <p class="mt-2 text-sm text-secondary-text">Calculations based on industry benchmarks for automation impact. Labor savings from packaging, admin, and end-user productivity. Azure savings via autoscale and optimization. Complete the Microsoft workspace — Nerdio orchestrates desktops; Recast governs applications and access. Contact us for customized analysis.</p>
+                <button type="button" class="mt-3 rounded-full border border-border bg-bg-card px-4 py-2 text-sm" data-action="reset-benchmarks">Reset to Benchmarks</button>
+              </details>
             </div>
+
             <button type="button" class="mt-4 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2" data-action="copy">
               <i data-lucide="clipboard" class="w-4 h-4" aria-hidden="true"></i>${STATE.copied ? 'Copied!' : 'Copy Summary'}
             </button>
@@ -791,7 +841,7 @@ Assumptions: ${fmtNumberShort(i.users)} users, ${i.apps} apps, $${i.costPerHour}
     function renderEditWhyModal() {
       return `
         <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50" data-action="close-modal-bg">
-          <div class="bg-bg-card rounded-2xl shadow-xl p-6 max-w-xl w-full mx-4 scale-95 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]" data-modal-content>
+          <div class="bg-bg-card rounded-2xl shadow-xl p-6 max-w-5xl w-full h-[90vh] overflow-auto mx-4 scale-95 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]" data-modal-content>
             <div class="flex justify-between items-start">
               <h2 class="text-lg font-bold">Edit Why Sections</h2>
               <button type="button" class="text-secondary-text hover:text-primary-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="close-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -941,14 +991,6 @@ Assumptions: ${fmtNumberShort(i.users)} users, ${i.apps} apps, $${i.costPerHour}
       const header = e.currentTarget;
       const content = header.nextElementSibling;
       const isOpen = header.getAttribute('aria-expanded') === 'true';
-      document.querySelectorAll('.accordion-header').forEach(h => {
-        if (h !== header) {
-          h.setAttribute('aria-expanded', 'false');
-          h.nextElementSibling.style.maxHeight = '0px';
-          h.querySelector('.chevron').classList.remove('rotate-180');
-          h.parentElement.classList.remove('border-l-4', 'border-accent');
-        }
-      });
       header.setAttribute('aria-expanded', `${!isOpen}`);
       const chevron = header.querySelector('.chevron');
       if (isOpen) {
@@ -1045,6 +1087,21 @@ Assumptions: ${fmtNumberShort(i.users)} users, ${i.apps} apps, $${i.costPerHour}
       if(success) success.classList.add('hidden');
       buildNerdio();
       buildRecast();
+    }
+    function animateKPIs(){
+      const items = document.querySelectorAll('[data-kpi]');
+      items.forEach(el => {
+        el.classList.add('opacity-0','translate-y-1','transition','duration-500','ease-out');
+      });
+      requestAnimationFrame(() => {
+        items.forEach(el => {
+          const d = Number(el.getAttribute('data-delay')) || 0;
+          setTimeout(() => {
+            el.classList.remove('opacity-0','translate-y-1');
+            el.classList.add('opacity-100','translate-y-0');
+          }, d);
+        });
+      });
     }
     document.addEventListener('DOMContentLoaded', () => { loadState(); render(); });
   </script>
