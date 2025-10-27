@@ -43,7 +43,9 @@
       .logo-ring:hover{box-shadow:0 0 8px rgba(0,112,243,0.5)}
       .logo-wrap{display:flex;align-items:center;gap:.4rem;position:relative}
       .logo-name{font-size:.7rem;color:#4A5568;white-space:nowrap;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
+      .show-labels .logo-wrap{flex-direction:column;align-items:flex-start;gap:0.2rem}
       .show-labels .logo-name{opacity:1;transform:translateX(0)}
+      .show-labels .logo-wrap .logo-ring{width:1.8rem;height:1.8rem}
       .run .logo-ring{animation:appLiftPulse 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
       @keyframes appLiftPulse{0%{transform:translateY(0) scale(1);filter:saturate(.4);opacity:.65}30%{transform:translateY(-4px) scale(1.05)}60%{transform:translateY(-2px) scale(1.02);filter:saturate(1);opacity:1}100%{transform:translateY(0) scale(1)}}
       .user-beam{height:.38rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
@@ -76,10 +78,13 @@
       @keyframes fadeIn{to{opacity:1}}
       .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:10}
       .show-labels .overlay-tag{opacity:1;transition-delay:0.5s}
-      .meta-label{font-size:0.6rem;color:#4A5568;background:#F7F9FB;border:1px solid var(--border-subtle);border-radius:4px;padding:0.1rem 0.3rem;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:absolute;top:100%;left:0;z-index:5;white-space:nowrap}
-      .show-labels .meta-label{opacity:1;transform:translateY(0)}
+      .meta-label{font-size:0.6rem;color:#4A5568;background:#F7F9FB;border:1px solid var(--border-subtle);border-radius:4px;padding:0.1rem 0.3rem;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap}
+      .show-labels .meta-label{opacity:1;transform:translateY(0);display:flex;flex-wrap:wrap;gap:0.2rem;width:100%;justify-content:flex-start}
       .show-labels .logo-wrap:hover .meta-label{background:var(--re-white);box-shadow:0 2px 4px rgba(0,0,0,0.1)}
       .logo-wrap .meta-label span{margin-right:0.3rem}
+      .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
+      .show-labels #flowCard .flex-wrap{gap:1rem}
+      .show-labels .logo-wrap{width:calc(25% - 0.75rem);margin-bottom:0.5rem}
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -1063,7 +1068,7 @@
             const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.2).toFixed(2)+'s');
             const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
             wrap.appendChild(ring);
-            if(STATE.showLabels){ 
+            if(STATE.showLabels){
               const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label);
               const meta=document.createElement('div'); meta.className='meta-label flex flex-wrap gap-1 mt-1';
               meta.innerHTML = `<span>Ring: Pilot</span><span>Policy: MFA required</span><span>Region: EMEA</span>`;
