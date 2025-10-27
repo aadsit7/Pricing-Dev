@@ -12,23 +12,22 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root{
-        --re-navy:#F7F9FC;
-        --re-blue-mid:#0F172A;
-        --re-blue-bright:#0B63E5;
-        --re-blue-hover:#0A4EBF;
-        --re-green:#0E9F6E;
-        --re-gray:#E6E8EF;
+        --re-navy:#F7F9FB;
+        --re-blue-mid:#0A1C60;
+        --re-blue-bright:#0070F3;
+        --re-blue-hover:#005AD0;
+        --re-green:#10B981;
+        --re-gray:#E2E8F0;
         --re-white:#FFFFFF;
-        --re-muted:#667085;
-        --radius:16px;
-        --border-subtle:#E6E8EF;
+        --radius:12px;
+        --border-subtle:#E2E8F0;
       }
       html,body{
         background:var(--re-navy);
         color:var(--re-blue-mid);
         font-family:Inter,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       }
-      .focus-ring:focus-visible{outline:2px solid var(--re-blue-bright);outline-offset:2px}
+      .focus-ring:focus-visible{outline:2px solid rgba(0,0,0,0.3);outline-offset:2px}
       .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#FFFFFF;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)}
       .sub-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#F7F9FB}
       .tile{width:.45rem;height:.45rem;border-radius:0;background:#E2E8F0;opacity:.9}
@@ -43,7 +42,7 @@
       .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:all 0.2s ease}
       .logo-ring:hover{box-shadow:0 0 8px rgba(0,112,243,0.5)}
       .logo-wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-      .logo-name{font-size:.7rem;color:var(--re-muted);opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
+      .logo-name{font-size:.7rem;color:#4A5568;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
       .show-labels .logo-wrap{flex-direction:column;align-items:flex-start;gap:0.2rem}
       .show-labels .logo-name{opacity:1;transform:translateX(0);white-space:normal;text-align:left}
       .show-labels .logo-wrap .logo-ring{width:1.8rem;height:1.8rem}
@@ -84,19 +83,6 @@
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
       .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
-      .rc-check{width:28px;height:28px;stroke:var(--re-blue-bright);stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round;display:inline-block}
-      .accordion-header:hover{background:rgba(11,99,229,0.06)}
-      .accordion-content{transition:max-height 200ms ease-out,opacity 200ms ease-out;padding:0 20px;background:var(--re-navy)}
-      .accordion-content.expanded{padding:24px 20px}
-      .expanded{box-shadow:var(--rc-shadow)}
-      @keyframes bar-fill{from{width:0%}to{width:100%}}
-      .progress-bar-fill{animation:bar-fill 900ms ease-out forwards}
-      @keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-      .stagger-item{opacity:0;animation:appear 300ms ease-out forwards;animation-delay:calc(120ms * var(--idx))}
-      .logo-placeholder{filter:grayscale(100%);transition:filter 150ms ease}
-      .logo-placeholder:hover{filter:grayscale(0%)}
-      .metric-badge{background:var(--re-blue-bright);color:white;border-radius:9999px;padding:4px 12px;font-size:14px;font-weight:600;position:absolute;top:16px;right:16px}
-      .step-bg{background:rgba(14,159,110,0.08)}
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -116,7 +102,6 @@
         openWhyModal: null,
         openCards: { core: false, onboarding: false, trust: false },
         visitedCards: [],
-        animatedCards: { core: false, onboarding: false, trust: false },
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
@@ -194,51 +179,50 @@
           id: 'core',
           icon: 'layers',
           title: 'How Recast Does It.',
-          tiles: [
-            {icon: 'layout-grid', headline: 'One workspace for every app.', desc: 'Package, validate, deploy, retire across Intune, ConfigMgr, Citrix, Omnissa, Azure.'},
-            {icon: 'package-check', headline: '8,000+ pre-tested apps.', desc: 'Ready to deploy instantly.'},
-            {icon: 'shield-check', headline: 'Automated patching and validation.', desc: 'Keeps apps secure and compliant.'},
-            {icon: 'layout-dashboard', headline: 'Unified governance.', desc: 'One dashboard for visibility across environments.'},
-            {icon: 'settings', headline: 'Policy-driven automation.', desc: 'Reduces manual work by 60%+.'},
-            {icon: 'user-check', headline: 'End-user ready.', desc: 'Right app, right surface — no tickets, no delays.'}
+          items: [
+            { icon: 'layout-grid', title: 'One workspace for every app.', desc: 'Package, validate, deploy, retire across Intune, ConfigMgr, Citrix, Omnissa, Azure.' },
+            { icon: 'package-check', title: '8,000+ pre-tested apps.', desc: 'Ready to deploy instantly.' },
+            { icon: 'shield-check', title: 'Automated patching and validation.', desc: 'Keeps apps secure and compliant.' },
+            { icon: 'layout-dashboard', title: 'Unified governance.', desc: 'One dashboard for visibility across environments.' },
+            { icon: 'zap', title: 'Policy-driven automation.', desc: 'Reduces manual work by 60%+.' },
+            { icon: 'user-check', title: 'End-user ready.', desc: 'Right app, right surface — no tickets, no delays.' }
           ],
-          steps: ['Package', 'Validate', 'Deploy', 'Govern'],
-          stepIcons: ['package', 'check-square', 'send', 'scale'],
-          metric: 92,
           closer: 'Configured once — Delivered everywhere.',
           timeline: false,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#F7F9FB]',
+          bgContent: 'bg-[#F7F9FB]'
         },
         {
           id: 'onboarding',
           icon: 'clock',
-          steps: [
-            {title: 'Connect', desc: 'Link Microsoft tenant and existing tools.'},
-            {title: 'Configure', desc: 'Map rings, policies, and scopes.'},
-            {title: 'Automate', desc: 'Enable packaging and validation workflows.'},
-            {title: 'Scale', desc: 'Roll out to business units and regions.'}
+          title: 'Onboard & Up to Speed Fast.',
+          items: [
+            { icon: 'calendar-check', title: 'Standard rollout in 4–6 weeks', desc: '(Kickoff — Implementation — UAT — Launch — Enablement).' },
+            { icon: 'server-off', title: 'No new infrastructure', desc: '— integrates with your existing management tools.' },
+            { icon: 'user-cog', title: 'Guided setup', desc: 'with dedicated Customer Success Manager.' },
+            { icon: 'users', title: 'Typical resource:', desc: '1–2 IT engineers part-time.' },
+            { icon: 'graduation-cap', title: 'Enablement includes', desc: 'training, certification, and success planning.' }
           ],
-          stats: ['Avg time to deploy: <30 days', 'No retraining', 'No new tools'],
           closer: 'From first call to production in weeks, not months.',
           timeline: true,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#F7F9FB]',
+          bgContent: 'bg-[#F7F9FB]'
         },
         {
           id: 'trust',
           icon: 'shield-check',
-          metrics: [
-            {number: 1000, label: 'enterprises automated'},
-            {number: 8000, label: 'apps pre-tested'},
-            {number: 60, label: 'manual work reduction', suffix: '%'}
+          title: 'Trusted by Customers',
+          items: [
+            { icon: 'globe', title: '60M+ endpoints', desc: 'across 130+ countries.' },
+            { icon: 'users-round', title: '70k+ Customers', desc: '& Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.' },
+            { icon: 'star', title: '87 CSAT Score', desc: '| Most trusted in the industry' },
+            { icon: 'trending-up', title: 'Proven scalability', desc: 'from small pilots to global deployments.' },
+            { icon: 'lock', title: 'Backed by enterprise-grade support', desc: 'and compliance alignment (SOC 2, ISO 27001).' }
           ],
-          testimonial: {quote: 'Recast helped us migrate 30,000 endpoints twice as fast — with fewer tickets.', attr: 'Global 500 Manufacturing'},
-          logos: ['Citibank', 'McKinsey & Company', 'U.S. Air Force', 'FEMA'],
           closer: 'Trusted by organizations that can’t afford downtime.',
           timeline: false,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#F7F9FB]',
+          bgContent: 'bg-[#F7F9FB]'
         }
       ];
       const onboardingMiniTimelineEnabled = true;
@@ -256,17 +240,17 @@
         root.innerHTML = `
           <header class="relative">
             <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:var(--re-blue-bright)">Re</span><span style="color:var(--re-blue-mid)">cast</span> Software</h1>
-              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[var(--re-muted)]">
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
+              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
-                  ? 'Gartner forecasts that by 2026, enterprises will face a pivotal shift in how applications are managed and experienced. Those that fail to simplify and modernize will fall behind in the next wave of digital work.'
+                  ? 'Gartner forecasts that by the end of 2026, enterprises will face a pivotal shift in how applications are managed and experienced. Those that fail to modernize will fall behind in the next wave of digital work.'
                   : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
               </p>
             </div>
             <div class="relative mx-auto max-w-6xl px-4">
               <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200">
                 ${TABS.map(t=>`
-                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-[var(--re-blue-bright)] text-white hover:bg-[var(--re-blue-hover)] rounded' : 'text-[var(--re-blue-mid)] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
                     <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
                   </button>
                 `).join('')}
@@ -290,15 +274,14 @@
         if (STATE.activeTab === 'solution') { buildFlow(); }
         if (STATE.activeTab === 'roi') { updateROIOutputs(); }
         if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
-        if (STATE.activeTab === 'solution') { animateMetrics(); }
       }
       function chip(label,value,tone){
         const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
         return `
           <div class="section-card p-3">
-            <div class="text-[11px] text-[var(--re-muted)]">${label}</div>
+            <div class="text-[11px] text-[#4A5568]">${label}</div>
             <div class="mt-1 inline-flex items-center gap-2 rounded-[2px] bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
-              <svg class="rc-check" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg><span class="text-sm font-semibold tabular-nums">${value}</span>
+              <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
             </div>
           </div>
         `;
@@ -321,8 +304,8 @@
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               ${items.map(p=>`
                 <article class="section-card p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-[var(--re-blue-bright)]"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
-                  <p class="mt-1 text-sm text-[var(--re-muted)]">${p.s}</p>
+                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-[#0070F3]"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
+                  <p class="mt-1 text-sm text-[#4A5568]">${p.s}</p>
                 </article>
               `).join('')}
             </div>
@@ -346,10 +329,10 @@
             >
               <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-[var(--re-blue-mid)]" aria-hidden="true"></i>
-                  <span class="text-[22px] font-semibold tracking-normal text-[var(--re-blue-mid)]">${label}</span>
+                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
+                  <span class="text-[22px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-[var(--re-muted)] transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
           </div>
@@ -368,27 +351,27 @@
             <div class="w-full max-w-3xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 90vh; overflow-y: auto;">
               <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
-                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[var(--re-blue-mid)]" aria-hidden="true"></i>
-                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[var(--re-blue-mid)]">${labelMap[id]}</h2>
+                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${labelMap[id]}</h2>
                 </div>
                 <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-why-modal" aria-label="Close">
                   <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
               </div>
               <div class="p-8 bg-slate-50">
-                <p class="text-lg leading-relaxed text-[var(--re-muted)] mb-4">${data.intro}</p>
+                <p class="text-lg leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
                 <div class="space-y-4">
                   ${data.bullets.map(b=>`
                     <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                      <svg class="rc-check mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg>
-                      <p class="text-lg leading-relaxed text-[var(--re-muted)]">${b}</p>
+                      <i data-lucide="check-circle" class="w-6 h-6 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-lg leading-relaxed text-[#4A5568]">${b}</p>
                     </div>
                   `).join('')}
                 </div>
-                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm text-md italic text-[var(--re-muted)] hover:shadow-md transition-shadow">${data.analyst}</div>
+                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm text-md italic text-[#4A5568] hover:shadow-md transition-shadow">${data.analyst}</div>
                 ${cta?`
                   <div class="mt-8 flex justify-center">
-                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[var(--re-blue-bright)] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[var(--re-blue-hover)] transition-shadow">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
                       <i data-lucide="arrow-right" class="w-5 h-5"></i>
                       How Recast solves it
                     </button>
@@ -402,103 +385,67 @@
       function popoutCard(card){
         const expanded = STATE.openCards[card.id];
         const contentId = `card-content-${card.id}`;
-        const contentClass = expanded ? 'expanded accordion-content' : 'accordion-content';
         return `
-          <div class="flex flex-col w-full border border-[var(--border-subtle)] rounded-2xl overflow-hidden cursor-pointer ${expanded ? 'shadow-[0_8px_24px_rgba(16,24,40,0.08)]' : ''}">
+          <div class="h-full flex flex-col">
             <button
               type="button"
-              class="accordion-header w-full text-left focus-ring transition"
+              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
               data-action="toggle-card"
               data-card="${card.id}"
               aria-expanded="${expanded}"
               aria-controls="${contentId}"
-              style="min-height: 44px;"
+              style="border-radius:var(--radius); min-height: 44px;"
             >
-              <div class="px-4 py-4 flex justify-between items-center bg-white">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${card.icon}" class="w-7 h-7 text-[var(--re-blue-bright)]" aria-hidden="true"></i>
-                  <span class="text-lg font-semibold text-[var(--re-blue-mid)]">${card.title}</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-[var(--re-muted)]">
-                  <span>${expanded ? 'Collapse' : 'Expand'}</span>
-                  <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+              <div class="${card.bgHeader || 'bg-slate-50'} px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="${card.icon}" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
+                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">${card.title}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-[#4A5568]">${expanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+                  </div>
                 </div>
               </div>
             </button>
-            <div id="${contentId}" class="${contentClass}" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};overflow:hidden">
-              ${renderCardContent(card, expanded)}
-              <p class="mt-4 italic text-[16px] text-[var(--re-muted)]">${card.closer}</p>
+            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(.2,.8,.2,1),opacity 300ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${card.items.map(it=>`
+                  <div class="section-card p-4 flex items-start gap-3 hover:shadow-lg transition-shadow duration-300 ease-in-out">
+                    <i data-lucide="${it.icon}" class="w-6 h-6 text-[#0070F3] flex-shrink-0 mt-1"></i>
+                    <div>
+                      <h4 class="text-base font-semibold text-[#0A1C60]">${it.title}</h4>
+                      <p class="mt-1 text-sm text-[#4A5568] leading-relaxed">${it.desc}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
+              <p class="mt-6 italic text-[16px] text-[#4A5568] text-center">${card.closer}</p>
             </div>
           </div>
         `;
       }
-      function renderCardContent(card, expanded){
-        if(card.id === 'core'){
-          return `
-            <div class="relative">
-              <div class="flex justify-between mb-4 relative">
-                ${card.steps.map((step, i) => `
-                  <div class="flex flex-col items-center z-10" style="--idx:${i}">
-                    <i data-lucide="${card.stepIcons[i]}" class="w-5 h-5 text-[var(--re-blue-bright)] stagger-item"></i>
-                    <span class="text-sm text-[var(--re-blue-mid)] stagger-item">${step}</span>
-                  </div>
-                `).join('')}
-                <div class="absolute bottom-2 left-0 w-full h-1 bg-[var(--re-gray)] rounded-full overflow-hidden">
-                  <div class="h-full bg-[var(--re-blue-bright)] w-0 ${expanded && !STATE.animatedCards[card.id] ? 'progress-bar-fill' : 'w-full'}"></div>
-                </div>
+      function renderMiniTimeline(){
+        const phases = [
+          {icon: 'play-circle', label: 'Kickoff'},
+          {icon: 'hammer', label: 'Implementation'},
+          {icon: 'check-circle', label: 'UAT'},
+          {icon: 'flag', label: 'Launch'},
+          {icon: 'book-open', label: 'Enablement'}
+        ];
+        return `
+          <div class="flex items-center justify-between mt-6" aria-hidden="true">
+            ${phases.map((p, i) => `
+              ${i > 0 ? '<div class="flex-1 h-px bg-slate-200 mx-2"></div>' : ''}
+              <div class="flex flex-col items-center">
+                <i data-lucide="${p.icon}" class="w-5 h-5 text-[#0070F3]"></i>
+                <span class="text-xs mt-1 text-[#4A5568]">${p.label}</span>
               </div>
-              <div class="metric-badge" aria-live="polite"><span id="metric-core" class="tabular-nums">0</span>%</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${card.tiles.map(tile => `
-                <div class="section-card p-3 stagger-item" style="--idx:${card.tiles.indexOf(tile)}">
-                  <div class="flex items-center gap-2 mb-1">
-                    <i data-lucide="${tile.icon}" class="w-5 h-5 text-[var(--re-blue-bright)]"></i>
-                    <span class="font-semibold text-[var(--re-blue-mid)]">${tile.headline}</span>
-                  </div>
-                  <p class="text-sm text-[var(--re-muted)]">${tile.desc}</p>
-                </div>
-              `).join('')}
-            </div>
-          `;
-        } else if(card.id === 'onboarding'){
-          return `
-            <ul class="space-y-4 mb-4">
-              ${card.steps.map((step, i) => `
-                <li class="flex items-start gap-3 p-3 rounded-lg step-bg stagger-item" style="--idx:${i}">
-                  <svg class="rc-check flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg>
-                  <div>
-                    <span class="font-semibold text-[var(--re-blue-mid)]">${step.title}</span>
-                    <p class="text-sm text-[var(--re-muted)]">${step.desc}</p>
-                  </div>
-                </li>
-              `).join('')}
-            </ul>
-            <div class="flex flex-wrap gap-4 text-sm text-[var(--re-muted)] stagger-item" style="--idx:4">
-              ${card.stats.map(stat => `<span>${stat}</span>`).join(' • ')}
-            </div>
-          `;
-        } else if(card.id === 'trust'){
-          return `
-            <div class="grid grid-cols-3 gap-4 mb-4">
-              ${card.metrics.map((metric, i) => `
-                <div class="text-center stagger-item" style="--idx:${i}" aria-live="polite">
-                  <div class="text-2xl font-bold text-[var(--re-blue-bright)] tabular-nums"><span id="metric-${card.id}-${i}">0</span>${metric.suffix || '+'}</div>
-                  <p class="text-sm text-[var(--re-muted)]">${metric.label}</p>
-                </div>
-              `).join('')}
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              ${card.logos.map(logo => `
-                <div class="bg-gray-200 text-[var(--re-muted)] p-4 rounded-lg text-center logo-placeholder stagger-item" style="--idx:${card.logos.indexOf(logo) + 3}">${logo}</div>
-              `).join('')}
-            </div>
-            <div class="italic text-[var(--re-muted)] p-4 bg-white rounded-lg shadow-sm stagger-item" style="--idx:7">
-              “${card.testimonial.quote}” — ${card.testimonial.attr}
-            </div>
-          `;
-        }
-        return '';
+            `).join('')}
+          </div>
+        `;
       }
       function bucketAccordion(id, icon, label, contentFunc, headerTone='bg-slate-50'){
         const expanded = STATE.openBuckets[id];
@@ -516,13 +463,13 @@
             >
               <div class="flex items-center justify-between px-5 py-4 ${headerTone}" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-[var(--re-blue-mid)]" aria-hidden="true"></i>
-                  <span class="text-[18px] font-semibold tracking-normal text-[var(--re-blue-mid)]">${label}</span>
+                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
+                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
                 </div>
-                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-[var(--re-muted)] transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
+                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
               </div>
             </button>
-            <div id="${contentId}" class="accordion-content overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 200ms ease-out,opacity 200ms ease-out">
+            <div id="${contentId}" class="accordion-content overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(.2,.8,.2,1),opacity 300ms ease">
               ${expanded ? contentFunc() : ''}
             </div>
           </div>
@@ -535,7 +482,7 @@
             <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Critical app updates</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-[var(--re-muted)]">Hours/package</span>
+                <span class="text-[#4A5568]">Hours/package</span>
                 <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
                 <span>→</span>
                 <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
@@ -546,7 +493,7 @@
                 <span class="rounded px-2 py-1 bg-slate-100">🖥️ On-Prem</span>
                 <span class="rounded px-2 py-1 bg-slate-100">🔀 Hybrid</span>
               </div>
-              <button type="button" class="mt-2 bg-[var(--re-blue-bright)] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[var(--re-blue-hover)]" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
             </div>
           </div>
         `;
@@ -558,11 +505,11 @@
             <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-[var(--re-muted)]">Current hrs</span>
+                <span class="text-[#4A5568]">Current hrs</span>
                 <input class="w-20 rounded bg-slate-100 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
               </label>
               <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
-              <button type="button" class="mt-2 bg-[var(--re-blue-bright)] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[var(--re-blue-hover)]" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
             </div>
           </div>
         `;
@@ -584,30 +531,26 @@
               ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
               ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
             </div>
-            <div class="mt-3"><button type="button" class="bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-3 py-1 text-xs w-full rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+            <div class="mt-3"><button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-3 py-1 text-xs w-full rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
           </div>
         `;
       }
       function renderSolution(){
-        const progressPct = STATE.visitedCards.length / 3 * 100;
         return `
           <section id="panel-solution" class="space-y-3">
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
               ${renderFlow()}
-              <div class="flex flex-col gap-3 relative w-full max-w-[620px] mx-auto">
-                <div class="sticky top-0 z-10 bg-[var(--re-navy)] py-2 shadow-sm">
+              <div class="flex flex-col gap-3 relative">
+                <div class="sticky top-0 z-10 bg-[#F7F9FB] py-2 shadow-sm">
                   <div class="flex justify-between items-center text-sm">
-                    <span class="font-semibold text-[var(--re-blue-mid)]">Recast Approach</span>
-                    <span class="text-[var(--re-muted)]">${STATE.visitedCards.length} of 3 explored</span>
-                  </div>
-                  <div class="w-full h-0.5 bg-[var(--re-gray)] mt-1">
-                    <div class="h-full bg-[var(--re-blue-bright)]" style="width:${progressPct}%"></div>
+                    <span class="font-semibold">Recast Approach</span>
+                    <span class="text-[#4A5568]">${STATE.visitedCards.length} of 3 explored</span>
                   </div>
                 </div>
-                <button type="button" class="md:hidden bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] py-2 text-sm rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]" data-action="expand-all">Expand All</button>
+                <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
                 ${NEW_CARDS.map(card => popoutCard(card)).join('')}
-                <div class="sticky bottom-0 bg-[var(--re-navy)] py-3 shadow-lg mt-3">
-                  <button type="button" class="bg-[var(--re-blue-bright)] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[var(--re-blue-hover)]" data-action="advance" data-next="roi">See Business Impact</button>
+                <div class="sticky bottom-0 bg-[#F7F9FB] py-3 shadow-lg mt-3">
+                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
                 </div>
               </div>
             </div>
@@ -615,23 +558,23 @@
         `;
       }
       function pill(label,active,action,value){
-        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[var(--re-blue-bright)] text-white border-transparent hover:bg-[var(--re-blue-hover)]':'bg-transparent text-[var(--re-blue-mid)] border-slate-200 hover:border-[var(--re-blue-bright)]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
       }
       function renderFlow(){
         return `
           <div class="section-card p-4">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[var(--re-blue-mid)]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
                 <div>
                   <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-[12px] text-[var(--re-muted)]">Curated & secured catalog</div>
+                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
                 </div>
               </div>
               <div class="flex items-center gap-2 text-[12px]">
-                <button type="button" class="bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-2.5 py-1 rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-[var(--re-blue-bright)] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[var(--re-blue-hover)]">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-2.5 py-1.5 rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]">Reset</button>
+                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
               </div>
             </div>
             <div class="mt-2 flex gap-2 text-xs">
@@ -645,20 +588,20 @@
               <div class="space-y-2 relative">
                 ${CATALOG.map(s=>`
                   <div class="cat-row">
-                    <div class="cat-title uppercase text-[var(--re-muted)]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
+                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
                     <div id="${s.id}" class="flex flex-wrap gap-2"></div>
                   </div>
                 `).join('')}
-                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[var(--re-muted)]">Every app mapped to stage, policy, region, and device.</div>
+                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
               </div>
-              <div id="flowHubFlash" class="mt-2 hidden text-[var(--re-blue-bright)]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
+              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[var(--re-muted)]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
                     <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,var(--re-blue-bright),var(--re-blue-hover));--d:${3 + .5*i}s"></div>
-                    <svg class="check-appear absolute top-1 right-1 rc-check" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="--d:${4 + .5*i}s"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg>
+                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
                   </div>
                 `).join('')}
                 <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
@@ -666,9 +609,9 @@
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[var(--re-muted)]">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
                     <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,var(--re-blue-mid),var(--re-blue-bright));--d:${5 + .5*i}s"></div>
+                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
                     <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
                   </div>
                 `).join('')}
@@ -677,10 +620,10 @@
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="sub-card p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[var(--re-muted)]"></i>
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
                     <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-[var(--re-muted)]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <svg class="check-appear absolute top-1 right-1 rc-check" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="--d:${8 + .5*i}s"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
                   </div>
                 `).join('')}
                 <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
@@ -690,21 +633,21 @@
                   <div class="flex items-center gap-3">
                     <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
                     <div class="text-sm">
-                      <div class="font-medium text-[var(--re-blue-mid)]">End user</div>
-                      <div id="endUserMessage" class="text-[var(--re-muted)]">Apps on demand — no waiting, no tickets.</div>
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
                     </div>
                   </div>
-                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,var(--re-blue-bright),var(--re-blue-hover));--d:10s"></div>
+                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
                   <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
-                    <i data-lucide="laptop" class="h-5 w-5 text-[var(--re-muted)]"></i>
+                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
                     <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
-                    <div class="mt-1 text-[11px] text-[var(--re-muted)]">Workspace launches the correct app instantly</div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
                   </div>
                   <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
                     ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
                   </div>
                 </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:var(--re-green)"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
               </div>
             </div>
           </div>
@@ -737,14 +680,14 @@
                   ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
                 </div>
                 <div class="mt-4">
-                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]">
+                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
                     <i data-lucide="edit-3" class="w-4 h-4"></i> Current State
                   </button>
                 </div>
                 <div class="mt-6 space-y-3">
-                  ${bucketAccordion('one', 'wand-sparkles', 'One package → Deploy anywhere (cloud / on-prem / hybrid)', onePackageContent)}
+                  ${bucketAccordion('one', 'wand-sparkles', 'Packaging Hours', onePackageContent)}
                   ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patches in Hours', zeroDayContent)}
-                  ${bucketAccordion('per', 'mouse-pointer', 'Smart icons → Always the right app (Windows / Mac / VPN / VDI)', perUserContent)}
+                  ${bucketAccordion('per', 'mouse-pointer', 'User Minutes Saved', perUserContent)}
                 </div>
               </div>
               <div class="section-card p-4">
@@ -758,8 +701,8 @@
                   ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
-                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]">Reset</button>
-                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[var(--re-blue-bright)] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[var(--re-blue-hover)]">
+                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
                     <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
                   </button>
                 </div>
@@ -810,20 +753,20 @@
           <div class="section-card p-3">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-[11px] text-[var(--re-muted)]">${label}</div>
+                <div class="text-[11px] text-[#4A5568]">${label}</div>
                 <div id="${id}" class="text-xl font-semibold tabular-nums">${value}</div>
               </div>
-              <i data-lucide="${icon}" class="w-5 h-5 text-[var(--re-blue-bright)]"></i>
+              <i data-lucide="${icon}" class="w-5 h-5 text-[#0070F3]"></i>
             </div>
-            ${hint ? `<div class="mt-1 text-[11px] text-[var(--re-muted)]">${hint}</div>` : ''}
+            ${hint ? `<div class="mt-1 text-[11px] text-[#4A5568]">${hint}</div>` : ''}
           </div>
         `;
       }
       function kvId(label,value,id){
-        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[var(--re-muted)]">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
+        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
       }
       function numInput(label,key,value){
-        return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[var(--re-muted)]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+        return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[#4A5568]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
       }
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
@@ -888,7 +831,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
             <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
             <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(0,0,0,.15)"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="var(--re-blue-mid)">${letter}</text>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
           </svg>`;
       }
       function multiLogo(name,colors){
@@ -1003,21 +946,21 @@
             <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
               <div class="flex items-center justify-between">
                 <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
-                <button type="button" class="bg-transparent text-[var(--re-blue-mid)] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
+                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
               </div>
-              <p class="mt-1 text-sm text-[var(--re-muted)]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
+              <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
               <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                 ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
                 ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
                 ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
-                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[var(--re-blue-bright)] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[var(--re-blue-hover)]">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
                   <i data-lucide="save" class="w-4 h-4"></i> Save
                 </button>
-                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[var(--re-blue-mid)] border-2 border-[var(--re-blue-mid)] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[var(--re-blue-bright)] hover:border-[var(--re-blue-bright)]">
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
                   <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
                 </button>
               </div>
@@ -1030,18 +973,18 @@
           <div class="flex flex-col gap-4">
             <span class="text-sm font-semibold">${label}</span>
             <label class="flex flex-col gap-1">
-              <span class="text-xs text-[var(--re-muted)]">Introduction</span>
+              <span class="text-xs text-[#4A5568]">Introduction</span>
               <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
             </label>
             <label class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 text-xs text-[var(--re-muted)]">
-                <svg class="rc-check w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor"/><path d="M8 12l2 2 4-4" stroke="currentColor"/></svg>
+              <div class="flex items-center gap-2 text-xs text-[#4A5568]">
+                <i data-lucide="check-circle" class="w-4 h-4 text-[#0070F3]"></i>
                 Bullets (one per line, max 4)
               </div>
               <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
             </label>
             <label class="flex flex-col gap-1">
-              <span class="text-xs text-[var(--re-muted)]">Analyst Trend</span>
+              <span class="text-xs text-[#4A5568]">Analyst Trend</span>
               <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
             </label>
           </div>
@@ -1075,7 +1018,6 @@
           STATE.openCards[id] = !wasOpen;
           if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) {
             STATE.visitedCards.push(id);
-            STATE.animatedCards[id] = false;
           }
           render();
           if (STATE.openCards[id]) {
@@ -1087,7 +1029,6 @@
         root.querySelectorAll('[data-action="expand-all"]').forEach(b=>b.addEventListener('click',()=>{
           Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
           STATE.visitedCards = ['core', 'onboarding', 'trust'];
-          Object.keys(STATE.animatedCards).forEach(k => STATE.animatedCards[k] = false);
           render();
         }));
         root.querySelectorAll('[data-action="toggle-bucket"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1293,34 +1234,6 @@
           }
         });
       }
-      function countUp(el, start, end, duration, suffix = '') {
-        let startTime = null;
-        function step(timestamp) {
-          if (!startTime) startTime = timestamp;
-          const progress = Math.min((timestamp - startTime) / duration, 1);
-          el.textContent = Math.floor(progress * (end - start) + start) + suffix;
-          if (progress < 1) {
-            requestAnimationFrame(step);
-          }
-        }
-        requestAnimationFrame(step);
-      }
-      function animateMetrics(){
-        NEW_CARDS.forEach(card => {
-          if (STATE.openCards[card.id] && !STATE.animatedCards[card.id]) {
-            if (card.id === 'core') {
-              const metricEl = document.getElementById('metric-core');
-              if (metricEl) countUp(metricEl, 0, card.metric, 800, '%');
-            } else if (card.id === 'trust') {
-              card.metrics.forEach((metric, i) => {
-                const metricEl = document.getElementById(`metric-${card.id}-${i}`);
-                if (metricEl) countUp(metricEl, 0, metric.number, 800, metric.suffix || '+');
-              });
-            }
-            STATE.animatedCards[card.id] = true;
-          }
-        });
-      }
       document.addEventListener('DOMContentLoaded', render);
       document.addEventListener('click', (e)=>{
         const act = e.target.closest('[data-action]');
@@ -1341,17 +1254,17 @@
           STATE.currentState = {
             change: {
               intro: formData.change.intro.trim() || fallback.change.intro,
-              bullets: parseLines(formData.change.bullets).length ? parseLines(formData.change.bullets) : fallback.change.bullets,
+              bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
               analyst: formData.change.analyst.trim() || fallback.change.analyst
             },
             now: {
               intro: formData.now.intro.trim() || fallback.now.intro,
-              bullets: parseLines(formData.now.bullets).length ? parseLines(formData.now.bullets) : fallback.now.bullets,
+              bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
               analyst: formData.now.analyst.trim() || fallback.now.analyst
             },
             recast: {
               intro: formData.recast.intro.trim() || fallback.recast.intro,
-              bullets: parseLines(formData.recast.bullets).length ? parseLines(formData.recast.bullets) : fallback.recast.bullets,
+              bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
               analyst: formData.recast.analyst.trim() || fallback.recast.analyst
             }
           };
