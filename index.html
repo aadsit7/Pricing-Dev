@@ -42,9 +42,9 @@
       .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:all 0.2s ease}
       .logo-ring:hover{box-shadow:0 0 8px rgba(0,112,243,0.5)}
       .logo-wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-      .logo-name{font-size:.7rem;color:#4A5568;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
+      .logo-name{font-size:.7rem;color:#4A5568;white-space:nowrap;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
       .show-labels .logo-wrap{flex-direction:column;align-items:flex-start;gap:0.2rem}
-      .show-labels .logo-name{opacity:1;transform:translateX(0);white-space:normal;text-align:left}
+      .show-labels .logo-name{opacity:1;transform:translateX(0)}
       .show-labels .logo-wrap .logo-ring{width:1.8rem;height:1.8rem}
       .run .logo-ring{animation:appLiftPulse 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
       @keyframes appLiftPulse{0%{transform:translateY(0) scale(1);filter:saturate(.4);opacity:.65}30%{transform:translateY(-4px) scale(1.05)}60%{transform:translateY(-2px) scale(1.02);filter:saturate(1);opacity:1}100%{transform:translateY(0) scale(1)}}
@@ -81,10 +81,11 @@
       .meta-label{font-size:0.6rem;color:#4A5568;background:#F7F9FB;border:1px solid var(--border-subtle);border-radius:4px;padding:0.1rem 0.3rem;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap}
       .show-labels .meta-label{opacity:1;transform:translateY(0);display:flex;flex-wrap:wrap;gap:0.2rem;width:100%;justify-content:flex-start}
       .show-labels .logo-wrap:hover .meta-label{background:var(--re-white);box-shadow:0 2px 4px rgba(0,0,0,0.1)}
-      .logo-wrap .meta-label span{margin-right:0}
+      .logo-wrap .meta-label span{margin-right:0.3rem}
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
       .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
+      .show-labels .logo-name{white-space:normal;text-align:left;max-width:100%}
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -750,47 +751,47 @@
       }
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
-          logo('Microsoft Word','W','#185ABD'),
-          logo('Microsoft Excel','X','#107C41'),
-          logo('PowerPoint','P','#D24726'),
-          logo('Outlook','O','#106EBE'),
-          logo('Microsoft Teams','T','#5B53D6'),
-          logo('Google Docs','Dc','#1A73E8'),
-          logo('Google Sheets','Sh','#1E8E3E'),
-          logo('Google Slides','Sl','#F9AB00')
+          {name: 'Microsoft Word', svg: mark('W','#185ABD'), stage: 'Prod', policy: 'MFA + VPN', region: 'AMER', device: 'Windows'},
+          {name: 'Microsoft Excel', svg: mark('X','#107C41'), stage: 'QA', policy: 'Compliant only', region: 'APAC', device: 'Any'},
+          {name: 'PowerPoint', svg: mark('P','#D24726'), stage: 'Dev', policy: 'MFA required', region: 'EMEA', device: 'Mac'},
+          {name: 'Outlook', svg: mark('O','#106EBE'), stage: 'Prod', policy: 'VPN only', region: 'Global', device: 'Windows'},
+          {name: 'Microsoft Teams', svg: mark('T','#5B53D6'), stage: 'QA', policy: 'MFA + Compliant', region: 'AMER', device: 'Any'},
+          {name: 'Google Docs', svg: mark('Dc','#1A73E8'), stage: 'Dev', policy: 'MFA required', region: 'APAC', device: 'Mac'},
+          {name: 'Google Sheets', svg: mark('Sh','#1E8E3E'), stage: 'Prod', policy: 'Compliant only', region: 'EMEA', device: 'Windows'},
+          {name: 'Google Slides', svg: mark('Sl','#F9AB00'), stage: 'QA', policy: 'VPN only', region: 'Global', device: 'Any'}
         ]},
         {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-          multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-          logo('Zoom','Z','#0B5CFF'),
-          logo('Gmail','G','#EA4335'),
-          logo('Google Meet','GM','#0F9D58')
+          {name: 'Slack', svg: multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']), stage: 'Dev', policy: 'MFA + VPN', region: 'AMER', device: 'Mac'},
+          {name: 'Zoom', svg: mark('Z','#0B5CFF'), stage: 'Prod', policy: 'MFA required', region: 'APAC', device: 'Windows'},
+          {name: 'Gmail', svg: mark('G','#EA4335'), stage: 'QA', policy: 'Compliant only', region: 'EMEA', device: 'Any'},
+          {name: 'Google Meet', svg: mark('GM','#0F9D58'), stage: 'Dev', policy: 'VPN only', region: 'Global', device: 'Mac'}
         ]},
         {title:'WEB BROWSERS',id:'cat-browsers',items:[
-          triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-          ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-          flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+          {name: 'Google Chrome', svg: triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'), stage: 'Prod', policy: 'MFA + Compliant', region: 'AMER', device: 'Windows'},
+          {name: 'Microsoft Edge', svg: ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'), stage: 'QA', policy: 'MFA required', region: 'APAC', device: 'Any'},
+          {name: 'Mozilla Firefox', svg: flameLogo('Mozilla Firefox','#FF7139','#FFCC00'), stage: 'Dev', policy: 'VPN only', region: 'EMEA', device: 'Mac'}
         ]},
         {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-          logo('Salesforce','SF','#00A1E0'),
-          logo('Workday','WD','#1F5BFF'),
-          logo('ServiceNow','SN','#81B29A'),
-          logo('SAP','SAP','#0A6ED1'),
-          logo('Oracle NetSuite','NS','#C74634')
+          {name: 'Salesforce', svg: mark('SF','#00A1E0'), stage: 'Prod', policy: 'Compliant only', region: 'Global', device: 'Windows'},
+          {name: 'Workday', svg: mark('WD','#1F5BFF'), stage: 'QA', policy: 'MFA + VPN', region: 'AMER', device: 'Any'},
+          {name: 'ServiceNow', svg: mark('SN','#81B29A'), stage: 'Dev', policy: 'MFA required', region: 'APAC', device: 'Mac'},
+          {name: 'SAP', svg: mark('SAP','#0A6ED1'), stage: 'Prod', policy: 'VPN only', region: 'EMEA', device: 'Windows'},
+          {name: 'Oracle NetSuite', svg: mark('NS','#C74634'), stage: 'QA', policy: 'Compliant only', region: 'Global', device: 'Any'}
         ]},
         {title:'SECURITY & ACCESS',id:'cat-security',items:[
-          logo('Duo','D','#3CB371'),
-          logo('Okta','O','#007DC1'),
-          logo('Ping Identity','P','#C0172C'),
-          logo('Cisco AnyConnect','AC','#00B5AD'),
-          logo('Microsoft Defender','MD','#0067B8'),
-          logo('CrowdStrike Falcon','CS','#D61F26')
+          {name: 'Duo', svg: mark('D','#3CB371'), stage: 'Dev', policy: 'MFA + Compliant', region: 'AMER', device: 'Mac'},
+          {name: 'Okta', svg: mark('O','#007DC1'), stage: 'Prod', policy: 'MFA required', region: 'APAC', device: 'Windows'},
+          {name: 'Ping Identity', svg: mark('P','#C0172C'), stage: 'QA', policy: 'VPN only', region: 'EMEA', device: 'Any'},
+          {name: 'Cisco AnyConnect', svg: mark('AC','#00B5AD'), stage: 'Dev', policy: 'Compliant only', region: 'Global', device: 'Mac'},
+          {name: 'Microsoft Defender', svg: mark('MD','#0067B8'), stage: 'Prod', policy: 'MFA + VPN', region: 'AMER', device: 'Windows'},
+          {name: 'CrowdStrike Falcon', svg: mark('CS','#D61F26'), stage: 'QA', policy: 'MFA required', region: 'APAC', device: 'Any'}
         ]},
         {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
-          logo('Adobe Acrobat','A','#ED2224'),
-          logo('Dropbox','DB','#0061FF'),
-          logo('Box','BX','#0061D5'),
-          logo('OneDrive','OD','#0A5BD5'),
-          logo('ZoomIt / Sysinternals','ZI','#58595B')
+          {name: 'Adobe Acrobat', svg: mark('A','#ED2224'), stage: 'Dev', policy: 'VPN only', region: 'EMEA', device: 'Mac'},
+          {name: 'Dropbox', svg: mark('DB','#0061FF'), stage: 'Prod', policy: 'Compliant only', region: 'Global', device: 'Windows'},
+          {name: 'Box', svg: mark('BX','#0061D5'), stage: 'QA', policy: 'MFA + Compliant', region: 'AMER', device: 'Any'},
+          {name: 'OneDrive', svg: mark('OD','#0A5BD5'), stage: 'Dev', policy: 'MFA required', region: 'APAC', device: 'Mac'},
+          {name: 'ZoomIt / Sysinternals', svg: mark('ZI','#58595B'), stage: 'Prod', policy: 'VPN only', region: 'EMEA', device: 'Windows'}
         ]}
       ];
       function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
@@ -1069,7 +1070,7 @@
             if(STATE.showLabels){
               const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label);
               const meta=document.createElement('div'); meta.className='meta-label flex flex-wrap gap-1 mt-1';
-              meta.innerHTML = `<span>Ring: Pilot</span><span>Policy: MFA required</span><span>Region: EMEA</span>`;
+              meta.innerHTML = `<span>Stage: ${itm.stage}</span><span>Policy: ${itm.policy}</span><span>Region: ${itm.region}</span><span>Device: ${itm.device}</span>`;
               wrap.appendChild(meta);
             }
             mount.appendChild(wrap);
