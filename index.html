@@ -1,1086 +1,1214 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Nerdio + Recast — Better Together</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'primary-text': '#0A1C60',
-            'secondary-text': '#4A5568',
-            'accent': '#0070F3',
-            'accent-hover': '#005AD0',
-            'bg-main': '#F7F9FB',
-            'bg-card': '#FFFFFF',
-            'border': '#E2E8F0',
-            'nerdio-from': '#34D399',
-            'nerdio-via': '#22D3EE',
-            'nerdio-to': '#38BDF8',
-            'recast-from': '#0A1C60',
-            'recast-via': '#0070F3',
-            'recast-to': '#60A5FA',
-            'grey-tile': '#4A5568',
-            'brand-orange': '#F05928',
-          },
-          animation: {
-            'tile-pulse': 'tilePulse 1s ease-in-out forwards',
-            'bar-grow': 'barGrow 0.9s ease forwards',
-            'bolt-drop': 'boltDrop 0.9s ease forwards',
-            'app-pop': 'appPop 0.85s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-            'badge-drop': 'badgeDrop 0.8s ease-out forwards',
-            'dot-on': 'dotOn 0.9s ease forwards',
-          },
-          keyframes: {
-            tilePulse: {
-              '0%': { transform: 'scale(0.7)', backgroundColor: '#4A5568', opacity: '0.4' },
-              '60%': { transform: 'scale(1)', backgroundColor: '#0070F3', opacity: '1' },
-              '100%': { transform: 'scale(1)', backgroundColor: '#4A5568', opacity: '0.9' },
-            },
-            barGrow: {
-              '0%': { transform: 'scaleX(0)' },
-              '100%': { transform: 'scaleX(1)' },
-            },
-            boltDrop: {
-              '0%': { transform: 'scaleY(0)' },
-              '100%': { transform: 'scaleY(1)' },
-            },
-            appPop: {
-              '0%': { transform: 'scale(0.85)', filter: 'saturate(0.4)', opacity: '0.65' },
-              '60%': { transform: 'scale(1.05)', filter: 'saturate(1)', opacity: '1' },
-              '100%': { transform: 'scale(1)', filter: 'saturate(1)', opacity: '1' },
-            },
-            badgeDrop: {
-              '0%': { opacity: '0', transform: 'translateY(-6px) scale(0.9)' },
-              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
-            },
-            dotOn: {
-              '0%': { transform: 'scale(0.7)', opacity: '0.4' },
-              '60%': { transform: 'scale(1.2)', opacity: '1', backgroundColor: '#0070F3' },
-              '100%': { transform: 'scale(1)', opacity: '0.9', backgroundColor: '#0070F3' },
-            },
-          },
+  <head>
+    <meta charset="utf-8">
+    <title>Recast — Compact Click-Through (Realistic Catalog)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://unpkg.com">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root{
+        --re-navy:#F7F9FB;
+        --re-blue-mid:#0A1C60;
+        --re-blue-bright:#0070F3;
+        --re-blue-hover:#005AD0;
+        --re-green:#10B981;
+        --re-gray:#E2E8F0;
+        --re-white:#FFFFFF;
+        --radius:12px;
+        --border-subtle:#E2E8F0;
+      }
+      html,body{
+        background:var(--re-navy);
+        color:var(--re-blue-mid);
+        font-family:Inter,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      }
+      .focus-ring:focus-visible{outline:2px solid rgba(0,0,0,0.3);outline-offset:2px}
+      .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#FFFFFF;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)}
+      .sub-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#F7F9FB}
+      .tile{width:.45rem;height:.45rem;border-radius:0;background:#E2E8F0;opacity:.9}
+      .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
+      @keyframes tilePulse{0%{transform:scale(.7);background:var(--re-gray);opacity:.4}60%{transform:scale(1);background:var(--re-blue-bright);opacity:1}100%{background:var(--re-gray);opacity:.9}}
+      .flow-bar{height:.22rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
+      .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
+      @keyframes barGrow{to{transform:scaleX(1)}}
+      .bolt-line{width:.22rem;border-radius:0;transform-origin:top center;transform:scaleY(0)}
+      .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
+      @keyframes boltDrop{to{transform:scaleY(1)}}
+      .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:all 0.2s ease}
+      .logo-ring:hover{box-shadow:0 0 8px rgba(0,112,243,0.5)}
+      .logo-wrap{display:flex;align-items:center;gap:.4rem;position:relative}
+      .logo-name{font-size:.7rem;color:#4A5568;white-space:nowrap;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
+      .show-labels .logo-name{opacity:1;transform:translateX(0)}
+      .run .logo-ring{animation:appLiftPulse 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
+      @keyframes appLiftPulse{0%{transform:translateY(0) scale(1);filter:saturate(.4);opacity:.65}30%{transform:translateY(-4px) scale(1.05)}60%{transform:translateY(-2px) scale(1.02);filter:saturate(1);opacity:1}100%{transform:translateY(0) scale(1)}}
+      .user-beam{height:.38rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
+      .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
+      .badge{width:1.15rem;height:1.15rem;border-radius:0;opacity:0;transform:translateY(-6px) scale(.9)}
+      .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
+      @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
+      .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center;border-top:1px solid var(--re-gray);padding-top:0.5rem}
+      .cat-row:first-child{border-top:none;padding-top:0}
+      .cat-title{font-size:.7rem;letter-spacing:.08em;display:flex;align-items:center;gap:0.5rem}
+      .re-primary{background:#0070F3!important;color:#fff!important;border:0;border-radius:var(--radius)}
+      .re-primary:hover{background:#005AD0!important}
+      .re-primary:focus-visible{outline:2px solid rgba(0,0,0,0.3);outline-offset:2px}
+      .re-secondary{background:transparent!important;color:#0A1C60!important;border:2px solid #0A1C60!important;border-radius:var(--radius)}
+      .re-secondary:hover{color:#0070F3!important;border-color:#0070F3!important}
+      @media (prefers-reduced-motion: reduce) {
+        .accordion-content { transition: none !important; }
+      }
+      .modal-overlay { transition: opacity 300ms ease; }
+      .modal-content { transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease; }
+      .modal-open .modal-content { transform: scale(1); opacity: 1; }
+      .modal-closed .modal-content { transform: scale(0.95); opacity: 0; }
+      .check-appear{opacity:0;animation:fadeInOut 1.5s ease var(--d,0s) forwards}
+      @keyframes fadeInOut{0%{opacity:0}30%{opacity:1}70%{opacity:1}100%{opacity:0}}
+      .flow-connect{background-image:linear-gradient(to right, transparent 50%, var(--re-gray) 50%);background-size:4px 1px;background-repeat:repeat-x;height:1px;opacity:0.5}
+      .end-user-expand{transition:all 0.5s ease;transform:scale(1.05);background:var(--re-white);border-color:var(--re-green)}
+      .icon-launch{animation:iconLaunch 0.5s ease forwards}
+      @keyframes iconLaunch{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+      .tagline-fade{opacity:0;animation:fadeIn 1s ease 10s forwards}
+      @keyframes fadeIn{to{opacity:1}}
+      .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:10}
+      .show-labels .overlay-tag{opacity:1;transition-delay:0.5s}
+      .meta-label{font-size:0.6rem;color:#4A5568;background:#F7F9FB;border:1px solid var(--border-subtle);border-radius:4px;padding:0.1rem 0.3rem;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:absolute;top:100%;left:0;z-index:5;white-space:nowrap}
+      .show-labels .meta-label{opacity:1;transform:translateY(0)}
+      .show-labels .logo-wrap:hover .meta-label{background:var(--re-white);box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+      .logo-wrap .meta-label span{margin-right:0.3rem}
+    </style>
+  </head>
+  <body class="min-h-screen antialiased">
+    <div id="app" class="min-h-screen"></div>
+    <script>
+      const STATE = {
+        activeTab: 'problems',
+        impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
+        defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
+        ctx: { device: 'Windows', network: 'Corporate', compliant: true },
+        packHrs: 8, configHrs: 2, currentHrs: 24,
+        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
+        copied: false,
+        showLabels: false,
+        showSolutionCards: true,
+        openWhy: null,
+        openWhyModal: null,
+        openCards: { core: false, onboarding: false, trust: false },
+        visitedCards: [],
+        openBuckets: { one: false, zero: false, per: false },
+        modalOpen: false,
+        editBuffers: { change: '', now: '', recast: '' },
+        currentStateTexts: {
+          change: [
+            'The work has outgrown the tools. Enterprises now manage thousands of applications across hybrid platforms — each requiring updates, validation, and packaging. Manual effort no longer scales.',
+            'The team hasn’t grown, but the demand has. Headcount and budgets stay flat while the number of apps, devices, and compliance needs keeps climbing. Teams are forced to do more with less — and it’s not sustainable.',
+            'Transformation keeps stalling at the app layer. Every initiative — Intune migrations, AVD deployments, ARM pilots — hits the same wall: app readiness. Modernization isn’t waiting on vision; it’s waiting on capacity.'
+          ],
+          now: [
+            'Workloads have doubled, but headcount hasn’t. Teams are being asked to manage twice as much with the same tools.',
+            'Apps must move with users. Work happens everywhere — across clouds, devices, and networks — and the old control models can’t keep up.',
+            'Every delay adds risk. Each missed update opens new vulnerabilities and creates friction for users who expect secure, instant access everywhere.'
+          ],
+          recast: [
+            'One workspace for every app. Installs, updates, and access — unified across platforms. No more tool sprawl or manual packaging.',
+            'Built for Microsoft’s ecosystem. Recast extends Intune, ConfigMgr, and AVD — automating what teams still do by hand and scaling what already works.',
+            'Frees IT to move faster. What took hours now takes minutes — freeing time for migrations, pilots, and modernization work that drives progress.',
+            'Seamless for users. Apps just work — no retraining, no disruption, no new tools — even as IT shifts everything behind the scenes.'
+          ]
+        },
+        defaultsCurrentState() {
+          return JSON.parse(JSON.stringify({
+            change: [
+              'The work has outgrown the tools. Enterprises now manage thousands of applications across hybrid platforms — each requiring updates, validation, and packaging. Manual effort no longer scales.',
+              'The team hasn’t grown, but the demand has. Headcount and budgets stay flat while the number of apps, devices, and compliance needs keeps climbing. Teams are forced to do more with less — and it’s not sustainable.',
+              'Transformation keeps stalling at the app layer. Every initiative — Intune migrations, AVD deployments, ARM pilots — hits the same wall: app readiness. Modernization isn’t waiting on vision; it’s waiting on capacity.'
+            ],
+            now: [
+              'Workloads have doubled, but headcount hasn’t. Teams are being asked to manage twice as much with the same tools.',
+              'Apps must move with users. Work happens everywhere — across clouds, devices, and networks — and the old control models can’t keep up.',
+              'Every delay adds risk. Each missed update opens new vulnerabilities and creates friction for users who expect secure, instant access everywhere.'
+            ],
+            recast: [
+              'One workspace for every app. Installs, updates, and access — unified across platforms. No more tool sprawl or manual packaging.',
+              'Built for Microsoft’s ecosystem. Recast extends Intune, ConfigMgr, and AVD — automating what teams still do by hand and scaling what already works.',
+              'Frees IT to move faster. What took hours now takes minutes — freeing time for migrations, pilots, and modernization work that drives progress.',
+              'Seamless for users. Apps just work — no retraining, no disruption, no new tools — even as IT shifts everything behind the scenes.'
+            ]
+          }));
+        },
+        progress: { apps: 0, time: 0, tickets: 0 }
+      };
+      const TABS = [
+        { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
+        { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
+        { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
+      ];
+      const NEW_CARDS = [
+        {
+          id: 'core',
+          icon: 'layers',
+          title: 'How Recast Does It.',
+          bullets: [
+            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
+            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
+            'Automated patching and validation keep apps secure and compliant.',
+            'Unified dashboard for visibility and governance across all environments.',
+            'Policy-driven automation reduces manual work by over 60%.',
+            'End users get the right app instantly — no tickets, no delays.'
+          ],
+          closer: 'Configured once — Delivered everywhere.',
+          timeline: false,
+          bgHeader: 'bg-[var(--re-navy)]',
+          bgContent: 'bg-slate-50'
+        },
+        {
+          id: 'onboarding',
+          icon: 'clock',
+          title: 'Onboard & Up to Speed Fast.',
+          bullets: [
+            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
+            'No new infrastructure — integrates with your existing management tools.',
+            'Guided setup with dedicated Customer Success Manager.',
+            'Typical resource: 1–2 IT engineers part-time.',
+            'Enablement includes training, certification, and success planning.'
+          ],
+          closer: 'From first call to production in weeks, not months.',
+          timeline: true,
+          bgHeader: 'bg-[var(--re-navy)]',
+          bgContent: 'bg-slate-50'
+        },
+        {
+          id: 'trust',
+          icon: 'shield-check',
+          title: 'Trusted by Customers',
+          bullets: [
+            '60M+ endpoints across 130+ countries.',
+            '70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.',
+            '87 CSAT Score | Most trusted in the industry',
+            'Proven scalability from small pilots to global deployments.',
+            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
+          ],
+          closer: 'Trusted by organizations that can’t afford downtime.',
+          timeline: false,
+          bgHeader: 'bg-[var(--re-navy)]',
+          bgContent: 'bg-slate-50'
         }
+      ];
+      const onboardingMiniTimelineEnabled = true;
+      function cx(...a){ return a.filter(Boolean).join(' '); }
+      function round(n){ return Math.round(n*100)/100; }
+      function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
+      function routeRecommendation(ctx){
+        if(!ctx.compliant) return 'Web';
+        if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
+        return 'VDI';
       }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="min-h-screen bg-bg-main text-primary-text antialiased font-['Inter']">
-  <div id="app" class="min-h-screen"></div>
-  <script>
-    const DEFAULT_INPUTS = {
-      users: 5000,
-      apps: 250,
-      costPerHour: 75,
-      azureCostAnnual: 1000000,
-      subscriptionAnnual: 350000,
-      hoursPerAppSaved: 8,
-      adminHoursPer100PerMonth: 60,
-      endUserMinsPerUserPerMonth: 5,
-      azureReductionPct: 20
-    };
-    const DEFAULT_WHY_SECTIONS = {
-      change: {
-        subtitle: 'The problem isn’t hardware anymore — it’s application drag.',
-        intro: '',
-        bullets: [
-          'Networks are fast, endpoints are reliable, but IT teams are buried keeping thousands of apps updated and secure with the same headcount.',
-          'That friction blocks every big initiative — whether it’s moving from Citrix to AVD, SCCM to Intune, or piloting new hardware.',
-          'It’s not that teams can’t modernize — they’re just stuck maintaining what already exists.'
-        ],
-        conclusion: ''
-      },
-      now: {
-        subtitle: 'The math has stopped working.',
-        intro: '',
-        bullets: [
-          'Workloads have doubled, but teams haven’t.',
-          'Renewals are rising, security risks grow with every delayed update, and users expect everything to “just work” from anywhere.',
-          'Every month you wait makes modernization harder — but in six weeks, you can prove there’s a faster, safer way forward.'
-        ],
-        conclusion: ''
-      },
-      better: {
-        subtitle: 'Nerdio + Recast remove the three blockers to change — cost, risk, and time.',
-        intro: '',
-        bullets: [
-          'Nerdio automates Azure Virtual Desktop and Intune — fast, scalable desktop orchestration.',
-          'Recast automates application installs, updates, and access — across AVD, ConfigMgr, and Intune.'
-        ],
-        conclusion: 'Together, they deliver one workspace for every app and every user, no matter the platform.\n\nIT moves from months of packaging and patching to minutes.\n\nEnd users never notice the shift — everything just works.\n\nModernization without the chaos.'
+      function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+      function render(){
+        const root=document.getElementById('app');
+        root.innerHTML = `
+          <header class="relative">
+            <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
+              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
+                ${STATE.activeTab==='problems'
+                  ? 'Gartner forecasts that by 2026, enterprises will face a pivotal shift in how applications are managed and experienced. Those that fail to simplify and modernize will fall behind in the next wave of digital work.'
+                  : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+              </p>
+            </div>
+            <div class="relative mx-auto max-w-6xl px-4">
+              <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200">
+                ${TABS.map(t=>`
+                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                    <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </header>
+          <main class="mx-auto max-w-6xl px-4 pb-16">
+            ${STATE.activeTab==='roi' ? `
+            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
+              ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
+              ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+            </div>` : ''}
+            <section class="mt-5">${renderActivePanel()}</section>
+          </main>
+          ${renderModal()}
+          ${renderWhyModal()}
+        `;
+        if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+        attachEvents();
+        if (STATE.activeTab === 'solution') { buildFlow(); }
+        if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+        if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
       }
-    };
-    const STATE = {
-      tab: 'outcomes',
-      showLabelsRecast: false,
-      showLabelsNerdio: false,
-      advancedOpen: false,
-      copied: false,
-      activeModal: null,
-      whySections: null,
-      inputs: { ...DEFAULT_INPUTS }
-    };
-    function loadState() {
-      const saved = localStorage.getItem('roiInputs');
-      if (saved) {
-        STATE.inputs = { ...DEFAULT_INPUTS, ...JSON.parse(saved) };
+      function chip(label,value,tone){
+        const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
+        return `
+          <div class="section-card p-3">
+            <div class="text-[11px] text-[#4A5568]">${label}</div>
+            <div class="mt-1 inline-flex items-center gap-2 rounded-[2px] bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
+              <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
+            </div>
+          </div>
+        `;
       }
-      const savedWhy = localStorage.getItem('whySections');
-      if (savedWhy) {
-        STATE.whySections = JSON.parse(savedWhy);
-      } else {
-        STATE.whySections = { ...DEFAULT_WHY_SECTIONS };
+      function renderActivePanel(){
+        if (STATE.activeTab==='problems') return renderProblems();
+        if (STATE.activeTab==='solution') return renderSolution();
+        if (STATE.activeTab==='roi') return renderROI();
+        return '';
       }
-    }
-    function saveState() {
-      localStorage.setItem('roiInputs', JSON.stringify(STATE.inputs));
-    }
-    function saveWhyToStorage() {
-      localStorage.setItem('whySections', JSON.stringify(STATE.whySections));
-    }
-    function render() {
-      const root = document.getElementById('app');
-      root.innerHTML = `
-        <header class="relative overflow-hidden">
-          <div aria-hidden="true" class="absolute inset-0">
-            <div class="absolute -top-36 -left-28 h-[420px] w-[420px] blur-[110px] rounded-full bg-gradient-to-br from-accent/25 via-primary-text/20 to-accent-hover/30"></div>
-            <div class="absolute -bottom-28 right-0 h-[320px] w-[320px] blur-[110px] rounded-full bg-gradient-to-tr from-accent/20 via-accent-hover/20 to-accent/25"></div>
-          </div>
-          <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-            <h1 class="text-3xl sm:text-4xl font-bold">Nerdio + Recast — Better Together</h1>
-            <p class="mt-2 max-w-3xl text-secondary-text">
-              According to Gartner’s Magic Quadrant 2025, over the past three years Microsoft’s leadership position has accelerated while legacy and niche VDI vendors have steadily declined in both vision and execution
-            </p>
-            <nav class="mt-5 flex w-full flex-wrap gap-2 rounded-full bg-bg-card p-1 border border-border shadow-sm" role="tablist" aria-label="Primary">
-              ${tabBtn('current','Current State','alert-circle')}
-              ${tabBtn('approach','Approach (Nerdio+Recast)','workflow')}
-              ${tabBtn('outcomes','ROI & Outcomes','bar-chart-3')}
-              ${STATE.tab==='approach' ? `
-              <div class="ml-auto flex items-center gap-2">
-                <button type="button" class="rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="start">Start</button>
-                <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="reset">Reset</button>
-              </div>` : ''}
-              ${STATE.tab==='current' ? `
-              <div class="ml-auto flex items-center gap-2">
-                <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="open-modal" data-id="edit-why">+</button>
-              </div>` : ''}
-            </nav>
-            ${STATE.tab==='approach' ? `
-            <div class="mt-4 flex flex-wrap gap-3 justify-end">
-              ${modalBtn('better','Better Together')}
-              ${modalBtn('onboarding','Fast Onboarding')}
-              ${modalBtn('proven','Proven & Trusted')}
-            </div>
-            ` : ''}
-          </div>
-        </header>
-        <main class="mx-auto max-w-6xl px-4 pb-16" role="main">
-          ${STATE.tab==='current'?renderCurrent():''}
-          ${STATE.tab==='approach'?renderApproach():''}
-          ${STATE.tab==='outcomes'?renderOutcomes():''}
-        </main>
-      `;
-      if(STATE.activeModal){
-        root.innerHTML += STATE.activeModal === 'edit-why' ? renderEditWhyModal() : renderModal(STATE.activeModal);
-      }
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch{} }
-      attachEvents();
-      if (STATE.tab==='approach'){ buildNerdio(); buildRecast(); }
-      const modalContent = document.querySelector('[data-modal-content]');
-      if (modalContent) setTimeout(() => modalContent.classList.add('scale-100', 'opacity-100'), 0);
-    }
-    function tabBtn(id,label,icon){
-      const active=STATE.tab===id;
-      return `<button type="button" class="${active?'bg-accent text-white':'text-secondary-text hover:bg-gray-100'} inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="tab" data-id="${id}" aria-selected="${active}" aria-controls="panel-${id}">
-        <i data-lucide="${icon}" class="w-4 h-4" aria-hidden="true"></i><span>${label}</span>
-      </button>`;
-    }
-    function renderCurrent(){
-      return `
-        <section id="panel-current" class="space-y-4" aria-label="Current State">
-          <div class="bg-bg-card rounded-2xl border border-border shadow-md p-4">
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-              <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-2.5 py-1 border border-border">
-                <span class="grid h-4 w-4 place-items-center rounded-md bg-gradient-to-br from-nerdio-from via-nerdio-via to-nerdio-to text-white text-[10px] font-black">N</span>
-                <span>Nerdio — <span class="font-medium">Desktop Automation</span></span>
-              </span>
-              <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-2.5 py-1 border border-border">
-                <span class="grid h-4 w-4 place-items-center rounded-md bg-gradient-to-br from-recast-from via-recast-via to-recast-to text-white text-[10px] font-black">R</span>
-                <span>Recast — <span class="font-medium">Application Management</span></span>
-              </span>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-            ${problemTile('Transition Complexity','layout-grid','Image sprawl across AVD/Windows 365 and on-prem extends change windows and multiplies policy drift; teams need a governed, identity-driven approach to land cleanly in Azure.')}
-            ${problemTile('App Readiness Bottleneck','boxes','Third-party apps and line-of-business packages consume 5–10 hours each when done manually; Recast’s curated catalog, staged deployment, and self-service shrink this critical path.')}
-            ${problemTile('Day-0 to Day-2 Compliance Pressure','shield-alert','Integrated release & patch management plus SSO (Access Manager) keep apps current and access contextual as users shift from legacy brokers to AVD.')}
-            ${problemTile('Azure Cost Confidence','gauge','Autoscale, right-sizing, and image hygiene reduce idle capacity; application-level control prevents unnecessary sessions and duplicate images that inflate spend (Nerdio’s orchestration + Recast’s app governance).')}
-          </div>
-          <div class="flex justify-end mb-2 sm:hidden">
-            <button type="button" class="text-sm text-accent underline" data-action="toggle-all-accordions">Expand All</button>
-          </div>
-          <div class="space-y-3">
-            ${accordion('why-change', 'Why Change', 'circle-help', renderWhyContent('change'))}
-            ${accordion('why-now', 'Why Now', 'alarm-clock', renderWhyContent('now'))}
-            ${accordion('why-better', 'Why Better Together', 'sparkles', renderWhyContent('better'))}
-          </div>
-        </section>
-      `;
-    }
-    function renderWhyContent(key) {
-      const sec = STATE.whySections[key];
-      return `
-        <h4 class="text-base font-semibold mt-2">${sec.subtitle}</h4>
-        <p class="mt-2 text-sm text-secondary-text">${sec.intro.replace(/\n/g, '<br>')}</p>
-        <ul class="mt-2 list-disc pl-5 text-sm text-secondary-text">${sec.bullets.map(li => `<li>${li}</li>`).join('')}</ul>
-        <p class="mt-2 text-sm text-secondary-text">${sec.conclusion.replace(/\n/g, '<br>')}</p>
-      `;
-    }
-    function accordion(id, title, icon, body) {
-      return `
-        <article class="bg-bg-card rounded-xl border border-border p-4 transition-shadow shadow-md">
-          <button class="accordion-header flex items-center justify-between w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-id="${id}" aria-expanded="false" aria-controls="${id}-content">
-            <div class="flex items-center gap-2">
-              <i data-lucide="${icon}" class="h-5 w-5 text-accent" aria-hidden="true"></i>
-              <h3 class="font-semibold">${title}</h3>
-            </div>
-            <i data-lucide="chevron-down" class="chevron w-5 h-5 text-secondary-text transition-transform duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)]"></i>
-          </button>
-          <div id="${id}-content" class="accordion-content max-h-0 overflow-hidden transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] pt-2">
-            ${body}
-          </div>
-        </article>
-      `;
-    }
-    function problemTile(title,icon,body){
-      return `
-        <article class="bg-bg-card rounded-xl border border-border p-4 transition hover:shadow-lg hover:-translate-y-1">
-          <div class="flex items-center gap-2">
-            <i data-lucide="${icon}" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-            <h3 class="font-semibold">${title}</h3>
-          </div>
-          <p class="mt-1 text-sm text-secondary-text">${body}</p>
-        </article>
-      `;
-    }
-    function renderApproach(){
-      return `
-        <section id="panel-approach" class="space-y-4" aria-label="Approach">
-          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            ${renderNerdio()}
-            ${renderRecast()}
-          </div>
-        </section>
-      `;
-    }
-    function renderNerdio(){
-      return `
-        <section class="bg-bg-card rounded-2xl border border-border shadow-md p-4" aria-label="Nerdio Orchestration">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="h-6 w-6 rounded-lg bg-gradient-to-br from-nerdio-from via-nerdio-via to-nerdio-to grid place-items-center" aria-hidden="true"><span class="text-white font-black">N</span></div>
-              <div>
-                <h3 class="text-base font-semibold">Nerdio — Desktop Orchestration</h3>
-                <div class="text-xs text-secondary-text">Provision • Autoscale • Policy via Intune</div>
-              </div>
-            </div>
-            <button type="button" class="rounded-full border border-border bg-bg-card px-2.5 py-1 text-xs" data-action="toggle-labels-nerdio" aria-pressed="${STATE.showLabelsNerdio}">${STATE.showLabelsNerdio?'Hide':'Show'} labels</button>
-          </div>
-          <div id="nerdioCard" class="mt-3 bg-bg-card rounded-xl border border-border p-3">
-            <div class="grid grid-cols-1 gap-3" role="region" aria-label="Animated orchestration">
-              <div class="rounded-xl border border-border p-3">
-                <div class="flex items-center justify-between">
-                  <div class="text-sm font-medium">Cloud PC Pools</div>
-                  <div class="text-xs text-secondary-text">Windows 365</div>
-                </div>
-                <div class="mt-2 grid grid-cols-6 gap-2" id="poolA"></div>
-                <div class="mt-2 h-2 rounded-full overflow-hidden bg-gray-100"><div class="bar h-full bg-gradient-to-r from-nerdio-from via-nerdio-via to-nerdio-to scale-x-0 origin-left" style="--d:0.2s"></div></div>
-              </div>
-              <div class="rounded-xl border border-border p-3">
-                <div class="flex items-center justify-between">
-                  <div class="text-sm font-medium">AVD Host Pools</div>
-                  <div class="text-xs text-secondary-text">Autoscale</div>
-                </div>
-                <div class="mt-2 grid grid-cols-6 gap-2" id="poolB"></div>
-                <div class="mt-2 h-2 rounded-full overflow-hidden bg-gray-100"><div class="bar h-full bg-gradient-to-r from-nerdio-from via-nerdio-via to-nerdio-to scale-x-0 origin-left" style="--d:0.5s"></div></div>
-              </div>
-              <div class="rounded-xl border border-border p-3">
-                <div class="text-sm font-medium">Policy via Intune</div>
-                <div class="mt-2 grid grid-cols-10 gap-1.5" id="policyDots"></div>
-              </div>
-              <div class="rounded-xl border border-border p-3">
-                <div class="flex items-center gap-2 text-sm"><i data-lucide="chart-no-axes-combined" class="w-4 h-4 text-accent" aria-hidden="true"></i><span>Insights</span></div>
-                <div class="mt-2 h-2 rounded-full overflow-hidden bg-gray-100"><div class="bar h-full bg-gradient-to-r from-recast-from via-recast-via to-recast-to scale-x-0 origin-left" style="--d:0.9s"></div></div>
-              </div>
-              <div class="rounded-xl border border-border p-3">
-                <div class="flex items-center gap-2 text-sm"><i data-lucide="user-check" class="w-4 h-4 text-accent" aria-hidden="true"></i><span>Identity-driven Workspace</span></div>
-                <div class="mt-2 user-beam h-[0.38rem] rounded-[0.38rem] bg-gradient-to-r from-nerdio-from via-nerdio-via to-nerdio-to scale-x-0 origin-left" style="--d:1.2s"></div>
-                <div class="mt-2 text-xs text-secondary-text">Desktop is ready and right-sized before apps arrive.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      `;
-    }
-    function renderRecast(){
-      return `
-        <section class="bg-bg-card rounded-2xl border border-border shadow-md p-4" aria-label="Recast Application Workspace">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-base font-bold"><span class="text-accent">Re</span><span class="text-primary-text">cast</span></span>
-              <div>
-                <h3 class="text-base font-semibold"> — Application Workspace</h3>
-                <div class="text-xs text-secondary-text"> Built on Azure | World's Largest App Catalog </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-secondary-text">
-              <button type="button" class="rounded-full border border-border bg-bg-card px-2.5 py-1" data-action="toggle-labels-recast" aria-pressed="${STATE.showLabelsRecast}">${STATE.showLabelsRecast?'Hide':'Show'} labels</button>
-            </div>
-          </div>
-          <div id="recastCard" class="mt-3 bg-bg-card rounded-xl border border-border p-3" role="region" aria-label="Animated catalog">
-            <div class="space-y-2">
-              ${CATALOG.map(s=>`
-                <div class="grid grid-cols-[15ch_1fr] gap-2 items-center">
-                  <div class="text-xs uppercase text-secondary-text">${s.title}</div>
-                  <div id="${s.id}" class="flex flex-wrap gap-2"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['Existing Platforms','Staged Rings','Access & Policy'].map((t,i)=>`
-                <div class="bg-bg-card rounded-lg border border-border p-2">
-                  <div class="text-xs text-secondary-text">${t}</div>
-                  <div id="flowConn${'ABC'[i]}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                  <div class="flow-bar mt-1 h-[0.22rem] rounded-[0.25rem] bg-gradient-to-r from-recast-from via-recast-via to-recast-to scale-x-0 origin-left" style="--d:${0.55 + 0.12*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['Business Unit','Subsidiary','Region'].map((t,i)=>`
-                <div class="bg-bg-card rounded-lg border border-border p-2">
-                  <div class="text-xs text-secondary-text">${t}</div>
-                  <div id="flowGrp${'ABC'[i]}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                  <div class="bolt-line mx-auto mt-1 w-[0.22rem] h-16 rounded-[0.25rem] bg-gradient-to-b from-recast-from via-white to-recast-to scale-y-0 origin-top" style="--d:${1 + 0.15*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-3 grid grid-cols-3 gap-2" aria-hidden="true">
-              ${['Windows & macOS','VDI / Web','Mobile'].map((t,i)=>`
-                <div class="bg-bg-card rounded-lg border border-border p-2 text-center">
-                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 opacity-80" aria-hidden="true"></i>
-                  <div id="flowDev${'ABC'[i]}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                  <div class="mt-1 text-[11px] text-secondary-text">${t}</div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-3">
-              <div id="endUserCard" class="bg-bg-card rounded-xl border border-border p-3">
-                <div class="flex items-center gap-3">
-                  <div id="endUserAvatar" class="h-9 w-9 rounded-full bg-brand-orange/90 grid place-items-center font-semibold" aria-hidden="true">U</div>
-                  <div class="text-sm">
-                    <div class="font-medium text-primary-text">End user</div>
-                    <div class="text-secondary-text">Apps on demand — no waiting, no tickets.</div>
-                  </div>
-                </div>
-                <div class="user-beam mt-3 h-[0.38rem] rounded-[0.38rem] bg-gradient-to-r from-recast-from via-recast-via to-recast-to scale-x-0 origin-left" style="--d:2.1s"></div>
-                <div class="relative mt-2 rounded-lg border border-border bg-gray-50 p-4">
-                  <i data-lucide="laptop" class="h-5 w-5 opacity-80" aria-hidden="true"></i>
-                  <div id="endUserBadge" class="badge absolute right-2 top-2 w-[1.15rem] h-[1.15rem] rounded-[0.3rem] opacity-0 translate-y-[-6px] scale-90 bg-brand-orange text-white grid place-items-center font-bold" style="--d:2.4s">!</div>
-                  <div class="mt-1 text-[11px] text-secondary-text">Workspace launches the correct app instantly</div>
-                </div>
-              </div>
-              <div id="flowSuccess" class="mt-2 hidden text-accent text-[13px] inline-flex items-center gap-1"><i data-lucide="sparkles" class="h-4 h-4" aria-hidden="true"></i><span>Desktop + apps delivered together with identity and rings.</span></div>
-            </div>
-          </div>
-        </section>
-      `;
-    }
-    function renderOutcomes() {
-      const calc = computeROI();
-      return `
-        <section id="panel-outcomes" class="space-y-4" aria-label="ROI & Outcomes">
-          <div class="bg-bg-card rounded-2xl border border-border shadow-md p-4">
-            <div class="-mx-4 -mt-4 h-1 rounded-t-2xl bg-gradient-to-r from-accent/30 via-accent to-accent/30"></div>
-            <div class="mt-3">
-              <h2 class="text-2xl md:text-3xl font-extrabold text-primary-text">ROI — Nerdio + Recast (Better Together)</h2>
-              <p class="mt-1 text-secondary-text">From desktop orchestration to application governance — one flow, measurable return.</p>
-            </div>
-
-            <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="percent" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                  <h3 class="font-semibold">Net ROI</h3>
-                </div>
-                <div class="mt-2">
-                  <div class="text-5xl font-extrabold text-accent leading-none">${Math.round(calc.netROI)}%</div>
-                  <p class="mt-1 text-sm text-secondary-text">Calculated as (Total savings − subscription) ÷ subscription</p>
-                </div>
-              </article>
-
-              <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="banknote" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                  <h3 class="font-semibold">Total Annual Savings</h3>
-                </div>
-                <div class="mt-2">
-                  <div class="text-4xl font-bold text-accent leading-none">${fmtCurrencyShort(calc.totalAnnualSavings)}</div>
-                  <p class="mt-1 text-sm text-secondary-text">Labor + Azure autoscale savings</p>
-                </div>
-              </article>
-
-              <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="timer" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                  <h3 class="font-semibold">Payback (months)</h3>
-                </div>
-                <div class="mt-2">
-                  <div class="text-4xl font-bold text-accent leading-none">${isFinite(calc.paybackMonths) ? `~${calc.paybackMonths.toFixed(1)}` : 'N/A'}</div>
-                  <p class="mt-1 text-sm text-secondary-text">Months to recoup subscription via savings</p>
-                </div>
-              </article>
-            </div>
-
-            <div class="mt-6 pt-6 border-t border-border">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="users" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                    <h3 class="font-semibold">Productivity</h3>
-                  </div>
-                  <div class="mt-2">
-                    <div class="text-3xl font-bold text-accent leading-none">${fmtNumberShort(calc.totalHoursSavedAnnual)} hrs / yr</div>
-                    <p class="text-sm text-secondary-text">(≈ ${Math.round(calc.equivalentFTEs)} FTEs)</p>
-                  </div>
+      function renderProblems(){
+        const items=[
+          {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
+          {t:'Packaging backlog',s:'Rebuild per version; updates stall.',i:'boxes'},
+          {t:'Zero-day exposure',s:'Patching takes days, not minutes.',i:'shield'},
+          {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
+        ];
+        return `
+          <section id="panel-problems" class="space-y-4">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              ${items.map(p=>`
+                <article class="section-card p-4">
+                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-[#0070F3]"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
+                  <p class="mt-1 text-sm text-[#4A5568]">${p.s}</p>
                 </article>
-
-                <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="trending-down" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                    <h3 class="font-semibold">Cost Efficiency</h3>
-                  </div>
-                  <div class="mt-2">
-                    <div class="text-3xl font-bold text-accent leading-none">${fmtCurrencyShort(calc.azureSavingsAnnual)}</div>
-                    <p class="text-sm text-secondary-text">Azure savings / yr</p>
-                  </div>
-                </article>
-
-                <article class="bg-white rounded-xl border border-border p-4 shadow-sm">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-5 h-5 text-accent" aria-hidden="true"></i>
-                    <h3 class="font-semibold">Compliance Readiness</h3>
-                  </div>
-                  <div class="mt-2">
-                    <div class="text-3xl font-bold text-accent leading-none">&gt;95%</div>
-                    <p class="text-sm text-secondary-text">patch compliance maintained</p>
-                  </div>
-                </article>
+              `).join('')}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
+              ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
+              ${calloutDropdown('now','clock-4','Why Now','bg-slate-50')}
+              ${calloutDropdown('recast','sparkles','Why Recast','bg-slate-50', true)}
+            </div>
+          </section>
+        `;
+      }
+      function calloutDropdown(id, icon, label, headerTone, cta=false){
+        return `
+          <div class="h-full flex flex-col">
+            <button
+              type="button"
+              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
+              data-action="open-why-modal"
+              data-why="${id}"
+              style="border-radius:var(--radius)"
+            >
+              <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
+                  <span class="text-[22px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
               </div>
-            </div>
-
-            <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <section aria-label="Required Inputs" class="rounded-xl border border-border p-4 bg-white">
-                <h3 class="font-semibold flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-accent" aria-hidden="true"></i>Required Assumptions</h3>
-                <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  ${numberInput('Users', 'users', STATE.inputs.users, 100, 200000, 100, 'Total AVD users in scope')}
-                  ${numberInput('Unique applications', 'apps', STATE.inputs.apps, 20, 5000, 10, 'Apps that need packaging/governance')}
-                  ${moneyInput('Avg loaded cost / hour', 'costPerHour', STATE.inputs.costPerHour, 30, 200, 1, 'Fully burdened IT cost (USD)')}
-                  ${moneyInput('Azure infra cost / year', 'azureCostAnnual', STATE.inputs.azureCostAnnual, 50000, 20000000, 10000, 'Eligible for autoscale savings')}
-                  ${moneyInput('Combined subscription / year', 'subscriptionAnnual', STATE.inputs.subscriptionAnnual, 100000, 2000000, 10000, 'Nerdio + Recast combined (editable)')}
-                </div>
-              </section>
-
-              <section aria-label="Advanced Assumptions" class="rounded-xl border border-border p-4 bg-gray-50">
-                <button type="button" class="w-full flex items-center justify-between rounded-lg border border-border bg-bg-card px-4 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="toggle-advanced">
-                  Advanced Assumptions
-                  <i data-lucide="${STATE.advancedOpen ? 'chevron-up' : 'chevron-down'}" class="w-5 h-5" aria-hidden="true"></i>
-                </button>
-                <div class="${STATE.advancedOpen ? 'block' : 'hidden'} mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  ${numberInput('Packaging hours avoided per app', 'hoursPerAppSaved', STATE.inputs.hoursPerAppSaved, 2, 12, 0.5, 'Time saved using curated catalog + automation')}
-                  ${numberInput('Admin hours saved / 100 users / month', 'adminHoursPer100PerMonth', STATE.inputs.adminHoursPer100PerMonth, 10, 80, 1, 'Automation across imaging, policy, approvals')}
-                  ${numberInput('End-user minutes saved / user / month', 'endUserMinsPerUserPerMonth', STATE.inputs.endUserMinsPerUserPerMonth, 0, 15, 1, 'Faster access + self-service')}
-                  ${percentInput('Azure cost reduction (%)', 'azureReductionPct', STATE.inputs.azureReductionPct, 5, 50, 1, 'Autoscale & hygiene')}
-                  <div class="flex flex-wrap gap-2">
-                    <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm" data-action="preset" data-preset="conservative">Conservative</button>
-                    <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm" data-action="preset" data-preset="benchmark">Benchmark</button>
-                    <button type="button" class="rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm" data-action="preset" data-preset="aggressive">Aggressive</button>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            <div class="mt-6 rounded-lg border border-border bg-gray-50 p-4">
-              <details>
-                <summary class="cursor-pointer font-semibold text-sm select-none">Methodology</summary>
-                <p class="mt-2 text-sm text-secondary-text">Calculations based on industry benchmarks for automation impact. Labor savings from packaging, admin, and end-user productivity. Azure savings via autoscale and optimization. Complete the Microsoft workspace — Nerdio orchestrates desktops; Recast governs applications and access. Contact us for customized analysis.</p>
-                <button type="button" class="mt-3 rounded-full border border-border bg-bg-card px-4 py-2 text-sm" data-action="reset-benchmarks">Reset to Benchmarks</button>
-              </details>
-            </div>
-
-            <button type="button" class="mt-4 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2" data-action="copy">
-              <i data-lucide="clipboard" class="w-4 h-4" aria-hidden="true"></i>${STATE.copied ? 'Copied!' : 'Copy Summary'}
             </button>
           </div>
-        </section>
-      `;
-    }
-    function numberInput(label, key, value, min, max, step, help) {
-      return `
-        <label class="block">
-          <span class="text-xs text-secondary-text">${label}</span>
-          <input type="number" inputmode="numeric" class="mt-1 w-full rounded-lg bg-gray-50 px-3 py-2 border border-border focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                 value="${value}" min="${min}" max="${max}" step="${step}" data-action="number" data-key="${key}" aria-describedby="${key}-help">
-          <span id="${key}-help" class="text-[11px] text-secondary-text">${help||''}</span>
-        </label>
-      `;
-    }
-    function moneyInput(label, key, value, min, max, step, help) {
-      return `
-        <label class="block">
-          <span class="text-xs text-secondary-text">${label}</span>
-          <div class="mt-1 relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-text">$</span>
-            <input type="number" inputmode="numeric" class="w-full rounded-lg bg-gray-50 pl-7 pr-3 py-2 border border-border focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                   value="${value}" min="${min}" max="${max}" step="${step}" data-action="number" data-key="${key}" aria-describedby="${key}-help">
-          </div>
-          <span id="${key}-help" class="text-[11px] text-secondary-text">${help||''}</span>
-        </label>
-      `;
-    }
-    function percentInput(label, key, value, min, max, step, help) {
-      return `
-        <label class="block">
-          <span class="text-xs text-secondary-text">${label}</span>
-          <div class="mt-1 relative">
-            <input type="number" inputmode="numeric" class="w-full rounded-lg bg-gray-50 pr-7 pl-3 py-2 border border-border focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
-                   value="${value}" min="${min}" max="${max}" step="${step}" data-action="number" data-key="${key}" aria-describedby="${key}-help">
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary-text">%</span>
-          </div>
-          <span id="${key}-help" class="text-[11px] text-secondary-text">${help||''}</span>
-        </label>
-      `;
-    }
-    function computeROI() {
-      const i = sanitizeInputs(STATE.inputs);
-      const groupsOf100 = Math.min(i.users / 100, 1000);
-      const hoursSavedPackaging = i.apps * i.hoursPerAppSaved;
-      const hoursSavedAdminAnnual = i.adminHoursPer100PerMonth * groupsOf100 * 12;
-      const hoursSavedEndUserAnnual = (i.endUserMinsPerUserPerMonth / 60) * i.users * 12;
-      const totalHoursSavedAnnual = hoursSavedPackaging + hoursSavedAdminAnnual + hoursSavedEndUserAnnual;
-      const laborSavingsAnnual = totalHoursSavedAnnual * i.costPerHour;
-      const azureSavingsAnnual = i.azureCostAnnual * (i.azureReductionPct / 100);
-      const totalAnnualSavings = laborSavingsAnnual + azureSavingsAnnual;
-      const net = totalAnnualSavings - i.subscriptionAnnual;
-      const netROI = i.subscriptionAnnual > 0 && net > 0 ? (net / i.subscriptionAnnual) * 100 : 0;
-      const paybackMonths = totalAnnualSavings > 0 && i.subscriptionAnnual > 0 ? i.subscriptionAnnual / (totalAnnualSavings / 12) : Infinity;
-      const equivalentFTEs = totalHoursSavedAnnual / 2080;
-      return {
-        totalHoursSavedAnnual,
-        azureSavingsAnnual,
-        totalAnnualSavings,
-        netROI,
-        paybackMonths,
-        equivalentFTEs,
-        summary: buildSummary(i, { netROI, totalAnnualSavings, paybackMonths, totalHoursSavedAnnual, equivalentFTEs, azureSavingsAnnual })
-      };
-    }
-    function buildSummary(i, c) {
-      return `Net ROI: ${Math.round(c.netROI)}% | Total Annual Savings: ~${fmtCurrencyShort(c.totalAnnualSavings)} | Payback: ~${isFinite(c.paybackMonths) ? c.paybackMonths.toFixed(1) : 'N/A'} months.
-Drivers: ${fmtNumberShort(c.totalHoursSavedAnnual)} hrs/yr saved (≈${Math.round(c.equivalentFTEs)} FTEs), ${fmtCurrencyShort(c.azureSavingsAnnual)} Azure autoscale savings, >95% patch compliance maintained.
-Assumptions: ${fmtNumberShort(i.users)} users, ${i.apps} apps, $${i.costPerHour}/hr, $${fmtShort(i.azureCostAnnual)} Azure cost, ${i.azureReductionPct}% autoscale, ${i.hoursPerAppSaved} hrs/app, ${i.adminHoursPer100PerMonth} admin hrs/100 users/mo, ${i.endUserMinsPerUserPerMonth} min/user/mo.`;
-    }
-    function sanitizeInputs(inp) {
-      const o = {};
-      Object.keys(DEFAULT_INPUTS).forEach(k => {
-        let v = Number(inp[k]);
-        o[k] = isFinite(v) ? v : DEFAULT_INPUTS[k];
-      });
-      o.users = clamp(o.users, 100, 200000);
-      o.apps = clamp(o.apps, 20, 5000);
-      o.costPerHour = clamp(o.costPerHour, 30, 200);
-      o.azureCostAnnual = clamp(o.azureCostAnnual, 50000, 20000000);
-      o.subscriptionAnnual = clamp(o.subscriptionAnnual, 100000, 2000000);
-      o.hoursPerAppSaved = clamp(o.hoursPerAppSaved, 2, 12);
-      o.adminHoursPer100PerMonth = clamp(o.adminHoursPer100PerMonth, 10, 80);
-      o.endUserMinsPerUserPerMonth = clamp(o.endUserMinsPerUserPerMonth, 0, 15);
-      o.azureReductionPct = clamp(o.azureReductionPct, 5, 50);
-      return o;
-    }
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
-    }
-    function fmtNumber(n, dec=0) {
-      return Number(n).toLocaleString(undefined, {maximumFractionDigits: dec, minimumFractionDigits: dec});
-    }
-    function fmtShort(n) {
-      if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-      if (n >= 1e3) return (n / 1e3).toFixed(0) + 'k';
-      return fmtNumber(n, 0);
-    }
-    function fmtNumberShort(n) {
-      return fmtShort(n);
-    }
-    function fmtCurrencyShort(n) {
-      return '$' + fmtShort(n);
-    }
-    function buildNerdio(){
-      const a = document.getElementById('poolA');
-      const b = document.getElementById('poolB');
-      const p = document.getElementById('policyDots');
-      if(a){ a.innerHTML=''; for(let i=0;i<12;i++){ a.appendChild(poolVM(i,0.15+i*0.05,'nerdio')); } }
-      if(b){ b.innerHTML=''; for(let i=0;i<12;i++){ b.appendChild(poolVM(i,0.4+i*0.05,'nerdio')); } }
-      if(p){ p.innerHTML=''; for(let i=0;i<24;i++){ const d=document.createElement('div'); d.className='policy-dot w-2 h-2 rounded-full bg-grey-tile opacity-90'; d.style.setProperty('--d', (0.8 + i*0.05)+'s'); p.appendChild(d); } }
-    }
-    function poolVM(i,delay,tone){
-      const d=document.createElement('div');
-      d.className='h-6 rounded-md bg-gray-100 relative border border-border';
-      const bar=document.createElement('div');
-      bar.className='bar absolute left-0 top-0 h-full w-full bg-gradient-to-r from-nerdio-from via-nerdio-via to-nerdio-to scale-x-0 origin-left';
-      bar.style.setProperty('--d', delay+'s');
-      d.appendChild(bar);
-      if(STATE.showLabelsNerdio){
-        const t=document.createElement('span');
-        t.textContent='VM';
-        t.className='absolute inset-0 grid place-items-center text-[10px] text-primary-text/80';
-        d.appendChild(t);
+        `;
       }
-      return d;
-    }
-    function buildRecast(){
-      let base=0;
-      CATALOG.forEach(section=>{
-        const mount=document.getElementById(section.id); if(!mount) return;
-        mount.innerHTML='';
-        section.items.forEach((itm,idx)=>{
-          const wrap=document.createElement('div');
-          wrap.className='flex items-center gap-1';
-          wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
-          const ring=document.createElement('div');
-          ring.className='logo-ring w-[2.1rem] h-[2.1rem] rounded-full grid place-items-center bg-bg-main ring-1 ring-inset ring-border';
-          ring.innerHTML=itm.svg;
-          ring.title=itm.name;
-          ring.setAttribute('role','img');
-          ring.setAttribute('aria-label',itm.name);
-          mount.appendChild(wrap);
-          wrap.appendChild(ring);
-          if(STATE.showLabelsRecast){
-            const label=document.createElement('span');
-            label.className='text-xs text-secondary-text whitespace-nowrap';
-            label.textContent=itm.name;
-            wrap.appendChild(label);
-          }
-        });
-        base+=0.25;
-      });
-      buildTiles(document.getElementById('flowConnA'), 14, 0.5);
-      buildTiles(document.getElementById('flowConnB'), 14, 0.56);
-      buildTiles(document.getElementById('flowConnC'), 14, 0.62);
-      buildTiles(document.getElementById('flowGrpA'), 18, 0.95);
-      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
-      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
-      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
-      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
-      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.classList.add('bg-brand-orange/90'); }
-      if(badge){ badge.classList.add('bg-brand-orange'); badge.textContent='!'; }
-    }
-    function buildTiles(container,count,baseDelay){
-      if(!container) return; container.innerHTML='';
-      for(let i=0;i<count;i++){
-        const d=document.createElement('div');
-        d.className='tile w-[0.45rem] h-[0.45rem] rounded bg-grey-tile opacity-90';
-        d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s');
-        container.appendChild(d);
+      function renderWhyModal(){
+        if(!STATE.openWhyModal) return '';
+        const id = STATE.openWhyModal;
+        const iconMap = { change: 'alert-triangle', now: 'clock-4', recast: 'sparkles' };
+        const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
+        const introMap = {
+          change: "The world around IT has evolved — but the way we manage applications hasn’t. Infrastructure is mature. Security is strong. Yet the way organizations manage and deliver applications remains the top barrier to transformation.",
+          now: "Because the gap between what IT can handle and what the business demands is widening fast.",
+          recast: "Recast closes the gap between how fast IT needs to move and how fast app management allows them to."
+        };
+        const analystMap = {
+          change: "Analyst trends | In Forrester’s latest application-modernization wave, 4 out of 5 enterprises identified application readiness and ongoing operations as their primary barrier to cloud/multicloud migration — not infrastructure",
+          now: "Analyst trends | Gartner predicts that by 2026, 75% of large enterprises will face significant operational risk due to delays in modernizing legacy applications — making app readiness the new competitive gap.",
+          recast: "Analyst trends | According to Forrester, organizations that automate 50% or more of their app lifecycle processes realize projects 3× faster and with 40% less operational cost — proving automation is now the differentiator in digital transformation."
+        };
+        const bullets = STATE.currentStateTexts[id];
+        const headerTone = 'bg-slate-50';
+        const cta = id === 'recast';
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-3xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 90vh; overflow-y: auto;">
+              <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${labelMap[id]}</h2>
+                </div>
+                <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-why-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+              </div>
+              <div class="p-8 bg-slate-50">
+                <p class="text-lg leading-relaxed text-[#4A5568] mb-4">${introMap[id]}</p>
+                <div class="space-y-4">
+                  ${bullets.map(b=>`
+                    <div class="flex items-start gap-3">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-lg leading-relaxed text-[#4A5568]">${b}</p>
+                    </div>
+                  `).join('')}
+                </div>
+                <p class="mt-6 text-md italic text-[#4A5568]">${analystMap[id]}</p>
+                ${cta?`
+                  <div class="mt-8 flex justify-center">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
+                      <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                      How Recast solves it
+                    </button>
+                  </div>
+                `:''}
+              </div>
+            </div>
+          </div>
+        `;
       }
-    }
-    const CATALOG=[
-      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+      function popoutCard(card){
+        const expanded = STATE.openCards[card.id];
+        const contentId = `card-content-${card.id}`;
+        return `
+          <div class="h-full flex flex-col">
+            <button
+              type="button"
+              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
+              data-action="toggle-card"
+              data-card="${card.id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+              style="border-radius:var(--radius); min-height: 44px;"
+            >
+              <div class="${card.bgHeader || 'bg-slate-50'} px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="${card.icon}" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
+                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">${card.title}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-[#4A5568]">${expanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
+              <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
+                ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
+              </ul>
+              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
+              <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
+            </div>
+          </div>
+        `;
+      }
+      function renderMiniTimeline(){
+        const phases = [
+          {icon: 'play-circle', label: 'Kickoff'},
+          {icon: 'hammer', label: 'Implementation'},
+          {icon: 'check-circle', label: 'UAT'},
+          {icon: 'flag', label: 'Launch'},
+          {icon: 'book-open', label: 'Enablement'}
+        ];
+        return `
+          <div class="flex items-center justify-between mt-4" aria-hidden="true">
+            ${phases.map((p, i) => `
+              ${i > 0 ? '<div class="flex-1 h-px bg-slate-200 mx-2"></div>' : ''}
+              <div class="flex flex-col items-center">
+                <i data-lucide="${p.icon}" class="w-5 h-5 text-[#0070F3]"></i>
+                <span class="text-xs mt-1 text-[#4A5568]">${p.label}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      function bucketAccordion(id, icon, label, contentFunc, headerTone='bg-slate-50'){
+        const expanded = STATE.openBuckets[id];
+        const contentId = `bucket-content-${id}`;
+        return `
+          <div class="flex flex-col">
+            <button
+              type="button"
+              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
+              data-action="toggle-bucket"
+              data-bucket="${id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+              style="border-radius:var(--radius)"
+            >
+              <div class="flex items-center justify-between px-5 py-4 ${headerTone}" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
+                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
+                </div>
+                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease">
+              ${expanded ? contentFunc() : ''}
+            </div>
+          </div>
+        `;
+      }
+      function onePackageContent(){
+        const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
+        return `
+          <div class="p-4">
+            <div class="sub-card p-3 text-sm">
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Critical app updates</div>
+              <label class="mt-2 flex items-center gap-2 text-xs">
+                <span class="text-[#4A5568]">Hours/package</span>
+                <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+                <span>→</span>
+                <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+              </label>
+              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
+              <div class="mt-2 text-[12px] flex flex-wrap gap-2">
+                <span class="rounded px-2 py-1 bg-slate-100">☁️ Cloud</span>
+                <span class="rounded px-2 py-1 bg-slate-100">🖥️ On-Prem</span>
+                <span class="rounded px-2 py-1 bg-slate-100">🔀 Hybrid</span>
+              </div>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function zeroDayContent(){
+        const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
+        return `
+          <div class="p-4">
+            <div class="sub-card p-3 text-sm">
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
+              <label class="mt-2 flex items-center gap-2 text-xs">
+                <span class="text-[#4A5568]">Current hrs</span>
+                <input class="w-20 rounded bg-slate-100 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+              </label>
+              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function perUserContent(){
+        const totalMin = Math.max(0, Number(STATE.impact.minutes));
+        const route=routeRecommendation(STATE.ctx);
+        return `
+          <div class="p-4">
+            <div class="sub-card p-3 text-sm">
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Per-user minutes saved</div>
+              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2">
+                <span class="tabular-nums">9 → ${totalMin} min</span>
+                <strong class="tabular-nums">${totalMin} min saved</strong>
+              </div>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+              ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
+              ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
+              ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
+            </div>
+            <div class="mt-3"><button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-3 py-1 text-xs w-full rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+          </div>
+        `;
+      }
+      function renderSolution(){
+        return `
+          <section id="panel-solution" class="space-y-3">
+            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              ${renderFlow()}
+              <div class="flex flex-col gap-3 relative">
+                <div class="sticky top-0 z-10 bg-[#F7F9FB] py-2 shadow-sm">
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="font-semibold">Recast Approach</span>
+                    <span class="text-[#4A5568]">${STATE.visitedCards.length} of 3 explored</span>
+                  </div>
+                </div>
+                <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
+                ${NEW_CARDS.map(card => popoutCard(card)).join('')}
+                <div class="sticky bottom-0 bg-[#F7F9FB] py-3 shadow-lg mt-3">
+                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+      function pill(label,active,action,value){
+        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+      }
+      function renderFlow(){
+        return `
+          <div class="section-card p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+                <div>
+                  <h3 class="text-base font-semibold">Application Workspace</h3>
+                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-[12px]">
+                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+              </div>
+            </div>
+            <div class="mt-2 flex gap-2 text-xs">
+              <div class="bg-slate-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3 text-var(--re-blue-bright)"></i> App readiness: 97%</div>
+              <div class="bg-slate-100 px-2 py-1 rounded flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3 text-var(--re-blue-bright)"></i> Automated workflows: 14 active</div>
+            </div>
+            <div id="flowCard" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
+                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
+                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
+                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
+              </div>
+              <div class="space-y-2 relative">
+                ${CATALOG.map(s=>`
+                  <div class="cat-row">
+                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
+                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                  </div>
+                `).join('')}
+                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to ring, policy, and scope.</div>
+              </div>
+              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3">
+                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
+                  <div class="flex items-center gap-3">
+                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
+                    <div class="text-sm">
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
+                    </div>
+                  </div>
+                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
+                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
+                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
+                  </div>
+                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
+                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                  </div>
+                </div>
+                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      const miniApps = [
         logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Excel','X','#107C41'),
-        logo('PowerPoint','P','#D24726'),
-        logo('Outlook','O','#106EBE'),
         logo('Microsoft Teams','T','#5B53D6'),
-        logo('Google Docs','Dc','#1A73E8'),
-        logo('Google Sheets','Sh','#1E8E3E'),
-        logo('Google Slides','Sl','#F9AB00')
-      ]},
-      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-        multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-        logo('Zoom','Z','#0B5CFF'),
-        logo('Gmail','G','#EA4335'),
-        logo('Google Meet','GM','#0F9D58')
-      ]},
-      {title:'WEB BROWSERS',id:'cat-browsers',items:[
-        triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-        ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-        flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
-      ]},
-      {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-        logo('Salesforce','SF','#00A1E0'),
-        logo('Workday','WD','#1F5BFF'),
-        logo('ServiceNow','SN','#81B29A'),
         logo('SAP','SAP','#0A6ED1'),
-        logo('Oracle NetSuite','NS','#C74634')
-      ]},
-      {title:'SECURITY & ACCESS',id:'cat-security',items:[
-        logo('Duo','D','#3CB371'),
-        logo('Okta','O','#007DC1'),
-        logo('Ping Identity','P','#C0172C'),
-        logo('Cisco AnyConnect','AC','#00B5AD'),
-        logo('Microsoft Defender','MD','#0067B8'),
-        logo('CrowdStrike Falcon','CS','#D61F26')
-      ]},
-      {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
-        logo('Adobe Acrobat','A','#ED2224'),
-        logo('Dropbox','DB','#0061FF'),
-        logo('Box','BX','#0061D5'),
-        logo('OneDrive','OD','#0A5BD5'),
-        logo('ZoomIt / Sysinternals','ZI','#58595B')
-      ]}
-    ];
-    function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
-    function mark(letter,color){
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
-          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,0.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
-          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="#E2E8F0"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="white">${letter}</text>
-        </svg>`;
-    }
-    function multiLogo(name,colors){
-      const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F3F4F6" stroke="#E2E8F0"/>${slices}</svg>` };
-    }
-    function triLogo(name,r1,r2,r3,r4){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F3F4F6" stroke="#E2E8F0"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
-    }
-    function ringLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F3F4F6" stroke="#E2E8F0"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
-    }
-    function flameLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F3F4F6" stroke="#E2E8F0"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
-    }
-    function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-    function modalBtn(id,label){
-      return `<button type="button" class="rounded-lg bg-bg-card border border-border shadow-sm px-4 py-2 text-sm font-medium text-primary-text hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="open-modal" data-id="${id}">${label}</button>`;
-    }
-    function renderModal(id){
-      let title = '';
-      let content = '';
-      if(id==='better'){
-        title = 'Better Together: Microsoft + Recast + Nerdio';
-        content = `
-          <p class="mt-2 text-sm text-secondary-text">Microsoft provides the trusted foundation — Intune and Azure handle security, device management, and compliance.</p>
-          <p class="mt-2 text-sm text-secondary-text">Recast adds the power layer — one workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.</p>
-          <ul class="mt-2 list-disc pl-5 text-sm text-secondary-text space-y-1">
-            <li>8,000+ pre-tested enterprise apps ready to go</li>
-            <li>Automated patching, validation, and compliance</li>
-            <li>Unified dashboard for full visibility</li>
-            <li>Policy-driven automation that cuts manual work by 60%+</li>
-            <li>End users get the right app instantly — no tickets, no waiting</li>
-          </ul>
-          <p class="mt-2 text-sm text-secondary-text">Configured once — delivered everywhere.</p>
-          <p class="mt-2 text-sm text-secondary-text">Nerdio completes the story — giving partners and customers the front-end workspace experience that brings Recast’s automation and Microsoft’s infrastructure together in a single, easy-to-use platform.</p>
-        `;
-      } else if(id==='onboarding'){
-        title = 'Fast, Guided Onboarding';
-        content = `
-          <ul class="mt-2 list-disc pl-5 text-sm text-secondary-text space-y-1">
-            <li>Standard rollout: 4–6 weeks (Kickoff → Implementation → UAT → Launch → Enablement)</li>
-            <li>Works with existing Intune/Azure setup — no new infrastructure</li>
-            <li>Guided setup with a Customer Success Manager</li>
-            <li>Only 1–2 IT engineers needed part-time</li>
-            <li>Includes training, certification, and success planning</li>
-          </ul>
-          <p class="mt-2 text-sm text-secondary-text">From first call to production in weeks, not months.</p>
-        `;
-      } else if(id==='proven'){
-        title = 'Proven and Trusted';
-        content = `
-          <ul class="mt-2 list-disc pl-5 text-sm text-secondary-text space-y-1">
-            <li>60M+ endpoints, 70K+ customers, 130+ countries</li>
-            <li>Trusted by global brands and public sector leaders</li>
-            <li>87 CSAT — highest in the industry</li>
-            <li>SOC 2 and ISO 27001 certified</li>
-          </ul>
-          <p class="mt-2 text-sm text-secondary-text">Trusted by organizations that can’t afford downtime.</p>
+        logo('Zoom','Z','#0B5CFF')
+      ];
+      function renderROI(){
+        const r = calcROI();
+        return `
+          <section id="panel-roi" class="space-y-3">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+              ${kpiId('users','FTEs freed', r.fteEquivalent, 'Equivalent IT capacity', 'kpi-fte')}
+              ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
+              ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Productivity Impact', 'kpi-year')}
+              ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
+            </div>
+            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+              <div class="section-card p-4 lg:col-span-2">
+                <h3 class="text-base font-semibold">Assumptions (edit)</h3>
+                <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  ${numInput('# users','users', r.i.users)}
+                  ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
+                  ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
+                  ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
+                  ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
+                </div>
+                <div class="mt-4">
+                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Current State
+                  </button>
+                </div>
+                <div class="mt-6 space-y-3">
+                  ${bucketAccordion('one', 'wand-sparkles', 'One package → Deploy anywhere (cloud / on-prem / hybrid)', onePackageContent)}
+                  ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patches in Hours', zeroDayContent)}
+                  ${bucketAccordion('per', 'mouse-pointer', 'Smart icons → Always the right app (Windows / Mac / VPN / VDI)', perUserContent)}
+                </div>
+              </div>
+              <div class="section-card p-4">
+                <h3 class="text-base font-semibold">Results</h3>
+                <div class="mt-3 space-y-2 text-sm">
+                  ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
+                  ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
+                  ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
+                  ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
+                  ${kvId('ROI', r.roiPct+'%', 'res-roi')}
+                  ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
+                    <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
         `;
       }
-      return `
-        <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50" data-action="close-modal-bg">
-          <div class="bg-bg-card rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 scale-95 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]" data-modal-content>
-            <div class="flex justify-between items-start">
+      function calcROI(){
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+        const dollarSavedYear = dollarSavedMonth * 12;
+        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+        const roiPct = i.recastAnnualCost ? round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
+        const fteHoursYear = 2080;
+        const fteEquivalent = round((totalHoursSavedMonth * 12) / fteHoursYear);
+        return {
+          i,
+          ticketsMonth,
+          hoursFromMinutes: round(hoursFromMinutes),
+          totalHoursSavedMonth: round(totalHoursSavedMonth),
+          dollarSavedMonth: round(dollarSavedMonth),
+          dollarSavedYear: round(dollarSavedYear),
+          netBenefitYear: round(netBenefitYear),
+          roiPct,
+          fteEquivalent
+        };
+      }
+      function updateROIOutputs(){
+        const r = calcROI();
+        setText('kpi-hours', r.totalHoursSavedMonth);
+        setText('kpi-year', '$'+num(r.dollarSavedYear));
+        setText('kpi-fte', r.fteEquivalent);
+        setText('kpi-tickets', num(r.ticketsMonth));
+        setText('res-hours', r.totalHoursSavedMonth);
+        setText('res-month', '$'+num(r.dollarSavedMonth));
+        setText('res-year', '$'+num(r.dollarSavedYear));
+        setText('res-net', '$'+num(r.netBenefitYear));
+        setText('res-roi', r.roiPct+'%');
+        setText('res-fte', r.fteEquivalent);
+      }
+      function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
+      function kpiId(icon,label,value,hint,id){
+        return `
+          <div class="section-card p-3">
+            <div class="flex items-center justify-between">
               <div>
-                <h2 id="modal-title" class="text-lg font-bold">${title}</h2>
-                ${content}
+                <div class="text-[11px] text-[#4A5568]">${label}</div>
+                <div id="${id}" class="text-xl font-semibold tabular-nums">${value}</div>
               </div>
-              <button type="button" class="text-secondary-text hover:text-primary-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="close-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
+              <i data-lucide="${icon}" class="w-5 h-5 text-[#0070F3]"></i>
             </div>
+            ${hint ? `<div class="mt-1 text-[11px] text-[#4A5568]">${hint}</div>` : ''}
           </div>
-        </div>
-      `;
-    }
-    function renderEditWhyModal() {
-      return `
-        <div class="fixed inset-0 bg-black/30 flex items-center justify-center z-50" data-action="close-modal-bg">
-          <div class="bg-bg-card rounded-2xl shadow-xl p-6 max-w-5xl w-full h-[90vh] overflow-auto mx-4 scale-95 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]" data-modal-content>
-            <div class="flex justify-between items-start">
-              <h2 class="text-lg font-bold">Edit Why Sections</h2>
-              <button type="button" class="text-secondary-text hover:text-primary-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" data-action="close-modal"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="mt-4 space-y-6">
-              <div>
-                <h3 class="font-medium">Why Change</h3>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Subtitle</span>
-                  <input id="why-change-subtitle" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent" value="${STATE.whySections.change.subtitle}">
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Intro (use \\n for line breaks)</span>
-                  <textarea id="why-change-intro" rows="3" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.change.intro}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Bullets (one per line)</span>
-                  <textarea id="why-change-bullets" rows="5" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.change.bullets.join('\n')}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Conclusion</span>
-                  <textarea id="why-change-conclusion" rows="2" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.change.conclusion}</textarea>
-                </label>
-              </div>
-              <div>
-                <h3 class="font-medium">Why Now</h3>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Subtitle</span>
-                  <input id="why-now-subtitle" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent" value="${STATE.whySections.now.subtitle}">
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Intro (use \\n for line breaks)</span>
-                  <textarea id="why-now-intro" rows="3" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.now.intro}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Bullets (one per line)</span>
-                  <textarea id="why-now-bullets" rows="5" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.now.bullets.join('\n')}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Conclusion</span>
-                  <textarea id="why-now-conclusion" rows="2" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.now.conclusion}</textarea>
-                </label>
-              </div>
-              <div>
-                <h3 class="font-medium">Why Better Together</h3>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Subtitle</span>
-                  <input id="why-better-subtitle" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent" value="${STATE.whySections.better.subtitle}">
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Intro (use \\n for line breaks)</span>
-                  <textarea id="why-better-intro" rows="3" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.better.intro}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Bullets (one per line)</span>
-                  <textarea id="why-better-bullets" rows="5" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.better.bullets.join('\n')}</textarea>
-                </label>
-                <label class="block mt-2">
-                  <span class="text-sm text-secondary-text">Conclusion</span>
-                  <textarea id="why-better-conclusion" rows="2" class="mt-1 w-full rounded-lg border border-border p-2 focus:border-accent focus:ring-accent">${STATE.whySections.better.conclusion}</textarea>
-                </label>
-              </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-              <button type="button" class="rounded-full border border-border bg-bg-card px-4 py-2 text-sm" data-action="close-modal">Cancel</button>
-              <button type="button" class="rounded-full border border-border bg-bg-card px-4 py-2 text-sm" data-action="reset-why">Reset to Default</button>
-              <button type="button" class="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white" data-action="save-why">Save</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    function attachEvents(){
-      const root=document.getElementById('app');
-      root.querySelectorAll('[data-action="tab"]').forEach(b=>b.addEventListener('click',e=>{ STATE.tab=e.currentTarget.getAttribute('data-id'); render(); }));
-      root.querySelector('[data-action="toggle-labels-recast"]')?.addEventListener('click',()=>{ STATE.showLabelsRecast=!STATE.showLabelsRecast; render(); });
-      root.querySelector('[data-action="toggle-labels-nerdio"]')?.addEventListener('click',()=>{ STATE.showLabelsNerdio=!STATE.showLabelsNerdio; render(); });
-      root.querySelectorAll('[data-action="number"]').forEach(n=>n.addEventListener('input',e=>{
-        const key=e.currentTarget.getAttribute('data-key'); const v=Number(e.target.value); if(isFinite(v)) STATE.inputs[key]=v; saveState(); render();
-      }));
-      root.querySelector('[data-action="copy"]')?.addEventListener('click', async ()=>{
-        const calc = computeROI();
-        try { await navigator.clipboard.writeText(calc.summary); } catch {
-          const ta=document.createElement('textarea'); ta.value=calc.summary; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        `;
+      }
+      function kvId(label,value,id){
+        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
+      }
+      function numInput(label,key,value){
+        return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[#4A5568]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+      }
+      const CATALOG=[
+        {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+          logo('Microsoft Word','W','#185ABD'),
+          logo('Microsoft Excel','X','#107C41'),
+          logo('PowerPoint','P','#D24726'),
+          logo('Outlook','O','#106EBE'),
+          logo('Microsoft Teams','T','#5B53D6'),
+          logo('Google Docs','Dc','#1A73E8'),
+          logo('Google Sheets','Sh','#1E8E3E'),
+          logo('Google Slides','Sl','#F9AB00')
+        ]},
+        {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
+          multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
+          logo('Zoom','Z','#0B5CFF'),
+          logo('Gmail','G','#EA4335'),
+          logo('Google Meet','GM','#0F9D58')
+        ]},
+        {title:'WEB BROWSERS',id:'cat-browsers',items:[
+          triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
+          ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
+          flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+        ]},
+        {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
+          logo('Salesforce','SF','#00A1E0'),
+          logo('Workday','WD','#1F5BFF'),
+          logo('ServiceNow','SN','#81B29A'),
+          logo('SAP','SAP','#0A6ED1'),
+          logo('Oracle NetSuite','NS','#C74634')
+        ]},
+        {title:'SECURITY & ACCESS',id:'cat-security',items:[
+          logo('Duo','D','#3CB371'),
+          logo('Okta','O','#007DC1'),
+          logo('Ping Identity','P','#C0172C'),
+          logo('Cisco AnyConnect','AC','#00B5AD'),
+          logo('Microsoft Defender','MD','#0067B8'),
+          logo('CrowdStrike Falcon','CS','#D61F26')
+        ]},
+        {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
+          logo('Adobe Acrobat','A','#ED2224'),
+          logo('Dropbox','DB','#0061FF'),
+          logo('Box','BX','#0061D5'),
+          logo('OneDrive','OD','#0A5BD5'),
+          logo('ZoomIt / Sysinternals','ZI','#58595B')
+        ]}
+      ];
+      function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
+      function mark(letter,color){
+        return `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
+            <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
+            <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(0,0,0,.15)"/>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
+          </svg>`;
+      }
+      function multiLogo(name,colors){
+        const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/>${slices}</svg>` };
+      }
+      function triLogo(name,r1,r2,r3,r4){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
+      }
+      function ringLogo(name,c1,c2){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
+      }
+      function flameLogo(name,c1,c2){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
+      }
+      function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+      /* ---------- Per-user cached Current State (IDs + storage) ---------- */
+      const USER_ID = String(window.APP_USER_ID || "guest");
+      const PAGE_SCOPE = location.origin + location.pathname + location.search;
+      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
+      let DEFAULT_CURRENT_STATE = null;
+      const $ = (sel, ctx = document) => ctx.querySelector(sel);
+      const fields = {
+        whyChange: () => $('#whyChange'),
+        whyNow: () => $('#whyNow'),
+        whyRecast: () => $('#whyRecast'),
+      };
+      function captureDefaultsOnce(){
+        if (DEFAULT_CURRENT_STATE) return;
+        DEFAULT_CURRENT_STATE = {
+          whyChange: fields.whyChange()?.value ?? "",
+          whyNow: fields.whyNow()?.value ?? "",
+          whyRecast: fields.whyRecast()?.value ?? "",
+        };
+      }
+      function readFields(){
+        return {
+          whyChange: fields.whyChange()?.value ?? "",
+          whyNow: fields.whyNow()?.value ?? "",
+          whyRecast: fields.whyRecast()?.value ?? "",
+        };
+      }
+      function writeFields(data){
+        if(!data) return;
+        if(fields.whyChange()) fields.whyChange().value = data.whyChange ?? "";
+        if(fields.whyNow()) fields.whyNow().value = data.whyNow ?? "";
+        if(fields.whyRecast()) fields.whyRecast().value = data.whyRecast ?? "";
+      }
+      function loadDraft(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        }catch{return null;}
+      }
+      function saveDraft(payload){
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
+        catch(e){ console.warn('Save failed (storage blocked or full):', e); }
+      }
+      function clearDraft(){
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+      }
+      function initCurrentStateModal(){
+        captureDefaultsOnce();
+        const draft = loadDraft();
+        if(draft) writeFields(draft);
+        const saveBtn = $('#btnSaveCurrentState');
+        const resetBtn = $('#btnResetCurrentState');
+        if (saveBtn && !saveBtn.dataset.wired){
+          saveBtn.dataset.wired = "1";
+          saveBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            saveDraft(readFields());
+          });
         }
-        STATE.copied=true; render(); setTimeout(()=>{ STATE.copied=false; render(); }, 1200);
-      });
-      root.querySelector('[data-action="toggle-advanced"]')?.addEventListener('click', () => { STATE.advancedOpen = !STATE.advancedOpen; render(); });
-      root.querySelectorAll('[data-action="preset"]').forEach(b=>b.addEventListener('click',e=>{
-        const preset = e.currentTarget.getAttribute('data-preset');
-        let vals;
-        if(preset === 'conservative') vals = {adminHoursPer100PerMonth:40, endUserMinsPerUserPerMonth:3, azureReductionPct:10};
-        else if(preset === 'benchmark') vals = {adminHoursPer100PerMonth:60, endUserMinsPerUserPerMonth:5, azureReductionPct:20};
-        else if(preset === 'aggressive') vals = {adminHoursPer100PerMonth:70, endUserMinsPerUserPerMonth:8, azureReductionPct:25};
-        if(vals) { Object.assign(STATE.inputs, vals); saveState(); render(); }
-      }));
-      root.querySelector('[data-action="reset-benchmarks"]')?.addEventListener('click', () => { STATE.inputs = { ...DEFAULT_INPUTS }; saveState(); render(); });
-      root.querySelector('[data-action="start"]')?.addEventListener('click', startAll);
-      root.querySelector('[data-action="reset"]')?.addEventListener('click', resetAll);
-      root.querySelectorAll('[data-action="open-modal"]').forEach(b=>b.addEventListener('click',e=>{ STATE.activeModal=e.currentTarget.getAttribute('data-id'); render(); }));
-      root.querySelector('[data-action="close-modal-bg"]')?.addEventListener('click',e=>{ if(e.target===e.currentTarget){ STATE.activeModal=null; render(); } });
-      root.querySelectorAll('[data-action="close-modal"]').forEach(b=>b.addEventListener('click',()=>{ STATE.activeModal=null; render(); }));
-      root.querySelector('[data-action="save-why"]')?.addEventListener('click', () => {
-        STATE.whySections.change.subtitle = document.getElementById('why-change-subtitle').value.trim();
-        STATE.whySections.change.intro = document.getElementById('why-change-intro').value.trim();
-        STATE.whySections.change.bullets = document.getElementById('why-change-bullets').value.split('\n').map(s => s.trim()).filter(Boolean);
-        STATE.whySections.change.conclusion = document.getElementById('why-change-conclusion').value.trim();
-        STATE.whySections.now.subtitle = document.getElementById('why-now-subtitle').value.trim();
-        STATE.whySections.now.intro = document.getElementById('why-now-intro').value.trim();
-        STATE.whySections.now.bullets = document.getElementById('why-now-bullets').value.split('\n').map(s => s.trim()).filter(Boolean);
-        STATE.whySections.now.conclusion = document.getElementById('why-now-conclusion').value.trim();
-        STATE.whySections.better.subtitle = document.getElementById('why-better-subtitle').value.trim();
-        STATE.whySections.better.intro = document.getElementById('why-better-intro').value.trim();
-        STATE.whySections.better.bullets = document.getElementById('why-better-bullets').value.split('\n').map(s => s.trim()).filter(Boolean);
-        STATE.whySections.better.conclusion = document.getElementById('why-better-conclusion').value.trim();
-        saveWhyToStorage();
-        STATE.activeModal = null;
-        render();
-      });
-      root.querySelector('[data-action="reset-why"]')?.addEventListener('click', () => {
-        STATE.whySections = { ...DEFAULT_WHY_SECTIONS };
-        saveWhyToStorage();
-        STATE.activeModal = null;
-        render();
-      });
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', toggleAccordion);
-        header.addEventListener('keydown', accordionKeydown);
-      });
-      root.querySelector('[data-action="toggle-all-accordions"]')?.addEventListener('click', () => {
-        const headers = document.querySelectorAll('.accordion-header');
-        const allOpen = [...headers].every(h => h.getAttribute('aria-expanded') === 'true');
-        headers.forEach(header => {
-          const e = { currentTarget: header };
-          if (allOpen) {
-            if (header.getAttribute('aria-expanded') === 'true') toggleAccordion(e);
-          } else {
-            if (header.getAttribute('aria-expanded') === 'false') toggleAccordion(e);
-          }
-        });
-        const btn = document.querySelector('[data-action="toggle-all-accordions"]');
-        if (btn) btn.textContent = allOpen ? 'Expand All' : 'Collapse All';
-      });
-      document.addEventListener('keydown', e=>{if(e.key==='Escape' && STATE.activeModal){ STATE.activeModal=null; render(); }});
-    }
-    function toggleAccordion(e) {
-      const header = e.currentTarget;
-      const content = header.nextElementSibling;
-      const isOpen = header.getAttribute('aria-expanded') === 'true';
-      header.setAttribute('aria-expanded', `${!isOpen}`);
-      const chevron = header.querySelector('.chevron');
-      if (isOpen) {
-        chevron.classList.remove('rotate-180');
-        content.style.maxHeight = '0px';
-        header.parentElement.classList.remove('border-l-4', 'border-accent');
-      } else {
-        chevron.classList.add('rotate-180');
-        content.style.maxHeight = `${content.scrollHeight}px`;
-        header.parentElement.classList.add('border-l-4', 'border-accent');
-        header.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        if (resetBtn && !resetBtn.dataset.wired){
+          resetBtn.dataset.wired = "1";
+          resetBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            clearDraft();
+            writeFields(DEFAULT_CURRENT_STATE);
+          });
+        }
       }
-    }
-    function accordionKeydown(e) {
-      if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) {
-        e.preventDefault();
-        const headers = [...document.querySelectorAll('.accordion-header')];
-        let idx = headers.indexOf(e.currentTarget);
-        if (e.key === 'ArrowDown') idx = (idx + 1) % headers.length;
-        else if (e.key === 'ArrowUp') idx = (idx - 1 + headers.length) % headers.length;
-        else if (e.key === 'Home') idx = 0;
-        else if (e.key === 'End') idx = headers.length - 1;
-        headers[idx].focus();
-      } else if (['Enter', ' '].includes(e.key)) {
-        e.preventDefault();
-        toggleAccordion(e);
+      /* ------------------------------------------------------------------- */
+      function renderModal(){
+        if(!STATE.modalOpen) return '';
+        const buf = STATE.editBuffers;
+        const toLines = arr => arr.join('\n');
+        const ensure = v => v ?? '';
+        return `
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
+            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
+              <div class="flex items-center justify-between">
+                <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
+                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-[#4A5568]">Enter up to four bullet points per section. Each new line becomes a bullet.</p>
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                ${editorBox('change','Why Change', ensure(buf.change) || toLines(STATE.currentStateTexts.change))}
+                ${editorBox('now','Why Now', ensure(buf.now) || toLines(STATE.currentStateTexts.now))}
+                ${editorBox('recast','Why Recast', ensure(buf.recast) || toLines(STATE.currentStateTexts.recast))}
+              </div>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
+                  <i data-lucide="save" class="w-4 h-4"></i> Save
+                </button>
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
+                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
       }
-    }
-    const animations = [
-      {sel: '.bar', anim: 'animate-bar-grow', initial: {transform: 'scaleX(0)'}},
-      {sel: '.flow-bar', anim: 'animate-bar-grow', initial: {transform: 'scaleX(0)'}},
-      {sel: '.user-beam', anim: 'animate-bar-grow', initial: {transform: 'scaleX(0)'}},
-      {sel: '.bolt-line', anim: 'animate-bolt-drop', initial: {transform: 'scaleY(0)'}},
-      {sel: '.tile', anim: 'animate-tile-pulse', initial: {transform: 'scale(0.7)', opacity: '0.4', backgroundColor: '#4A5568'}},
-      {sel: '.logo-ring', anim: 'animate-app-pop', initial: {transform: 'scale(0.85)', filter: 'saturate(0.4)', opacity: '0.65'}},
-      {sel: '.badge', anim: 'animate-badge-drop', initial: {opacity: '0', transform: 'translateY(-6px) scale(0.9)'}},
-      {sel: '.policy-dot', anim: 'animate-dot-on', initial: {transform: 'scale(0.7)', opacity: '0.4', backgroundColor: '#4A5568'}},
-    ];
-    function resetAnimations(){
-      animations.forEach(({sel, anim, initial}) => {
-        document.querySelectorAll(sel).forEach(el => {
-          el.classList.remove(anim);
-          if(initial){
-            Object.entries(initial).forEach(([key, val]) => el.style[key] = val);
+      function editorBox(key,label,value){
+        const idMap = { change:'whyChange', now:'whyNow', recast:'whyRecast' };
+        const tid = idMap[key] || ('why-'+key);
+        return `
+          <label class="flex flex-col gap-2">
+            <span class="text-sm font-semibold">${label}</span>
+            <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 4)">${value}</textarea>
+          </label>
+        `;
+      }
+      function attachEvents(){
+        const root=document.getElementById('app');
+        root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
+          STATE.activeTab=e.currentTarget.getAttribute('data-tab');
+          STATE.visitedCards = [];
+          render();
+        }));
+        root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
+          STATE.activeTab=e.currentTarget.getAttribute('data-next');
+          STATE.openWhyModal = null;
+          render();
+        }));
+        root.querySelectorAll('[data-action="open-why-modal"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-why');
+          STATE.openWhyModal = id;
+          render();
+        }));
+        root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.openWhyModal = null;
+          render();
+        }));
+        root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-card');
+          const wasOpen = STATE.openCards[id];
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
+          STATE.openCards[id] = !wasOpen;
+          if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) {
+            STATE.visitedCards.push(id);
           }
+          render();
+          if (STATE.openCards[id]) {
+            setTimeout(() => {
+              e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 200);
+          }
+        }));
+        root.querySelectorAll('[data-action="expand-all"]').forEach(b=>b.addEventListener('click',()=>{
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
+          STATE.visitedCards = ['core', 'onboarding', 'trust'];
+          render();
+        }));
+        root.querySelectorAll('[data-action="toggle-bucket"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-bucket');
+          STATE.openBuckets[id] = !STATE.openBuckets[id];
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
+        root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
+        root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
+        const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); render(); });
+        const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); render(); });
+        const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); render(); });
+        root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
+          const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
+          if (kind==='minutes') STATE.impact.minutes+=val;
+          if (kind==='pkgHours') STATE.impact.pkgHours+=val;
+          if (kind==='riskHrs') STATE.impact.riskHrs+=val;
+          updateROIOutputs();
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
+          const key=e.currentTarget.getAttribute('data-key');
+          const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+          STATE.roiInputs[key]=isFinite(v)?v:0;
+          updateROIOutputs();
+        }));
+        const resetCalc=root.querySelector('[data-action="reset-calculator"]');
+        if(resetCalc) resetCalc.addEventListener('click', ()=>{
+          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
+          STATE.impact = { ...STATE.defaults.impact };
+          STATE.copied = false;
+          render();
         });
-      });
-    }
-    function addAnimations(){
-      animations.forEach(({sel, anim}) => {
-        document.querySelectorAll(sel).forEach(el => el.classList.add(anim));
-      });
-    }
-    function startAll(){
-      const nerdio=document.getElementById('nerdioCard');
-      const recast=document.getElementById('recastCard');
-      resetAnimations();
-      nerdio.offsetWidth;
-      recast.offsetWidth;
-      addAnimations();
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      const success=document.getElementById('flowSuccess');
-      if(avatar&&badge){
-        avatar.classList.remove('bg-accent');
-        avatar.classList.add('bg-brand-orange/90');
-        badge.classList.remove('bg-accent');
-        badge.classList.add('bg-brand-orange');
-        badge.textContent='!';
-        setTimeout(() => {
-          avatar.classList.remove('bg-brand-orange/90');
-          avatar.classList.add('bg-accent');
-          badge.classList.remove('bg-brand-orange');
-          badge.classList.add('bg-accent');
-          badge.textContent='✓';
+        const copyBtn=root.querySelector('[data-action="copy-onepager"]');
+        if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+          const i = STATE.roiInputs;
+          const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+          const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
+          const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
+          const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
+          const dollarSavedYear = dollarSavedMonth * 12;
+          const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
+          const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
+          const fteHoursYear = 2080;
+          const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+          const body =
+  `Recast Application Workspace — Executive One-Pager
+  Assumptions
+   - Users: ${i.users}
+   - Tickets per user / month: ${i.ticketsPerUserPerMonth}
+   - Avg handle: ${i.avgHandleMins} mins
+   - Loaded cost: $${i.loadedCostPerHour}/hr
+   - Subscription (annual): $${i.recastAnnualCost}
+  Observed demo impact (illustrative)
+   - Minutes saved per user (monthly): ${STATE.impact.minutes}
+   - Packaging hours avoided (org): ${STATE.impact.pkgHours}
+   - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
+  Calculated outcomes
+   - Tickets / month: ${num(ticketsMonth)}
+   - Hours saved / month: ${round(totalHoursSavedMonth)}
+   - $ saved / month: $${num(dollarSavedMonth)}
+   - $ saved / year: $${num(dollarSavedYear)}
+   - Net benefit / year: $${num(netBenefitYear)}
+   - ROI: ${round(roiPct)}%
+   - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+  Notes: Illustrative; replace with your data.`;
+          try { await navigator.clipboard.writeText(body); } catch {
+            const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          }
+          STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+        });
+        const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
+        const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
+        const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; toggleOverlay(); buildFlow(); });
+        root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('icon-launch'); setTimeout(()=>icon.classList.remove('icon-launch'), 500); }));
+        const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
+        if(openEditor) openEditor.addEventListener('click', ()=>{
+          STATE.modalOpen = true;
+          STATE.editBuffers = { change: '', now: '', recast: '' };
+          render();
+          setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+          setTimeout(()=>{ initCurrentStateModal(); }, 0);
+        });
+      }
+      function toggleOverlay(){
+        const overlay = document.getElementById('overlayTag');
+        if(STATE.showLabels){
+          overlay.classList.remove('hidden');
+          setTimeout(()=>{ overlay.classList.add('hidden'); }, 3000);
+        }
+      }
+      function buildFlow(){
+        let base=0;
+        CATALOG.forEach(section=>{
+          const mount=document.getElementById(section.id); if(!mount) return;
+          mount.innerHTML='';
+          section.items.forEach((itm,idx)=>{
+            const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.2).toFixed(2)+'s');
+            const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+            wrap.appendChild(ring);
+            if(STATE.showLabels){ 
+              const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label);
+              const meta=document.createElement('div'); meta.className='meta-label flex flex-wrap gap-1 mt-1';
+              meta.innerHTML = `<span>Ring: Pilot</span><span>Policy: MFA required</span><span>Region: EMEA</span>`;
+              wrap.appendChild(meta);
+            }
+            mount.appendChild(wrap);
+          });
+          base+=1.5;
+        });
+        buildTiles(document.getElementById('flowConnA'), 14, 3);
+        buildTiles(document.getElementById('flowConnB'), 14, 3.5);
+        buildTiles(document.getElementById('flowConnC'), 14, 4);
+        buildTiles(document.getElementById('flowGrpA'), 18, 5);
+        buildTiles(document.getElementById('flowGrpB'), 18, 5.5);
+        buildTiles(document.getElementById('flowGrpC'), 18, 6);
+        buildTiles(document.getElementById('flowDevA'), 10, 8);
+        buildTiles(document.getElementById('flowDevB'), 10, 8.5);
+        buildTiles(document.getElementById('flowDevC'), 10, 9);
+        const avatar=document.getElementById('endUserAvatar');
+        const badge=document.getElementById('endUserBadge');
+        if(avatar){ avatar.style.background='#EA4335'; avatar.textContent='U'; }
+        if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
+        const message = document.getElementById('endUserMessage');
+        if(message) message.textContent = 'Apps on demand — no waiting, no tickets.';
+        const mini = document.getElementById('miniWorkspace');
+        if(mini) mini.classList.add('hidden');
+        const counters = document.getElementById('progressCounters');
+        if(counters) counters.classList.add('hidden');
+        const card = document.getElementById('flowCard');
+        if(card) card.classList.remove('run');
+        if(STATE.showLabels) card.classList.add('show-labels');
+        else card.classList.remove('show-labels');
+        const endCard = document.getElementById('endUserCard');
+        if(endCard) endCard.classList.remove('end-user-expand');
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        updateProgress();
+        const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+      }
+      function buildTiles(container,count,baseDelay){
+        if(!container) return; container.innerHTML='';
+        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
+      }
+      function startFlow(){
+        const card=document.getElementById('flowCard'); if(!card) return;
+        card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
+        const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
+        const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
+        const message = document.getElementById('endUserMessage'); const mini = document.getElementById('miniWorkspace');
+        const counters = document.getElementById('progressCounters'); const endCard = document.getElementById('endUserCard');
+        if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),2000); }
+        if(success) success.classList.add('hidden');
+        if(counters) counters.classList.remove('hidden');
+        let interval = setInterval(updateProgress, 100);
+        setTimeout(()=>{
+          if(avatar){ avatar.style.background= 'var(--re-green)'; }
+          if(badge){ badge.textContent='✓'; badge.style.background= 'var(--re-green)'; }
+          if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
+          if(mini) mini.classList.remove('hidden');
+          if(endCard) endCard.classList.add('end-user-expand');
           if(success) success.classList.remove('hidden');
-        }, 2300);
+          clearInterval(interval);
+        }, 11000);
+        setTimeout(()=> card.classList.remove('run'), 12000);
       }
-    }
-    function resetAll(){
-      resetAnimations();
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      const success=document.getElementById('flowSuccess');
-      if(avatar){
-        avatar.classList.remove('bg-accent');
-        avatar.classList.add('bg-brand-orange/90');
+      function updateProgress(){
+        if(STATE.progress.apps < 128) STATE.progress.apps += 4;
+        if(STATE.progress.time < 46) STATE.progress.time += 2;
+        if(STATE.progress.tickets < 73) STATE.progress.tickets += 3;
+        setText('appsProcessed', STATE.progress.apps > 128 ? 128 : STATE.progress.apps);
+        setText('timeSaved', STATE.progress.time > 46 ? 46 : STATE.progress.time);
+        setText('ticketsAvoided', STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets);
       }
-      if(badge){
-        badge.classList.remove('bg-accent');
-        badge.classList.add('bg-brand-orange');
-        badge.textContent='!';
+      function resetFlow(){
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.showLabels = false;
+        buildFlow();
       }
-      if(success) success.classList.add('hidden');
-      buildNerdio();
-      buildRecast();
-    }
-    document.addEventListener('DOMContentLoaded', () => { loadState(); render(); });
-  </script>
-</body>
+      function attachAccordionKeyboard(){
+        document.addEventListener('keydown', (e) => {
+          const target = e.target;
+          if (!target.classList.contains('accordion-header')) return;
+          const headers = Array.from(document.querySelectorAll('.accordion-header'));
+          const idx = headers.indexOf(target);
+          if (e.key === 'ArrowDown') {
+            const nextIdx = (idx + 1) % headers.length;
+            headers[nextIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'ArrowUp') {
+            const prevIdx = (idx - 1 + headers.length) % headers.length;
+            headers[prevIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'Home') {
+            headers[0].focus();
+            e.preventDefault();
+          } else if (e.key === 'End') {
+            headers[headers.length - 1].focus();
+            e.preventDefault();
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            target.click();
+            e.preventDefault();
+          }
+        });
+      }
+      document.addEventListener('DOMContentLoaded', render);
+      document.addEventListener('click', (e)=>{
+        const act = e.target.closest('[data-action]');
+        if(!act) return;
+        const action = act.getAttribute('data-action');
+        if(action==='close-modal'){
+          STATE.modalOpen=false; render();
+        }
+        if(action==='edit-buffer'){
+          const key = act.getAttribute('data-key');
+          act.addEventListener('input', (evt)=>{ STATE.editBuffers[key] = evt.target.value; });
+        }
+        if(action==='save-currentstate'){
+          const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,4);
+          const change = parseLines($('#whyChange')?.value || '');
+          const now = parseLines($('#whyNow')?.value || '');
+          const recast = parseLines($('#whyRecast')?.value || '');
+          const fallback = STATE.defaultsCurrentState();
+          STATE.currentStateTexts = {
+            change: change.length?change:fallback.change,
+            now: now.length?now:fallback.now,
+            recast: recast.length?recast:fallback.recast
+          };
+          saveDraft({ whyChange: $('#whyChange')?.value || '', whyNow: $('#whyNow')?.value || '', whyRecast: $('#whyRecast')?.value || '' });
+          STATE.modalOpen=false;
+          STATE.activeTab='problems';
+          STATE.openWhy=null;
+          render();
+        }
+        if(action==='reset-currentstate-defaults'){
+          clearDraft();
+          captureDefaultsOnce();
+          writeFields(DEFAULT_CURRENT_STATE);
+        }
+      });
+      document.addEventListener('keydown',(e)=>{
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){
+          STATE.modalOpen=false;
+          STATE.openWhyModal=null;
+          render();
+        }
+      });
+    </script>
+  </body>
 </html>
