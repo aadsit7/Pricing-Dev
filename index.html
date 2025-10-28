@@ -83,19 +83,6 @@
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
       .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
-      .rc-check{width:28px;height:28px;stroke:var(--re-blue-bright);stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round;display:inline-block}
-      .accordion-header:hover{background:rgba(11,99,229,0.06)}
-      .accordion-content{transition:max-height 200ms ease-out,opacity 200ms ease-out;padding:0 20px;background:var(--re-navy)}
-      .accordion-content.expanded{padding:24px 20px}
-      .expanded{box-shadow:var(--rc-shadow)}
-      @keyframes bar-fill{from{width:0%}to{width:100%}}
-      .progress-bar-fill{animation:bar-fill 900ms ease-out forwards}
-      @keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-      .stagger-item{opacity:0;animation:appear 300ms ease-out forwards;animation-delay:calc(120ms * var(--idx))}
-      .logo-placeholder{filter:grayscale(100%);transition:filter 150ms ease}
-      .logo-placeholder:hover{filter:grayscale(0%)}
-      .metric-badge{background:var(--re-blue-bright);color:white;border-radius:9999px;padding:4px 12px;font-size:14px;font-weight:600;position:absolute;top:16px;right:16px}
-      .step-bg{background:rgba(14,159,110,0.08)}
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -115,7 +102,6 @@
         openWhyModal: null,
         openCards: { core: false, onboarding: false, trust: false },
         visitedCards: [],
-        animatedCards: { core: false, onboarding: false, trust: false },
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
@@ -193,17 +179,14 @@
           id: 'core',
           icon: 'layers',
           title: 'How Recast Does It.',
-          tiles: [
-            {icon: 'layout-grid', headline: 'One workspace for every app.', desc: 'Package, validate, deploy, retire across Intune, ConfigMgr, Citrix, Omnissa, Azure.'},
-            {icon: 'package-check', headline: '8,000+ pre-tested apps.', desc: 'Ready to deploy instantly.'},
-            {icon: 'shield-check', headline: 'Automated patching and validation.', desc: 'Keeps apps secure and compliant.'},
-            {icon: 'layout-dashboard', headline: 'Unified governance.', desc: 'One dashboard for visibility across environments.'},
-            {icon: 'settings', headline: 'Policy-driven automation.', desc: 'Reduces manual work by 60%+.'},
-            {icon: 'user-check', headline: 'End-user ready.', desc: 'Right app, right surface — no tickets, no delays.'}
+          bullets: [
+            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
+            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
+            'Automated patching and validation keep apps secure and compliant.',
+            'Unified dashboard for visibility and governance across all environments.',
+            'Policy-driven automation reduces manual work by over 60%.',
+            'End users get the right app instantly — no tickets, no delays.'
           ],
-          steps: ['Package', 'Validate', 'Deploy', 'Govern'],
-          stepIcons: ['package', 'check-square', 'send', 'scale'],
-          metric: 92,
           closer: 'Configured once — Delivered everywhere.',
           timeline: false,
           bgHeader: 'bg-[var(--re-navy)]',
@@ -212,13 +195,14 @@
         {
           id: 'onboarding',
           icon: 'clock',
-          steps: [
-            {title: 'Connect', desc: 'Link Microsoft tenant and existing tools.'},
-            {title: 'Configure', desc: 'Map rings, policies, and scopes.'},
-            {title: 'Automate', desc: 'Enable packaging and validation workflows.'},
-            {title: 'Scale', desc: 'Roll out to business units and regions.'}
+          title: 'Onboard & Up to Speed Fast.',
+          bullets: [
+            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
+            'No new infrastructure — integrates with your existing management tools.',
+            'Guided setup with dedicated Customer Success Manager.',
+            'Typical resource: 1–2 IT engineers part-time.',
+            'Enablement includes training, certification, and success planning.'
           ],
-          stats: ['Avg time to deploy: <30 days', 'No retraining', 'No new tools'],
           closer: 'From first call to production in weeks, not months.',
           timeline: true,
           bgHeader: 'bg-[var(--re-navy)]',
@@ -227,13 +211,14 @@
         {
           id: 'trust',
           icon: 'shield-check',
-          metrics: [
-            {number: 1000, label: 'enterprises automated', suffix: '+'},
-            {number: 8000, label: 'apps pre-tested', suffix: '+'},
-            {number: 60, label: 'manual work reduction', suffix: '%'}
+          title: 'Trusted by Customers',
+          bullets: [
+            '60M+ endpoints across 130+ countries.',
+            '70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.',
+            '87 CSAT Score | Most trusted in the industry',
+            'Proven scalability from small pilots to global deployments.',
+            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
           ],
-          testimonial: {quote: 'Recast helped us migrate 30,000 endpoints twice as fast — with fewer tickets.', attr: 'Global 500 Manufacturing'},
-          logos: ['Citibank', 'McKinsey & Company', 'U.S. Air Force', 'FEMA'],
           closer: 'Trusted by organizations that can’t afford downtime.',
           timeline: false,
           bgHeader: 'bg-[var(--re-navy)]',
@@ -255,11 +240,11 @@
         root.innerHTML = `
           <header class="relative">
             <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:var(--re-blue-bright)">Re</span><span style="color:var(--re-blue-mid)">cast</span> Software</h1>
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
-                  ? 'Gartner forecasts that by 2026, enterprises will face a pivotal shift in how applications are managed and experienced. Those that fail to simplify and modernize will fall behind in the next wave of digital work.'
-                  : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+                  ? 'AW works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
+                  : 'AW works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
               </p>
             </div>
             <div class="relative mx-auto max-w-6xl px-4">
@@ -378,12 +363,12 @@
                 <div class="space-y-4">
                   ${data.bullets.map(b=>`
                     <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <i data-lucide="check-circle" class="w-6 h-6 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
                       <p class="text-lg leading-relaxed text-[#4A5568]">${b}</p>
                     </div>
                   `).join('')}
                 </div>
-                <p class="mt-6 text-md italic text-[#4A5568]">${data.analyst}</p>
+                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm text-md italic text-[#4A5568] hover:shadow-md transition-shadow">${data.analyst}</div>
                 ${cta?`
                   <div class="mt-8 flex justify-center">
                     <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
@@ -426,7 +411,7 @@
             </button>
             <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
               <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
-                ${card.tiles.map(b=>`<li>${b}</li>`).join('')}
+                ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
               ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
               <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
@@ -692,9 +677,9 @@
                   </button>
                 </div>
                 <div class="mt-6 space-y-3">
-                  ${bucketAccordion('one', 'wand-sparkles', 'One package → Deploy anywhere (cloud / on-prem / hybrid)', onePackageContent)}
+                  ${bucketAccordion('one', 'wand-sparkles', 'Packaging Hours', onePackageContent)}
                   ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patches in Hours', zeroDayContent)}
-                  ${bucketAccordion('per', 'mouse-pointer', 'Smart icons → Always the right app (Windows / Mac / VPN / VDI)', perUserContent)}
+                  ${bucketAccordion('per', 'mouse-pointer', 'User Minutes Saved', perUserContent)}
                 </div>
               </div>
               <div class="section-card p-4">
@@ -1238,34 +1223,6 @@
           } else if (e.key === 'Enter' || e.key === ' ') {
             target.click();
             e.preventDefault();
-          }
-        });
-      }
-      function countUp(el, start, end, duration, suffix = '') {
-        let startTime = null;
-        function step(timestamp) {
-          if (!startTime) startTime = timestamp;
-          const progress = Math.min((timestamp - startTime) / duration, 1);
-          el.textContent = Math.floor(progress * (end - start) + start) + suffix;
-          if (progress < 1) {
-            requestAnimationFrame(step);
-          }
-        }
-        requestAnimationFrame(step);
-      }
-      function animateMetrics(){
-        NEW_CARDS.forEach(card => {
-          if (STATE.openCards[card.id] && !STATE.animatedCards[card.id]) {
-            if (card.id === 'core') {
-              const metricEl = document.getElementById('metric-core');
-              if (metricEl) countUp(metricEl, 0, card.metric, 800, '%');
-            } else if (card.id === 'trust') {
-              card.metrics.forEach((metric, i) => {
-                const metricEl = document.getElementById(`metric-${card.id}-${i}`);
-                if (metricEl) countUp(metricEl, 0, metric.number, 800, metric.suffix || '+');
-              });
-            }
-            STATE.animatedCards[card.id] = true;
           }
         });
       }
