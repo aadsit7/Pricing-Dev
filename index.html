@@ -107,7 +107,7 @@
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
         currentState: {
           change: {
-            intro: "Everyone's saying the same thing: the app layer is the bottleneck. McKinsey calls it \"the final mile of digital transformation.\" Gartner says \"modern management fails when app delivery stays manual.\" Forrester warns that \"endpoint complexity is now the biggest drag on IT productivity.\" Enterprise leaders already know it — everything modernized except how apps are managed.",
+            intro: "Everyone's saying the same thing: the app layer is the bottleneck. McKinsey calls it \"the final mile of digital transformation.\ Forrester warns that \"endpoint complexity is now the biggest drag on IT productivity.",
             bullets: [
               'The work has outgrown the tools. Thousands of apps. Hybrid platforms. Endless updates. Manual processes simply don\'t scale anymore.',
               'Teams can\'t keep up. Headcount is flat, but demand has exploded. IT is running at 120% capacity — doing more with less isn\'t sustainable.',
@@ -116,7 +116,7 @@
             analyst: "The industry's aligned: transformation fails or flies at the app layer — and right now, it's failing."
           },
           now: {
-            intro: "We're at an inflection point. Every analyst is calling it out — Gartner, Forrester, McKinsey — the moment where IT demand outpaces IT capacity for good. Teams are being asked to manage ten times the workload, with the same tools and the same headcount. Something has to give.",
+            intro: "We're at an inflection point. Teams are being asked to manage ten times the workload, with the same tools and the same headcount. Something has to give.",
             bullets: [
               'The math no longer works. The number of apps, platforms, and compliance checks keeps climbing, but teams aren\'t growing. You can\'t scale people the way you scale software.',
               'Work is everywhere, all the time. Users expect instant, secure access from any device, anywhere. The perimeter is gone — but the management model hasn\'t caught up.',
@@ -366,7 +366,10 @@
                     </div>
                   `).join('')}
                 </div>
-                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm text-base italic text-[#4A5568] hover:shadow-md transition-shadow">${data.analyst}</div>
+                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                  <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                  <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
+                </div>
                 ${cta?`
                   <div class="mt-8 flex justify-center">
                     <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
@@ -922,6 +925,8 @@
             e.preventDefault();
             clearDraft();
             writeFields(DEFAULT_CURRENT_STATE);
+            STATE.currentState = STATE.defaultsCurrentState();
+            render();
           });
         }
       }
@@ -1284,6 +1289,8 @@
           clearDraft();
           captureDefaultsOnce();
           writeFields(DEFAULT_CURRENT_STATE);
+          STATE.currentState = STATE.defaultsCurrentState();
+          render();
         }
       });
       document.addEventListener('keydown',(e)=>{
