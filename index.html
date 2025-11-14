@@ -95,7 +95,7 @@
         defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
         ctx: { device: 'Windows', network: 'Corporate', compliant: true },
         packHrs: 8, configHrs: 2, currentHrs: 24,
-        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035 },
+        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 },
         copied: false,
         showLabels: false,
         showSolutionCards: true,
@@ -265,7 +265,7 @@
           <main class="mx-auto max-w-6xl px-4 pb-16">
             ${STATE.activeTab==='roi' ? `
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              ${chip('App-Related Reactive Work Reduced (hours/month)', String(round((STATE.impact.minutes * STATE.roiInputs.users) / 60)), 'emerald')}
+              ${chip('Reactive Work Reduced', String(STATE.impact.minutes)+' min/user/mo', 'emerald')}
               ${chip('Hours Saved from Packaging', String(STATE.impact.pkgHours), 'sky')}
               ${chip('Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
             </div>` : ''}
@@ -352,7 +352,7 @@
         const headerTone = 'bg-slate-50';
         const cta = id === 'recast';
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay modal-open" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
             <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 95vh; overflow-y: auto;">
               <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
@@ -480,7 +480,7 @@
         return `
           <div class="p-4">
             <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Critical app updates</div>
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Hours Saved from Packaging</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
                 <span class="text-[#4A5568]">Hours/package</span>
                 <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
@@ -503,7 +503,7 @@
         return `
           <div class="p-4">
             <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Zero-day rollout</div>
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Hours Saved from Faster Patching</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
                 <span class="text-[#4A5568]">Current hrs</span>
                 <input class="w-20 rounded bg-slate-100 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
@@ -520,7 +520,7 @@
         return `
           <div class="p-4">
             <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Per-user minutes saved</div>
+              <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Reactive Work Reduced</div>
               <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2">
                 <span class="tabular-nums">9 → ${totalMin} min</span>
                 <strong class="tabular-nums">${totalMin} min saved</strong>
@@ -560,57 +560,155 @@
       function pill(label,active,action,value){
         return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
       }
+      function renderFlow(){
+        return `
+          <div class="section-card p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+                <div>
+                  <h3 class="text-base font-semibold">Application Workspace</h3>
+                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-[12px]">
+                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+              </div>
+            </div>
+            <div class="mt-2 flex gap-2 text-xs">
+            </div>
+            <div id="flowCard" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
+                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
+                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
+                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
+              </div>
+              <div class="space-y-2 relative">
+                ${CATALOG.map(s=>`
+                  <div class="cat-row">
+                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
+                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                  </div>
+                `).join('')}
+                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
+              </div>
+              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+              <div class="mt-3">
+                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
+                  <div class="flex items-center gap-3">
+                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
+                    <div class="text-sm">
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
+                    </div>
+                  </div>
+                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
+                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
+                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
+                  </div>
+                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
+                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                  </div>
+                </div>
+                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      const miniApps = [
+        logo('Microsoft Word','W','#185ABD'),
+        logo('Microsoft Teams','T','#5B53D6'),
+        logo('SAP','SAP','#0A6ED1'),
+        logo('Zoom','Z','#0B5CFF')
+      ];
       function renderROI(){
         const r = calcROI();
         return `
           <section id="panel-roi" class="space-y-3">
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
-              <div class="section-card p-4 lg:col-span-2">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div class="section-card p-4 md:col-span-2">
                 <h3 class="text-base font-semibold">Assumptions (edit)</h3>
-                <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
                   ${numInput('# users','users', r.i.users)}
-                  ${numInput('App-related tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                </div>
-                <div class="mt-4">
-                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
-                    <i data-lucide="edit-3" class="w-4 h-4"></i> Current State
-                  </button>
+                  ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
+                  ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
                 </div>
                 <div class="mt-6 space-y-3">
-                  ${bucketAccordion('one', 'wand-sparkles', 'Packaging Work Reduced', onePackageContent)}
-                  ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patch Time Reduced', zeroDayContent)}
-                  ${bucketAccordion('per', 'mouse-pointer', 'App-Related Reactive Work Reduced', perUserContent)}
+                  ${bucketAccordion('per', 'mouse-pointer', 'Reactive Work Reduced', perUserContent)}
+                  ${bucketAccordion('one', 'wand-sparkles', 'Hours Saved from Packaging', onePackageContent)}
+                  ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent)}
                 </div>
               </div>
               <div class="section-card p-4">
                 <h3 class="text-base font-semibold">Results</h3>
                 <div class="mt-3 space-y-2 text-sm">
-                  ${kvId('Hours Returned / Month', r.totalHoursSavedMonth, 'res-hours')}
-                  ${kvId('Hours Returned / Year', r.totalHoursSavedYear, 'res-year')}
-                  ${kvId('Packaging Hours Reduced / Month', r.pkgHours, 'res-pkg')}
-                  ${kvId('Zero-Day Patch Hours Reduced / Month', r.riskHrs, 'res-zero')}
-                  ${kvId('App-Related Reactive Hours Reduced / Month', r.hoursFromMinutes, 'res-reactive')}
+                  ${kv('Hours Returned / Month', num(round(r.totalHoursMonth)))}
+                  ${kv('Hours Returned / Year', num(round(r.totalHoursYear)))}
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
                   <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
                   <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
-                    <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
+                    <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy capacity summary'}
                   </button>
                 </div>
               </div>
-            </div>
-            <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <div class="section-card p-4">
+                <h3 class="text-base font-semibold">Where the Time Comes From</h3>
+                <div class="mt-3 space-y-2 text-sm">
+                  ${kv('Packaging Work Reduced / Month', num(round(r.packagingHoursMonth)))}
+                  ${kv('Zero-Day Patch Time Reduced / Month', num(round(r.patchHoursMonth)))}
+                  ${kv('App-Related Reactive Work Reduced / Month', num(round(r.reactiveHoursMonth)))}
+                </div>
+              </div>
               <div class="section-card p-4">
                 <h3 class="text-base font-semibold">Technical Debt Impact</h3>
                 <div class="mt-3 space-y-2 text-sm">
-                  ${kvId('App Version Reduction (estimated)', '30-50% fewer versions', 'tech-version')}
-                  ${kvId('Faster Patch Window (% reduction)', round((STATE.currentHrs > 0 ? (STATE.impact.riskHrs / STATE.currentHrs) * 100 : 0)) + '%', 'tech-patch')}
-                  ${kvId('Tickets Avoided (est.)', num(r.ticketsMonth), 'tech-tickets')}
+                  ${kv('App Version Reduction (estimated)', '30-50% fewer active versions')}
+                  ${kv('Faster Patch Window', `${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}% reduction)`)}
+                  ${kv('Tickets Avoided (est.)', num(round(r.ticketsAvoided)) + ' / month')}
                 </div>
               </div>
               <div class="section-card p-4">
                 <h3 class="text-base font-semibold">Project Velocity Impact</h3>
-                <ul class="mt-3 list-disc pl-5 space-y-2 text-sm text-[#4A5568]">
+                <ul class="mt-3 space-y-2 text-sm list-disc pl-5">
                   <li>Faster migration and pilot cycles (apps ready sooner)</li>
                   <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
                   <li>Frees capacity for strategic initiatives</li>
@@ -623,47 +721,31 @@
       function calcROI(){
         const i = STATE.roiInputs;
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const totalHoursSavedYear = totalHoursSavedMonth * 12;
+        const reactiveHoursMonth = (STATE.impact.minutes * i.users) / 60;
+        const packagingHoursMonth = STATE.impact.pkgHours;
+        const patchHoursMonth = STATE.impact.riskHrs;
+        const totalHoursMonth = reactiveHoursMonth + packagingHoursMonth + patchHoursMonth;
+        const totalHoursYear = totalHoursMonth * 12;
+        const ticketsAvoided = (STATE.impact.minutes * i.users) / i.avgHandleMins;
+        const patchReductionPct = STATE.currentHrs > 0 ? Math.round((STATE.impact.riskHrs / STATE.currentHrs) * 100) : 0;
         return {
           i,
           ticketsMonth: round(ticketsMonth),
-          hoursFromMinutes: round(hoursFromMinutes),
-          totalHoursSavedMonth: round(totalHoursSavedMonth),
-          totalHoursSavedYear: round(totalHoursSavedYear),
-          pkgHours: STATE.impact.pkgHours,
-          riskHrs: round(STATE.impact.riskHrs)
+          reactiveHoursMonth: round(reactiveHoursMonth),
+          packagingHoursMonth: round(packagingHoursMonth),
+          patchHoursMonth: round(patchHoursMonth),
+          totalHoursMonth,
+          totalHoursYear,
+          ticketsAvoided,
+          patchReductionPct
         };
       }
       function updateROIOutputs(){
-        const r = calcROI();
-        setText('res-hours', r.totalHoursSavedMonth);
-        setText('res-year', r.totalHoursSavedYear);
-        setText('res-pkg', r.pkgHours);
-        setText('res-zero', r.riskHrs);
-        setText('res-reactive', r.hoursFromMinutes);
-        setText('tech-version', '30-50% fewer versions');
-        setText('tech-patch', round((STATE.currentHrs > 0 ? (STATE.impact.riskHrs / STATE.currentHrs) * 100 : 0)) + '%');
-        setText('tech-tickets', num(r.ticketsMonth));
+        // No need for outputs update beyond render
       }
       function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
-      function kpiId(icon,label,value,hint,id){
-        return `
-          <div class="section-card p-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-[11px] text-[#4A5568]">${label}</div>
-                <div id="${id}" class="text-xl font-semibold tabular-nums">${value}</div>
-              </div>
-              <i data-lucide="${icon}" class="w-5 h-5 text-[#0070F3]"></i>
-            </div>
-            ${hint ? `<div class="mt-1 text-[11px] text-[#4A5568]">${hint}</div>` : ''}
-          </div>
-        `;
-      }
-      function kvId(label,value,id){
-        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span id="${id}" class="font-semibold tabular-nums">${value}</span></div>`;
+      function kv(label,value){
+        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
       }
       function numInput(label,key,value){
         return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[#4A5568]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
@@ -844,8 +926,8 @@
         const toLines = arr => arr.join('\n');
         const ensure = v => v ?? '';
         return `
-          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8 modal-open">
-            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto modal-content">
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
+            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
               <div class="flex items-center justify-between">
                 <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
                 <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
@@ -960,7 +1042,7 @@
         }));
         const resetCalc=root.querySelector('[data-action="reset-calculator"]');
         if(resetCalc) resetCalc.addEventListener('click', ()=>{
-          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035 };
+          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 };
           STATE.impact = { ...STATE.defaults.impact };
           STATE.copied = false;
           render();
@@ -969,21 +1051,24 @@
         if(copyBtn) copyBtn.addEventListener('click', async ()=>{
           const r = calcROI();
           const body =
- `Recast Application Workspace — Executive One-Pager
+ `Recast Application Workspace — Capacity Dashboard
  Assumptions
   - Users: ${r.i.users}
-  - App-related tickets per user / mo: ${r.i.ticketsPerUserPerMonth}
- Observed demo impact (illustrative)
+  - Tickets per user / month: ${r.i.ticketsPerUserPerMonth}
+  - Avg handle: ${r.i.avgHandleMins} mins
+ Observed impact
   - Minutes saved per user (monthly): ${STATE.impact.minutes}
-  - Packaging hours avoided (org): ${STATE.impact.pkgHours}
-  - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
- Calculated outcomes
-  - Hours Returned / Month: ${r.totalHoursSavedMonth}
-  - Hours Returned / Year: ${r.totalHoursSavedYear}
-  - Packaging Hours Reduced / Month: ${r.pkgHours}
-  - Zero-Day Patch Hours Reduced / Month: ${r.riskHrs}
-  - App-Related Reactive Hours Reduced / Month: ${r.hoursFromMinutes}
-  - Tickets Avoided (est.): ${num(r.ticketsMonth)}
+  - Packaging hours avoided: ${STATE.impact.pkgHours}
+  - Zero-day hours avoided: ${STATE.impact.riskHrs}
+ Outcomes
+  - Hours Returned / Month: ${round(r.totalHoursMonth)}
+  - Hours Returned / Year: ${round(r.totalHoursYear)}
+  - Packaging Work Reduced / Month: ${round(r.packagingHoursMonth)}
+  - Zero-Day Patch Time Reduced / Month: ${round(r.patchHoursMonth)}
+  - App-Related Reactive Work Reduced / Month: ${round(r.reactiveHoursMonth)}
+  - Tickets Avoided (est.): ${round(r.ticketsAvoided)} / month
+  - Faster Patch Window: ${STATE.currentHrs} to 1.5 hrs (${r.patchReductionPct}% reduction)
+  - App Version Reduction (estimated): 30-50% fewer active versions
  Notes: Illustrative; replace with your data.`;
           try { await navigator.clipboard.writeText(body); } catch {
             const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
