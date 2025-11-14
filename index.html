@@ -663,8 +663,8 @@
         const r = calcROI();
         return `
           <section id="panel-roi" class="space-y-6">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <div class="section-card p-8 md:col-span-2 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
                 <h3 class="text-2xl font-light mb-6 text-gray-900">Assumptions</h3>
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   ${numInput('# users','users', r.i.users)}
@@ -695,29 +695,34 @@
                   </button>
                 </div>
               </div>
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Where the Time Comes From</h3>
-                <div class="space-y-4 text-lg">
-                  ${kv('Packaging Work Reduced / Month', num(round(r.packagingHoursMonth)))}
-                  ${kv('Zero-Day Patch Time Reduced / Month', num(round(r.patchHoursMonth)))}
-                  ${kv('App-Related Reactive Work Reduced / Month', num(round(r.reactiveHoursMonth)))}
+              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white col-span-1 md:col-span-2">
+                <h3 class="text-2xl font-light mb-6 text-gray-900">Impact Breakdown</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <h4 class="text-xl font-light mb-4 text-gray-900">Where the Time Comes From</h4>
+                    <div class="space-y-4 text-lg">
+                      ${kv('Packaging Work Reduced / Month', num(round(r.packagingHoursMonth)))}
+                      ${kv('Zero-Day Patch Time Reduced / Month', num(round(r.patchHoursMonth)))}
+                      ${kv('App-Related Reactive Work Reduced / Month', num(round(r.reactiveHoursMonth)))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-xl font-light mb-4 text-gray-900">Technical Debt Impact</h4>
+                    <div class="space-y-4 text-lg">
+                      ${kv('App Version Reduction (estimated)', '30-50% fewer active versions')}
+                      ${kv('Faster Patch Window', `${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}% reduction)`)}
+                      ${kv('Tickets Avoided (est.)', num(round(r.ticketsAvoided)) + ' / month')}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-xl font-light mb-4 text-gray-900">Project Velocity Impact</h4>
+                    <ul class="space-y-4 text-lg list-disc pl-5">
+                      <li>Faster migration and pilot cycles (apps ready sooner)</li>
+                      <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
+                      <li>Frees capacity for strategic initiatives</li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Technical Debt Impact</h3>
-                <div class="space-y-4 text-lg">
-                  ${kv('App Version Reduction (estimated)', '30-50% fewer active versions')}
-                  ${kv('Faster Patch Window', `${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}% reduction)`)}
-                  ${kv('Tickets Avoided (est.)', num(round(r.ticketsAvoided)) + ' / month')}
-                </div>
-              </div>
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Project Velocity Impact</h3>
-                <ul class="space-y-4 text-lg list-disc pl-5">
-                  <li>Faster migration and pilot cycles (apps ready sooner)</li>
-                  <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
-                  <li>Frees capacity for strategic initiatives</li>
-                </ul>
               </div>
             </div>
           </section>
