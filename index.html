@@ -662,53 +662,58 @@
       function renderROI(){
         const r = calcROI();
         return `
-          <section id="panel-roi" class="space-y-3">
+          <section id="panel-roi" class="space-y-6">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <div class="section-card p-4 md:col-span-2">
-                <h3 class="text-base font-semibold">Assumptions (edit)</h3>
-                <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div class="section-card p-6 md:col-span-2 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-medium mb-4">Assumptions</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   ${numInput('# users','users', r.i.users)}
                   ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
                   ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
                 </div>
-                <div class="mt-6 space-y-3">
+                <div class="mt-6 space-y-4">
                   ${bucketAccordion('per', 'mouse-pointer', 'Reactive Work Reduced', perUserContent)}
                   ${bucketAccordion('one', 'wand-sparkles', 'Hours Saved from Packaging', onePackageContent)}
                   ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent)}
                 </div>
+                <div class="mt-6">
+                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Current State
+                  </button>
+                </div>
               </div>
-              <div class="section-card p-4">
-                <h3 class="text-base font-semibold">Results</h3>
-                <div class="mt-3 space-y-2 text-sm">
+              <div class="section-card p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-medium mb-4">Results</h3>
+                <div class="space-y-3 text-base">
                   ${kv('Hours Returned / Month', num(round(r.totalHoursMonth)))}
                   ${kv('Hours Returned / Year', num(round(r.totalHoursYear)))}
                 </div>
-                <div class="mt-4 flex flex-wrap gap-2">
+                <div class="mt-6 flex flex-wrap gap-3">
                   <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
                   <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
                     <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy capacity summary'}
                   </button>
                 </div>
               </div>
-              <div class="section-card p-4">
-                <h3 class="text-base font-semibold">Where the Time Comes From</h3>
-                <div class="mt-3 space-y-2 text-sm">
+              <div class="section-card p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-medium mb-4">Where the Time Comes From</h3>
+                <div class="space-y-3 text-base">
                   ${kv('Packaging Work Reduced / Month', num(round(r.packagingHoursMonth)))}
                   ${kv('Zero-Day Patch Time Reduced / Month', num(round(r.patchHoursMonth)))}
                   ${kv('App-Related Reactive Work Reduced / Month', num(round(r.reactiveHoursMonth)))}
                 </div>
               </div>
-              <div class="section-card p-4">
-                <h3 class="text-base font-semibold">Technical Debt Impact</h3>
-                <div class="mt-3 space-y-2 text-sm">
+              <div class="section-card p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-medium mb-4">Technical Debt Impact</h3>
+                <div class="space-y-3 text-base">
                   ${kv('App Version Reduction (estimated)', '30-50% fewer active versions')}
                   ${kv('Faster Patch Window', `${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}% reduction)`)}
                   ${kv('Tickets Avoided (est.)', num(round(r.ticketsAvoided)) + ' / month')}
                 </div>
               </div>
-              <div class="section-card p-4">
-                <h3 class="text-base font-semibold">Project Velocity Impact</h3>
-                <ul class="mt-3 space-y-2 text-sm list-disc pl-5">
+              <div class="section-card p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 class="text-xl font-medium mb-4">Project Velocity Impact</h3>
+                <ul class="space-y-3 text-base list-disc pl-5">
                   <li>Faster migration and pilot cycles (apps ready sooner)</li>
                   <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
                   <li>Frees capacity for strategic initiatives</li>
