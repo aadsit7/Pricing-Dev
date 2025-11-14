@@ -5,62 +5,63 @@
     <title>Recast — Compact Click-Through (Realistic Catalog)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://unpkg.com">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-      :root{
-        --re-navy:#F7F9FB;
-        --re-blue-mid:#0A1C60;
-        --re-blue-bright:#0070F3;
-        --re-blue-hover:#005AD0;
-        --re-green:#10B981;
-        --re-gray:#E2E8F0;
-        --re-white:#FFFFFF;
-        --radius:12px;
-        --border-subtle:#E2E8F0;
+      :root {
+        --bg-main: #f9fafb;
+        --text-primary: #111827;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --radius: 1rem;
+        --border-subtle: #e5e7eb;
+        --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       }
-      html,body{
-        background:var(--re-navy);
-        color:var(--re-blue-mid);
-        font-family:Inter,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      html, body {
+        background: var(--bg-main);
+        color: var(--text-primary);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       }
-      .focus-ring:focus-visible{outline:2px solid rgba(0,0,0,0.3);outline-offset:2px}
-      .section-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#FFFFFF;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)}
-      .sub-card{border-radius:var(--radius);border:1px solid var(--border-subtle);background:#F7F9FB}
-      .tile{width:.45rem;height:.45rem;border-radius:0;background:#E2E8F0;opacity:.9}
-      .run .tile{animation:tilePulse 1s ease-in-out var(--d,0s) 1 forwards}
-      @keyframes tilePulse{0%{transform:scale(.7);background:var(--re-gray);opacity:.4}60%{transform:scale(1);background:var(--re-blue-bright);opacity:1}100%{background:var(--re-gray);opacity:.9}}
-      .flow-bar{height:.22rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
-      .run .flow-bar{animation:barGrow .9s ease forwards var(--d,0s)}
-      @keyframes barGrow{to{transform:scaleX(1)}}
-      .bolt-line{width:.22rem;border-radius:0;transform-origin:top center;transform:scaleY(0)}
-      .run .bolt-line{animation:boltDrop .9s ease forwards var(--d,0s)}
-      @keyframes boltDrop{to{transform:scaleY(1)}}
-      .logo-ring{width:2.1rem;height:2.1rem;border-radius:9999px;display:grid;place-items:center;background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);transition:all 0.2s ease}
-      .logo-ring:hover{box-shadow:0 0 8px rgba(0,112,243,0.5)}
-      .logo-wrap{display:flex;align-items:center;gap:.4rem;position:relative}
-      .logo-name{font-size:.7rem;color:#4A5568;opacity:0;transform:translateX(-10px);transition:all 0.3s ease}
-      .show-labels .logo-wrap{flex-direction:column;align-items:flex-start;gap:0.2rem}
-      .show-labels .logo-name{opacity:1;transform:translateX(0);white-space:normal;text-align:left}
-      .show-labels .logo-wrap .logo-ring{width:1.8rem;height:1.8rem}
-      .run .logo-ring{animation:appLiftPulse 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) 1 forwards}
-      @keyframes appLiftPulse{0%{transform:translateY(0) scale(1);filter:saturate(.4);opacity:.65}30%{transform:translateY(-4px) scale(1.05)}60%{transform:translateY(-2px) scale(1.02);filter:saturate(1);opacity:1}100%{transform:translateY(0) scale(1)}}
-      .user-beam{height:.38rem;border-radius:0;transform-origin:left center;transform:scaleX(0)}
-      .run .user-beam{animation:barGrow 1s ease forwards var(--d,0s)}
-      .badge{width:1.15rem;height:1.15rem;border-radius:0;opacity:0;transform:translateY(-6px) scale(.9)}
-      .run .badge{animation:badgeDrop .8s ease-out var(--d,0s) forwards}
-      @keyframes badgeDrop{to{opacity:1;transform:translateY(0) scale(1)}}
-      .cat-row{display:grid;grid-template-columns:15ch 1fr;gap:.5rem;align-items:center;border-top:1px solid var(--re-gray);padding-top:0.5rem}
-      .cat-row:first-child{border-top:none;padding-top:0}
-      .cat-title{font-size:.7rem;letter-spacing:.08em;display:flex;align-items:center;gap:0.5rem}
-      .re-primary{background:#0070F3!important;color:#fff!important;border:0;border-radius:var(--radius)}
-      .re-primary:hover{background:#005AD0!important}
-      .re-primary:focus-visible{outline:2px solid rgba(0,0,0,0.3);outline-offset:2px}
-      .re-secondary{background:transparent!important;color:#0A1C60!important;border:2px solid #0A1C60!important;border-radius:var(--radius)}
-      .re-secondary:hover{color:#0070F3!important;border-color:#0070F3!important}
+      .focus-ring:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+      .section-card { border-radius: var(--radius); background: #ffffff; box-shadow: var(--shadow-card); transition: box-shadow 300ms ease, transform 300ms ease; }
+      .section-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+      .sub-card { border-radius: calc(var(--radius) / 1.5); border: 1px solid var(--border-subtle); background: #f9fafb; transition: box-shadow 300ms ease; }
+      .tile { width: 0.45rem; height: 0.45rem; border-radius: 2px; background: #e5e7eb; opacity: 0.9; }
+      .run .tile { animation: tilePulse 1s ease-in-out var(--d, 0s) 1 forwards; }
+      @keyframes tilePulse { 0% { transform: scale(0.7); background: #e5e7eb; opacity: 0.4; } 60% { transform: scale(1); background: var(--primary); opacity: 1; } 100% { background: #e5e7eb; opacity: 0.9; } }
+      .flow-bar { height: 0.22rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
+      .run .flow-bar { animation: barGrow 0.9s ease forwards var(--d, 0s); }
+      @keyframes barGrow { to { transform: scaleX(1); } }
+      .bolt-line { width: 0.22rem; border-radius: 2px; transform-origin: top center; transform: scaleY(0); }
+      .run .bolt-line { animation: boltDrop 0.9s ease forwards var(--d, 0s); }
+      @keyframes boltDrop { to { transform: scaleY(1); } }
+      .logo-ring { width: 2.1rem; height: 2.1rem; border-radius: 9999px; display: grid; place-items: center; background: #ffffff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+      .logo-ring:hover { box-shadow: 0 0 8px rgba(37,99,235,0.3); transform: scale(1.05); }
+      .logo-wrap { display: flex; align-items: center; gap: 0.4rem; position: relative; transition: all 300ms ease; }
+      .logo-name { font-size: 0.7rem; color: #6b7280; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+      .show-labels .logo-wrap { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+      .show-labels .logo-name { opacity: 1; transform: translateX(0); white-space: normal; text-align: left; }
+      .show-labels .logo-wrap .logo-ring { width: 1.8rem; height: 1.8rem; }
+      .run .logo-ring { animation: appLiftPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
+      @keyframes appLiftPulse { 0% { transform: translateY(0) scale(1); filter: saturate(0.4); opacity: 0.65; } 30% { transform: translateY(-4px) scale(1.05); } 60% { transform: translateY(-2px) scale(1.02); filter: saturate(1); opacity: 1; } 100% { transform: translateY(0) scale(1); } }
+      .user-beam { height: 0.38rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
+      .run .user-beam { animation: barGrow 1s ease forwards var(--d, 0s); }
+      .badge { width: 1.15rem; height: 1.15rem; border-radius: 9999px; opacity: 0; transform: translateY(-6px) scale(0.9); }
+      .run .badge { animation: badgeDrop 0.8s ease-out var(--d, 0s) forwards; }
+      @keyframes badgeDrop { to { opacity: 1; transform: translateY(0) scale(1); } }
+      .cat-row { display: grid; grid-template-columns: 15ch 1fr; gap: 0.5rem; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 0.5rem; transition: all 300ms ease; }
+      .cat-row:first-child { border-top: none; padding-top: 0; }
+      .cat-title { font-size: 0.7rem; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.5rem; }
+      .re-primary { background: var(--primary) !important; color: #fff !important; border: 0; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: background 0.2s ease, transform 0.2s ease; }
+      .re-primary:hover { background: var(--primary-hover) !important; transform: scale(1.02); }
+      .re-primary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+      .re-secondary { background: transparent !important; color: var(--text-primary) !important; border: 2px solid var(--text-primary) !important; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: all 0.2s ease, transform 0.2s ease; }
+      .re-secondary:hover { color: var(--primary) !important; border-color: var(--primary) !important; transform: scale(1.02); }
       @media (prefers-reduced-motion: reduce) {
         .accordion-content { transition: none !important; }
       }
@@ -70,15 +71,15 @@
       .modal-closed .modal-content { transform: scale(0.95); opacity: 0; }
       .check-appear{opacity:0;animation:fadeInOut 1.5s ease var(--d,0s) forwards}
       @keyframes fadeInOut{0%{opacity:0}30%{opacity:1}70%{opacity:1}100%{opacity:0}}
-      .flow-connect{background-image:linear-gradient(to right, transparent 50%, var(--re-gray) 50%);background-size:4px 1px;background-repeat:repeat-x;height:1px;opacity:0.5}
-      .end-user-expand{transition:all 0.5s ease;transform:scale(1.05);background:var(--re-white);border-color:var(--re-green)}
+      .flow-connect{background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%);background-size:4px 1px;background-repeat:repeat-x;height:1px;opacity:0.5}
+      .end-user-expand{transition:all 0.5s ease;transform:scale(1.05);background:#ffffff;border-color:#10b981}
       .icon-launch{animation:iconLaunch 0.5s ease forwards}
       @keyframes iconLaunch{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
       .tagline-fade{opacity:0;animation:fadeIn 1s ease 10s forwards}
       @keyframes fadeIn{to{opacity:1}}
-      .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:0 4px 6px rgba(0,0,0,0.1);z-index:10}
+      .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:var(--shadow-card);z-index:10}
       .show-labels .overlay-tag{opacity:1;transition-delay:0.5s}
-      .meta-label{font-size:0.6rem;color:#4A5568;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap;display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;width:100%;justify-content:flex-start}
+      .meta-label{font-size:0.6rem;color:#6b7280;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap;display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;width:100%;justify-content:flex-start}
       .show-labels .meta-label{opacity:1;transform:translateY(0)}
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
@@ -94,7 +95,7 @@
         defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
         ctx: { device: 'Windows', network: 'Corporate', compliant: true },
         packHrs: 8, configHrs: 2, currentHrs: 24,
-        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
+        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035 },
         copied: false,
         showLabels: false,
         showSolutionCards: true,
@@ -107,61 +108,67 @@
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
         currentState: {
           change: {
-            intro: "Everyone's saying the same thing: the app layer is the bottleneck. McKinsey calls it \"the final mile of digital transformation.\ Forrester warns that \"endpoint complexity is now the biggest drag on IT productivity.",
+            intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
             bullets: [
-              'The work has outgrown the tools. Thousands of apps. Hybrid platforms. Endless updates. Manual processes simply don\'t scale anymore.',
-              'Teams can\'t keep up. Headcount is flat, but demand has exploded. IT is running at 120% capacity — doing more with less isn\'t sustainable.',
-              'Transformation keeps stalling. Cloud migrations, AVD pilots, All rollouts — they all hit the same wall: app readiness. Modernization isn\'t waiting on vision; it\'s waiting on capacity.'
+              'There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.',
+              'Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.',
+              'Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.',
+              'Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.'
             ],
-            analyst: "The industry's aligned: transformation fails or flies at the app layer — and right now, it's failing."
+            analyst: "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute."
           },
           now: {
-            intro: "We're at an inflection point. Teams are being asked to manage ten times the workload, with the same tools and the same headcount. Something has to give.",
+            intro: "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
             bullets: [
-              'The math no longer works. The number of apps, platforms, and compliance checks keeps climbing, but teams aren\'t growing. You can\'t scale people the way you scale software.',
-              'Work is everywhere, all the time. Users expect instant, secure access from any device, anywhere. The perimeter is gone — but the management model hasn\'t caught up.',
-              'Waiting is the real risk. Every delay — every manual update or stalled rollout — compounds into security gaps, user frustration, and lost momentum. By the time the pain is visible, it\'s too late to react.'
+              'App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.',
+              'Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.',
+              'Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.',
+              'The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.'
             ],
-            analyst: "Analysts say this capacity crisis will define the next two years of IT. The question isn't if you modernize app delivery — it's whether you do it before the breaking point."
+            analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
           },
           recast: {
-            intro: "Recast closes the gap between how fast IT needs to move and how slow app management allows them to. While others talk about modernization, Recast makes it real — automating the last mile of app delivery that's been holding everyone back.",
+            intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
             bullets: [
-              'One workspace for every app. Installs, updates, access — unified across Intune, ConfigMgr, AVD, and beyond. No tool sprawl, no repackaging chaos.',
-              'Built to extend Microsoft\'s ecosystem. Recast doesn\'t replace — it amplifies. Automating what teams still do by hand and scaling what already works.',
-              'Frees IT to move at business speed. What took hours now takes minutes. Migrations, pilots, patch cycles, and modernization work finally keep up with demand.'
+              'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
+              'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
+              'Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.',
+              'Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.'
             ],
-            analyst: "Recast turns app management from a bottleneck into a competitive advantage — making readiness the new speed of business."
+            analyst: "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default."
           }
         },
         defaultsCurrentState() {
           return JSON.parse(JSON.stringify({
             change: {
-              intro: "Everyone's saying the same thing: the app layer is the bottleneck. McKinsey calls it \"the final mile of digital transformation.\ Forrester warns that \"endpoint complexity is now the biggest drag on IT productivity.",
+              intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
               bullets: [
-                'The work has outgrown the tools. Thousands of apps. Hybrid platforms. Endless updates. Manual processes simply don\'t scale anymore.',
-                'Teams can\'t keep up. Headcount is flat, but demand has exploded. IT is running at 120% capacity — doing more with less isn\'t sustainable.',
-                'Transformation keeps stalling. Cloud migrations, AVD pilots, All rollouts — they all hit the same wall: app readiness. Modernization isn\'t waiting on vision; it\'s waiting on capacity.'
+                'There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.',
+                'Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.',
+                'Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.',
+                'Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.'
               ],
-              analyst: "The industry's aligned: transformation fails or flies at the app layer — and right now, it's failing."
+              analyst: "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute."
             },
             now: {
-              intro: "We're at an inflection point. Teams are being asked to manage ten times the workload, with the same tools and the same headcount. Something has to give.",
+              intro: "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
               bullets: [
-                'The math no longer works. The number of apps, platforms, and compliance checks keeps climbing, but teams aren\'t growing. You can\'t scale people the way you scale software.',
-                'Work is everywhere, all the time. Users expect instant, secure access from any device, anywhere. The perimeter is gone — but the management model hasn\'t caught up.',
-                'Waiting is the real risk. Every delay — every manual update or stalled rollout — compounds into security gaps, user frustration, and lost momentum. By the time the pain is visible, it\'s too late to react.'
+                'App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.',
+                'Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.',
+                'Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.',
+                'The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.'
               ],
-              analyst: "Analysts say this capacity crisis will define the next two years of IT. The question isn't if you modernize app delivery — it's whether you do it before the breaking point."
+              analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
             },
             recast: {
-              intro: "Recast closes the gap between how fast IT needs to move and how slow app management allows them to. While others talk about modernization, Recast makes it real — automating the last mile of app delivery that's been holding everyone back.",
+              intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
               bullets: [
-                'One workspace for every app. Installs, updates, access — unified across Intune, ConfigMgr, AVD, and beyond. No tool sprawl, no repackaging chaos.',
-                'Built to extend Microsoft\'s ecosystem. Recast doesn\'t replace — it amplifies. Automating what teams still do by hand and scaling what already works.',
-                'Frees IT to move at business speed. What took hours now takes minutes. Migrations, pilots, patch cycles, and modernization work finally keep up with demand.'
+                'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
+                'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
+                'Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.',
+                'Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.'
               ],
-              analyst: "Recast turns app management from a bottleneck into a competitive advantage — making readiness the new speed of business."
+              analyst: "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default."
             }
           }));
         },
@@ -187,8 +194,8 @@
           ],
           closer: 'Configured once — Delivered everywhere.',
           timeline: false,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
         },
         {
           id: 'onboarding',
@@ -203,8 +210,8 @@
           ],
           closer: 'From first call to production in weeks, not months.',
           timeline: true,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
         },
         {
           id: 'trust',
@@ -219,8 +226,8 @@
           ],
           closer: 'Trusted by organizations that can’t afford downtime.',
           timeline: false,
-          bgHeader: 'bg-[var(--re-navy)]',
-          bgContent: 'bg-slate-50'
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
         }
       ];
       const onboardingMiniTimelineEnabled = true;
@@ -258,9 +265,9 @@
           <main class="mx-auto max-w-6xl px-4 pb-16">
             ${STATE.activeTab==='roi' ? `
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
-              ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
-              ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
+              ${chip('App-Related Reactive Work Reduced (hours/month)', String(round((STATE.impact.minutes * STATE.roiInputs.users) / 60)), 'emerald')}
+              ${chip('Hours Saved from Packaging', String(STATE.impact.pkgHours), 'sky')}
+              ${chip('Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
             </div>` : ''}
             <section class="mt-5">${renderActivePanel()}</section>
           </main>
@@ -553,124 +560,16 @@
       function pill(label,active,action,value){
         return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
       }
-      function renderFlow(){
-        return `
-          <div class="section-card p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
-                <div>
-                  <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 text-[12px]">
-                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
-              </div>
-            </div>
-            <div class="mt-2 flex gap-2 text-xs">
-            </div>
-            <div id="flowCard" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
-              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
-                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
-                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
-                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
-              </div>
-              <div class="space-y-2 relative">
-                ${CATALOG.map(s=>`
-                  <div class="cat-row">
-                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
-                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
-                  </div>
-                `).join('')}
-                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
-              </div>
-              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
-                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
-                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3">
-                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
-                  <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
-                    <div class="text-sm">
-                      <div class="font-medium">End user</div>
-                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
-                    </div>
-                  </div>
-                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
-                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
-                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
-                  </div>
-                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
-                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
-                  </div>
-                </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      const miniApps = [
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('SAP','SAP','#0A6ED1'),
-        logo('Zoom','Z','#0B5CFF')
-      ];
       function renderROI(){
         const r = calcROI();
         return `
           <section id="panel-roi" class="space-y-3">
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
-              ${kpiId('users','FTEs freed', r.fteEquivalent, 'Equivalent IT capacity', 'kpi-fte')}
-              ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
-              ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Productivity Impact', 'kpi-year')}
-              ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
-            </div>
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
               <div class="section-card p-4 lg:col-span-2">
                 <h3 class="text-base font-semibold">Assumptions (edit)</h3>
                 <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   ${numInput('# users','users', r.i.users)}
-                  ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                  ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
-                  ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
-                  ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
+                  ${numInput('App-related tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
                 </div>
                 <div class="mt-4">
                   <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
@@ -678,20 +577,19 @@
                   </button>
                 </div>
                 <div class="mt-6 space-y-3">
-                  ${bucketAccordion('one', 'wand-sparkles', 'Packaging Hours', onePackageContent)}
-                  ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patches in Hours', zeroDayContent)}
-                  ${bucketAccordion('per', 'mouse-pointer', 'User Minutes Saved', perUserContent)}
+                  ${bucketAccordion('one', 'wand-sparkles', 'Packaging Work Reduced', onePackageContent)}
+                  ${bucketAccordion('zero', 'shield-check', 'Zero-Day Patch Time Reduced', zeroDayContent)}
+                  ${bucketAccordion('per', 'mouse-pointer', 'App-Related Reactive Work Reduced', perUserContent)}
                 </div>
               </div>
               <div class="section-card p-4">
                 <h3 class="text-base font-semibold">Results</h3>
                 <div class="mt-3 space-y-2 text-sm">
-                  ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
-                  ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
-                  ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
-                  ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
-                  ${kvId('ROI', r.roiPct+'%', 'res-roi')}
-                  ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
+                  ${kvId('Hours Returned / Month', r.totalHoursSavedMonth, 'res-hours')}
+                  ${kvId('Hours Returned / Year', r.totalHoursSavedYear, 'res-year')}
+                  ${kvId('Packaging Hours Reduced / Month', r.pkgHours, 'res-pkg')}
+                  ${kvId('Zero-Day Patch Hours Reduced / Month', r.riskHrs, 'res-zero')}
+                  ${kvId('App-Related Reactive Hours Reduced / Month', r.hoursFromMinutes, 'res-reactive')}
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
                   <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
@@ -699,6 +597,24 @@
                     <i data-lucide="clipboard" class="w-4 h-4"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
                   </button>
                 </div>
+              </div>
+            </div>
+            <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <div class="section-card p-4">
+                <h3 class="text-base font-semibold">Technical Debt Impact</h3>
+                <div class="mt-3 space-y-2 text-sm">
+                  ${kvId('App Version Reduction (estimated)', '30-50% fewer versions', 'tech-version')}
+                  ${kvId('Faster Patch Window (% reduction)', round((STATE.currentHrs > 0 ? (STATE.impact.riskHrs / STATE.currentHrs) * 100 : 0)) + '%', 'tech-patch')}
+                  ${kvId('Tickets Avoided (est.)', num(r.ticketsMonth), 'tech-tickets')}
+                </div>
+              </div>
+              <div class="section-card p-4">
+                <h3 class="text-base font-semibold">Project Velocity Impact</h3>
+                <ul class="mt-3 list-disc pl-5 space-y-2 text-sm text-[#4A5568]">
+                  <li>Faster migration and pilot cycles (apps ready sooner)</li>
+                  <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
+                  <li>Frees capacity for strategic initiatives</li>
+                </ul>
               </div>
             </div>
           </section>
@@ -709,36 +625,27 @@
         const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
         const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
         const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = round((totalHoursSavedMonth * 12) / fteHoursYear);
+        const totalHoursSavedYear = totalHoursSavedMonth * 12;
         return {
           i,
-          ticketsMonth,
+          ticketsMonth: round(ticketsMonth),
           hoursFromMinutes: round(hoursFromMinutes),
           totalHoursSavedMonth: round(totalHoursSavedMonth),
-          dollarSavedMonth: round(dollarSavedMonth),
-          dollarSavedYear: round(dollarSavedYear),
-          netBenefitYear: round(netBenefitYear),
-          roiPct,
-          fteEquivalent
+          totalHoursSavedYear: round(totalHoursSavedYear),
+          pkgHours: STATE.impact.pkgHours,
+          riskHrs: round(STATE.impact.riskHrs)
         };
       }
       function updateROIOutputs(){
         const r = calcROI();
-        setText('kpi-hours', r.totalHoursSavedMonth);
-        setText('kpi-year', '$'+num(r.dollarSavedYear));
-        setText('kpi-fte', r.fteEquivalent);
-        setText('kpi-tickets', num(r.ticketsMonth));
         setText('res-hours', r.totalHoursSavedMonth);
-        setText('res-month', '$'+num(r.dollarSavedMonth));
-        setText('res-year', '$'+num(r.dollarSavedYear));
-        setText('res-net', '$'+num(r.netBenefitYear));
-        setText('res-roi', r.roiPct+'%');
-        setText('res-fte', r.fteEquivalent);
+        setText('res-year', r.totalHoursSavedYear);
+        setText('res-pkg', r.pkgHours);
+        setText('res-zero', r.riskHrs);
+        setText('res-reactive', r.hoursFromMinutes);
+        setText('tech-version', '30-50% fewer versions');
+        setText('tech-patch', round((STATE.currentHrs > 0 ? (STATE.impact.riskHrs / STATE.currentHrs) * 100 : 0)) + '%');
+        setText('tech-tickets', num(r.ticketsMonth));
       }
       function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
       function kpiId(icon,label,value,hint,id){
@@ -1053,46 +960,33 @@
         }));
         const resetCalc=root.querySelector('[data-action="reset-calculator"]');
         if(resetCalc) resetCalc.addEventListener('click', ()=>{
-          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
+          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035 };
           STATE.impact = { ...STATE.defaults.impact };
           STATE.copied = false;
           render();
         });
         const copyBtn=root.querySelector('[data-action="copy-onepager"]');
         if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-          const i = STATE.roiInputs;
-          const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-          const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-          const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-          const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-          const dollarSavedYear = dollarSavedMonth * 12;
-          const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-          const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-          const fteHoursYear = 2080;
-          const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
+          const r = calcROI();
           const body =
  `Recast Application Workspace — Executive One-Pager
  Assumptions
-  - Users: ${i.users}
-  - Tickets per user / month: ${i.ticketsPerUserPerMonth}
-  - Avg handle: ${i.avgHandleMins} mins
-  - Loaded cost: $${i.loadedCostPerHour}/hr
-  - Subscription (annual): $${i.recastAnnualCost}
+  - Users: ${r.i.users}
+  - App-related tickets per user / mo: ${r.i.ticketsPerUserPerMonth}
  Observed demo impact (illustrative)
   - Minutes saved per user (monthly): ${STATE.impact.minutes}
   - Packaging hours avoided (org): ${STATE.impact.pkgHours}
   - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
  Calculated outcomes
-  - Tickets / month: ${num(ticketsMonth)}
-  - Hours saved / month: ${round(totalHoursSavedMonth)}
-  - $ saved / month: $${num(dollarSavedMonth)}
-  - $ saved / year: $${num(dollarSavedYear)}
-  - Net benefit / year: $${num(netBenefitYear)}
-  - ROI: ${round(roiPct)}%
-  - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+  - Hours Returned / Month: ${r.totalHoursSavedMonth}
+  - Hours Returned / Year: ${r.totalHoursSavedYear}
+  - Packaging Hours Reduced / Month: ${r.pkgHours}
+  - Zero-Day Patch Hours Reduced / Month: ${r.riskHrs}
+  - App-Related Reactive Hours Reduced / Month: ${r.hoursFromMinutes}
+  - Tickets Avoided (est.): ${num(r.ticketsMonth)}
  Notes: Illustrative; replace with your data.`;
           try { await navigator.clipboard.writeText(body); } catch {
-            const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.removeChild(ta);
           }
           STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
         });
@@ -1113,7 +1007,7 @@
         const overlay = document.getElementById('overlayTag');
         if(STATE.showLabels){
           overlay.classList.remove('hidden');
-          setTimeout(()=>{ overlay.classList.add('hidden'); }, 3000);
+          setTimeout(()=>{ overlay.classList.add('hidden'); },3000);
         }
       }
       function buildFlow(){
