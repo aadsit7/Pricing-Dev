@@ -62,7 +62,7 @@
             defaultBand: 'band2',
             marginCap: '15%',
             coSellEligible: true,
-            fullCycleEligible: false,
+            fullCycleEligible: true,
           },
           'Premier': {
             defaultBand: 'band1',
@@ -722,9 +722,9 @@
         }
         if (showButtons) {
           html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
-          html += '<button id="businessPlanButton" class="rounded-full bg-[#2563eb] text-white px-6 py-3 text-sm font-medium hover:bg-[#1d4ed8] transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="file-text" class="h-4 w-4"></i>View Sample Business Plan</button>';
+          if (STATE.partnerType === 'Premier') html += '<button id="businessPlanButton" class="rounded-full bg-[#2563eb] text-white px-6 py-3 text-sm font-medium hover:bg-[#1d4ed8] transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="file-text" class="h-4 w-4"></i>View Sample Business Plan</button>';
           html += '<button id="evaluationButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="scale" class="h-4 w-4"></i>Preferred to Premier Evaluation</button>';
-          html += '<button id="partnerEventsButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="calendar" class="h-4 w-4"></i>Partner Events & Campaigns</button>';
+          if (STATE.partnerType === 'Premier') html += '<button id="partnerEventsButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="calendar" class="h-4 w-4"></i>Partner Events & Campaigns</button>';
           html += '</div>';
         }
         return html;
@@ -811,7 +811,7 @@
           html += '<div class="mt-6">';
           html += '<label for="bandSelect" class="block text-sm font-medium mb-1">Select Band for Example</label>';
           html += '<select id="bandSelect" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300">';
-          html += `<option value="band1" ${STATE.band === 'band1' ? 'selected' : ''}>Band 1 – Full-Cycle</option>`;
+          if (STATE.partnerTierMeta[STATE.partnerType].fullCycleEligible) html += `<option value="band1" ${STATE.band === 'band1' ? 'selected' : ''}>Band 1 – Full-Cycle</option>`;
           html += `<option value="band2" ${STATE.band === 'band2' ? 'selected' : ''}>Band 2 – Co-Sell</option>`;
           html += '</select>';
           html += '</div>';
@@ -819,8 +819,8 @@
           html += '<label for="exampleACV" class="block text-sm font-medium mb-1">Example ACV ($)</label>';
           html += '<input type="number" id="exampleACV" value="' + STATE.exampleACV + '" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300 w-full max-w-xs" />';
           html += '</div>';
-          const bandMeta = STATE.salesCycle.bandMeta[STATE.band];
-          const marginPercent = parseFloat(bandMeta.margin) / 100;
+          let upTo = STATE.band === 'band1' ? margins[0].upTo : margins[1].upTo;
+          const marginPercent = parseFloat(upTo) / 100;
           const acv = STATE.exampleACV;
           const margin = acv * marginPercent;
           const services = margin * STATE.servicesMultiplier;
@@ -988,6 +988,7 @@
         return html;
       }
       function renderSalesMotionContent() {
+        const isRegistered = STATE.partnerType === 'Registered';
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="table" class="h-6 w-6 stroke-[#2563eb]"></i>Sales Motion</h2>';
         html += '<h3 class="text-lg font-medium mb-4">Sales Cycle Stages</h3>';
         html += '<div class="overflow-x-auto mb-8">';
@@ -1001,18 +1002,27 @@
         html += '</tbody></table></div>';
         html += '<h3 class="text-lg font-medium mb-4">Band Overviews</h3>';
         html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">';
-        Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
-          const meta = STATE.salesCycle.bandMeta[band];
+        if (isRegistered) {
+          const meta = STATE.salesCycle.bandMeta.band3;
           html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
-        });
+        } else {
+          Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
+            const meta = STATE.salesCycle.bandMeta[band];
+            html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
+          });
+        }
         html += '</div>';
         html += '<h3 class="text-lg font-medium mb-4">Ownership by Band</h3>';
-        html += '<div class="flex gap-2 mb-4">';
-        Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
-          const active = STATE.activeBand === band;
-          html += `<button data-band="${band}" class="${active ? 'bg-[#2563eb] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 flex-1">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</button>`;
-        });
-        html += '</div>';
+        if (isRegistered) {
+          STATE.activeBand = 'band3';
+        } else {
+          html += '<div class="flex gap-2 mb-4">';
+          Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
+            const active = STATE.activeBand === band;
+            html += `<button data-band="${band}" class="${active ? 'bg-[#2563eb] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 flex-1">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</button>`;
+          });
+          html += '</div>';
+        }
         html += '<div class="space-y-4">';
         STATE.salesCycle.rows.forEach(row => {
           const own = STATE.salesCycle.bands[STATE.activeBand][row];
@@ -1376,6 +1386,7 @@
         document.getElementById('partnerType').addEventListener('change', (e) => {
           STATE.partnerType = e.target.value;
           STATE.band = setDefaultBand(STATE.partnerType);
+          STATE.activeBand = setDefaultBand(STATE.partnerType);
           STATE.showMspOption = false; // Reset MSP toggle on type change
           if (STATE.partnerType === 'Registered') {
             STATE.newPartner = false;
