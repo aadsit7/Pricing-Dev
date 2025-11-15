@@ -48,6 +48,7 @@
         showCsvModal: false,
         activeStep: 0,
         band: 'band1',
+        activeBand: 'band1', // New for sales motion
         roeView: 'partner', // 'partner' | 'internal'
         defaultBandByType: { Registered:'band3', Preferred:'band2', Premier:'band1' },
         partnerTierMeta: {
@@ -931,7 +932,8 @@
       }
       function renderSalesMotionContent() {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="table" class="h-6 w-6 stroke-[#2563eb]"></i>Sales Motion</h2>';
-        html += '<div class="overflow-x-auto">';
+        html += '<h3 class="text-lg font-medium mb-4">Sales Cycle Stages</h3>';
+        html += '<div class="overflow-x-auto mb-8">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
         html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Stage</th><th class="px-6 py-3 text-left text-sm font-semibold">Description</th><th class="px-6 py-3 text-left text-sm font-semibold">Entry Criteria</th><th class="px-6 py-3 text-left text-sm font-semibold">Exit Criteria</th><th class="px-6 py-3 text-left text-sm font-semibold">Deliverables</th></tr></thead>';
         html += '<tbody class="divide-y divide-[#E2E8F0]">';
@@ -940,36 +942,41 @@
           html += `<tr><td class="px-6 py-4 text-sm font-medium">${stage.label}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.description}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.entryCriteria.join('<br>')}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.exitCriteria.join('<br>')}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.deliverables.join('<br>')}</td></tr>`;
         });
         html += '</tbody></table></div>';
-        html += '<div class="mt-8 space-y-6">';
+        html += '<h3 class="text-lg font-medium mb-4">Band Overviews</h3>';
+        html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">';
         Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
           const meta = STATE.salesCycle.bandMeta[band];
-          html += `<div class="rounded-xl ${meta.color} p-4"><h3 class="font-medium mb-2">${meta.name}</h3><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
+          html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
         });
         html += '</div>';
-        html += '<h3 class="text-lg font-medium mt-8 mb-4">Ownership by Band</h3>';
-        html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6">';
-        Object.keys(STATE.salesCycle.bands).forEach(band => {
+        html += '<h3 class="text-lg font-medium mb-4">Ownership by Band</h3>';
+        html += '<div class="flex gap-2 mb-4">';
+        Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
+          const active = STATE.activeBand === band;
+          html += `<button data-band="${band}" class="${active ? 'bg-[#2563eb] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 flex-1">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</button>`;
+        });
+        html += '</div>';
+        html += '<div class="space-y-4">';
+        STATE.salesCycle.rows.forEach(row => {
+          const own = STATE.salesCycle.bands[STATE.activeBand][row];
+          html += '<div class="rounded-xl border border-[#E2E8F0] p-4 bg-white">';
+          html += `<h4 class="font-medium text-sm mb-3">${row}</h4>`;
+          html += '<div class="space-y-3">';
           html += '<div>';
-          html += `<h4 class="font-medium mb-4">${STATE.salesCycle.bandMeta[band].name}</h4>`;
-          html += '<div class="space-y-4">';
-          STATE.salesCycle.rows.forEach(row => {
-            const own = STATE.salesCycle.bands[band][row];
-            html += '<div class="rounded-xl border border-[#E2E8F0] p-3">';
-            html += `<div class="font-medium text-sm mb-2">${row}</div>`;
-            html += '<div class="bg-gray-50 rounded-xl p-3 mb-2">';
-            html += '<div class="font-medium text-sm mb-1 flex items-center gap-2"><i data-lucide="user-round" class="h-4 w-4 stroke-[#2563eb]"></i>Owner</div>';
-            html += '<div class="text-sm">' + own.primaryOwner + '</div>';
-            html += '<div class="text-[11px] text-gray-600 mt-0.5">Accountable: ' + own.accountable + '</div>';
-            html += '</div>';
-            html += '<div class="bg-gray-50 rounded-xl p-3">';
-            html += '<div class="font-medium text-sm mb-1 flex items-center gap-2"><i data-lucide="users-round" class="h-4 w-4 stroke-[#2563eb]"></i>Support</div>';
-            html += '<div class="flex flex-wrap gap-1">';
-            own.support.forEach(s => {
-              html += '<span class="rounded-full bg-white px-2 py-0.5 text-xs text-gray-600 border border-[#E2E8F0]">' + s + '</span>';
-            });
-            html += '</div></div>';
-            html += '</div>';
+          html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Primary Owner</div>';
+          html += '<div class="text-sm">' + own.primaryOwner + '</div>';
+          html += '</div>';
+          html += '<div>';
+          html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Support</div>';
+          html += '<div class="flex flex-wrap gap-2">';
+          own.support.forEach(s => {
+            html += '<span class="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">' + s + '</span>';
           });
+          html += '</div></div>';
+          html += '<div>';
+          html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Accountable</div>';
+          html += '<div class="text-sm">' + own.accountable + '</div>';
+          html += '</div>';
           html += '</div>';
           html += '</div>';
         });
@@ -1518,6 +1525,12 @@
             render();
           });
         }
+        document.querySelectorAll('[data-band]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            STATE.activeBand = btn.dataset.band;
+            render();
+          });
+        });
         const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal');
         modals.forEach(m => {
           m.addEventListener('click', (e) => {
