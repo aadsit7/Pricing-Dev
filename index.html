@@ -37,7 +37,7 @@
     </main>
     <script>
       const STATE = {
-        partnerType: 'Premier',
+        partnerType: 'Program Overview',
         commitment: 'Annual',
         dealType: 'Net New',
         newPartner: false,
@@ -520,7 +520,7 @@
         filterModalOpen: false,
         selectedPartnerTypes: []
       };
-      const PARTNER_TYPES = ["Registered", "Preferred", "Premier", "Technology Partner (ISV)", "OEM Partner", "Distributor Partner"]; // Removed MSP from dropdown
+      const PARTNER_TYPES = ["Program Overview", "Registered", "Preferred", "Premier", "Technology Partner (ISV)", "OEM Partner", "Distributor Partner"]; // Removed MSP from dropdown
       const TABS = [
         { id: 'overview', label: 'Overview', icon: 'book-open' },
         { id: 'requirements', label: 'Requirements & Benefits', icon: 'check-circle' },
@@ -555,6 +555,17 @@
         return 'band1';
       }
       function getPartnerData(type) {
+        if (type === "Program Overview") {
+          return {
+            overview: '',
+            requirements: [],
+            benefits: [],
+            isStandard: false,
+            isPremier: false,
+            isPreferred: false,
+            specific: null
+          };
+        }
         if (["Registered", "Preferred", "Premier"].includes(type)) {
           return {
             overview: STATE.model.tiers[type].overview,
@@ -692,7 +703,11 @@
       }
       function renderTabs() {
         let tabsHtml = '<div class="flex flex-wrap gap-2 mb-6 overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">';
-        TABS.forEach(tab => {
+        let tabsToShow = TABS;
+        if (STATE.partnerType === 'Program Overview') {
+          tabsToShow = [TABS[0]]; // Only Overview
+        }
+        tabsToShow.forEach(tab => {
           const active = STATE.activeTab === tab.id;
           const disabled = (tab.id === 'margins' && !getPartnerData(STATE.partnerType).isStandard) || (tab.id === 'onboarding' && STATE.partnerType === 'Registered');
           tabsHtml += `
@@ -711,7 +726,11 @@
       }
       function renderOverview(overview, showButtons) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="book-open" class="h-6 w-6 stroke-[#2563eb]"></i>Overview</h2>';
-        html += `<p class="text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-300">${overview}</p>`;
+        if (STATE.partnerType === 'Program Overview') {
+          html += renderProgramOverviewMatrix();
+        } else {
+          html += `<p class="text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-300">${overview}</p>`;
+        }
         if (showButtons && (STATE.partnerType === 'Preferred' || STATE.partnerType === 'Premier')) {
           html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
           html += `<label for="mspToggle" class="relative inline-flex cursor-pointer items-center">
@@ -721,11 +740,41 @@
           </label>`;
           html += '</div>';
         }
-        if (showButtons) {
+        if (showButtons && STATE.partnerType !== 'Program Overview') {
           html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
           html += '<button id="evaluationButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="scale" class="h-4 w-4"></i>Preferred to Premier Evaluation</button>';
           html += '</div>';
         }
+        return html;
+      }
+      function renderProgramOverviewMatrix() {
+        const benefits = [
+          {benefit: "Resell Licensing", registered: true, preferred: true, premier: true},
+          {benefit: "Access to Partner Portal", registered: false, preferred: true, premier: true},
+          {benefit: "Listing on Recastsoftware.com", registered: true, preferred: true, premier: true},
+          {benefit: "Self-Service Training", registered: false, preferred: true, premier: true},
+          {benefit: "Campaigns-in-a-Box", registered: false, preferred: true, premier: true},
+          {benefit: "Quarterly Roadmap Updates", registered: false, preferred: true, premier: true},
+          {benefit: "Partner NFR Licensing", registered: false, preferred: true, premier: true},
+          {benefit: "Enhanced CRM Access (quote-to-order)", registered: false, preferred: false, premier: true},
+          {benefit: "Basic Lead-Gen Support (no funding)", registered: false, preferred: true, premier: true},
+          {benefit: "Partner of Record (PoR) Eligibility", registered: false, preferred: true, premier: true},
+          {benefit: "Eligible for MSP or Resell Delivery Model", registered: false, preferred: true, premier: true},
+          {benefit: "Dedicated Support", registered: false, preferred: false, premier: true},
+          {benefit: "Joint Lead-Gen Campaigns (with MDF Funds)", registered: false, preferred: false, premier: true},
+          {benefit: "Access to Services Delivery Leads", registered: false, preferred: false, premier: true},
+          {benefit: "Dedicated Recast Partner Manager", registered: false, preferred: false, premier: true},
+          {benefit: "Co-Sell & Expansion Support", registered: false, preferred: true, premier: true},
+          {benefit: "Mutual Business Plan & GTM Alignment", registered: false, preferred: true, premier: true}
+        ];
+        let html = '<div class="overflow-x-auto">';
+        html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
+        html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Benefit</th><th class="px-6 py-3 text-left text-sm font-semibold">Registered</th><th class="px-6 py-3 text-left text-sm font-semibold">Preferred</th><th class="px-6 py-3 text-left text-sm font-semibold">Premier</th></tr></thead>';
+        html += '<tbody class="divide-y divide-[#E2E8F0]">';
+        benefits.forEach(b => {
+          html += `<tr><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.benefit}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.registered ? '✓' : '✗'}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.preferred ? '✓' : '✗'}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.premier ? '✓' : '✗'}</td></tr>`;
+        });
+        html += '</tbody></table></div>';
         return html;
       }
       function renderRequirementsAndBenefits(requirements, benefits, isPremier) {
@@ -1412,6 +1461,9 @@
           STATE.band = setDefaultBand(STATE.partnerType);
           STATE.activeBand = setDefaultBand(STATE.partnerType);
           STATE.showMspOption = false; // Reset MSP toggle on type change
+          if (STATE.partnerType === 'Program Overview') {
+            STATE.activeTab = 'overview';
+          }
           if (STATE.partnerType === 'Registered') {
             STATE.newPartner = false;
             if (['margins', 'onboarding'].includes(STATE.activeTab)) {
@@ -1593,10 +1645,10 @@
             render();
           });
         }
-        const filterModalBg = document.getElementById('filterModalBg');
-        if (filterModalBg) {
-          filterModalBg.addEventListener('click', (e) => {
-            if (e.target === filterModalBg) {
+        const closeFilterModalBg = document.getElementById('filterModalBg');
+        if (closeFilterModalBg) {
+          closeFilterModalBg.addEventListener('click', (e) => {
+            if (e.target === closeFilterModalBg) {
               STATE.filterModalOpen = false;
               render();
             }
