@@ -48,8 +48,8 @@
         showCsvModal: false,
         activeStep: 0,
         band: 'band1',
-        activeBand: 'band1', // New for sales motion
-        roeView: 'partner', // 'partner' | 'internal'
+        activeBand: 'band1',
+        roeView: 'partner',
         defaultBandByType: { Registered:'band3', Preferred:'band2', Premier:'band1' },
         partnerTierMeta: {
           'Registered': {
@@ -71,7 +71,7 @@
             fullCycleEligible: true,
           },
         },
-        showMspOption: false, // New state for MSP toggle
+        showMspOption: false,
         simpleROE: {
           Registered: {
             summary: "You can refer and transact. Margin capped at 5% for transactional or referral sales only.",
@@ -618,7 +618,7 @@
         let html = '<div class="space-y-6">';
         html += renderPartnerTypeSelector();
         html += renderTabs();
-        html += '<div class="rounded-xl bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-300">';
+        html += '<div class="rounded-2xl bg-white p-6 shadow-md hover:shadow-lg transition-shadow duration-300">';
         switch (STATE.activeTab) {
           case 'overview':
             html += renderOverview(STATE.showMspOption && (STATE.partnerType === 'Preferred' || STATE.partnerType === 'Premier') ? STATE.msp.overview : data.overview, data.isPreferred || data.isPremier);
@@ -660,7 +660,9 @@
         if (STATE.showPartnerEventsModal) {
           html += renderPartnerEventsModal();
         }
-        if (STATE.showCsvModal) html += renderCsvModal();
+        if (STATE.showCsvModal) {
+          html += renderCsvModal();
+        }
         document.getElementById('app').innerHTML = html;
         lucide.createIcons();
         addEventListeners();
@@ -803,7 +805,7 @@
       function renderRequirementsAndBenefits(requirements, benefits, isPremier) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="check-circle" class="h-6 w-6 stroke-[#2563eb]"></i>Requirements & Benefits</h2>';
         html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">';
-        html += '<div>';
+        html += '<div class="rounded-2xl bg-gray-50 p-6">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="list-checks" class="h-5 w-5 stroke-[#2563eb]"></i>Requirements</h3>';
         html += '<ul class="space-y-4">';
         requirements.forEach(req => {
@@ -818,7 +820,7 @@
         });
         html += '</ul>';
         html += '</div>';
-        html += '<div>';
+        html += '<div class="rounded-2xl bg-gray-50 p-6">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 stroke-[#2563eb]"></i>Benefits</h3>';
         html += '<ul class="space-y-4">';
         benefits.forEach(ben => {
@@ -835,7 +837,7 @@
         html += '</div>';
         html += '</div>';
         if (isPremier) {
-          html += '<div class="mt-8 rounded-xl border border-[#E2E8F0] p-4 bg-gray-50 flex gap-3 items-start">';
+          html += '<div class="mt-8 rounded-2xl border border-[#E2E8F0] p-6 bg-gray-50 flex gap-3 items-start">';
           html += '<i data-lucide="info" class="h-5 w-5 mt-0.5 stroke-[#2563eb]"></i>';
           html += '<div><div class="font-medium">Premier Tier Note</div><p class="text-gray-700 leading-relaxed text-sm mt-1">Premier partners receive enhanced MDF and joint planning. Schedule a QBR to discuss advancement.</p></div>';
           html += '</div>';
@@ -848,7 +850,7 @@
       }
       function renderMarginsContent() {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="dollar-sign" class="h-6 w-6 stroke-[#2563eb]"></i>Margins</h2>';
-        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<div class="rounded-2xl bg-white p-6 shadow-md mb-6">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="filter" class="h-5 w-5 stroke-[#2563eb]"></i>Filters</h3>';
         html += '<div class="flex flex-col sm:flex-row gap-4 rounded-full border border-[#E2E8F0] p-1 bg-white mb-4">';
         html += '<select id="commitment" class="flex-1 rounded-full px-4 py-2 text-sm text-gray-700 focus:outline-none">';
@@ -871,7 +873,7 @@
             when: STATE.dealType === 'Renewal' ? "NA" : "Intro or PO only → Referral margin."
           });
         }
-        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<div class="rounded-2xl bg-white p-6 shadow-md mb-6">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="table" class="h-5 w-5 stroke-[#2563eb]"></i>Margin Bands</h3>';
         html += '<div class="overflow-x-auto mb-6">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
@@ -881,7 +883,7 @@
           html += `<tr><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.band}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.upTo}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.when}</td></tr>`;
         });
         html += '</tbody></table></div></div>';
-        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<div class="rounded-2xl bg-white p-6 shadow-md mb-6">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="calculator" class="h-5 w-5 stroke-[#2563eb]"></i>Example Calculation</h3>';
         if (isRegistered) {
           STATE.band = 'band3';
@@ -932,16 +934,13 @@
       function renderNewROE() {
         let html = '';
         html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2"><i data-lucide="users" class="h-5 w-5 stroke-[#2563eb]"></i>Tier Overview & Primary Role</h3>';
-        html += '<div class="overflow-x-auto mb-6">';
-        html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
-        html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Tier</th><th class="px-6 py-3 text-left text-sm font-semibold">Primary Role</th><th class="px-6 py-3 text-left text-sm font-semibold">Partner Type(s)</th></tr></thead>';
-        html += '<tbody class="divide-y divide-[#E2E8F0]">';
-        html += '<tr><td class="px-6 py-4 text-sm text-gray-700">Registered</td><td class="px-6 py-4 text-sm text-gray-700">Entry-level: referral or transactional resellers</td><td class="px-6 py-4 text-sm text-gray-700">VAR, LAR, Referral</td></tr>';
-        html += '<tr><td class="px-6 py-4 text-sm text-gray-700">Preferred</td><td class="px-6 py-4 text-sm text-gray-700">Mid-tier: delivers projects, sells Recast, some managed services</td><td class="px-6 py-4 text-sm text-gray-700">MSP, SI, Hybrid</td></tr>';
-        html += '<tr><td class="px-6 py-4 text-sm text-gray-700">Premier</td><td class="px-6 py-4 text-sm text-gray-700">Strategic: sells, delivers, operates, markets</td><td class="px-6 py-4 text-sm text-gray-700">MSP, SI, Hybrid, ISV</td></tr>';
-        html += '<tr><td class="px-6 py-4 text-sm text-gray-700">OEM</td><td class="px-6 py-4 text-sm text-gray-700">Embeds Recast in their platform</td><td class="px-6 py-4 text-sm text-gray-700">ISV only</td></tr>';
-        html += '<tr><td class="px-6 py-4 text-sm text-gray-700">Distributor</td><td class="px-6 py-4 text-sm text-gray-700">Routes-to-market; enablement and logistics only Not delivery-focused</td><td class="px-6 py-4 text-sm text-gray-700"></td></tr>';
-        html += '</tbody></table></div>';
+        html += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">';
+        html += '<div class="rounded-2xl border p-4"><h4 class="font-medium mb-2">Registered</h4><p>Entry-level: referral or transactional resellers</p><p>Partner Type(s): VAR, LAR, Referral</p></div>';
+        html += '<div class="rounded-2xl border p-4"><h4 class="font-medium mb-2">Preferred</h4><p>Mid-tier: delivers projects, sells Recast, some managed services</p><p>Partner Type(s): MSP, SI, Hybrid</p></div>';
+        html += '<div class="rounded-2xl border p-4"><h4 class="font-medium mb-2">Premier</h4><p>Strategic: sells, delivers, operates, markets</p><p>Partner Type(s): MSP, SI, Hybrid, ISV</p></div>';
+        html += '<div class="rounded-2xl border p-4"><h4 class="font-medium mb-2">OEM</h4><p>Embeds Recast in their platform</p><p>Partner Type(s): ISV only</p></div>';
+        html += '<div class="rounded-2xl border p-4"><h4 class="font-medium mb-2">Distributor</h4><p>Routes-to-market; enablement and logistics only Not delivery-focused</p><p>Partner Type(s): </p></div>';
+        html += '</div>';
         html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2"><i data-lucide="clipboard-check" class="h-5 w-5 stroke-[#2563eb]"></i>Deal Registration & Partner of Record (PoR)</h3>';
         html += '<p class="text-gray-700 leading-relaxed mb-4">All partner tiers must register deals to gain Partner of Record status and protect opportunities. Two supported registration methods:</p>';
         html += '<div class="overflow-x-auto mb-6">';
@@ -955,7 +954,8 @@
         html += '<li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="alert-circle" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Registered partners may not submit deals for PoR protection unless upgraded.</span></li>';
         html += '<li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="alert-circle" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Premier deals are excluded from Recast SDR and marketing sequences once submitted.</span></li>';
         html += '</ul>';
-        html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2"><i data-lucide="dollar-sign" class="h-5 w-5 stroke-[#2563eb]"></i>Margin Eligibility by Tier</h3>';
+        html += '<button id="csvSopBtn" class="rounded-full bg-[#2563eb] text-white px-4 py-2 text-sm hover:bg-[#1d4ed8] transition-colors duration-300 flex items-center gap-2"><i data-lucide="upload" class="h-4 w-4"></i>View CSV Upload SOP</button>';
+        html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2 mt-6"><i data-lucide="dollar-sign" class="h-5 w-5 stroke-[#2563eb]"></i>Margin Eligibility by Tier</h3>';
         html += '<div class="overflow-x-auto mb-6">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
         html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Tier</th><th class="px-6 py-3 text-left text-sm font-semibold">How Margin is Earned</th></tr></thead>';
@@ -1037,7 +1037,7 @@
             html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2"><i data-lucide="gavel" class="h-5 w-5 stroke-[#2563eb]"></i>Principles</h3>';
             html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
             roeData.principles.forEach(p => {
-              html += `<div class="rounded-xl border border-[#E2E8F0] p-4"><h4 class="font-medium mb-2">${p.principle}</h4><p class="text-sm text-gray-700 leading-relaxed mb-2">${p.description}</p><p class="text-xs text-gray-500">Intent: ${p.intent}</p></div>`;
+              html += `<div class="rounded-2xl border border-[#E2E8F0] p-4"><h4 class="font-medium mb-2">${p.principle}</h4><p class="text-sm text-gray-700 leading-relaxed mb-2">${p.description}</p><p class="text-xs text-gray-500">Intent: ${p.intent}</p></div>`;
             });
             html += '</div>';
             html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 stroke-[#2563eb]"></i>Bands</h3>';
@@ -1072,19 +1072,19 @@
       function renderSalesMotionContent() {
         const isRegistered = STATE.partnerType === 'Registered';
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="table" class="h-6 w-6 stroke-[#2563eb]"></i>Sales Motion</h2>';
-        html += '<div class="mb-6 rounded-xl bg-white p-6 shadow-md">';
+        html += '<div class="mb-6 rounded-2xl bg-white p-6 shadow-md">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="workflow" class="h-5 w-5 stroke-[#2563eb]"></i>Sales Cycle Stages</h3>';
-        html += '<div class="space-y-2">';
+        html += '<div class="space-y-4">';
         STATE.salesCycle.rows.forEach((row, index) => {
           const active = STATE.salesCycle.activeAccordion === index;
           const stage = STATE.salesCycle.stages[row];
           html += `
-            <div class="border border-[#E2E8F0] rounded-xl overflow-hidden">
-              <button data-accordion="${index}" class="w-full flex justify-between items-center px-4 py-3 text-left font-medium text-sm bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div class="border border-[#E2E8F0] rounded-2xl overflow-hidden">
+              <button data-accordion="${index}" class="w-full flex justify-between items-center px-6 py-4 text-left font-medium text-sm bg-gray-50 hover:bg-gray-100 transition-colors">
                 <span>${stage.label}</span>
                 <i data-lucide="${active ? 'chevron-up' : 'chevron-down'}" class="h-4 w-4"></i>
               </button>
-              <div class="${active ? '' : 'hidden'} px-4 py-3 text-sm text-gray-700 space-y-2">
+              <div class="${active ? '' : 'hidden'} px-6 py-4 text-sm text-gray-700 space-y-2">
                 <p><strong>Description:</strong> ${stage.description}</p>
                 <p><strong>Entry Criteria:</strong> ${stage.entryCriteria.join(', ')}</p>
                 <p><strong>Exit Criteria:</strong> ${stage.exitCriteria.join(', ')}</p>
@@ -1094,20 +1094,20 @@
           `;
         });
         html += '</div></div>';
-        html += '<div class="mb-6 rounded-xl bg-white p-6 shadow-md">';
+        html += '<div class="mb-6 rounded-2xl bg-white p-6 shadow-md">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 stroke-[#2563eb]"></i>Band Overviews</h3>';
         html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
         if (isRegistered) {
           const meta = STATE.salesCycle.bandMeta.band3;
-          html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
+          html += `<div class="rounded-2xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
         } else {
           Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
             const meta = STATE.salesCycle.bandMeta[band];
-            html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
+            html += `<div class="rounded-2xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
           });
         }
         html += '</div></div>';
-        html += '<div class="rounded-xl bg-white p-6 shadow-md">';
+        html += '<div class="rounded-2xl bg-white p-6 shadow-md">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="users-round" class="h-5 w-5 stroke-[#2563eb]"></i>Ownership by Band</h3>';
         if (isRegistered) {
           STATE.activeBand = 'band3';
@@ -1122,21 +1122,21 @@
         html += '<div class="space-y-4">';
         STATE.salesCycle.rows.forEach(row => {
           const own = STATE.salesCycle.bands[STATE.activeBand][row];
-          html += '<div class="rounded-xl border border-[#E2E8F0] p-4 bg-white">';
+          html += '<div class="rounded-2xl border border-[#E2E8F0] p-6 bg-white">';
           html += `<h4 class="font-medium text-sm mb-3">${row}</h4>`;
-          html += '<div class="space-y-3">';
-          html += '<div>';
+          html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6">';
+          html += '<div class="p-4 rounded-xl bg-gray-50">';
           html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Primary Owner</div>';
           html += '<div class="text-sm">' + own.primaryOwner + '</div>';
           html += '</div>';
-          html += '<div>';
+          html += '<div class="p-4 rounded-xl bg-gray-50">';
           html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Support</div>';
           html += '<div class="flex flex-wrap gap-2">';
           own.support.forEach(s => {
-            html += '<span class="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">' + s + '</span>';
+            html += '<span class="rounded-full bg-white px-3 py-1 text-xs text-gray-700 border">' + s + '</span>';
           });
           html += '</div></div>';
-          html += '<div>';
+          html += '<div class="p-4 rounded-xl bg-gray-50">';
           html += '<div class="font-medium text-xs mb-1 text-gray-600 uppercase">Accountable</div>';
           html += '<div class="text-sm">' + own.accountable + '</div>';
           html += '</div>';
@@ -1149,7 +1149,7 @@
         html += '<span class="flex items-center gap-1"><i data-lucide="users-round" class="h-3 w-3 stroke-[#2563eb]"></i> Band 2 is co-sell</span>';
         html += '<span class="flex items-center gap-1"><i data-lucide="shield-check" class="h-3 w-3 stroke-[#2563eb]"></i> Band 3 is referral/transactional</span>';
         html += '</div>';
-        html += '<div class="mt-4 rounded-xl border border-[#E2E8F0] p-4 bg-gray-50 flex gap-3 items-start">';
+        html += '<div class="mt-4 rounded-2xl border border-[#E2E8F0] p-6 bg-gray-50 flex gap-3 items-start">';
         html += '<i data-lucide="info" class="h-5 w-5 mt-0.5 stroke-[#2563eb]"></i>';
         html += '<div><div class="font-medium">Lead Registration & Partner of Record</div><p class="text-gray-700 leading-relaxed text-sm mt-1">A lead is not considered Partner of Record until approved by Recast through the Partner Portal. Margin eligibility is set at deal approval based on documented ownership and CRM evidence.</p></div>';
         html += '</div>';
@@ -1157,7 +1157,7 @@
       }
       function renderOnboardingContent(data) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="rocket" class="h-6 w-6 stroke-[#2563eb]"></i>Onboarding</h2>';
-        let certHtml = '<div class="rounded-xl bg-amber-100 border border-amber-200 p-4 mb-6">';
+        let certHtml = '<div class="rounded-2xl bg-amber-100 border border-amber-200 p-6 mb-6">';
         certHtml += '<h3 class="text-lg font-medium mb-2 flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 stroke-[#d97706]"></i>Required Certifications</h3>';
         let certText;
         if (STATE.partnerType === 'MSP' || STATE.showMspOption) {
@@ -1230,7 +1230,7 @@
       function renderBusinessPlanModal() {
         return `
           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="businessPlanModal">
-            <div class="relative max-w-4xl w-full bg-white rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+            <div class="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
               <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeBusinessPlan">
                 <i data-lucide="x" class="h-6 w-6"></i>
                 <span class="sr-only">Close</span>
@@ -1245,7 +1245,7 @@
       function renderPartnerEventsModal() {
         return `
           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="partnerEventsModal">
-            <div class="relative max-w-4xl w-full bg-white rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+            <div class="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
               <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closePartnerEvents">
                 <i data-lucide="x" class="h-6 w-6"></i>
                 <span class="sr-only">Close</span>
@@ -1407,12 +1407,12 @@
       function renderEvaluationModal() {
         return `
           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="evaluationModal">
-            <div class="relative max-w-3xl w-full bg-white rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+            <div class="relative max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
               <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeEvaluation">
                 <i data-lucide="x" class="h-6 w-6"></i>
                 <span class="sr-only">Close</span>
               </button>
-              <h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="scale" class="h-6 w-6 stroke-[#2563eb]"></i>Preferred vs. Premier Partner Evaluation Guide</h2>
+              <h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="scale" class="h-6 w-6 stroke-[#2563eb]"></i>Preferred to Premier Partner Evaluation Guide</h2>
               ${renderEvaluationGuideContent()}
             </div>
           </div>
@@ -1459,7 +1459,7 @@
         const sample = "Partner Name,Campaign Name,ID,Account Name,Domain,First Name,Last Name,Email,Country,Source Type,Attribution Intent,Requested PoR\nAcme Partner,2025-03 Webinar,Contoso,contoso.com,Jane,Doe,jane@contoso.com,US,Webinar,Partner Sourced,Yes";
         return `
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" id="csvModal">
-          <div class="relative max-w-3xl w-full bg-white rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+          <div class="relative max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
             <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900" id="closeCsvModal"><i data-lucide="x" class="h-6 w-6"></i></button>
             <h2 class="text-xl font-medium mb-4 flex items-center gap-3"><i data-lucide="upload" class="h-6 w-6 stroke-[#2563eb]"></i>CSV Upload SOP</h2>
             <ol class="list-decimal pl-6 space-y-2 text-gray-700">
