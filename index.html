@@ -290,6 +290,7 @@
             },
           },
           rows: ["PQL", "Identification", "Qualification", "Development", "Proposal", "Closing", "ClosedWon", "Onboarding"],
+          activeAccordion: null,
         },
         msp: {
           overview: "Welcome to the Recast MSP Partner Program\n\nThe Recast MSP Program is built for service providers that want to embed Recast’s solutions into their service offerings to drive recurring revenue, expand client value, and scale with predictable economics.\n\nWe support multiple MSP archetypes—from infra-focused to app-centric—with enablement tailored to each type. Whether you’re a high-touch implementation shop or a lightweight automation-led MSP, this program offers flexible models to fit your business.\n\nProgram Highlights:\n\n* Monthly point-based licensing structure for easy cost forecasting\n\n* Tiered margin bands based on deal ownership and engagement\n\n* Access to white-labeled deployment kits, SOWs, and enablement tools\n\n* Support for both application workspace and endpoint solutions\n\n* Designed to protect partner margin, loyalty, and renewal rights",
@@ -722,9 +723,7 @@
         }
         if (showButtons) {
           html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
-          if (STATE.partnerType === 'Premier') html += '<button id="businessPlanButton" class="rounded-full bg-[#2563eb] text-white px-6 py-3 text-sm font-medium hover:bg-[#1d4ed8] transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="file-text" class="h-4 w-4"></i>View Sample Business Plan</button>';
           html += '<button id="evaluationButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="scale" class="h-4 w-4"></i>Preferred to Premier Evaluation</button>';
-          if (STATE.partnerType === 'Premier') html += '<button id="partnerEventsButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="calendar" class="h-4 w-4"></i>Partner Events & Campaigns</button>';
           html += '</div>';
         }
         return html;
@@ -767,6 +766,10 @@
           html += '<div class="mt-8 rounded-xl border border-[#E2E8F0] p-4 bg-gray-50 flex gap-3 items-start">';
           html += '<i data-lucide="info" class="h-5 w-5 mt-0.5 stroke-[#2563eb]"></i>';
           html += '<div><div class="font-medium">Premier Tier Note</div><p class="text-gray-700 leading-relaxed text-sm mt-1">Premier partners receive enhanced MDF and joint planning. Schedule a QBR to discuss advancement.</p></div>';
+          html += '</div>';
+          html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
+          html += '<button id="businessPlanButton" class="rounded-full bg-[#2563eb] text-white px-6 py-3 text-sm font-medium hover:bg-[#1d4ed8] transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="file-text" class="h-4 w-4"></i>View Sample Business Plan</button>';
+          html += '<button id="partnerEventsButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="calendar" class="h-4 w-4"></i>Partner Events & Campaigns</button>';
           html += '</div>';
         }
         return html;
@@ -990,18 +993,31 @@
       function renderSalesMotionContent() {
         const isRegistered = STATE.partnerType === 'Registered';
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="table" class="h-6 w-6 stroke-[#2563eb]"></i>Sales Motion</h2>';
-        html += '<h3 class="text-lg font-medium mb-4">Sales Cycle Stages</h3>';
-        html += '<div class="overflow-x-auto mb-8">';
-        html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
-        html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Stage</th><th class="px-6 py-3 text-left text-sm font-semibold">Description</th><th class="px-6 py-3 text-left text-sm font-semibold">Entry Criteria</th><th class="px-6 py-3 text-left text-sm font-semibold">Exit Criteria</th><th class="px-6 py-3 text-left text-sm font-semibold">Deliverables</th></tr></thead>';
-        html += '<tbody class="divide-y divide-[#E2E8F0]">';
-        STATE.salesCycle.rows.forEach(row => {
+        html += '<div class="mb-6 rounded-xl bg-white p-6 shadow-md">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="workflow" class="h-5 w-5 stroke-[#2563eb]"></i>Sales Cycle Stages</h3>';
+        html += '<div class="space-y-2">';
+        STATE.salesCycle.rows.forEach((row, index) => {
+          const active = STATE.salesCycle.activeAccordion === index;
           const stage = STATE.salesCycle.stages[row];
-          html += `<tr><td class="px-6 py-4 text-sm font-medium">${stage.label}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.description}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.entryCriteria.join('<br>')}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.exitCriteria.join('<br>')}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${stage.deliverables.join('<br>')}</td></tr>`;
+          html += `
+            <div class="border border-[#E2E8F0] rounded-xl overflow-hidden">
+              <button data-accordion="${index}" class="w-full flex justify-between items-center px-4 py-3 text-left font-medium text-sm bg-gray-50 hover:bg-gray-100 transition-colors">
+                <span>${stage.label}</span>
+                <i data-lucide="${active ? 'chevron-up' : 'chevron-down'}" class="h-4 w-4"></i>
+              </button>
+              <div class="${active ? '' : 'hidden'} px-4 py-3 text-sm text-gray-700 space-y-2">
+                <p><strong>Description:</strong> ${stage.description}</p>
+                <p><strong>Entry Criteria:</strong> ${stage.entryCriteria.join(', ')}</p>
+                <p><strong>Exit Criteria:</strong> ${stage.exitCriteria.join(', ')}</p>
+                <p><strong>Deliverables:</strong> ${stage.deliverables.join(', ')}</p>
+              </div>
+            </div>
+          `;
         });
-        html += '</tbody></table></div>';
-        html += '<h3 class="text-lg font-medium mb-4">Band Overviews</h3>';
-        html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">';
+        html += '</div></div>';
+        html += '<div class="mb-6 rounded-xl bg-white p-6 shadow-md">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 stroke-[#2563eb]"></i>Band Overviews</h3>';
+        html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
         if (isRegistered) {
           const meta = STATE.salesCycle.bandMeta.band3;
           html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
@@ -1011,15 +1027,16 @@
             html += `<div class="rounded-xl ${meta.color} p-4"><h4 class="font-medium mb-2">${meta.name}</h4><p class="text-sm leading-relaxed">${meta.summary}</p><p class="text-sm font-medium mt-2">Margin: ${meta.margin}</p></div>`;
           });
         }
-        html += '</div>';
-        html += '<h3 class="text-lg font-medium mb-4">Ownership by Band</h3>';
+        html += '</div></div>';
+        html += '<div class="rounded-xl bg-white p-6 shadow-md">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="users-round" class="h-5 w-5 stroke-[#2563eb]"></i>Ownership by Band</h3>';
         if (isRegistered) {
           STATE.activeBand = 'band3';
         } else {
-          html += '<div class="flex gap-2 mb-4">';
+          html += '<div class="flex flex-col sm:flex-row gap-2 mb-4 rounded-full border border-[#E2E8F0] p-1 bg-white">';
           Object.keys(STATE.salesCycle.bandMeta).forEach(band => {
             const active = STATE.activeBand === band;
-            html += `<button data-band="${band}" class="${active ? 'bg-[#2563eb] text-white' : 'bg-white text-gray-700 hover:bg-gray-100'} rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 flex-1">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</button>`;
+            html += `<button data-band="${band}" class="flex-1 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 ${active ? 'bg-[#2563eb] text-white' : 'text-gray-700 hover:bg-gray-100'} focus:outline-none">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</button>`;
           });
           html += '</div>';
         }
@@ -1047,7 +1064,7 @@
           html += '</div>';
           html += '</div>';
         });
-        html += '</div>';
+        html += '</div></div>';
         html += '<div class="mt-6 text-xs text-gray-600 flex flex-wrap gap-4">';
         html += '<span class="flex items-center gap-1"><i data-lucide="handshake" class="h-3 w-3 stroke-[#2563eb]"></i>Band 1 rewards full-cycle ownership</span>';
         html += '<span class="flex items-center gap-1"><i data-lucide="users-round" class="h-3 w-3 stroke-[#2563eb]"></i> Band 2 is co-sell</span>';
@@ -1596,6 +1613,13 @@
         document.querySelectorAll('[data-band]').forEach(btn => {
           btn.addEventListener('click', () => {
             STATE.activeBand = btn.dataset.band;
+            render();
+          });
+        });
+        document.querySelectorAll('[data-accordion]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const index = parseInt(btn.dataset.accordion);
+            STATE.salesCycle.activeAccordion = STATE.salesCycle.activeAccordion === index ? null : index;
             render();
           });
         });
