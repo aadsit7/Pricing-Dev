@@ -531,10 +531,10 @@
         },
         partnerEvents: {
           summaries: [
-            { type: "Webinars", events: 6, avgInvited: 926, avgAttended: 853, avgOpps: 222, avgOppInvited: "24%", avgOppAttended: "26%", avgClosed: 59, win: "27%" },
-            { type: "User Groups", events: 4, avgInvited: 21, avgAttended: 17, avgOpps: 4, avgOppInvited: "21%", avgOppAttended: "25%", avgClosed: 1, win: "24%" },
-            { type: "Events (incl. Conf + HH)", events: 2, avgInvited: 330, avgAttended: 300, avgOpps: 85, avgOppInvited: "25%", avgOppAttended: "28%", avgClosed: 25, win: "28%" },
-            { type: "Partner Events", events: 3, avgInvited: 280, avgAttended: 207, avgOpps: 52, avgOppInvited: "19%", avgOppAttended: "25%", avgClosed: 12, win: "24%" },
+            { type: "Webinars", icon: "video", description: "Interactive online sessions showcasing joint solutions, best practices, and customer stories.", avgInvited: 926, avgAttended: 853, avgOpps: 222, avgOppInvited: "24%", avgOppAttended: "26%", avgClosed: 59, win: "27%", benefit: "High engagement with targeted audiences, leading to qualified leads and accelerated pipeline." },
+            { type: "User Groups", icon: "users", description: "Community-focused meetings for end-users to share experiences and learn from experts.", avgInvited: 21, avgAttended: 17, avgOpps: 4, avgOppInvited: "21%", avgOppAttended: "25%", avgClosed: 1, win: "24%", benefit: "Builds loyalty and uncovers expansion opportunities through direct customer interactions." },
+            { type: "Events (incl. Conf + HH)", icon: "calendar", description: "In-person conferences and happy hours for networking and product demonstrations.", avgInvited: 330, avgAttended: 300, avgOpps: 85, avgOppInvited: "25%", avgOppAttended: "28%", avgClosed: 25, win: "28%", benefit: "Face-to-face connections that foster trust and drive higher conversion rates." },
+            { type: "Partner Events", icon: "handshake", description: "Collaborative gatherings with partners to align strategies and generate joint opportunities.", avgInvited: 280, avgAttended: 207, avgOpps: 52, avgOppInvited: "19%", avgOppAttended: "25%", avgClosed: 12, win: "24%", benefit: "Strengthens partnerships and creates shared pipelines for mutual growth." },
           ]
         },
         filterModalOpen: false,
@@ -1250,39 +1250,30 @@
                 <i data-lucide="x" class="h-6 w-6"></i>
                 <span class="sr-only">Close</span>
               </button>
-              <h2 class="text-xl font-medium mb-4 flex items-center gap-3"><i data-lucide="calendar" class="h-6 w-6 stroke-[#2563eb]"></i>Joint Marketing Campaigns Success</h2>
-              <p class="text-gray-700 leading-relaxed mb-6">Our team excels at driving demand gen through co-marketing events. We're particularly strong in webinars, user groups, events/happy hours, and partner events. Example Avg. </p>
-              <div class="overflow-x-auto mb-8">
-                <table class="min-w-full divide-y divide-[#E2E8F0]">
-                  <thead>
-                    <tr>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold"># Events</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Invited</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Attended</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Opps</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Opp % (Invited)</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Opp % (Attended)</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Avg Closed Won</th>
-                      <th class="px-6 py-3 text-left text-sm font-semibold">Win %</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-[#E2E8F0]">
-                    ${STATE.partnerEvents.summaries.map(s => `
-                      <tr>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.type}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.events}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgInvited}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgAttended}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgOpps}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgOppInvited}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgOppAttended}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.avgClosed}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${s.win}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
+              <h2 class="text-2xl font-semibold mb-4 text-center">Joint Marketing Campaigns: Driving Demand Together</h2>
+              <p class="text-gray-700 leading-relaxed mb-8 text-center max-w-2xl mx-auto">At Recast, we collaborate with partners to host impactful events that attract high-quality attendees and convert them into closed-won opportunities. Our expertise in demand generation provides a significant advantage, helping you build a stronger pipeline with less effort.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                ${STATE.partnerEvents.summaries.map(s => `
+                  <div class="rounded-2xl bg-gray-50 p-6 shadow-md">
+                    <div class="flex items-center gap-3 mb-4">
+                      <i data-lucide="${s.icon}" class="h-6 w-6 stroke-[#2563eb]"></i>
+                      <h3 class="text-lg font-medium">${s.type}</h3>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">${s.description}</p>
+                    <div class="space-y-2 text-sm text-gray-600">
+                      <div><span class="font-medium">Avg. Attended:</span> ${s.avgAttended} (from ${s.avgInvited} invited)</div>
+                      <div><span class="font-medium">Avg. Opportunities:</span> ${s.avgOpps} (${s.avgOppAttended} conversion)</div>
+                      <div><span class="font-medium">Avg. Closed-Won:</span> ${s.avgClosed} (${s.win} win rate)</div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                      <p class="text-sm font-medium text-[#2563eb]">Partner Advantage:</p>
+                      <p class="text-sm text-gray-700">${s.benefit}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="mt-8 text-center">
+                <p class="text-gray-700 leading-relaxed">These metrics demonstrate Recast's strength in event execution. Partner with us to leverage our demand gen expertise for your success.</p>
               </div>
             </div>
           </div>
