@@ -768,34 +768,37 @@
         return html;
       }
       function renderProgramOverviewMatrix() {
-        const benefits = [
-          {benefit: "Resell Licensing", registered: true, preferred: true, premier: true},
-          {benefit: "Access to Partner Portal", registered: false, preferred: true, premier: true},
-          {benefit: "Listing on Recastsoftware.com", registered: true, preferred: true, premier: true},
-          {benefit: "Self-Service Training", registered: false, preferred: true, premier: true},
-          {benefit: "Campaigns-in-a-Box", registered: false, preferred: true, premier: true},
-          {benefit: "Quarterly Roadmap Updates", registered: false, preferred: true, premier: true},
-          {benefit: "Partner NFR Licensing", registered: false, preferred: true, premier: true},
-          {benefit: "Enhanced CRM Access (quote-to-order)", registered: false, preferred: false, premier: true},
-          {benefit: "Basic Lead-Gen Support (no funding)", registered: false, preferred: true, premier: true},
-          {benefit: "Partner of Record (PoR) Eligibility", registered: false, preferred: true, premier: true},
-          {benefit: "Eligible for MSP or Resell Delivery Model", registered: false, preferred: true, premier: true},
-          {benefit: "Dedicated Support", registered: false, preferred: false, premier: true},
-          {benefit: "Joint Lead-Gen Campaigns (with MDF Funds)", registered: false, preferred: false, premier: true},
-          {benefit: "Access to Services Delivery Leads", registered: false, preferred: false, premier: true},
-          {benefit: "Dedicated Recast Partner Manager", registered: false, preferred: false, premier: true},
-          {benefit: "Co-Sell & Expansion Support", registered: false, preferred: true, premier: true},
-          {benefit: "Mutual Business Plan & GTM Alignment", registered: false, preferred: true, premier: true}
-        ];
         let html = '<div class="overflow-x-auto">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
-        html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Benefit</th><th class="px-6 py-3 text-left text-sm font-semibold">Registered</th><th class="px-6 py-3 text-left text-sm font-semibold">Preferred</th><th class="px-6 py-3 text-left text-sm font-semibold">Premier</th></tr></thead>';
+        html += '<thead><tr><th class="px-4 py-2 text-left text-xs font-semibold">Benefit</th><th class="px-4 py-2 text-left text-xs font-semibold">Registered</th><th class="px-4 py-2 text-left text-xs font-semibold">Preferred</th><th class="px-4 py-2 text-left text-xs font-semibold">Premier</th></tr></thead>';
         html += '<tbody class="divide-y divide-[#E2E8F0]">';
-        benefits.forEach(b => {
-          html += `<tr><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.benefit}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.registered ? '✓' : '✗'}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.preferred ? '✓' : '✗'}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${b.premier ? '✓' : '✗'}</td></tr>`;
-        });
+        html += '<tr class="bg-gray-50"><td colspan="4" class="px-4 py-2 text-xs font-medium">Core Access</td></tr>';
+        html += renderBenefitRow("Resell Licensing", '✓', '✓', '✓');
+        html += renderBenefitRow("Access to Partner Portal", '✗', '✓', '✓');
+        html += renderBenefitRow("Listing on RecastSoftware.com", '✓', '✓', '✓');
+        html += renderBenefitRow("Self-Service Training", '✗', '✓', '✓');
+        html += '<tr class="bg-gray-50"><td colspan="4" class="px-4 py-2 text-xs font-medium">Marketing & GTM Support</td></tr>';
+        html += renderBenefitRow("Campaigns-in-a-Box", '✗', '✓', '✓');
+        html += renderBenefitRow("Quarterly Roadmap Updates", '✗', '✓', '✓');
+        html += renderBenefitRow("Basic Lead-Gen Support (no funding)", '✗', '✓', '✓');
+        html += renderBenefitRow("Joint Lead-Gen Campaigns (with MDF Funds)", '✗', '✗', '✓');
+        html += renderBenefitRow("Mutual Business Plan & GTM Alignment", '✗', '✓', '✓');
+        html += '<tr class="bg-gray-50"><td colspan="4" class="px-4 py-2 text-xs font-medium">Sales & Deal Support</td></tr>';
+        html += renderBenefitRow("Partner NFR Licensing", '✗', '✓', '✓');
+        html += renderBenefitRow("Enhanced CRM Access (quote-to-order)", '✗', '✗', '✓');
+        html += renderBenefitRow("Partner of Record (PoR) Eligibility", '✗', '✓', '✓');
+        html += renderBenefitRow("Co-Sell & Expansion Support", '✗', '✓', '✓');
+        html += '<tr class="bg-gray-50"><td colspan="4" class="px-4 py-2 text-xs font-medium">Delivery Enablement</td></tr>';
+        html += renderBenefitRow("Eligible for MSP or Resell Delivery Model", '✗', '✓', '✓');
+        html += renderBenefitRow("Access to Services Delivery Leads", '✗', '✗', '✓');
+        html += '<tr class="bg-gray-50"><td colspan="4" class="px-4 py-2 text-xs font-medium">Strategic Engagement</td></tr>';
+        html += renderBenefitRow("Dedicated Support", '✗', '✗', '✓');
+        html += renderBenefitRow("Dedicated Recast Partner Manager", '✗', '✗', '✓');
         html += '</tbody></table></div>';
         return html;
+      }
+      function renderBenefitRow(benefit, reg, pref, prem) {
+        return `<tr><td class="px-4 py-2 text-xs text-gray-700 leading-relaxed">${benefit}</td><td class="px-4 py-2 text-xs text-gray-700 leading-relaxed">${reg}</td><td class="px-4 py-2 text-xs text-gray-700 leading-relaxed">${pref}</td><td class="px-4 py-2 text-xs text-gray-700 leading-relaxed">${prem}</td></tr>`;
       }
       function renderRequirementsAndBenefits(requirements, benefits, isPremier) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="check-circle" class="h-6 w-6 stroke-[#2563eb]"></i>Requirements & Benefits</h2>';
