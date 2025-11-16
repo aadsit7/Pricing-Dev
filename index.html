@@ -776,32 +776,31 @@
       }
       function renderMarginsContent() {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="dollar-sign" class="h-6 w-6 stroke-[#2563eb]"></i>Margins</h2>';
-        html += '<div class="flex flex-wrap gap-4 mb-6">';
-        html += '<div>';
-        html += '<label for="commitment" class="block text-sm font-medium mb-1">Commitment</label>';
-        html += '<select id="commitment" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300">';
+        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="filter" class="h-5 w-5 stroke-[#2563eb]"></i>Filters</h3>';
+        html += '<div class="flex flex-col sm:flex-row gap-4 rounded-full border border-[#E2E8F0] p-1 bg-white mb-4">';
+        html += '<select id="commitment" class="flex-1 rounded-full px-4 py-2 text-sm text-gray-700 focus:outline-none">';
         html += `<option value="Annual" ${STATE.commitment === 'Annual' ? 'selected' : ''}>Annual</option>`;
         html += `<option value="Monthly" ${STATE.commitment === 'Monthly' ? 'selected' : ''}>Monthly</option>`;
         html += '</select>';
-        html += '</div>';
-        html += '<div>';
-        html += '<label for="dealType" class="block text-sm font-medium mb-1">Deal Type</label>';
-        html += '<select id="dealType" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300">';
+        html += '<select id="dealType" class="flex-1 rounded-full px-4 py-2 text-sm text-gray-700 focus:outline-none">';
         html += `<option value="Net New" ${STATE.dealType === 'Net New' ? 'selected' : ''}>Net New</option>`;
         html += `<option value="Renewal" ${STATE.dealType === 'Renewal' ? 'selected' : ''}>Renewal</option>`;
         html += '</select>';
-        html += '</div>';
-        html += '<div>';
-        html += '<label for="newPartner" class="block text-sm font-medium mb-1">New Partner?</label>';
-        html += '<div class="relative inline-flex cursor-pointer items-center">';
-        html += `<input type="checkbox" id="newPartner" class="sr-only peer" ${STATE.newPartner ? 'checked' : ''}>`;
-        html += '<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#2563eb] peer-focus:ring-offset-2 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 peer-checked:bg-[#2563eb]"></div>';
-        html += '</div>';
-        html += '</div>';
-        html += '</div>';
+        html += '</div></div>';
         const isRegistered = STATE.partnerType === 'Registered';
         const tierKey = isRegistered ? 'Registered' : 'Preferred|Premier';
-        const margins = STATE.model.margins[STATE.commitment][STATE.dealType][tierKey];
+        let margins = STATE.model.margins[STATE.commitment][STATE.dealType][tierKey];
+        if (!isRegistered) {
+          margins = [...margins]; // copy to avoid modifying original
+          margins.push({
+            band: "Band 3",
+            upTo: STATE.dealType === 'Renewal' ? "0%" : "Up to 5% (discretionary)",
+            when: STATE.dealType === 'Renewal' ? "NA" : "Intro or PO only → Referral margin."
+          });
+        }
+        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="table" class="h-5 w-5 stroke-[#2563eb]"></i>Margin Bands</h3>';
         html += '<div class="overflow-x-auto mb-6">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
         html += '<thead><tr><th class="px-6 py-3 text-left text-sm font-semibold">Band</th><th class="px-6 py-3 text-left text-sm font-semibold">Up to</th><th class="px-6 py-3 text-left text-sm font-semibold">When</th></tr></thead>';
@@ -809,30 +808,38 @@
         margins.forEach(m => {
           html += `<tr><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.band}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.upTo}</td><td class="px-6 py-4 text-sm text-gray-700 leading-relaxed">${m.when}</td></tr>`;
         });
-        html += '</tbody></table></div>';
-        if (!isRegistered) {
-          html += '<div class="mt-6">';
-          html += '<label for="bandSelect" class="block text-sm font-medium mb-1">Select Band for Example</label>';
-          html += '<select id="bandSelect" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300">';
-          if (STATE.partnerTierMeta[STATE.partnerType].fullCycleEligible) html += `<option value="band1" ${STATE.band === 'band1' ? 'selected' : ''}>Band 1 – Full-Cycle</option>`;
-          html += `<option value="band2" ${STATE.band === 'band2' ? 'selected' : ''}>Band 2 – Co-Sell</option>`;
-          html += '</select>';
-          html += '</div>';
-          html += '<div class="mt-6">';
-          html += '<label for="exampleACV" class="block text-sm font-medium mb-1">Example ACV ($)</label>';
-          html += '<input type="number" id="exampleACV" value="' + STATE.exampleACV + '" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300 w-full max-w-xs" />';
-          html += '</div>';
-          let upTo = STATE.band === 'band1' ? margins[0].upTo : margins[1].upTo;
-          const marginPercent = parseFloat(upTo) / 100;
-          const acv = STATE.exampleACV;
-          const margin = acv * marginPercent;
-          const services = margin * STATE.servicesMultiplier;
-          html += '<div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">';
-          html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Software Margin</div><div class="text-2xl font-semibold">$${margin.toLocaleString()}</div></div>`;
-          html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Est. Services Revenue</div><div class="text-2xl font-semibold">$${services.toLocaleString()}</div></div>`;
-          html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Total Partner Value</div><div class="text-2xl font-semibold">$${(margin + services).toLocaleString()}</div></div>`;
-          html += '</div>';
+        html += '</tbody></table></div></div>';
+        html += '<div class="rounded-xl bg-white p-6 shadow-md mb-6">';
+        html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="calculator" class="h-5 w-5 stroke-[#2563eb]"></i>Example Calculation</h3>';
+        if (isRegistered) {
+          STATE.band = 'band3';
         }
+        html += '<div class="flex flex-wrap gap-4 mb-4">';
+        const availableBands = isRegistered ? ['band3'] : (STATE.partnerTierMeta[STATE.partnerType].fullCycleEligible ? ['band1', 'band2', 'band3'] : ['band2', 'band3']);
+        availableBands.forEach(band => {
+          html += `
+            <label class="inline-flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="band" value="${band}" ${STATE.band === band ? 'checked' : ''} class="form-radio h-4 w-4 text-[#2563eb] focus:ring-[#2563eb]">
+              <span class="text-sm font-medium">${STATE.salesCycle.bandMeta[band].name.split(' – ')[0]}</span>
+            </label>
+          `;
+        });
+        html += '</div>';
+        html += '<div class="mt-4">';
+        html += '<label for="exampleACV" class="block text-sm font-medium mb-1">Example ACV ($)</label>';
+        html += '<input type="number" id="exampleACV" value="' + STATE.exampleACV + '" min="0" step="1000" class="rounded-full border border-[#E2E8F0] bg-white px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2 transition-all duration-300 w-full max-w-xs" />';
+        html += '</div>';
+        const upTo = margins.find(m => m.band.toLowerCase().replace(/\s/g, '') === STATE.band.toLowerCase().replace(/\s/g, '')).upTo;
+        const marginPercentStr = upTo.replace(/[^0-9.]/g, '');
+        const marginPercent = parseFloat(marginPercentStr) / 100 || 0;
+        const acv = STATE.exampleACV;
+        const margin = acv * marginPercent;
+        const services = margin * STATE.servicesMultiplier;
+        html += '<div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">';
+        html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Software Margin</div><div class="text-2xl font-semibold">$${margin.toLocaleString()}</div></div>`;
+        html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Est. Services Revenue</div><div class="text-2xl font-semibold">$${services.toLocaleString()}</div></div>`;
+        html += `<div class="rounded-xl bg-gray-50 p-4"><div class="text-sm font-medium mb-1">Total Partner Value</div><div class="text-2xl font-semibold">$${(margin + services).toLocaleString()}</div></div>`;
+        html += '</div></div>';
         return html;
       }
       function renderDetailsContent(specific) {
@@ -1421,13 +1428,6 @@
             render();
           });
         });
-        const newPartnerCheckbox = document.getElementById('newPartner');
-        if (newPartnerCheckbox) {
-          newPartnerCheckbox.addEventListener('change', (e) => {
-            STATE.newPartner = e.target.checked;
-            render();
-          });
-        }
         const commitmentSelect = document.getElementById('commitment');
         if (commitmentSelect) {
           commitmentSelect.addEventListener('change', (e) => {
@@ -1442,13 +1442,12 @@
             render();
           });
         }
-        const bandSelect = document.getElementById('bandSelect');
-        if (bandSelect) {
-          bandSelect.addEventListener('change', (e) => {
+        document.querySelectorAll('input[name="band"]').forEach(radio => {
+          radio.addEventListener('change', (e) => {
             STATE.band = e.target.value;
             render();
           });
-        }
+        });
         document.querySelectorAll('[data-step]').forEach((btn) => {
           btn.addEventListener('click', () => {
             STATE.activeStep = parseInt(btn.dataset.step);
