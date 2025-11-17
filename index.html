@@ -46,6 +46,7 @@
         showEvaluationModal: false,
         showPartnerEventsModal: false,
         showCsvModal: false,
+        showLeadsGuideModal: false,
         activeStep: 0,
         band: 'band1',
         activeBand: 'band1',
@@ -404,7 +405,6 @@
                 "Lead Pass | Services Delivery Leads",
                 "Recast Executive Support",
                 "Co-Sell & Expansion Support",
-
               ],
             },
           },
@@ -651,6 +651,9 @@
         }
         if (STATE.showCsvModal) {
           html += renderCsvModal();
+        }
+        if (STATE.showLeadsGuideModal) {
+          html += renderLeadsGuideModal();
         }
         document.getElementById('app').innerHTML = html;
         lucide.createIcons();
@@ -944,6 +947,9 @@
         html += '<li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="alert-circle" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Premier deals are excluded from Recast SDR and marketing sequences once submitted.</span></li>';
         html += '</ul>';
         html += '<button id="csvSopBtn" class="rounded-full bg-[#2563eb] text-white px-4 py-2 text-sm hover:bg-[#1d4ed8] transition-colors duration-300 flex items-center gap-2"><i data-lucide="upload" class="h-4 w-4"></i>View CSV Upload SOP</button>';
+        if (['Preferred', 'Premier'].includes(STATE.partnerType)) {
+          html += '<button id="leadsGuideBtn" class="ml-4 rounded-full bg-[#2563eb] text-white px-4 py-2 text-sm hover:bg-[#1d4ed8] transition-colors duration-300 flex items-center gap-2"><i data-lucide="file-text" class="h-4 w-4"></i>Submit Leads Guide</button>';
+        }
         html += '<h3 class="text-lg font-medium mb-3 flex items-center gap-2 mt-6"><i data-lucide="dollar-sign" class="h-5 w-5 stroke-[#2563eb]"></i>Margin Eligibility by Tier</h3>';
         html += '<div class="overflow-x-auto mb-6">';
         html += '<table class="min-w-full divide-y divide-[#E2E8F0]">';
@@ -1436,7 +1442,7 @@
         return html;
       }
       function renderCsvModal(){
-        const sample = "Partner Name,Campaign Name,ID,Account Name,Domain,First Name,Last Name,Email,Country,Source Type,Attribution Intent,Requested PoR\nAcme Partner,2025-03 Webinar,Contoso,contoso.com,Jane,Doe,jane@contoso.com,US,Webinar,Partner Sourced,Yes";
+        const sample = "Partner Name,Campaign Name/ID,Account Name (and Domain),First Name,Last Name,Email,Country,Source Type,Attribution Intent,Requested PoR (Y/N)\n";
         return `
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" id="csvModal">
           <div class="relative max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
@@ -1457,6 +1463,69 @@
             </div>
           </div>
         </div>`;
+      }
+      function renderLeadsGuideModal() {
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="leadsGuideModal">
+            <div class="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+              <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeLeadsGuide">
+                <i data-lucide="x" class="h-6 w-6"></i>
+                <span class="sr-only">Close</span>
+              </button>
+              <h2 class="text-2xl font-semibold mb-6 text-center">Submit Leads, Get Credit, Win More Deals</h2>
+              <p class="text-gray-700 leading-relaxed mb-8">To protect your deals and ensure you're recognized as the Partner of Record (POR), it's critical to submit leads through the right channels. When you register leads, we guarantee visibility — and we will not take those deals direct. Here’s how to submit leads based on your selling motion:</p>
+              <div class="space-y-8">
+                <section>
+                  <h3 class="text-xl font-medium mb-4 flex items-center gap-2"><i data-lucide="file-plus" class="h-5 w-5 stroke-[#2563eb]"></i>1. Submitting One-Off Deals (Sales-Led)</h3>
+                  <p class="text-gray-700 leading-relaxed mb-2"><strong>Use:</strong> Partner Portal Lead Registration Form</p>
+                  <p class="text-gray-700 leading-relaxed mb-4"><strong>When to Use:</strong> For individual deals you’re actively working.</p>
+                  <h4 class="text-lg font-medium mb-2">What to Do:</h4>
+                  <ul class="space-y-3 mb-4">
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Go to the Partner Portal and complete the form</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed"><strong>Required:</strong> First Name, Last Name, Business Email, Company Name, Country, Campaign Source (defaults to “Salesperson”)</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">(Optional: Lead Notes or BANT)</span></li>
+                  </ul>
+                  <h4 class="text-lg font-medium mb-2">What You Get:</h4>
+                  <ul class="space-y-3">
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Your lead is protected and entered into Salesforce</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">You’re tagged as Partner of Record (POR) if it qualifies</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Our team won’t engage the lead directly — it stays with you</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Full transparency on conversion and pipeline status</span></li>
+                  </ul>
+                </section>
+                <section>
+                  <h3 class="text-xl font-medium mb-4 flex items-center gap-2"><i data-lucide="upload" class="h-5 w-5 stroke-[#2563eb]"></i>2. Uploading Leads from Webinars or Events</h3>
+                  <p class="text-gray-700 leading-relaxed mb-2"><strong>Use:</strong> CSV Upload</p>
+                  <p class="text-gray-700 leading-relaxed mb-4"><strong>When to Use:</strong> For leads collected at events, webinars, or campaigns.</p>
+                  <h4 class="text-lg font-medium mb-2">What to Do:</h4>
+                  <ul class="space-y-3 mb-4">
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Prepare your CSV with: First Name, Last Name, Business Email, Company Name, Country, Campaign Source (e.g., Webinar, Event), Partner Account</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">(Optional: Lead Notes / BANT, Lead Owner, Lead Status, Date Created)</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Submit via the upload tool</span></li>
+                  </ul>
+                  <h4 class="text-lg font-medium mb-2">What You Get:</h4>
+                  <ul class="space-y-3">
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Your leads are attributed to your partner account and campaign</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Qualified leads convert to opportunities with POR credit</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Leads from Premier/Strategic partners are never routed to direct sales</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Event performance is tracked in Salesforce for visibility</span></li>
+                  </ul>
+                </section>
+                <section>
+                  <h3 class="text-xl font-medium mb-4 flex items-center gap-2"><i data-lucide="shield-check" class="h-5 w-5 stroke-[#2563eb]"></i>Why Registering Leads Matters</h3>
+                  <p class="text-gray-700 leading-relaxed mb-4">When you register leads:</p>
+                  <ul class="space-y-3 mb-4">
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">You’re protected as the Partner of Record</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">We don’t pursue the deal directly</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">You gain access to full-funnel visibility</span></li>
+                    <li class="flex items-start gap-3"><div class="flex-shrink-0 mt-1 bg-[#2563eb] rounded-full p-1"><i data-lucide="check" class="h-3 w-3 stroke-white"></i></div><span class="text-gray-700 leading-relaxed">Your efforts are recognized in revenue reporting</span></li>
+                  </ul>
+                  <p class="text-gray-700 leading-relaxed">This process protects your deals, supports co-selling, and ensures you’re in the driver's seat.</p>
+                </section>
+              </div>
+            </div>
+          </div>
+        `;
       }
       function addEventListeners() {
         document.getElementById('partnerType').addEventListener('change', (e) => {
@@ -1571,6 +1640,20 @@
             render();
           });
         }
+        const leadsGuideBtn = document.getElementById('leadsGuideBtn');
+        if (leadsGuideBtn) {
+          leadsGuideBtn.addEventListener('click', () => {
+            STATE.showLeadsGuideModal = true;
+            render();
+          });
+        }
+        const closeLeadsGuide = document.getElementById('closeLeadsGuide');
+        if (closeLeadsGuide) {
+          closeLeadsGuide.addEventListener('click', () => {
+            STATE.showLeadsGuideModal = false;
+            render();
+          });
+        }
         const closeCsv = document.getElementById('closeCsvModal');
         const closeCsv2 = document.getElementById('closeCsvModal2');
         if (closeCsv || closeCsv2){
@@ -1579,7 +1662,7 @@
         const dl = document.getElementById('downloadCsvTpl');
         if (dl){
           dl.addEventListener('click',()=>{
-            const csv = `Partner Name,Campaign Name,ID,Account Name,Domain,First Name,Last Name,Email,Country,Source Type,Attribution Intent,Requested PoR\n`;
+            const csv = `Partner Name,Campaign Name/ID,Account Name (and Domain),First Name,Last Name,Email,Country,Source Type,Attribution Intent,Requested PoR (Y/N)\n`;
             const blob = new Blob([csv], {type:'text/csv'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href=url; a.download='recast_partner_upload_template.csv'; a.click();
@@ -1677,7 +1760,7 @@
             render();
           });
         });
-        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal');
+        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal');
         modals.forEach(m => {
           m.addEventListener('click', (e) => {
             if (e.target === m) {
@@ -1685,16 +1768,18 @@
               STATE.showPartnerEventsModal = false;
               STATE.showEvaluationModal = false;
               STATE.showCsvModal = false;
+              STATE.showLeadsGuideModal = false;
               render();
             }
           });
         });
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.filterModalOpen)) {
+          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen)) {
             STATE.showBusinessPlanModal = false;
             STATE.showPartnerEventsModal = false;
             STATE.showEvaluationModal = false;
             STATE.showCsvModal = false;
+            STATE.showLeadsGuideModal = false;
             STATE.filterModalOpen = false;
             render();
           }
