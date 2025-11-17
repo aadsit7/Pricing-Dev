@@ -47,6 +47,7 @@
         showPartnerEventsModal: false,
         showCsvModal: false,
         showLeadsGuideModal: false,
+        showPartnersHelpModal: false,
         activeStep: 0,
         band: 'band1',
         activeBand: 'band1',
@@ -659,6 +660,9 @@
         if (STATE.salesCycle.showStageModal) {
           html += renderStageModal();
         }
+        if (STATE.showPartnersHelpModal) {
+          html += renderPartnersHelpModal();
+        }
         document.getElementById('app').innerHTML = html;
         lucide.createIcons();
         addEventListeners();
@@ -745,10 +749,9 @@
       function renderOverview(overview, showButtons) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="book-open" class="h-6 w-6 stroke-[#2563eb]"></i>Overview</h2>';
         if (STATE.partnerType === 'Program Overview') {
-          html += `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div class="rounded-2xl bg-white p-6 shadow-md">
-          `;
+          html += '<div class="mt-6 flex flex-col sm:flex-row gap-4">';
+          html += '<button id="partnersHelpButton" class="rounded-full border border-[#E2E8F0] px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="users" class="h-4 w-4"></i>Partners do we help?</button>';
+          html += '</div>';
           html += renderProgramOverviewMatrix();
         } else {
           html += `<p class="text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-300">${overview}</p>`;
@@ -1529,18 +1532,83 @@
       }
       function renderStageModal() {
         const stage = STATE.salesCycle.stages[STATE.salesCycle.selectedStage];
+        let left = STATE.salesCycle.modalPosition.left;
+        if (left + 320 > window.innerWidth) {
+          left = STATE.salesCycle.modalPosition.left - (left + 320 - window.innerWidth);
+        }
+        const style = `position: absolute; top: ${STATE.salesCycle.modalPosition.top}px; left: ${left}px;`;
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="stageModalBg">
-            <div class="relative max-w-md w-full bg-white rounded-2xl shadow-2xl p-6">
-              <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeStageModal">
-                <i data-lucide="x" class="h-5 w-5"></i>
-              </button>
+          <div class="popout-panel open bg-white rounded-2xl shadow-lg w-80 transform scale-100 opacity-100 transition-all duration-200 ease-in-out z-50" style="${style}">
+            <div class="p-6">
               <h2 class="text-xl font-medium mb-4">${stage.label}</h2>
               <div class="space-y-4 text-sm text-gray-700">
                 <p><strong>Description:</strong> ${stage.description}</p>
                 <p><strong>Entry Criteria:</strong> ${stage.entryCriteria.join(', ')}</p>
                 <p><strong>Exit Criteria:</strong> ${stage.exitCriteria.join(', ')}</p>
                 <p><strong>Deliverables:</strong> ${stage.deliverables.join(', ')}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      function renderPartnersHelpModal() {
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="partnersHelpModal">
+            <div class="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+              <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closePartnersHelp">
+                <i data-lucide="x" class="h-6 w-6"></i>
+                <span class="sr-only">Close</span>
+              </button>
+              <h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="users" class="h-6 w-6 stroke-[#2563eb]"></i>Partners do we help?</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="rounded-2xl bg-white p-6 shadow-md">
+                  <h3 class="text-lg font-medium mb-4">Hybrid MSP / SI Partners</h3>
+                  <h4 class="text-base font-medium mb-2">Challenges</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                    <li>Application layer blocks every initiative</li>
+                    <li>Too much manual app work</li>
+                    <li>Customer IT overwhelmed</li>
+                    <li>Project timelines slip</li>
+                  </ul>
+                  <h4 class="text-base font-medium mb-2">Business Value</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                    <li>Scale without adding headcount</li>
+                    <li>Increase ARR + project output</li>
+                    <li>Faster, more predictable delivery</li>
+                    <li>Stronger valuation via automation</li>
+                  </ul>
+                  <h4 class="text-base font-medium mb-2">Customer Impact</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                    <li>Faster modernization + migration</li>
+                    <li>Fewer app incidents</li>
+                    <li>Clear path to readiness</li>
+                    <li>More stable environments</li>
+                  </ul>
+                </div>
+                <div class="rounded-2xl bg-white p-6 shadow-md">
+                  <h3 class="text-lg font-medium mb-4">ISV / OEM Partners</h3>
+                  <h4 class="text-base font-medium mb-2">Challenges</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                    <li>Application readiness stalls adoption</li>
+                    <li>Pilots fail due to app gaps</li>
+                    <li>Customers lack capacity</li>
+                    <li>Sales motions slow down</li>
+                  </ul>
+                  <h4 class="text-base font-medium mb-2">Business Value</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                    <li>Faster pilots + rollouts</li>
+                    <li>Higher win rates</li>
+                    <li>Larger, stickier deployments</li>
+                    <li>Predictable co-sell motions</li>
+                  </ul>
+                  <h4 class="text-base font-medium mb-2">Customer Impact</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                    <li>Smooth onboarding</li>
+                    <li>Lower deployment risk</li>
+                    <li>Compatible applications</li>
+                    <li>Faster value from the platform</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -1781,23 +1849,36 @@
             render();
           });
         });
-        const closeStageModal = document.getElementById('closeStageModal');
-        if (closeStageModal) {
-          closeStageModal.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
+          if (STATE.salesCycle.showStageModal && !e.target.closest('.popout-panel') && !e.target.closest('[data-stage]')) {
             STATE.salesCycle.showStageModal = false;
+            render();
+          }
+        });
+        const partnersHelpButton = document.getElementById('partnersHelpButton');
+        if (partnersHelpButton) {
+          partnersHelpButton.addEventListener('click', () => {
+            STATE.showPartnersHelpModal = true;
             render();
           });
         }
-        const stageModalBg = document.getElementById('stageModalBg');
-        if (stageModalBg) {
-          stageModalBg.addEventListener('click', (e) => {
-            if (e.target === stageModalBg) {
-              STATE.salesCycle.showStageModal = false;
+        const closePartnersHelp = document.getElementById('closePartnersHelp');
+        if (closePartnersHelp) {
+          closePartnersHelp.addEventListener('click', () => {
+            STATE.showPartnersHelpModal = false;
+            render();
+          });
+        }
+        const partnersHelpModal = document.getElementById('partnersHelpModal');
+        if (partnersHelpModal) {
+          partnersHelpModal.addEventListener('click', (e) => {
+            if (e.target === partnersHelpModal) {
+              STATE.showPartnersHelpModal = false;
               render();
             }
           });
         }
-        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal');
+        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal, #partnersHelpModal');
         modals.forEach(m => {
           m.addEventListener('click', (e) => {
             if (e.target === m) {
@@ -1806,12 +1887,13 @@
               STATE.showEvaluationModal = false;
               STATE.showCsvModal = false;
               STATE.showLeadsGuideModal = false;
+              STATE.showPartnersHelpModal = false;
               render();
             }
           });
         });
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen || STATE.salesCycle.showStageModal)) {
+          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen || STATE.salesCycle.showStageModal || STATE.showPartnersHelpModal)) {
             STATE.showBusinessPlanModal = false;
             STATE.showPartnerEventsModal = false;
             STATE.showEvaluationModal = false;
@@ -1819,6 +1901,7 @@
             STATE.showLeadsGuideModal = false;
             STATE.filterModalOpen = false;
             STATE.salesCycle.showStageModal = false;
+            STATE.showPartnersHelpModal = false;
             render();
           }
         });
