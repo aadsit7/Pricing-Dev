@@ -188,42 +188,42 @@
               deliverables: ["Registration form (company, domain, contacts, use case)", "Approval notification"],
             },
             Identification: {
-              label: "Identification (10% Pipeline)",
+              label: "Identification (10%)",
               description: "Initial contact made; meeting confirmed; problem identified.",
               entryCriteria: ["Approved lead", "Intro outreach completed"],
               exitCriteria: ["Discovery meeting held", "Clear problem statement"],
               deliverables: ["Discovery notes", "Next-step email / agenda"],
             },
             Qualification: {
-              label: "Qualification (25% Pipeline)",
+              label: "Qualification (25%)",
               description: "Pain and decision process validated; budget signal present; technical feasibility confirmed.",
               entryCriteria: ["Engaged prospect", "Business + technical discovery"],
               exitCriteria: ["Budget/timeline/authority captured", "Technical viability confirmed"],
               deliverables: ["MEDDICC summary", "Qualified Opportunity in CRM"],
             },
             Development: {
-              label: "Development (50% Best Case)",
+              label: "Development (50%)",
               description: "Solutioning and validation; business case and compelling event linked to value.",
               entryCriteria: ["Technical work started", "Solution fit agreed"],
               exitCriteria: ["Technical Win achieved", "Budget allocated"],
               deliverables: ["Technical validation checklist", "Mutual Action Plan (MAP)", "High-level architecture / scope"],
             },
             Proposal: {
-              label: "Proposal (75% Best Case)",
+              label: "Proposal (75%)",
               description: "Commercial alignment; quote/SOW delivered; legal/security reviews in progress.",
               entryCriteria: ["Budget identified", "Solution design accepted"],
               exitCriteria: ["Budget approval in progress", "Security/Legal submitted"],
               deliverables: ["Final quote or SOW", "Security questionnaire / DPA (if required)"],
             },
             Closing: {
-              label: "Closing (90% Commit)",
+              label: "Closing (90%)",
               description: "Signature or PO routing; go-live plan established.",
               entryCriteria: ["Commercial terms finalized", "Redlines near completion"],
               exitCriteria: ["Signature/PO received", "Launch date confirmed"],
               deliverables: ["Executed order form/PO", "Launch plan"],
             },
             ClosedWon: {
-              label: "Closed Won (100% Closed)",
+              label: "Closed Won",
               description: "Provisioning and fulfillment completed; CS intro scheduled.",
               entryCriteria: ["Executed paperwork"],
               exitCriteria: ["Software/license delivered", "CS kickoff scheduled"],
@@ -290,7 +290,8 @@
             },
           },
           rows: ["PQL", "Identification", "Qualification", "Development", "Proposal", "Closing", "ClosedWon", "Onboarding"],
-          activeAccordion: null,
+          selectedStage: null,
+          showStageModal: false,
         },
         msp: {
           overview: "Welcome to the Recast MSP Partner Program\n\nThe Recast MSP Program is built for service providers that want to embed Recast’s solutions into their service offerings to drive recurring revenue, expand client value, and scale with predictable economics.\n\nWe support multiple MSP archetypes—from infra-focused to app-centric—with enablement tailored to each type. Whether you’re a high-touch implementation shop or a lightweight automation-led MSP, this program offers flexible models to fit your business.\n\nProgram Highlights:\n\n* Monthly point-based licensing structure for easy cost forecasting\n\n* Tiered margin bands based on deal ownership and engagement\n\n* Access to white-labeled deployment kits, SOWs, and enablement tools\n\n* Support for both application workspace and endpoint solutions\n\n* Designed to protect partner margin, loyalty, and renewal rights",
@@ -655,6 +656,9 @@
         if (STATE.showLeadsGuideModal) {
           html += renderLeadsGuideModal();
         }
+        if (STATE.salesCycle.showStageModal) {
+          html += renderStageModal();
+        }
         document.getElementById('app').innerHTML = html;
         lucide.createIcons();
         addEventListeners();
@@ -741,6 +745,58 @@
       function renderOverview(overview, showButtons) {
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="book-open" class="h-6 w-6 stroke-[#2563eb]"></i>Overview</h2>';
         if (STATE.partnerType === 'Program Overview') {
+          html += `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="rounded-2xl bg-white p-6 shadow-md">
+                <h3 class="text-lg font-medium mb-4">Hybrid MSP / SI Partners</h3>
+                <h4 class="text-base font-medium mb-2">Challenges</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                  <li>Application layer blocks every initiative</li>
+                  <li>Too much manual app work</li>
+                  <li>Customer IT overwhelmed</li>
+                  <li>Project timelines slip</li>
+                </ul>
+                <h4 class="text-base font-medium mb-2">Business Value</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                  <li>Scale without adding headcount</li>
+                  <li>Increase ARR + project output</li>
+                  <li>Faster, more predictable delivery</li>
+                  <li>Stronger valuation via automation</li>
+                </ul>
+                <h4 class="text-base font-medium mb-2">Customer Impact</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                  <li>Faster modernization + migration</li>
+                  <li>Fewer app incidents</li>
+                  <li>Clear path to readiness</li>
+                  <li>More stable environments</li>
+                </ul>
+              </div>
+              <div class="rounded-2xl bg-white p-6 shadow-md">
+                <h3 class="text-lg font-medium mb-4">ISV / OEM Partners</h3>
+                <h4 class="text-base font-medium mb-2">Challenges</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                  <li>Application readiness stalls adoption</li>
+                  <li>Pilots fail due to app gaps</li>
+                  <li>Customers lack capacity</li>
+                  <li>Sales motions slow down</li>
+                </ul>
+                <h4 class="text-base font-medium mb-2">Business Value</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700 mb-4">
+                  <li>Faster pilots + rollouts</li>
+                  <li>Higher win rates</li>
+                  <li>Larger, stickier deployments</li>
+                  <li>Predictable co-sell motions</li>
+                </ul>
+                <h4 class="text-base font-medium mb-2">Customer Impact</h4>
+                <ul class="list-disc pl-5 space-y-1 text-gray-700">
+                  <li>Smooth onboarding</li>
+                  <li>Lower deployment risk</li>
+                  <li>Compatible applications</li>
+                  <li>Faster value from the platform</li>
+                </ul>
+              </div>
+            </div>
+          `;
           html += renderProgramOverviewMatrix();
         } else {
           html += `<p class="text-gray-700 leading-relaxed whitespace-pre-line transition-opacity duration-300">${overview}</p>`;
@@ -1069,26 +1125,18 @@
         let html = '<h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="table" class="h-6 w-6 stroke-[#2563eb]"></i>Sales Motion</h2>';
         html += '<div class="mb-6 rounded-2xl bg-white p-6 shadow-md">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="workflow" class="h-5 w-5 stroke-[#2563eb]"></i>Sales Cycle Stages</h3>';
-        html += '<div class="space-y-4">';
+        html += '<div class="relative before:content-[\'\'] before:absolute before:top-0 before:left-0 before:w-10 before:h-full before:z-10 before:pointer-events-none before:bg-gradient-to-r before:from-white before:to-transparent after:content-[\'\'] after:absolute after:top-0 after:right-0 after:w-10 after:h-full after:z-10 after:pointer-events-none after:bg-gradient-to-l after:from-white after:to-transparent">';
+        html += '<div class="flex overflow-x-auto gap-2 pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">';
+        const colors = ['bg-yellow-100', 'bg-green-100', 'bg-blue-100', 'bg-purple-100', 'bg-pink-100', 'bg-yellow-100', 'bg-green-100', 'bg-blue-100'];
         STATE.salesCycle.rows.forEach((row, index) => {
-          const active = STATE.salesCycle.activeAccordion === index;
           const stage = STATE.salesCycle.stages[row];
           html += `
-            <div class="border border-[#E2E8F0] rounded-2xl overflow-hidden">
-              <button data-accordion="${index}" class="w-full flex justify-between items-center px-6 py-4 text-left font-medium text-sm bg-gray-50 hover:bg-gray-100 transition-colors">
-                <span>${stage.label}</span>
-                <i data-lucide="${active ? 'chevron-up' : 'chevron-down'}" class="h-4 w-4"></i>
-              </button>
-              <div class="${active ? '' : 'hidden'} px-6 py-4 text-sm text-gray-700 space-y-2">
-                <p><strong>Description:</strong> ${stage.description}</p>
-                <p><strong>Entry Criteria:</strong> ${stage.entryCriteria.join(', ')}</p>
-                <p><strong>Exit Criteria:</strong> ${stage.exitCriteria.join(', ')}</p>
-                <p><strong>Deliverables:</strong> ${stage.deliverables.join(', ')}</p>
-              </div>
-            </div>
+            <button data-stage="${row}" class="flex-shrink-0 ${colors[index]} rounded-full px-4 py-2 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2">
+              ${stage.label}
+            </button>
           `;
         });
-        html += '</div></div>';
+        html += '</div></div></div>';
         html += '<div class="mb-6 rounded-2xl bg-white p-6 shadow-md">';
         html += '<h3 class="text-lg font-medium mb-4 flex items-center gap-2"><i data-lucide="layers" class="h-5 w-5 stroke-[#2563eb]"></i>Band Overviews</h3>';
         html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
@@ -1527,6 +1575,25 @@
           </div>
         `;
       }
+      function renderStageModal() {
+        const stage = STATE.salesCycle.stages[STATE.salesCycle.selectedStage];
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="stageModalBg">
+            <div class="relative max-w-md w-full bg-white rounded-2xl shadow-2xl p-6">
+              <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeStageModal">
+                <i data-lucide="x" class="h-5 w-5"></i>
+              </button>
+              <h2 class="text-xl font-medium mb-4">${stage.label}</h2>
+              <div class="space-y-4 text-sm text-gray-700">
+                <p><strong>Description:</strong> ${stage.description}</p>
+                <p><strong>Entry Criteria:</strong> ${stage.entryCriteria.join(', ')}</p>
+                <p><strong>Exit Criteria:</strong> ${stage.exitCriteria.join(', ')}</p>
+                <p><strong>Deliverables:</strong> ${stage.deliverables.join(', ')}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       function addEventListeners() {
         document.getElementById('partnerType').addEventListener('change', (e) => {
           STATE.partnerType = e.target.value;
@@ -1753,13 +1820,31 @@
             render();
           });
         });
-        document.querySelectorAll('[data-accordion]').forEach(btn => {
+        document.querySelectorAll('[data-stage]').forEach(btn => {
           btn.addEventListener('click', () => {
-            const index = parseInt(btn.dataset.accordion);
-            STATE.salesCycle.activeAccordion = STATE.salesCycle.activeAccordion === index ? null : index;
+            const rect = btn.getBoundingClientRect();
+            STATE.salesCycle.modalPosition = { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX };
+            STATE.salesCycle.selectedStage = btn.dataset.stage;
+            STATE.salesCycle.showStageModal = true;
             render();
           });
         });
+        const closeStageModal = document.getElementById('closeStageModal');
+        if (closeStageModal) {
+          closeStageModal.addEventListener('click', () => {
+            STATE.salesCycle.showStageModal = false;
+            render();
+          });
+        }
+        const stageModalBg = document.getElementById('stageModalBg');
+        if (stageModalBg) {
+          stageModalBg.addEventListener('click', (e) => {
+            if (e.target === stageModalBg) {
+              STATE.salesCycle.showStageModal = false;
+              render();
+            }
+          });
+        }
         const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal');
         modals.forEach(m => {
           m.addEventListener('click', (e) => {
@@ -1774,13 +1859,14 @@
           });
         });
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen)) {
+          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen || STATE.salesCycle.showStageModal)) {
             STATE.showBusinessPlanModal = false;
             STATE.showPartnerEventsModal = false;
             STATE.showEvaluationModal = false;
             STATE.showCsvModal = false;
             STATE.showLeadsGuideModal = false;
             STATE.filterModalOpen = false;
+            STATE.salesCycle.showStageModal = false;
             render();
           }
         });
