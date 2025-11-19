@@ -393,7 +393,7 @@
               </div>
               <i data-lucide="chevron-down" class="w-6 h-6 text-gray-700 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
             </button>
-            <div id="${contentId}" class="accordion-content px-6 pb-6 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(0.2, 0.8, 0.2, 1),opacity 300ms ease">
+            <div id="${contentId}" class="accordion-content px-6 pb-6 overflow-visible" style="max-height:${expanded?'none':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(0.2, 0.8, 0.2, 1),opacity 300ms ease">
               <ul class="list-disc pl-6 space-y-3 text-base text-gray-700 leading-relaxed">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
@@ -442,7 +442,7 @@
               </div>
               <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-6 h-6 text-gray-700 transition-transform duration-300" aria-hidden="true"></i>
             </button>
-            <div id="${contentId}" class="accordion-content px-6 pb-6 overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(0.2, 0.8, 0.2, 1),opacity 300ms ease">
+            <div id="${contentId}" class="accordion-content px-6 pb-6 overflow-visible" style="max-height:${expanded?'none':'0'};opacity:${expanded?'1':'0'};transition:max-height 300ms cubic-bezier(0.2, 0.8, 0.2, 1),opacity 300ms ease">
               ${expanded ? contentFunc() : ''}
             </div>
           </div>
