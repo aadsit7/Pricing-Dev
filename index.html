@@ -50,6 +50,7 @@
         showPartnersHelpModal: false,
         showInternalROEPopout: false,
         showPartnerCommPopout: false,
+        showDealRegModal: false,
         activeStep: 0,
         tier: 'tier1',
         activeTier: 'tier1',
@@ -683,6 +684,9 @@
         if (STATE.showPartnerCommPopout) {
           html += renderPartnerCommPopout();
         }
+        if (STATE.showDealRegModal) {
+          html += renderDealRegModal();
+        }
         document.getElementById('app').innerHTML = html;
         lucide.createIcons();
         addEventListeners();
@@ -1196,8 +1200,70 @@
         });
         html += '</tbody></table></div>';
         html += '</section>';
+        html += '<button id="dealRegButton" class="rounded-full bg-[#2563eb] text-white px-6 py-3 text-sm font-medium hover:bg-[#1d4ed8] transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2"><i data-lucide="file-text" class="h-4 w-4"></i>Deal Registration Details</button>';
         html += '</div>';
         return html;
+      }
+      function renderDealRegModal() {
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" id="dealRegModal">
+            <div class="relative max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto">
+              <button class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focus:outline-none" id="closeDealReg">
+                <i data-lucide="x" class="h-6 w-6"></i>
+              </button>
+              <h2 class="text-xl font-medium mb-6 flex items-center gap-3"><i data-lucide="file-text" class="h-6 w-6 stroke-[#2563eb]"></i>Deal Registration</h2>
+              <div class="space-y-6 text-gray-700 leading-relaxed whitespace-pre-line">.1. Partner Portal Lead Registration Form – For Individual Deal Submissions
+Used when a partner salesperson submits a single deal.
+Required Fields
+·         First Name
+·         Last Name
+·         Business Email
+·         Company Name
+·         Country
+·         Partner Campaign Source (defaults to “Salesperson”)
+·         Lead Notes / BANT (optional)
+ 
+ 
+What Happens
+·         Leads are added into Salesforce
+·         Email opt out the lead or contact – select ‘Email Opt Out’ field as ‘true’
+·         They’re linked to the correct partner account and tagged with the campaign source – Add new campaign for NA Partners
+·         Leads from Premier /Strategic partners are excluded from direct outreach and routed only to the Partner team
+·         The assigned Partner or Region Manager reviews each lead (The demand Gen stage can mirror the direct process. In this example if the partner is registering the lead individually it can meet the highest criteria since they are filling it out in the portal. Ie default to MQL)
+·         If the lead meets minimum qualification requirements:
+·         It is converted into an opportunity
+·         The partner is recorded as the Partner of Record (POR)
+·         Qualification criteria for POR status are documented in the opportunity
+ 
+2. CSV Upload – For Lists From Campaigns or Events
+Used when partners or internal teams upload a list of leads from events like webinars or tradeshows.
+Required Columns
+·         First Name
+·         Last Name
+·         Business Email
+·         Company Name
+·         Country
+·         Partner Campaign Source (e.g., Webinar, Event)
+·         Partner Account
+·         Email Opt-out (TRUE or FALSE)
+·         (Optional: Lead Notes / BANT, Lead Owner, Lead Status, Date Created)[AA1] 
+ 
+What Happens
+·         Leads are added into Salesforce
+·         They’re linked to the right partner and campaign
+·         Leads from Premier or Strategic partners are also excluded from direct outreach and sent only to the Partner team
+·         The assigned Partner or Region Manager reviews each lead
+·         If the lead meets minimum qualification requirements:
+·         It is converted into an opportunity
+·         The partner is recorded as the Partner of Record (POR)
+ [AA1]@Chelsea Eugster
+ 
+Add email, opt in/opt out field.
+ 
+Marketing will scrub the list.</div>
+            </div>
+          </div>
+        `;
       }
       function renderSalesMotionContent() {
         const isRegistered = STATE.partnerType === 'Registered';
@@ -2053,7 +2119,21 @@
             render();
           });
         }
-        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal, #partnersHelpModal, #internalROEPopout, #partnerCommPopout');
+        const dealRegButton = document.getElementById('dealRegButton');
+        if (dealRegButton) {
+          dealRegButton.addEventListener('click', () => {
+            STATE.showDealRegModal = true;
+            render();
+          });
+        }
+        const closeDealReg = document.getElementById('closeDealReg');
+        if (closeDealReg) {
+          closeDealReg.addEventListener('click', () => {
+            STATE.showDealRegModal = false;
+            render();
+          });
+        }
+        const modals = document.querySelectorAll('#businessPlanModal, #partnerEventsModal, #evaluationModal, #csvModal, #leadsGuideModal, #partnersHelpModal, #internalROEPopout, #partnerCommPopout, #dealRegModal');
         modals.forEach(m => {
           m.addEventListener('click', (e) => {
             if (e.target === m) {
@@ -2065,12 +2145,13 @@
               STATE.showPartnersHelpModal = false;
               STATE.showInternalROEPopout = false;
               STATE.showPartnerCommPopout = false;
+              STATE.showDealRegModal = false;
               render();
             }
           });
         });
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen || STATE.salesCycle.showStageModal || STATE.showPartnersHelpModal || STATE.showInternalROEPopout || STATE.showPartnerCommPopout)) {
+          if (e.key === 'Escape' && (STATE.showBusinessPlanModal || STATE.showPartnerEventsModal || STATE.showEvaluationModal || STATE.showCsvModal || STATE.showLeadsGuideModal || STATE.filterModalOpen || STATE.salesCycle.showStageModal || STATE.showPartnersHelpModal || STATE.showInternalROEPopout || STATE.showPartnerCommPopout || STATE.showDealRegModal)) {
             STATE.showBusinessPlanModal = false;
             STATE.showPartnerEventsModal = false;
             STATE.showEvaluationModal = false;
@@ -2081,6 +2162,7 @@
             STATE.showPartnersHelpModal = false;
             STATE.showInternalROEPopout = false;
             STATE.showPartnerCommPopout = false;
+            STATE.showDealRegModal = false;
             render();
           }
         });
