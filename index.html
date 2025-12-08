@@ -106,7 +106,7 @@
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
-        selectedPressures: [],
+        selectedBullets: {},
         currentState: {
           change: {
             intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
@@ -311,20 +311,29 @@
             <p class="text-xl text-gray-700 leading-relaxed">- Application Layer is the #1 bottleneck for continuous transformation.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               ${pressures.map(p=>`
-                <div class="section-card p-6 ${STATE.selectedPressures.includes(p.id) ? 'border-2 border-[var(--primary)] shadow-lg' : ''}">
+                <div class="section-card p-6">
                   <h3 class="text-xl font-medium mb-4">${p.title}</h3>
-                  <ul class="space-y-2 text-base text-gray-700 leading-relaxed">
-                    ${p.bullets.map(b=>`<li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-1 text-gray-500"></i>${b}</li>`).join('')}
+                  <ul class="space-y-3 text-base text-gray-700 leading-relaxed">
+                    ${p.bullets.map((b,i)=>{
+                      const selected = (STATE.selectedBullets[p.id] || []).includes(i);
+                      return `
+                        <li class="flex items-start gap-3 ${selected ? 'bg-blue-50 rounded-md p-2 transition-colors' : ''}">
+                          <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <input type="checkbox" class="sr-only" data-action="toggle-bullet" data-category="${p.id}" data-index="${i}" ${selected ? 'checked' : ''} aria-label="Select: ${b}">
+                            <div class="w-5 h-5 border-2 rounded-md flex items-center justify-center transition-all duration-200 ease-in-out ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}">
+                              ${selected ? '<i data-lucide="check" class="w-3 h-3 text-white stroke-[3]"></i>' : ''}
+                            </div>
+                            <span class="${selected ? 'text-blue-800 font-medium' : ''}">${b}</span>
+                          </label>
+                        </li>
+                      `;
+                    }).join('')}
                   </ul>
-                  <div class="mt-6 flex items-center gap-2">
-                    <input type="checkbox" id="check-${p.id}" ${STATE.selectedPressures.includes(p.id) ? 'checked' : ''} data-action="toggle-pressure" data-id="${p.id}" class="w-4 h-4 text-[var(--primary)] focus-ring rounded" aria-label="Select ${p.title}">
-                    <label for="check-${p.id}" class="text-sm text-gray-700">Select</label>
-                  </div>
                 </div>
               `).join('')}
             </div>
             <div class="mt-8 flex justify-between items-center">
-              <button type="button" data-action="reset-pressures" class="re-secondary px-6 py-2">Reset</button>
+              <button type="button" data-action="reset-bullets" class="re-secondary px-6 py-2">Reset</button>
               <button type="button" data-action="next-tab" class="re-primary px-6 py-2">Next</button>
             </div>
           </section>
@@ -1105,17 +1114,20 @@
           setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
           setTimeout(()=>{ initCurrentStateModal(); }, 0);
         });
-        root.querySelectorAll('[data-action="toggle-pressure"]').forEach(inp=>inp.addEventListener('change',e=>{
-          const id = e.target.getAttribute('data-id');
-          if (STATE.selectedPressures.includes(id)) {
-            STATE.selectedPressures = STATE.selectedPressures.filter(x => x !== id);
+        root.querySelectorAll('[data-action="toggle-bullet"]').forEach(inp=>inp.addEventListener('change',e=>{
+          const category = e.target.getAttribute('data-category');
+          const index = parseInt(e.target.getAttribute('data-index'));
+          if (!STATE.selectedBullets[category]) STATE.selectedBullets[category] = [];
+          const arr = STATE.selectedBullets[category];
+          if (arr.includes(index)) {
+            STATE.selectedBullets[category] = arr.filter(x => x !== index);
           } else {
-            STATE.selectedPressures.push(id);
+            arr.push(index);
           }
           render();
         }));
-        root.querySelectorAll('[data-action="reset-pressures"]').forEach(b=>b.addEventListener('click',()=>{
-          STATE.selectedPressures = [];
+        root.querySelectorAll('[data-action="reset-bullets"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.selectedBullets = {};
           render();
         }));
         root.querySelectorAll('[data-action="next-tab"]').forEach(b=>b.addEventListener('click',()=>{
