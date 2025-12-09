@@ -94,6 +94,8 @@
         openCards: { core: false, onboarding: false, trust: false },
         visitedCards: [],
         openBuckets: { one: false, zero: false, per: false },
+        modalOpen: false,
+        editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
         selectedBullets: {},
         currentState: {
           change: {
@@ -260,6 +262,7 @@
             </div>` : ''}
             <section class="mt-5">${renderActivePanel()}</section>
           </main>
+          ${renderModal()}
           ${renderWhyModal()}
         `;
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
@@ -286,10 +289,10 @@
         return '';
       }
       const pressures = [
-        { id: 'cost', title: 'COST-TO-OPERATE REDUCTION', bullets: ['Thousands of apps across Intune, ConfigMgr, VDI, and macOS are still managed by hand.', 'Redundant packaging and one-off installs inflate operational spend.', 'Teams can’t scale app work to match project and device growth.', 'Lack of standardized packaging and delivery hides significant costs.'] },
-        { id: 'risk', title: 'RISK, COMPLIANCE & SECURITY', bullets: ['Version sprawl and unpatched apps create persistent security gaps.', 'No single view of app versions and assignments across environments.', 'Manual governance for internal and custom apps increases human error and audit exposure.'] },
-        { id: 'capacity', title: 'CAPACITY & DELIVERY VELOCITY', bullets: ['IT must ship more apps and updates every month with flat headcount.', 'Repetitive packaging and validation stall modernization and AI initiatives.', 'Slow app readiness blocks pilots, platform migrations, and hardware refreshes.'] },
-        { id: 'employee', title: 'EMPLOYEE EXPERIENCE & ENABLEMENT', bullets: ['Delays in app access stall employee and customer workflows.', 'Different app versions by site, device, or platform frustrate users and support teams.', 'Inconsistent delivery drives shadow IT and erodes productivity and morale.'] }
+        { id: 'cost', title: 'COST-TO-OPERATE REDUCTION', bullets: ['Manual app management across Intune, VDI, and macOS is bleeding time and budget.', 'One-off installs and redundant packaging silently bloat operational spend.', 'App delivery can’t keep up with project or device growth.', 'Without standardization, hidden costs go unnoticed until they become significant.'] },
+        { id: 'risk', title: 'RISK, COMPLIANCE & SECURITY', bullets: ['Unpatched and outdated apps create invisible security gaps.', 'IT lacks a single view of app versions and assignments across environments.', 'Manual governance increases human error and audit exposure.', 'New compliance mandates amplify the risk of manual processes.'] },
+        { id: 'capacity', title: 'CAPACITY & DELIVERY VELOCITY', bullets: ['App demand grows monthly while headcount stays flat.', 'Repetitive packaging and validation stall modernization and AI initiatives.', 'Slow app readiness delays pilots, platform migrations, and hardware refreshes.'] },
+        { id: 'employee', title: 'EMPLOYEE EXPERIENCE & ENABLEMENT', bullets: ['App delays stall employee and customer workflows.', 'Inconsistent versions across devices frustrate users and support teams.', 'Shadow IT emerges when users cannot get the tools they need, eroding productivity and morale.'] }
       ];
       function renderProblems(){
         return `
@@ -677,6 +680,11 @@
                   ${bucketAccordion('one', 'wand-sparkles', 'Hours Saved from Packaging', onePackageContent)}
                   ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent)}
                 </div>
+                <div class="mt-8">
+                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">
+                    <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
+                  </button>
+                </div>
               </div>
               <div class="rounded-3xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-8">
                 <h3 class="text-2xl font-semibold mb-6 text-gray-900">Results</h3>
@@ -836,6 +844,150 @@
         return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
       }
       function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+      /* ---------- Per-user cached Current State (IDs + storage) ---------- */
+      const USER_ID = String(window.APP_USER_ID || "guest");
+      const PAGE_SCOPE = location.origin + location.pathname + location.search;
+      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
+      let DEFAULT_CURRENT_STATE = null;
+      const $ = (sel, ctx = document) => ctx.querySelector(sel);
+      const fields = {
+        changeIntro: () => $('#changeIntro'),
+        changeBullets: () => $('#changeBullets'),
+        changeAnalyst: () => $('#changeAnalyst'),
+        nowIntro: () => $('#nowIntro'),
+        nowBullets: () => $('#nowBullets'),
+        nowAnalyst: () => $('#nowAnalyst'),
+        recastIntro: () => $('#recastIntro'),
+        recastBullets: () => $('#recastBullets'),
+        recastAnalyst: () => $('#recastAnalyst')
+      };
+      function captureDefaultsOnce(){
+        if (DEFAULT_CURRENT_STATE) return;
+        DEFAULT_CURRENT_STATE = STATE.defaultsCurrentState();
+      }
+      function readFields(){
+        return {
+          change: {
+            intro: fields.changeIntro()?.value ?? "",
+            bullets: fields.changeBullets()?.value ?? "",
+            analyst: fields.changeAnalyst()?.value ?? ""
+          },
+          now: {
+            intro: fields.nowIntro()?.value ?? "",
+            bullets: fields.nowBullets()?.value ?? "",
+            analyst: fields.nowAnalyst()?.value ?? ""
+          },
+          recast: {
+            intro: fields.recastIntro()?.value ?? "",
+            bullets: fields.recastBullets()?.value ?? "",
+            analyst: fields.recastAnalyst()?.value ?? ""
+          }
+        };
+      }
+      function writeFields(data){
+        if(!data) return;
+        if(fields.changeIntro()) fields.changeIntro().value = data.change.intro ?? "";
+        if(fields.changeBullets()) fields.changeBullets().value = data.change.bullets ?? "";
+        if(fields.changeAnalyst()) fields.changeAnalyst().value = data.change.analyst ?? "";
+        if(fields.nowIntro()) fields.nowIntro().value = data.now.intro ?? "";
+        if(fields.nowBullets()) fields.nowBullets().value = data.now.bullets ?? "";
+        if(fields.nowAnalyst()) fields.nowAnalyst().value = data.now.analyst ?? "";
+        if(fields.recastIntro()) fields.recastIntro().value = data.recast.intro ?? "";
+        if(fields.recastBullets()) fields.recastBullets().value = data.recast.bullets ?? "";
+        if(fields.recastAnalyst()) fields.recastAnalyst().value = data.recast.analyst ?? "";
+      }
+      function loadDraft(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        }catch{return null;}
+      }
+      function saveDraft(payload){
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
+        catch(e){ console.warn('Save failed (storage blocked or full):', e); }
+      }
+      function clearDraft(){
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+      }
+      function initCurrentStateModal(){
+        captureDefaultsOnce();
+        const draft = loadDraft();
+        if(draft) writeFields(draft);
+        const saveBtn = $('#btnSaveCurrentState');
+        const resetBtn = $('#btnResetCurrentState');
+        if (saveBtn && !saveBtn.dataset.wired){
+          saveBtn.dataset.wired = "1";
+          saveBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            saveDraft(readFields());
+          });
+        }
+        if (resetBtn && !resetBtn.dataset.wired){
+          resetBtn.dataset.wired = "1";
+          resetBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            clearDraft();
+            writeFields(DEFAULT_CURRENT_STATE);
+            STATE.currentState = STATE.defaultsCurrentState();
+            render();
+          });
+        }
+      }
+      /* ------------------------------------------------------------------- */
+      function renderModal(){
+        if(!STATE.modalOpen) return '';
+        const buf = STATE.editBuffers;
+        const toLines = arr => arr.join('\n');
+        const ensure = v => v ?? '';
+        return `
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8 animate-overlayFade">
+            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto animate-modalEnter">
+              <div class="flex items-center justify-between">
+                <h2 id="cs-editor-title" class="text-xl font-medium tracking-normal">Edit Current State</h2>
+                <button type="button" class="bg-transparent text-gray-900 p-2 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded" data-action="close-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <p class="mt-1 text-sm text-gray-700">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
+                ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
+                ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
+              </div>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:bg-blue-700">
+                  <i data-lucide="save" class="w-4 h-4"></i> Save
+                </button>
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-gray-900 border-2 border-gray-900 px-4 py-2 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:text-blue-600 hover:border-blue-600">
+                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      function editorSection(key,label,introValue,bulletsValue,analystValue){
+        return `
+          <div class="flex flex-col gap-4">
+            <span class="text-sm font-medium">${label}</span>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-gray-700">Introduction</span>
+              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
+            </label>
+            <label class="flex flex-col gap-1">
+              <div class="flex items-center gap-2 text-xs text-gray-700">
+                <i data-lucide="check-circle" class="w-4 h-4 text-blue-600"></i>
+                Bullets (one per line, max 4)
+              </div>
+              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-gray-700">Analyst Trend</span>
+              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
+            </label>
+          </div>
+        `;
+      }
       function attachEvents(){
         const root=document.getElementById('app');
         root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
@@ -922,9 +1074,7 @@
           const currentStateSection = selectedPressures ? `Current State Selections:\n${selectedPressures}` : 'Current State Selections:\nNone selected';
           const body =
  `Recast Application Workspace — Executive Summary
-
 ${currentStateSection}
-
 Assumptions
   - Users: ${r.i.users}
   - Tickets per user / month: ${r.i.ticketsPerUserPerMonth}
@@ -952,6 +1102,14 @@ Notes: Illustrative; replace with your data.`;
         const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
         const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; toggleOverlay(); buildFlow(); });
         root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('animate-iconLaunch'); setTimeout(()=>icon.classList.remove('animate-iconLaunch'), 500); }));
+        const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
+        if(openEditor) openEditor.addEventListener('click', ()=>{
+          STATE.modalOpen = true;
+          STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
+          render();
+          setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+          setTimeout(()=>{ initCurrentStateModal(); }, 0);
+        });
         root.querySelectorAll('[data-action="toggle-bullet"]').forEach(inp=>inp.addEventListener('change',e=>{
           const category = e.target.getAttribute('data-category');
           const index = parseInt(e.target.getAttribute('data-index'));
@@ -1094,8 +1252,72 @@ Notes: Illustrative; replace with your data.`;
         });
       }
       document.addEventListener('DOMContentLoaded', render);
+      document.addEventListener('click', (e)=>{
+        const act = e.target.closest('[data-action]');
+        if(!act) return;
+        const action = act.getAttribute('data-action');
+        if(action==='close-modal'){
+          STATE.modalOpen=false; render();
+        }
+        if(action==='edit-buffer'){
+          const key = act.getAttribute('data-key');
+          const subkey = act.getAttribute('data-subkey');
+          act.addEventListener('input', (evt)=>{ STATE.editBuffers[key][subkey] = evt.target.value; });
+        }
+        if(action==='save-currentstate'){
+          const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,4);
+          const fallback = STATE.defaultsCurrentState();
+          const formData = readFields();
+          STATE.currentState = {
+            change: {
+              intro: formData.change.intro.trim() || fallback.change.intro,
+              bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
+              analyst: formData.change.analyst.trim() || fallback.change.analyst
+            },
+            now: {
+              intro: formData.now.intro.trim() || fallback.now.intro,
+              bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
+              analyst: formData.now.analyst.trim() || fallback.now.analyst
+            },
+            recast: {
+              intro: formData.recast.intro.trim() || fallback.recast.intro,
+              bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
+              analyst: formData.recast.analyst.trim() || fallback.recast.analyst
+            }
+          };
+          saveDraft({
+            change: {
+              intro: $('#changeIntro')?.value || '',
+              bullets: $('#changeBullets')?.value || '',
+              analyst: $('#changeAnalyst')?.value || ''
+            },
+            now: {
+              intro: $('#nowIntro')?.value || '',
+              bullets: $('#nowBullets')?.value || '',
+              analyst: $('#nowAnalyst')?.value || ''
+            },
+            recast: {
+              intro: $('#recastIntro')?.value || '',
+              bullets: $('#recastBullets')?.value || '',
+              analyst: $('#recastAnalyst')?.value || ''
+            }
+          });
+          STATE.modalOpen=false;
+          STATE.activeTab='problems';
+          STATE.openWhy=null;
+          render();
+        }
+        if(action==='reset-currentstate-defaults'){
+          clearDraft();
+          captureDefaultsOnce();
+          writeFields(DEFAULT_CURRENT_STATE);
+          STATE.currentState = STATE.defaultsCurrentState();
+          render();
+        }
+      });
       document.addEventListener('keydown',(e)=>{
-        if(e.key==='Escape' && (STATE.openWhyModal)){
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){
+          STATE.modalOpen=false;
           STATE.openWhyModal=null;
           render();
         }
