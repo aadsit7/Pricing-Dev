@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://unpkg.com">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -75,6 +76,39 @@
         },
       };
     </script>
+    <style>
+      /* Overlay sits on top of ONLY the Application Workspace card */
+      #recast-approach-animation-layer {
+          position: absolute;
+          top: 220px;  /* Adjust to align with top of the Workspace card */
+          left: 0;
+          width: 100%;
+          height: 520px; /* Height of the card region */
+          pointer-events: none;
+          z-index: 999;
+      }
+
+      #recast-approach-animation-layer .lottie {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: none;
+      }
+
+      /* Final calm state after animation */
+      .workspace-final .warning,
+      .workspace-final .duplicate,
+      .workspace-final .loading-indicator {
+          opacity: 0;
+          transition: opacity .25s ease-out;
+      }
+
+      .workspace-final .app-icon {
+          opacity: 1;
+          transform: scale(1);
+          transition: .25s ease-out;
+      }
+    </style>
   </head>
   <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
     <div id="app" class="min-h-screen"></div>
@@ -93,7 +127,7 @@
         openWhyModal: null,
         openCards: { core: false, onboarding: false, trust: false },
         visitedCards: [],
-        openBuckets: { one: false, zero: false, per: false },
+        openBuckets: { one: false, zero: false, per: false, edit: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
         selectedBullets: {},
@@ -539,6 +573,35 @@
           </div>
         `;
       }
+      function editContent(){
+        return `
+          <div class="p-6 bg-white rounded-xl shadow-inner">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h4 class="text-lg font-medium mb-4">Assumptions</h4>
+                <div class="space-y-4">
+                  ${inputNum('set-roi', '# users', 'users', STATE.roiInputs.users)}
+                  ${inputNum('set-roi', 'Tickets per user / mo', 'ticketsPerUserPerMonth', STATE.roiInputs.ticketsPerUserPerMonth)}
+                  ${inputNum('set-roi', 'Avg handle (mins)', 'avgHandleMins', STATE.roiInputs.avgHandleMins)}
+                </div>
+              </div>
+              <div>
+                <h4 class="text-lg font-medium mb-4">Direct Impacts</h4>
+                <div class="space-y-4">
+                  ${inputNum('set-impact', 'Minutes saved per user / mo', 'minutes', STATE.impact.minutes)}
+                  ${inputNum('set-impact', 'Packaging hours avoided / mo', 'pkgHours', STATE.impact.pkgHours)}
+                  ${inputNum('set-impact', 'Patching hours avoided / mo', 'riskHrs', STATE.impact.riskHrs)}
+                </div>
+              </div>
+            </div>
+            <div class="mt-8 space-y-8">
+              ${perUserContent()}
+              ${onePackageContent()}
+              ${zeroDayContent()}
+            </div>
+          </div>
+        `;
+      }
       function renderSolution(){
         return `
           <section id="panel-solution" class="space-y-3">
@@ -566,7 +629,15 @@
       }
       function renderFlow(){
         return `
-          <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4">
+          <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4">
+            <!-- Animation Overlay for Recast Approach tab -->
+            <div id="recast-approach-animation-layer">
+                <div id="chaos" class="lottie"></div>
+                <div id="breakdown" class="lottie"></div>
+                <div id="collapse" class="lottie"></div>
+                <div id="unify" class="lottie"></div>
+                <div id="endstate" class="lottie"></div>
+            </div>
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
                 <div class="h-6 w-6 rounded grid place-items-center bg-gray-900"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
@@ -576,8 +647,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-2 text-xs">
-                <button type="button" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-1 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-blue-600 text-white px-2.5 py-1.5 text-xs font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
+                <button type="button" data-action="start-flow" id="workspaceStartButton" class="bg-blue-600 text-white px-2.5 py-1.5 text-xs font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
                 <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-1.5 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
               </div>
             </div>
@@ -706,10 +776,8 @@
               </div>
             </div>
             <div class="mt-6 text-xl italic text-gray-800">“This isn’t just saved time — it’s recovered momentum.”</div>
-            <div class="mt-8 space-y-6">
-              ${bucketAccordion('per', 'mouse-pointer', 'Reactive Work Reduced', perUserContent, 'bg-blue-50')}
-              ${bucketAccordion('one', 'wand-sparkles', 'Hours Saved from Packaging', onePackageContent, 'bg-blue-50')}
-              ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent, 'bg-blue-50')}
+            <div class="mt-8">
+              ${bucketAccordion('edit', 'edit-3', 'Edit Assumptions & Impacts', editContent)}
             </div>
             <div class="mt-8 flex flex-wrap gap-4 justify-end">
               <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">Reset</button>
@@ -749,8 +817,8 @@
       function kv(label,value){
         return `<div class="flex items-center justify-between rounded bg-gray-100 px-3 py-2"><span class="text-gray-700">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
       }
-      function numInput(label,key,value){
-        return `<label class="flex flex-col gap-1 text-sm"><span class="text-xs text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+      function inputNum(action, label, key, value){
+        return `<label class="flex flex-col gap-1 text-sm"><span class="text-xs text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="${action}" data-key="${key}"></label>`;
       }
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
@@ -1042,6 +1110,12 @@
           STATE.roiInputs[key]=isFinite(v)?v:0;
           render();
         }));
+        root.querySelectorAll('[data-action="set-impact"]').forEach(inp=>inp.addEventListener('input',e=>{
+          const key=e.currentTarget.getAttribute('data-key');
+          const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+          STATE.impact[key]=isFinite(v)?v:0;
+          render();
+        }));
         const resetCalc=root.querySelector('[data-action="reset-calculator"]');
         if(resetCalc) resetCalc.addEventListener('click', ()=>{
           STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 };
@@ -1310,6 +1384,61 @@ Notes: Illustrative; replace with your data.`;
           render();
         }
       });
+      // Init animation JSON
+const approachAnimations = {
+  chaos: lottie.loadAnimation({
+    container: document.getElementById('chaos'),
+    renderer: 'svg', autoplay: false, loop: false,
+    path: '/animations/chaos.json'
+  }),
+  breakdown: lottie.loadAnimation({
+    container: document.getElementById('breakdown'),
+    renderer: 'svg', autoplay: false, loop: false,
+    path: '/animations/breakdown.json'
+  }),
+  collapse: lottie.loadAnimation({
+    container: document.getElementById('collapse'),
+    renderer: 'svg', autoplay: false, loop: false,
+    path: '/animations/collapse.json'
+  }),
+  unify: lottie.loadAnimation({
+    container: document.getElementById('unify'),
+    renderer: 'svg', autoplay: false, loop: false,
+    path: '/animations/unify.json'
+  }),
+  endstate: lottie.loadAnimation({
+    container: document.getElementById('endstate'),
+    renderer: 'svg', autoplay: false, loop: false,
+    path: '/animations/endstate.json'
+  })
+};
+
+// Sequence behavior
+function playStep(name, delay) {
+  setTimeout(() => {
+    const layer = document.getElementById(name);
+    layer.style.display = "block";
+    approachAnimations[name].goToAndPlay(0, true);
+  }, delay);
+}
+
+function runWorkspaceAnimation() {
+    playStep("chaos", 0);
+    playStep("breakdown", 1000);
+    playStep("collapse", 1600);
+    playStep("unify", 2500);
+    playStep("endstate", 3400);
+
+    // Final stabilized UI
+    setTimeout(() => {
+        document.body.classList.add("workspace-final");
+    }, 4300);
+}
+
+// Hook into existing Start button
+document.getElementById("workspaceStartButton")
+    .addEventListener("click", runWorkspaceAnimation);
+
     </script>
   </body>
 </html>
