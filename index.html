@@ -246,7 +246,7 @@
         root.innerHTML = `
           <header class="relative">
             <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Application Workspace</h1>
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast Application Workspace</span></h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
                   ? 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
@@ -301,23 +301,23 @@
       function renderProblems(){
         const pressures = [
           { id: 'cost', title: 'COST-TO-OPERATE REDUCTION', bullets: ['Manual work drains expensive engineering capacity.', 'Redundant steps and rework inflate operational spend.', 'Teams can’t scale to match workload growth.', 'Lack of standardization drives hidden costs.'] },
-          { id: 'risk', title: 'RISK & COMPLIANCE', bullets: ['Unpatched or inconsistent versions create security gaps.', 'No unified visibility across environments and access levels.', 'Manual governance leads to human error and audit exposure.'] },
-          { id: 'capacity', title: 'CAPACITY & DELIVERY VELOCITY', bullets: ['IT must deliver more apps and updates with flat headcount.', 'Repetitive work stalls modernization and AI initiatives.', 'Slow app readiness blocks pilots and platform migrations.'] },
-          { id: 'employee', title: 'EMPLOYEE EXPERIENCE & ENABLEMENT', bullets: ['Delays in app access slow down employee and customer workflows.', 'Friction across systems frustrates users and support teams.', 'Inconsistent delivery breaks productivity and morale.'] }
+          { id: 'risk', title: 'RISK, COMPLIANCE & SECURITY', bullets: ['Unpatched or inconsistent versions create security gaps.', 'No unified visibility across environments and access levels.', 'Manual governance leads to human error and audit exposure.', ''] },
+          { id: 'capacity', title: 'CAPACITY & DELIVERY VELOCITY', bullets: ['IT must deliver more apps and updates with flat headcount.', 'Repetitive work stalls modernization and AI initiatives.', 'Slow app readiness blocks pilots and platform migrations.', ''] },
+          { id: 'employee', title: 'EMPLOYEE EXPERIENCE & ENABLEMENT', bullets: ['Delays in app access slow down employee and customer workflows.', 'Friction across systems frustrates users and support teams.', 'Inconsistent delivery breaks productivity and morale.', ''] }
         ];
         return `
           <section id="panel-problems" class="space-y-4">
             <h2 class="text-3xl font-semibold leading-tight">Top Pressures Organizations Face in 2025</h2>
             <p class="text-xl text-gray-700 leading-relaxed">- Application Layer is the #1 bottleneck for continuous transformation.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
               ${pressures.map(p=>`
-                <div class="section-card p-6">
-                  <h3 class="text-xl font-medium mb-4">${p.title}</h3>
-                  <ul class="space-y-3 text-base text-gray-700 leading-relaxed">
+                <div class="section-card p-6 flex flex-col space-y-2 h-full">
+                  <h3 class="text-base font-semibold mb-2">${p.title}</h3>
+                  <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
                     ${p.bullets.map((b,i)=>{
                       const selected = (STATE.selectedBullets[p.id] || []).includes(i);
                       return `
-                        <li class="flex items-center gap-3 ${selected ? 'bg-blue-50 rounded-md p-2 transition-colors' : ''}">
+                        <li class="flex items-center gap-3 min-h-[1.5rem] ${selected ? 'bg-blue-50 rounded-md p-2 transition-colors' : ''} ${b ? '' : 'invisible' }">
                           <label class="flex items-center gap-3 cursor-pointer select-none w-full">
                             <input type="checkbox" class="sr-only" data-action="toggle-bullet" data-category="${p.id}" data-index="${i}" ${selected ? 'checked' : ''} aria-label="Select: ${b}">
                             <div class="w-4 h-4 border-2 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shrink-0 ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}">
