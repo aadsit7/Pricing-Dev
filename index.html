@@ -77,24 +77,22 @@
       };
     </script>
     <style>
-      /* Overlay sits on top of ONLY the Application Workspace card */
+      /* Overlay sits on top of the Application Workspace card */
       #recast-approach-animation-layer {
           position: absolute;
-          top: 220px;  /* Adjust to align with top of the Workspace card */
+          top: 0;
           left: 0;
           width: 100%;
-          height: 520px; /* Height of the card region */
+          height: 100%;
           pointer-events: none;
           z-index: 999;
       }
-
       #recast-approach-animation-layer .lottie {
           position: absolute;
           width: 100%;
           height: 100%;
           display: none;
       }
-
       /* Final calm state after animation */
       .workspace-final .warning,
       .workspace-final .duplicate,
@@ -102,11 +100,19 @@
           opacity: 0;
           transition: opacity .25s ease-out;
       }
-
       .workspace-final .app-icon {
           opacity: 1;
           transform: scale(1);
           transition: .25s ease-out;
+      }
+      .dimmed {
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+      }
+      .highlighted {
+        border-color: #10B981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
+        transition: all 0.3s ease;
       }
     </style>
   </head>
@@ -653,6 +659,31 @@
             </div>
             <div class="mt-2 flex gap-2 text-xs">
             </div>
+            <div class="mt-2 flex items-center justify-center gap-4 text-sm font-medium">
+              <div class="flex items-center gap-1">
+                <i data-lucide="building" class="w-5 h-5 text-gray-700"></i>
+                <span>App Manager = SCCM / Intune</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="truck" class="w-5 h-5 text-blue-600"></i>
+                <span>Application Delivery = Recast</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="user" class="w-5 h-5 text-gray-700"></i>
+                <span>End User</span>
+              </div>
+            </div>
+            <div class="mt-2 text-center">
+              <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                Configured once → delivered everywhere
+              </span>
+            </div>
+            <div class="mt-2 text-center bg-blue-50 p-2 rounded-lg text-sm">
+              Recast removes repackaging and delivers apps instantly across all device types.
+            </div>
             <div id="flowCard" class="mt-3 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
               <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
                 <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
@@ -669,7 +700,7 @@
                 <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-2xl shadow-md z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-sm text-gray-700">Every app mapped to stage, policy, region, and device.</div>
               </div>
               <div id="flowHubFlash" class="mt-2 hidden text-blue-600"><span class="inline-flex items-center gap-1 text-xs"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="platformsSection">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 relative">
                     <div class="text-xs text-gray-700">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
@@ -680,7 +711,7 @@
                 `).join('')}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="groupsSection">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 relative">
                     <div class="text-xs text-gray-700">${['Business Unit','Subsidiary','Region'][i]}</div>
@@ -691,7 +722,7 @@
                 `).join('')}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="devicesSection">
                 ${['A','B','C'].map((k,i)=>`
                   <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 text-center relative">
                     <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-gray-700"></i>
@@ -1252,16 +1283,22 @@ Notes: Illustrative; replace with your data.`;
         for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='w-[0.45rem] h-[0.45rem] rounded-[2px] bg-gray-200 opacity-90 run:animate-tilePulse'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
       }
       function startFlow(){
+        runWorkspaceAnimation();
         const card=document.getElementById('flowCard'); if(!card) return;
         card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
         const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
         const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
         const message = document.getElementById('endUserMessage'); const mini = document.getElementById('miniWorkspace');
         const counters = document.getElementById('progressCounters'); const endCard = document.getElementById('endUserCard');
+        const groups = document.getElementById('groupsSection');
         if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),2000); }
         if(success) success.classList.add('hidden');
         if(counters) counters.classList.remove('hidden');
         let interval = setInterval(updateProgress, 100);
+        setTimeout(()=>{
+          if(groups) groups.classList.add('dimmed');
+          if(endCard) endCard.classList.add('highlighted');
+        }, 5000);
         setTimeout(()=>{
           if(avatar){ avatar.classList.remove('bg-red-600'); avatar.classList.add('bg-green-500'); }
           if(badge){ badge.textContent='✓'; badge.classList.remove('bg-red-600'); badge.classList.add('bg-green-500'); }
@@ -1388,56 +1425,57 @@ const approachAnimations = {
   chaos: lottie.loadAnimation({
     container: document.getElementById('chaos'),
     renderer: 'svg', autoplay: false, loop: false,
-    path: '/animations/chaos.json'
+    path: 'https://assets4.lottiefiles.com/packages/lf20_yr6zz3wt.json'
   }),
   breakdown: lottie.loadAnimation({
     container: document.getElementById('breakdown'),
     renderer: 'svg', autoplay: false, loop: false,
-    path: '/animations/breakdown.json'
+    path: 'https://assets9.lottiefiles.com/packages/lf20_rovf9s.json'
   }),
   collapse: lottie.loadAnimation({
     container: document.getElementById('collapse'),
     renderer: 'svg', autoplay: false, loop: false,
-    path: '/animations/collapse.json'
+    path: 'https://assets3.lottiefiles.com/packages/lf20_k9qliiD3Bf.json'
   }),
   unify: lottie.loadAnimation({
     container: document.getElementById('unify'),
     renderer: 'svg', autoplay: false, loop: false,
-    path: '/animations/unify.json'
+    path: 'https://assets1.lottiefiles.com/packages/lf20_u4yrau.json'
   }),
   endstate: lottie.loadAnimation({
     container: document.getElementById('endstate'),
     renderer: 'svg', autoplay: false, loop: false,
-    path: '/animations/endstate.json'
+    path: 'https://assets8.lottiefiles.com/packages/lf20_jmejybvu.json'
   })
 };
-
 // Sequence behavior
 function playStep(name, delay) {
   setTimeout(() => {
     const layer = document.getElementById(name);
-    layer.style.display = "block";
-    approachAnimations[name].goToAndPlay(0, true);
+    if (layer) {
+      layer.style.display = "block";
+      approachAnimations[name].goToAndPlay(0, true);
+    }
   }, delay);
 }
-
 function runWorkspaceAnimation() {
     playStep("chaos", 0);
     playStep("breakdown", 1000);
     playStep("collapse", 1600);
     playStep("unify", 2500);
     playStep("endstate", 3400);
-
     // Final stabilized UI
     setTimeout(() => {
         document.body.classList.add("workspace-final");
     }, 4300);
 }
-
 // Hook into existing Start button
-document.getElementById("workspaceStartButton")
-    .addEventListener("click", runWorkspaceAnimation);
-
+document.addEventListener('DOMContentLoaded', () => {
+  const startButton = document.getElementById("workspaceStartButton");
+  if (startButton) {
+    startButton.addEventListener("click", runWorkspaceAnimation);
+  }
+});
     </script>
   </body>
 </html>
