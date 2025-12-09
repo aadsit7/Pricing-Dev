@@ -114,6 +114,12 @@
         box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
         transition: all 0.3s ease;
       }
+      .processed {
+        background-color: #ECFDF5 !important;
+        border-color: #D1FAE5 !important;
+        color: #065F46 !important;
+        transition: all 0.3s ease;
+      }
     </style>
   </head>
   <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
@@ -337,7 +343,7 @@
       function renderProblems(){
         return `
           <section id="panel-problems" class="space-y-4">
-            <h2 class="text-3xl font-semibold leading-tight">Top Pressures Organizations Face</h2>
+            <h2 class="text-3xl font-semibold leading-tight">Top Pressures Organizations Face in 2025</h2>
             <p class="text-xl text-gray-700 leading-relaxed">- Application Layer is the #1 bottleneck for continuous transformation.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
               ${pressures.map(p=>`
@@ -1299,6 +1305,18 @@ Notes: Illustrative; replace with your data.`;
           if(groups) groups.classList.add('dimmed');
           if(endCard) endCard.classList.add('highlighted');
         }, 5000);
+        const platformBuckets = document.querySelectorAll('#platformsSection > div');
+        const groupBuckets = document.querySelectorAll('#groupsSection > div');
+        const deviceBuckets = document.querySelectorAll('#devicesSection > div');
+        setTimeout(() => { if (platformBuckets[0]) platformBuckets[0].classList.add('processed'); }, 4500);
+        setTimeout(() => { if (platformBuckets[1]) platformBuckets[1].classList.add('processed'); }, 5000);
+        setTimeout(() => { if (platformBuckets[2]) platformBuckets[2].classList.add('processed'); }, 5500);
+        setTimeout(() => { if (groupBuckets[0]) groupBuckets[0].classList.add('processed'); }, 6500);
+        setTimeout(() => { if (groupBuckets[1]) groupBuckets[1].classList.add('processed'); }, 7000);
+        setTimeout(() => { if (groupBuckets[2]) groupBuckets[2].classList.add('processed'); }, 7500);
+        setTimeout(() => { if (deviceBuckets[0]) deviceBuckets[0].classList.add('processed'); }, 8500);
+        setTimeout(() => { if (deviceBuckets[1]) deviceBuckets[1].classList.add('processed'); }, 9000);
+        setTimeout(() => { if (deviceBuckets[2]) deviceBuckets[2].classList.add('processed'); }, 9500);
         setTimeout(()=>{
           if(avatar){ avatar.classList.remove('bg-red-600'); avatar.classList.add('bg-green-500'); }
           if(badge){ badge.textContent='✓'; badge.classList.remove('bg-red-600'); badge.classList.add('bg-green-500'); }
@@ -1322,6 +1340,12 @@ Notes: Illustrative; replace with your data.`;
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
         STATE.showLabels = false;
         buildFlow();
+        const allBuckets = document.querySelectorAll('.processed');
+        allBuckets.forEach(b => b.classList.remove('processed'));
+        const groups = document.getElementById('groupsSection');
+        if (groups) groups.classList.remove('dimmed');
+        const endCard = document.getElementById('endUserCard');
+        if (endCard) endCard.classList.remove('highlighted');
       }
       function attachAccordionKeyboard(){
         document.addEventListener('keydown', (e) => {
