@@ -222,12 +222,11 @@
           icon: 'layers',
           title: 'How Recast Does It.',
           bullets: [
-            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
-            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
-            'Automated patching and validation keep apps secure and compliant.',
-            'Unified dashboard for visibility and governance across all environments.',
-            'Policy-driven automation reduces manual work by over 60%.',
-            'End users get the right app instantly — no tickets, no delays.'
+            'One workspace for every app: Package, deploy, patch, and retire apps across Intune, ConfigMgr, Citrix, Omnissa, Azure, and AVD — all from one console. Simplifies management, removes silos, accelerates project readiness.',
+            '7,500+ enterprise apps ready to deploy: Largest pre-tested app catalog available; includes commercial, internal, and legacy support. Cuts packaging time and shortens pilot-to-production cycles.',
+            'Automated patching and validation: Automated versioning, rollback, and compliance checks across environments. Keeps apps secure and compliant without manual effort.',
+            'Policy-driven automation: Workflow engine reduces manual tasks by ~60% per Recast documentation. Frees up IT time for strategic initiatives (AI, modernization, migrations).',
+            'Unified dashboard and self-service: Single visibility plane for admins + instant delivery for end users. Reduces tickets, improves user experience, and speeds delivery.'
           ],
           closer: 'Configured once — Delivered everywhere.',
           timeline: false,
@@ -299,14 +298,14 @@
               </div>
             </div>
           </header>
-          <main class="mx-auto max-w-6xl px-6 lg:px-12 pb-16 gap-6">
+          <main class="mx-auto max-w-6xl px-6 lg:px-12 pb-8 gap-4">
             ${STATE.activeTab==='roi' ? `
-            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               ${chip('Reactive Work Reduced', String(STATE.impact.minutes)+' min/user/mo', 'emerald')}
               ${chip('Hours Saved from Packaging', String(round(STATE.impact.pkgHours)), 'sky')}
               ${chip('Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
             </div>` : ''}
-            <section class="mt-5">${renderActivePanel()}</section>
+            <section class="mt-4">${renderActivePanel()}</section>
           </main>
           ${renderModal()}
           ${renderWhyModal()}
@@ -320,10 +319,10 @@
       function chip(label,value,tone){
         const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
         return `
-          <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-3">
-            <div class="text-xs text-gray-600">${label}</div>
-            <div class="mt-1 inline-flex items-center gap-2 rounded bg-gradient-to-r px-2 py-0.5 text-gray-900 ${tones[tone]}">
-              <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
+          <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-2">
+            <div class="text-[11px] text-gray-600">${label}</div>
+            <div class="mt-0.5 inline-flex items-center gap-1.5 rounded bg-gradient-to-r px-1.5 py-0.5 text-gray-900 ${tones[tone]}">
+              <i data-lucide="badge-check" class="w-3.5 h-3.5"></i><span class="text-[12px] font-semibold tabular-nums">${value}</span>
             </div>
           </div>
         `;
@@ -342,22 +341,22 @@
       ];
       function renderProblems(){
         return `
-          <section id="panel-problems" class="space-y-4">
+          <section id="panel-problems" class="space-y-3">
             <h2 class="text-3xl font-semibold leading-tight">Top Pressures Organizations Face in 2025</h2>
             <p class="text-xl text-gray-700 leading-relaxed">- Application Layer is the #1 bottleneck for continuous transformation.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
               ${pressures.map(p=>`
-                <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-6 flex flex-col space-y-2 h-full">
-                  <h3 class="text-base font-semibold mb-2">${p.title}</h3>
-                  <ul class="list-disc list-inside space-y-2 text-sm text-gray-700">
+                <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4 flex flex-col space-y-1 h-full">
+                  <h3 class="text-[14px] font-semibold mb-1">${p.title}</h3>
+                  <ul class="list-disc list-inside space-y-1 text-[12px] text-gray-700">
                     ${p.bullets.map((b,i)=>{
                       const selected = (STATE.selectedBullets[p.id] || []).includes(i);
                       return `
-                        <li class="flex items-center gap-3 min-h-[1.5rem] ${selected ? 'bg-blue-50 rounded-md p-2 transition-colors' : ''} ${b ? '' : 'invisible' }">
-                          <label class="flex items-center gap-3 cursor-pointer select-none w-full">
+                        <li class="flex items-center gap-2 min-h-[1.25rem] ${selected ? 'bg-blue-50 rounded-md p-1 transition-colors' : ''} ${b ? '' : 'invisible' }">
+                          <label class="flex items-center gap-2 cursor-pointer select-none w-full">
                             <input type="checkbox" class="sr-only" data-action="toggle-bullet" data-category="${p.id}" data-index="${i}" ${selected ? 'checked' : ''} aria-label="Select: ${b}">
-                            <div class="w-4 h-4 border-2 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shrink-0 ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}">
-                              ${selected ? '<i data-lucide="check" class="w-3 h-3 text-white stroke-[3]"></i>' : ''}
+                            <div class="w-3.5 h-3.5 border-2 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shrink-0 ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}">
+                              ${selected ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i>' : ''}
                             </div>
                             <span class="${selected ? 'text-blue-800 font-medium' : ''}">${b}</span>
                           </label>
@@ -368,9 +367,9 @@
                 </div>
               `).join('')}
             </div>
-            <div class="mt-8 flex justify-between items-center">
-              <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-6 py-2 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
-              <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-6 py-2 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Next</button>
+            <div class="mt-6 flex justify-between items-center">
+              <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
+              <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
             </div>
           </section>
         `;
@@ -384,12 +383,12 @@
               data-action="open-why-modal"
               data-why="${id}"
             >
-              <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)} border-b border-gray-200">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-gray-900" aria-hidden="true"></i>
-                  <span class="text-xl font-semibold tracking-normal text-gray-900">${label}</span>
+              <div class="${cx('flex items-center justify-between px-4 py-3', headerTone)} border-b border-gray-200">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="${icon}" class="w-4.5 h-4.5 text-gray-900" aria-hidden="true"></i>
+                  <span class="text-lg font-semibold tracking-normal text-gray-900">${label}</span>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="chevron-right" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
           </div>
@@ -406,33 +405,33 @@
         return `
           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
             <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
-              <div class="${headerTone} px-8 py-6 flex items-center justify-between border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-gray-900" aria-hidden="true"></i>
-                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-gray-900">${labelMap[id]}</h2>
+              <div class="${headerTone} px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${iconMap[id]}" class="w-7 h-7 text-gray-900" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-2xl font-bold tracking-tight text-gray-900">${labelMap[id]}</h2>
                 </div>
-                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-2" data-action="close-why-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-6 h-6"></i>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-why-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
               </div>
-              <div class="p-8 bg-gray-50">
-                <p class="text-base leading-relaxed text-gray-700 mb-4">${data.intro}</p>
-                <div class="space-y-4">
+              <div class="p-6 bg-gray-50">
+                <p class="text-[15px] leading-relaxed text-gray-700 mb-3">${data.intro}</p>
+                <div class="space-y-3">
                   ${data.bullets.map(b=>`
-                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow duration-300">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
-                      <p class="text-base leading-relaxed text-gray-700">${b}</p>
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex items-start gap-2 hover:shadow-md transition-shadow duration-300">
+                      <i data-lucide="check-circle" class="w-4.5 h-4.5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                      <p class="text-[15px] leading-relaxed text-gray-700">${b}</p>
                     </div>
                   `).join('')}
                 </div>
-                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex items-start gap-3">
-                  <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
-                  <p class="text-base italic text-gray-700">${data.analyst}</p>
+                <div class="mt-5 bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex items-start gap-2">
+                  <i data-lucide="lightbulb" class="w-4.5 h-4.5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                  <p class="text-[15px] italic text-gray-700">${data.analyst}</p>
                 </div>
                 ${cta?`
-                  <div class="mt-8 flex justify-center">
-                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-blue-600 text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shadow-md hover:shadow-lg hover:bg-blue-700 transition-shadow duration-300">
-                      <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                  <div class="mt-6 flex justify-center">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-blue-600 text-white text-[15px] font-semibold px-5 py-2.5 items-center gap-2 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shadow-md hover:shadow-lg hover:bg-blue-700 transition-shadow duration-300 rounded-full">
+                      <i data-lucide="arrow-right" class="w-4.5 h-4.5"></i>
                       How Recast solves it
                     </button>
                   </div>
@@ -455,25 +454,25 @@
               aria-expanded="${expanded}"
               aria-controls="${contentId}"
             >
-              <div class="${card.bgHeader || 'bg-gray-50'} px-5 py-4 flex flex-col border-b border-gray-200">
+              <div class="${card.bgHeader || 'bg-gray-50'} px-4 py-3 flex flex-col border-b border-gray-200">
                 <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="${card.icon}" class="w-6 h-6 text-gray-900" aria-hidden="true"></i>
-                    <span class="text-xl font-medium text-left tracking-normal text-gray-900">${card.title}</span>
+                  <div class="flex items-center gap-1.5">
+                    <i data-lucide="${card.icon}" class="w-5 h-5 text-gray-900" aria-hidden="true"></i>
+                    <span class="text-lg font-medium text-left tracking-normal text-gray-900">${card.title}</span>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-700">${expanded ? 'Collapse' : 'Expand'}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-600 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[13px] text-gray-700">${expanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
                   </div>
                 </div>
               </div>
             </button>
-            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-blue-600 ${card.bgContent} ${expanded ? 'max-h-[1200px] opacity-100 p-6' : 'max-h-0 opacity-0 p-0'} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
-              <ul class="list-disc pl-6 text-base leading-relaxed space-y-3 text-gray-700 text-left">
+            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-blue-600 ${card.bgContent} ${expanded ? 'max-h-[1200px] opacity-100 p-4' : 'max-h-0 opacity-0 p-0'} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
+              <ul class="list-disc pl-5 text-[15px] leading-relaxed space-y-2 text-gray-700 text-left">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
               ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
-              <p class="mt-4 italic text-base text-gray-700">${card.closer}</p>
+              <p class="mt-3 italic text-[15px] text-gray-700">${card.closer}</p>
             </div>
           </div>
         `;
@@ -487,12 +486,12 @@
           {icon: 'book-open', label: 'Enablement'}
         ];
         return `
-          <div class="flex items-center justify-between mt-4" aria-hidden="true">
+          <div class="flex items-center justify-between mt-3" aria-hidden="true">
             ${phases.map((p, i) => `
-              ${i > 0 ? '<div class="flex-1 h-px bg-gray-200 mx-2"></div>' : ''}
+              ${i > 0 ? '<div class="flex-1 h-px bg-gray-200 mx-1.5"></div>' : ''}
               <div class="flex flex-col items-center">
-                <i data-lucide="${p.icon}" class="w-5 h-5 text-blue-600"></i>
-                <span class="text-xs mt-1 text-gray-700">${p.label}</span>
+                <i data-lucide="${p.icon}" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span class="text-[11px] mt-0.5 text-gray-700">${p.label}</span>
               </div>
             `).join('')}
           </div>
@@ -511,12 +510,12 @@
               aria-expanded="${expanded}"
               aria-controls="${contentId}"
             >
-              <div class="flex items-center justify-between px-5 py-4 ${headerTone} border-b border-gray-200">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-gray-900" aria-hidden="true"></i>
-                  <span class="text-lg font-semibold tracking-normal text-gray-900">${label}</span>
+              <div class="flex items-center justify-between px-4 py-3 ${headerTone} border-b border-gray-200">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="${icon}" class="w-4.5 h-4.5 text-gray-900" aria-hidden="true"></i>
+                  <span class="text-[15px] font-semibold tracking-normal text-gray-900">${label}</span>
                 </div>
-                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
             <div id="${contentId}" class="accordion-content overflow-hidden ${expanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
@@ -528,22 +527,22 @@
       function onePackageContent(){
         const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
         return `
-          <div class="p-4">
-            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Hours Saved from Packaging</div>
-              <label class="mt-2 flex items-center gap-2 text-xs">
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> Hours Saved from Packaging</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
                 <span class="text-gray-700">Hours/package</span>
-                <input class="w-16 rounded bg-gray-100 px-2 py-1 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
                 <span>→</span>
-                <input class="w-16 rounded bg-gray-100 px-2 py-1 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
               </label>
-              <div class="mt-2 flex items-center justify-between rounded bg-gray-100 px-3 py-2"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
-              <div class="mt-2 text-[12px] flex flex-wrap gap-2">
-                <span class="rounded px-2 py-1 bg-gray-100">☁️ Cloud</span>
-                <span class="rounded px-2 py-1 bg-gray-100">🖥️ On-Prem</span>
-                <span class="rounded px-2 py-1 bg-gray-100">🔀 Hybrid</span>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
+              <div class="mt-1.5 text-[11px] flex flex-wrap gap-1.5">
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">☁️ Cloud</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🖥️ On-Prem</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🔀 Hybrid</span>
               </div>
-              <button type="button" class="mt-2 bg-blue-600 text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Add to impact</button>
             </div>
           </div>
         `;
@@ -551,15 +550,15 @@
       function zeroDayContent(){
         const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
         return `
-          <div class="p-4">
-            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Hours Saved from Faster Patching</div>
-              <label class="mt-2 flex items-center gap-2 text-xs">
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Hours Saved from Faster Patching</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
                 <span class="text-gray-700">Current hrs</span>
-                <input class="w-20 rounded bg-gray-100 px-2 py-1 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+                <input class="w-16 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
               </label>
-              <div class="mt-2 flex items-center justify-between rounded bg-gray-100 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
-              <button type="button" class="mt-2 bg-blue-600 text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
             </div>
           </div>
         `;
@@ -568,45 +567,45 @@
         const totalMin = Math.max(0, Number(STATE.impact.minutes));
         const route=routeRecommendation(STATE.ctx);
         return `
-          <div class="p-4">
-            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Reactive Work Reduced</div>
-              <div class="mt-2 flex items-center justify-between rounded bg-gray-100 px-3 py-2">
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="mouse-pointer" class="w-3.5 h-3.5"></i> Reactive Work Reduced</div>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1">
                 <span class="tabular-nums">18 → ${totalMin} min</span>
                 <strong class="tabular-nums">${totalMin} min saved</strong>
               </div>
             </div>
-            <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
+            <div class="mt-1.5 grid grid-cols-3 gap-1.5 text-[11px]">
               ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
               ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
               ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
             </div>
-            <div class="mt-3"><button type="button" class="bg-transparent text-gray-900 border-2 border-gray-900 px-3 py-1 text-xs w-full rounded hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+            <div class="mt-2"><button type="button" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-0.5 text-[11px] w-full rounded hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
           </div>
         `;
       }
       function editContent(){
         return `
-          <div class="p-6 bg-white rounded-xl shadow-inner">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="p-4 bg-white rounded-xl shadow-inner">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 class="text-lg font-medium mb-4">Assumptions</h4>
-                <div class="space-y-4">
+                <h4 class="text-[15px] font-medium mb-3">Assumptions</h4>
+                <div class="space-y-3">
                   ${inputNum('set-roi', '# users', 'users', STATE.roiInputs.users)}
                   ${inputNum('set-roi', 'Tickets per user / mo', 'ticketsPerUserPerMonth', STATE.roiInputs.ticketsPerUserPerMonth)}
                   ${inputNum('set-roi', 'Avg handle (mins)', 'avgHandleMins', STATE.roiInputs.avgHandleMins)}
                 </div>
               </div>
               <div>
-                <h4 class="text-lg font-medium mb-4">Direct Impacts</h4>
-                <div class="space-y-4">
+                <h4 class="text-[15px] font-medium mb-3">Direct Impacts</h4>
+                <div class="space-y-3">
                   ${inputNum('set-impact', 'Minutes saved per user / mo', 'minutes', STATE.impact.minutes)}
                   ${inputNum('set-impact', 'Packaging hours avoided / mo', 'pkgHours', STATE.impact.pkgHours)}
                   ${inputNum('set-impact', 'Patching hours avoided / mo', 'riskHrs', STATE.impact.riskHrs)}
                 </div>
               </div>
             </div>
-            <div class="mt-8 space-y-8">
+            <div class="mt-6 space-y-6">
               ${perUserContent()}
               ${onePackageContent()}
               ${zeroDayContent()}
@@ -616,20 +615,20 @@
       }
       function renderSolution(){
         return `
-          <section id="panel-solution" class="space-y-3">
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <section id="panel-solution" class="space-y-2">
+            <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
               ${renderFlow()}
-              <div class="flex flex-col gap-3 relative">
-                <div class="sticky top-0 z-10 bg-gray-50 py-2 shadow-md">
-                  <div class="flex justify-between items-center text-sm">
+              <div class="flex flex-col gap-2 relative">
+                <div class="sticky top-0 z-10 bg-gray-50 py-1 shadow-md">
+                  <div class="flex justify-between items-center text-[13px]">
                     <span class="font-semibold">Recast Approach</span>
                     <span class="text-gray-700">${STATE.visitedCards.length} of 3 explored</span>
                   </div>
                 </div>
-                <button type="button" class="md:hidden bg-transparent text-gray-900 border-2 border-gray-900 py-2 text-sm rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="expand-all">Expand All</button>
+                <button type="button" class="md:hidden bg-transparent text-gray-900 border-2 border-gray-900 py-1.5 text-[13px] rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="expand-all">Expand All</button>
                 ${NEW_CARDS.map(card => popoutCard(card)).join('')}
-                <div class="sticky bottom-0 bg-gray-50 py-3 shadow-lg mt-3">
-                  <button type="button" class="bg-blue-600 text-white px-4 py-2 text-sm font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="advance" data-next="roi">See Business Impact</button>
+                <div class="sticky bottom-0 bg-gray-50 py-2 shadow-lg mt-2">
+                  <button type="button" class="bg-blue-600 text-white px-3 py-1.5 text-[13px] font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 w-full">See Business Impact</button>
                 </div>
               </div>
             </div>
@@ -637,11 +636,11 @@
         `;
       }
       function pill(label,active,action,value){
-        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition rounded',active?'bg-blue-600 text-white border-transparent hover:bg-blue-700':'bg-transparent text-gray-900 border-gray-200 hover:border-blue-600')} focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+        return `<button type="button" class="${cx('px-2.5 py-0.5 border text-[11px] transition rounded',active?'bg-blue-600 text-white border-transparent hover:bg-blue-700':'bg-transparent text-gray-900 border-gray-200 hover:border-blue-600')} focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="${action}" data-value="${String(value)}">${label}</button>`;
       }
       function renderFlow(){
         return `
-          <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4">
+          <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-3">
             <!-- Animation Overlay for Recast Approach tab -->
             <div id="recast-approach-animation-layer">
                 <div id="chaos" class="lottie"></div>
@@ -650,115 +649,114 @@
                 <div id="unify" class="lottie"></div>
                 <div id="endstate" class="lottie"></div>
             </div>
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded grid place-items-center bg-gray-900"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+                <div class="h-5 w-5 rounded grid place-items-center bg-gray-900"><i data-lucide="boxes" class="h-3 w-3 text-white"></i></div>
                 <div>
-                  <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-xs text-gray-700">Curated & secured catalog</div>
+                  <h3 class="text-[14px] font-semibold">Application Workspace</h3>
+                  <div class="text-[11px] text-gray-700">Curated & secured catalog</div>
                 </div>
               </div>
-              <div class="flex items-center gap-2 text-xs">
-                <button type="button" data-action="start-flow" id="workspaceStartButton" class="bg-blue-600 text-white px-2.5 py-1.5 text-xs font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-1.5 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <button type="button" data-action="start-flow" id="workspaceStartButton" class="bg-blue-600 text-white px-2 py-1 text-[11px] font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2 py-1 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
               </div>
             </div>
-            <div class="mt-2 flex gap-2 text-xs">
+            <div class="mt-1 flex gap-1.5 text-[11px]">
             </div>
-            <div class="mt-2 flex items-center justify-center gap-4 text-sm font-medium">
+            <div class="mt-1 flex items-center justify-center gap-3 text-[13px] font-medium">
               <div class="flex items-center gap-1">
-                <i data-lucide="building" class="w-5 h-5 text-gray-700"></i>
+                <i data-lucide="building" class="w-4.5 h-4.5 text-gray-700"></i>
                 <span>App Manager = SCCM / Intune</span>
               </div>
-              <i data-lucide="arrow-right" class="w-5 h-5 text-gray-500"></i>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
               <div class="flex items-center gap-1">
-                <i data-lucide="truck" class="w-5 h-5 text-blue-600"></i>
-                <span>Application Delivery = Recast</span>
+                <i data-lucide="truck" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span>App Delivery = Recast</span>
               </div>
-              <i data-lucide="arrow-right" class="w-5 h-5 text-gray-500"></i>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
               <div class="flex items-center gap-1">
-                <i data-lucide="user" class="w-5 h-5 text-gray-700"></i>
-                <span>End User</span>
+                <i data-lucide="user" class="w-4.5 h-4.5 text-gray-700"></i>
+                <span>User</span>
               </div>
             </div>
-            <div class="mt-2 text-center">
-              <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <div class="mt-1 text-center">
+              <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-[12px] font-medium">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
                 Configured once → delivered everywhere
               </span>
             </div>
-            <div class="mt-2 text-center bg-blue-50 p-2 rounded-lg text-sm">
-              Recast removes repackaging and delivers apps instantly across all device types.
+            <div class="mt-1 text-center bg-blue-50 p-1.5 rounded-lg text-[12px]">
             </div>
-            <div id="flowCard" class="mt-3 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
-              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
+            <div id="flowCard" class="mt-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+              <div id="progressCounters" class="hidden mb-2 grid grid-cols-3 gap-1.5 text-[13px] text-center">
                 <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
                 <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
                 <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
               </div>
-              <div class="space-y-2 relative">
+              <div class="space-y-1 relative">
                 ${CATALOG.map(s=>`
-                  <div class="grid grid-cols-[15ch_1fr] gap-0.5 items-center border-t border-gray-200 pt-0.5 transition-all duration-300 first:border-t-0 first:pt-0 show-labels:grid-cols-[15ch_1fr] show-labels:gap-4">
-                    <div class="text-xs uppercase text-gray-700 flex items-center gap-2"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
-                    <div id="${s.id}" class="flex flex-wrap gap-2 show-labels:gap-4"></div>
+                  <div class="grid grid-cols-[12ch_1fr] gap-0.5 items-center border-t border-gray-200 pt-0.5 transition-all duration-300 first:border-t-0 first:pt-0 show-labels:grid-cols-[12ch_1fr] show-labels:gap-3">
+                    <div class="text-[11px] uppercase text-gray-700 flex items-center gap-1.5"><i data-lucide="folder" class="w-2.5 h-2.5"></i>${s.title}</div>
+                    <div id="${s.id}" class="flex flex-wrap gap-1.5 show-labels:gap-3"></div>
                   </div>
                 `).join('')}
-                <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-2xl shadow-md z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-sm text-gray-700">Every app mapped to stage, policy, region, and device.</div>
+                <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-2xl shadow-md z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-[13px] text-gray-700">Every app mapped to stage, policy, region, and device.</div>
               </div>
-              <div id="flowHubFlash" class="mt-2 hidden text-blue-600"><span class="inline-flex items-center gap-1 text-xs"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="platformsSection">
+              <div id="flowHubFlash" class="mt-1 hidden text-blue-600"><span class="inline-flex items-center gap-1 text-[11px]"><i data-lucide="bolt" class="h-3.5 w-3.5"></i><span>Update published</span></span></div>
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="platformsSection">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 relative">
-                    <div class="text-xs text-gray-700">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 h-[0.22rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:${3 + .5*i}s"></div>
-                    <i data-lucide="check-circle" class="opacity-0 absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${4 + .5*i}s"></i>
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div id="flowConn${k}" class="mt-0.5 grid grid-cols-10 gap-1"></div>
+                    <div class="mt-0.5 h-[0.22rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${4 + .5*i}s"></i>
                   </div>
                 `).join('')}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="groupsSection">
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="groupsSection">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 relative">
-                    <div class="text-xs text-gray-700">${['Business Unit','Subsidiary','Region'][i]}</div>
-                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 w-[0.22rem] h-16 rounded-[2px] origin-top scale-y-0 bg-gradient-to-b from-gray-900 to-blue-600" style="--d:${5 + .5*i}s"></div>
-                    <i data-lucide="shield-check" class="opacity-0 absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${6 + .5*i}s"></i>
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div id="flowGrp${k}" class="mt-0.5 grid grid-cols-8 gap-1"></div>
+                    <div class="mx-auto mt-0.5 w-[0.22rem] h-12 rounded-[2px] origin-top scale-y-0 bg-gradient-to-b from-gray-900 to-blue-600" style="--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${6 + .5*i}s"></i>
                   </div>
                 `).join('')}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true" id="devicesSection">
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="devicesSection">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-gray-700"></i>
-                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-gray-700">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <i data-lucide="check-circle" class="opacity-0 absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${8 + .5*i}s"></i>
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="flowDev${k}" class="mt-0.5 grid grid-cols-6 gap-1"></div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${8 + .5*i}s"></i>
                   </div>
                 `).join('')}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-              <div class="mt-3">
-                <div id="endUserCard" class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 transition-all duration-500 p-3">
-                  <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full bg-red-600 text-white">U</div>
-                    <div class="text-sm">
+              <div class="mt-2">
+                <div id="endUserCard" class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 transition-all duration-500 p-2.5">
+                  <div class="flex items-center gap-2">
+                    <div id="endUserAvatar" class="h-8 w-8 grid place-items-center font-semibold rounded-full bg-red-600 text-white">U</div>
+                    <div class="text-[13px]">
                       <div class="font-medium">End user</div>
                       <div id="endUserMessage" class="text-gray-700">Apps on demand — no waiting, no tickets.</div>
                     </div>
                   </div>
-                  <div class="mt-3 h-[0.38rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:10s"></div>
-                  <div class="relative mt-2 border border-gray-200 bg-gray-50 rounded-2xl p-4">
-                    <i data-lucide="laptop" class="h-5 w-5 text-gray-700"></i>
-                    <div id="endUserBadge" class="absolute right-2 top-2 w-[1.15rem] h-[1.15rem] rounded-full opacity-0 translate-y-[-6px] scale-90 grid place-items-center font-bold text-black bg-red-600" style="--d:11s">!</div>
-                    <div class="mt-1 text-[11px] text-gray-700">Workspace launches the correct app instantly</div>
+                  <div class="mt-2 h-[0.38rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:10s"></div>
+                  <div class="relative mt-1 border border-gray-200 bg-gray-50 rounded-2xl p-3">
+                    <i data-lucide="laptop" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="endUserBadge" class="absolute right-1.5 top-1.5 w-[1rem] h-[1rem] rounded-full opacity-0 translate-y-[-6px] scale-90 grid place-items-center font-bold text-black bg-red-600" style="--d:11s">!</div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">Workspace launches the correct app instantly</div>
                   </div>
-                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
-                    ${miniApps.map(app => `<div class="w-[2.1rem] h-[2.1rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                  <div id="miniWorkspace" class="mt-2 hidden grid grid-cols-4 gap-1.5">
+                    ${miniApps.map(app => `<div class="w-[1.8rem] h-[1.8rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
                   </div>
                 </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-sm opacity-0 animate-fadeIn text-green-500"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+                <div id="flowSuccess" class="mt-1 hidden inline-flex items-center gap-1 text-[13px] opacity-0 animate-fadeIn text-green-500"><i data-lucide="sparkles" class="h-3.5 w-3.5"></i><span>Configured once → delivered everywhere.</span></div>
               </div>
             </div>
           </div>
@@ -774,51 +772,51 @@
         const r = calcROI();
         const fteContext = `≈ ${Math.round(r.totalHoursMonth / 160)}+ FTE months or ${Math.round(r.totalHoursYear / 3000)} strategic projects/year unblocked`;
         return `
-          <section id="panel-roi" class="space-y-6">
+          <section id="panel-roi" class="space-y-4">
             <h1 class="text-3xl font-bold">The application layer is where friction becomes visible</h1>
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 bg-gray-50 rounded-xl p-6 shadow-md">
-              <div class="space-y-2">
-                <h2 class="text-xl font-semibold">Total Time Returned</h2>
-                <p class="text-4xl font-bold text-blue-700">${num(r.totalHoursMonth)} hrs/month</p>
-                <p class="text-2xl font-bold text-blue-700">${num(r.totalHoursYear)} hrs/year</p>
-                <p class="text-sm text-gray-500">${fteContext}</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 bg-gray-50 rounded-xl p-4 shadow-md">
+              <div class="space-y-1">
+                <h2 class="text-lg font-semibold">Total Time Returned</h2>
+                <p class="text-3xl font-bold text-blue-700">${num(r.totalHoursMonth)} hrs/month</p>
+                <p class="text-xl font-bold text-blue-700">${num(r.totalHoursYear)} hrs/year</p>
+                <p class="text-[13px] text-gray-500">${fteContext}</p>
               </div>
-              <div class="space-y-2">
-                <h2 class="text-xl font-semibold">Where the Hours Come From</h2>
-                <ul class="list-disc ml-6 text-base text-gray-700 space-y-1">
+              <div class="space-y-1">
+                <h2 class="text-lg font-semibold">Where the Hours Come From</h2>
+                <ul class="list-disc ml-5 text-[15px] text-gray-700 space-y-0.5">
                   <li>App-related support time avoided: ${num(r.reactiveHoursMonth)} hrs/mo</li>
                   <li>Faster patch cycles: ${num(r.patchHoursMonth)} hrs/mo</li>
                   <li>Packaging automation: ${num(r.packagingHoursMonth)} hrs/mo</li>
                 </ul>
-                <p class="text-sm text-gray-500">High-volume pain, solved at the root.</p>
+                <p class="text-[13px] text-gray-500">High-volume pain, solved at the root.</p>
               </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
-              <div class="bg-white rounded-xl p-5 border shadow-sm">
-                <h3 class="font-semibold text-lg mb-2">Technical Debt Reduced</h3>
-                <ul class="list-disc ml-5 space-y-1 text-gray-700 text-base">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div class="bg-white rounded-xl p-4 border shadow-sm">
+                <h3 class="font-semibold text-[15px] mb-1">Technical Debt Reduced</h3>
+                <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
                   <li>30–50% fewer active app versions</li>
                   <li>Patch time cut from ${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}%)</li>
                   <li>~${num(r.ticketsAvoided)} tickets avoided / month</li>
                 </ul>
               </div>
-              <div class="bg-white rounded-xl p-5 border shadow-sm">
-                <h3 class="font-semibold text-lg mb-2">Project Velocity Gained</h3>
-                <ul class="list-disc ml-5 space-y-1 text-gray-700 text-base">
+              <div class="bg-white rounded-xl p-4 border shadow-sm">
+                <h3 class="font-semibold text-[15px] mb-1">Project Velocity Gained</h3>
+                <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
                   <li>Apps ready sooner = faster migrations, AI pilots, W365 rollout</li>
                   <li>Fewer blockers to modernization, hardware refreshes</li>
                   <li>Frees capacity for strategic initiatives</li>
                 </ul>
               </div>
             </div>
-            <div class="mt-6 text-xl italic text-gray-800">“This isn’t just saved time — it’s recovered momentum.”</div>
-            <div class="mt-8">
+            <div class="mt-4 text-lg italic text-gray-800">“This isn’t just saved time — it’s recovered momentum.”</div>
+            <div class="mt-6">
               ${bucketAccordion('edit', 'edit-3', 'Edit Assumptions & Impacts', editContent)}
             </div>
-            <div class="mt-8 flex flex-wrap gap-4 justify-end">
-              <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">Reset</button>
-              <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-3 text-base font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:bg-blue-700">
-                <i data-lucide="clipboard" class="w-5 h-5"></i> ${STATE.copied ? 'Copied!' : 'Copy'}
+            <div class="mt-6 flex flex-wrap gap-3 justify-end">
+              <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-1.5 bg-transparent text-gray-600 border-2 border-gray-300 px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">Reset</button>
+              <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:bg-blue-700">
+                <i data-lucide="clipboard" class="w-4.5 h-4.5"></i> ${STATE.copied ? 'Copied!' : 'Copy'}
               </button>
             </div>
           </section>
@@ -851,10 +849,10 @@
       }
       function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
       function kv(label,value){
-        return `<div class="flex items-center justify-between rounded bg-gray-100 px-3 py-2"><span class="text-gray-700">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
+        return `<div class="flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="text-gray-700">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
       }
       function inputNum(action, label, key, value){
-        return `<label class="flex flex-col gap-1 text-sm"><span class="text-xs text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="${action}" data-key="${key}"></label>`;
+        return `<label class="flex flex-col gap-0.5 text-[13px]"><span class="text-[11px] text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-[13px] focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="${action}" data-key="${key}"></label>`;
       }
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
@@ -1033,25 +1031,25 @@
         const ensure = v => v ?? '';
         return `
           <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8 animate-overlayFade">
-            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto animate-modalEnter">
+            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-6 overflow-y-auto animate-modalEnter">
               <div class="flex items-center justify-between">
-                <h2 id="cs-editor-title" class="text-xl font-medium tracking-normal">Edit Current State</h2>
-                <button type="button" class="bg-transparent text-gray-900 p-2 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded" data-action="close-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-4 h-4"></i>
+                <h2 id="cs-editor-title" class="text-lg font-medium tracking-normal">Edit Current State</h2>
+                <button type="button" class="bg-transparent text-gray-900 p-1.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded" data-action="close-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
-              <p class="mt-1 text-sm text-gray-700">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
-              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <p class="mt-0.5 text-[13px] text-gray-700">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
+              <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
                 ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
                 ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
                 ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
               </div>
-              <div class="mt-5 flex flex-wrap gap-2">
-                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:bg-blue-700">
-                  <i data-lucide="save" class="w-4 h-4"></i> Save
+              <div class="mt-4 flex flex-wrap gap-1.5">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 text-[13px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:bg-blue-700">
+                  <i data-lucide="save" class="w-3.5 h-3.5"></i> Save
                 </button>
-                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-gray-900 border-2 border-gray-900 px-4 py-2 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:text-blue-600 hover:border-blue-600">
-                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-1.5 bg-transparent text-gray-900 border-2 border-gray-900 px-3 py-1.5 text-[13px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:text-blue-600 hover:border-blue-600">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset to default
                 </button>
               </div>
             </div>
@@ -1060,22 +1058,22 @@
       }
       function editorSection(key,label,introValue,bulletsValue,analystValue){
         return `
-          <div class="flex flex-col gap-4">
-            <span class="text-sm font-medium">${label}</span>
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-gray-700">Introduction</span>
-              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
+          <div class="flex flex-col gap-3">
+            <span class="text-[13px] font-medium">${label}</span>
+            <label class="flex flex-col gap-0.5">
+              <span class="text-[11px] text-gray-700">Introduction</span>
+              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[70px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
             </label>
-            <label class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 text-xs text-gray-700">
-                <i data-lucide="check-circle" class="w-4 h-4 text-blue-600"></i>
+            <label class="flex flex-col gap-0.5">
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-700">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-blue-600"></i>
                 Bullets (one per line, max 4)
               </div>
-              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
+              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[140px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} bullets editor" rows="5">${bulletsValue}</textarea>
             </label>
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-gray-700">Analyst Trend</span>
-              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded border border-gray-200 bg-white p-3 text-sm leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
+            <label class="flex flex-col gap-0.5">
+              <span class="text-[11px] text-gray-700">Analyst Trend</span>
+              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[70px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
             </label>
           </div>
         `;
@@ -1196,7 +1194,8 @@ Notes: Illustrative; replace with your data.`;
           }
           STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
         });
-        const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
+        const startBtn=root.querySelector('[data-action="start-flow"]');
+        if(startBtn) startBtn.addEventListener('click', startFlow);
         const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
         const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; toggleOverlay(); buildFlow(); });
         root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('animate-iconLaunch'); setTimeout(()=>icon.classList.remove('animate-iconLaunch'), 500); }));
@@ -1242,18 +1241,18 @@ Notes: Illustrative; replace with your data.`;
           const mount=document.getElementById(section.id); if(!mount) return;
           mount.innerHTML='';
           section.items.forEach((itm,idx)=>{
-            const wrap=document.createElement('div'); wrap.className='flex items-center gap-1 relative transition-all duration-300 show-labels:flex-col show-labels:items-start show-labels:gap-[0.2rem] show-labels:w-[calc(33.333%-0.666rem)] show-labels:mb-2'; wrap.style.setProperty('--d',(base+idx*0.2).toFixed(2)+'s');
-            const ring=document.createElement('div'); ring.className='w-[2.1rem] h-[2.1rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 show-labels:w-[1.8rem] show-labels:h-[1.8rem]'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+            const wrap=document.createElement('div'); wrap.className='flex items-center gap-1 relative transition-all duration-300 show-labels:flex-col show-labels:items-start show-labels:gap-[0.2rem] show-labels:w-[calc(33.333%-0.666rem)] show-labels:mb-1'; wrap.style.setProperty('--d',(base+idx*0.2).toFixed(2)+'s');
+            const ring=document.createElement('div'); ring.className='w-[1.8rem] h-[1.8rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 show-labels:w-[1.5rem] show-labels:h-[1.5rem]'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
             wrap.appendChild(ring);
             if(STATE.showLabels){
-              const label=document.createElement('span'); label.className='text-[0.7rem] text-gray-500 opacity-0 -translate-x-[10px] transition-all duration-300 show-labels:opacity-100 show-labels:translate-x-0 whitespace-normal text-left'; label.textContent=itm.name; wrap.appendChild(label);
-              const meta=document.createElement('div'); meta.className='text-[0.6rem] text-gray-500 opacity-0 translate-y-[5px] transition-all duration-300 relative top-auto left-auto z-[5] whitespace-nowrap flex flex-col gap-[0.1rem] items-start w-full justify-start show-labels:opacity-100 show-labels:translate-y-0';
+              const label=document.createElement('span'); label.className='text-[0.6rem] text-gray-500 opacity-0 -translate-x-[10px] transition-all duration-300 show-labels:opacity-100 show-labels:translate-x-0 whitespace-normal text-left'; label.textContent=itm.name; wrap.appendChild(label);
+              const meta=document.createElement('div'); meta.className='text-[0.5rem] text-gray-500 opacity-0 translate-y-[5px] transition-all duration-300 relative top-auto left-auto z-[5] whitespace-nowrap flex flex-col gap-[0.1rem] items-start w-full justify-start show-labels:opacity-100 show-labels:translate-y-0';
               meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
               wrap.appendChild(meta);
             }
             mount.appendChild(wrap);
           });
-          base+=1.5;
+          base+=1.2;
         });
         buildTiles(document.getElementById('flowConnA'), 14, 3);
         buildTiles(document.getElementById('flowConnB'), 14, 3.5);
@@ -1286,7 +1285,7 @@ Notes: Illustrative; replace with your data.`;
       }
       function buildTiles(container,count,baseDelay){
         if(!container) return; container.innerHTML='';
-        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='w-[0.45rem] h-[0.45rem] rounded-[2px] bg-gray-200 opacity-90 run:animate-tilePulse'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
+        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='w-[0.4rem] h-[0.4rem] rounded-[2px] bg-gray-200 opacity-90 run:animate-tilePulse'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
       }
       function startFlow(){
         runWorkspaceAnimation();
@@ -1340,12 +1339,12 @@ Notes: Illustrative; replace with your data.`;
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
         STATE.showLabels = false;
         buildFlow();
-        const allBuckets = document.querySelectorAll('.processed');
-        allBuckets.forEach(b => b.classList.remove('processed'));
-        const groups = document.getElementById('groupsSection');
-        if (groups) groups.classList.remove('dimmed');
-        const endCard = document.getElementById('endUserCard');
-        if (endCard) endCard.classList.remove('highlighted');
+        const allProcessed = document.querySelectorAll('.processed');
+        allProcessed.forEach(el => el.classList.remove('processed'));
+        const dimmed = document.querySelectorAll('.dimmed');
+        dimmed.forEach(el => el.classList.remove('dimmed'));
+        const highlighted = document.querySelectorAll('.highlighted');
+        highlighted.forEach(el => el.classList.remove('highlighted'));
       }
       function attachAccordionKeyboard(){
         document.addEventListener('keydown', (e) => {
