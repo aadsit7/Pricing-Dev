@@ -1,1199 +1,1540 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Recast — Compact Click-Through (Realistic Catalog)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://unpkg.com">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    :root {
-      --re-navy: #0F1D6B;
-      --re-accent: #1D6BFF;
-      --re-blue-mid: #284CBA;
-      --re-blue-bright: #1D6BFF;
-      --re-blue-light: #5BA4FF;
-      --re-orange: #FF6B00;
-      --re-white: #FFFFFF;
-      --radius: 12px;
-      --border-subtle: rgba(255,255,255,0.12);
-      --shadow-soft: 0 4px 20px rgba(0,0,0,0.15);
-    }
-    html, body {
-      background: var(--re-navy);
-      color: var(--re-white);
-      font-family: 'Inter', sans-serif;
-    }
-    .focus-ring:focus-visible {
-      outline: 2px solid var(--re-blue-light);
-      outline-offset: 2px;
-    }
-    .section-card {
-      border-radius: var(--radius);
-      border: 1px solid var(--border-subtle);
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(8px);
-      box-shadow: var(--shadow-soft);
-    }
-    .sub-card {
-      border-radius: calc(var(--radius) - 4px);
-      border: 1px solid var(--border-subtle);
-      background: rgba(255,255,255,0.03);
-    }
-    .tile {
-      width: 0.5rem;
-      height: 0.5rem;
-      border-radius: 3px;
-      background: #334155;
-      opacity: 0.85;
-    }
-    .run .tile {
-      animation: tilePulse 1.2s ease-in-out var(--d,0s) 1 forwards;
-    }
-    @keyframes tilePulse {
-      0% { transform: scale(0.6); background: #334155; opacity: 0.3; }
-      50% { transform: scale(1.1); background: var(--re-blue-light); opacity: 1; }
-      100% { transform: scale(1); background: #334155; opacity: 0.85; }
-    }
-    .flow-bar {
-      height: 0.25rem;
-      border-radius: 9999px;
-      transform-origin: left center;
-      transform: scaleX(0);
-    }
-    .run .flow-bar {
-      animation: barGrow 1s cubic-bezier(0.4,0,0.2,1) forwards var(--d,0s);
-    }
-    @keyframes barGrow {
-      to { transform: scaleX(1); }
-    }
-    .bolt-line {
-      width: 0.25rem;
-      border-radius: 9999px;
-      transform-origin: top center;
-      transform: scaleY(0);
-    }
-    .run .bolt-line {
-      animation: boltDrop 1s cubic-bezier(0.4,0,0.2,1) forwards var(--d,0s);
-    }
-    @keyframes boltDrop {
-      to { transform: scaleY(1); }
-    }
-    .logo-ring {
-      width: 2.2rem;
-      height: 2.2rem;
-      border-radius: 9999px;
-      display: grid;
-      place-items: center;
-      background: #0b1445;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: transform 0.3s ease;
-    }
-    .logo-wrap:hover {
-      transform: translateY(-2px);
-    }
-    .logo-name {
-      font-size: 0.75rem;
-      color: #e5e7eb;
-      white-space: nowrap;
-    }
-    .run .logo-ring {
-      animation: appPop 0.9s cubic-bezier(0.2,0.8,0.2,1) var(--d,0s) 1 forwards;
-    }
-    @keyframes appPop {
-      0% { transform: scale(0.8); filter: saturate(0.5); opacity: 0.6; }
-      60% { transform: scale(1.05); filter: saturate(1); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-    .user-beam {
-      height: 0.3rem;
-      border-radius: 9999px;
-      transform-origin: left center;
-      transform: scaleX(0);
-    }
-    .run .user-beam {
-      animation: barGrow 1.1s cubic-bezier(0.4,0,0.2,1) forwards var(--d,0s);
-    }
-    .badge {
-      width: 1.2rem;
-      height: 1.2rem;
-      border-radius: 9999px;
-      opacity: 0;
-      transform: translateY(-8px) scale(0.8);
-    }
-    .run .badge {
-      animation: badgeDrop 0.9s ease-out var(--d,0s) forwards;
-    }
-    @keyframes badgeDrop {
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .cat-row {
-      display: grid;
-      grid-template-columns: 16ch 1fr;
-      gap: 0.6rem;
-      align-items: center;
-    }
-    .cat-title {
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0.95;
-    }
-    .re-primary {
-      background: var(--re-accent) !important;
-      color: #fff !important;
-      border: 0;
-      border-radius: var(--radius);
-      box-shadow: 0 8px 20px rgba(29,107,255,0.28), inset 0 1px 0 rgba(255,255,255,0.1);
-      transition: all 0.2s ease;
-    }
-    .re-primary:hover {
-      background: #1559ff !important;
-      transform: translateY(-1px);
-    }
-    .re-primary:focus-visible {
-      outline: 2px solid var(--re-blue-light);
-      outline-offset: 2px;
-    }
-    .re-secondary {
-      background: transparent !important;
-      color: #fff !important;
-      border: 1px solid rgba(255,255,255,0.25) !important;
-      border-radius: var(--radius);
-      transition: all 0.2s ease;
-    }
-    .re-secondary:hover {
-      color: var(--re-blue-light) !important;
-      border-color: var(--re-blue-light) !important;
-      background: rgba(91,164,255,0.08) !important;
-    }
-  </style>
-</head>
-<body class="min-h-screen antialiased">
-  <div id="app" class="min-h-screen"></div>
-  <script>
-    const STATE = {
-      activeTab: 'today',
-      impact: { minutes: 9, pkgHours: 6, riskHrs: 0 },
-      defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 0 } },
-      ctx: { device: 'Windows', network: 'Corporate', compliant: true },
-      packHrs: 8, configHrs: 2, currentHrs: 24,
-      roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 },
-      copied: false,
-      showLabels: false,
-      showSolutionCards: true,
-      openWhy: null,
-      modalOpen: false,
-      modalKind: null,
-      invoker: null,
-      editBuffers: { change: '', now: '', recast: '' },
-      todayAgenda: {
-        title: 'Agenda',
-        overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
-      },
-      defaultsAgenda() {
-        return JSON.parse(JSON.stringify({
-          title: 'Agenda',
-          overviewText: ['Why Change | Why Now | Why Recast','Our Approach','Business Impact'].join('\n')
-        }));
-      },
-      currentStateTexts: {
-        change: [
-          'Apps have become the new supply chain bottleneck. Business initiatives stall when applications aren’t packaged, patched, and ready.',
-          'Scale has outgrown people. Thousands of apps and constant updates can’t be managed manually anymore.',
-          'Innovation depends on delivery. Cloud, AI, and security investments fail if apps lag behind.'
-        ],
-        now: [
-          'App updates went from yearly to daily. IT must keep up or risk falling behind instantly.',
-          'IT is asked to do ten times more with fewer people. Every hour wasted on manual app management blocks everything else from moving forward.',
-          'Security stakes are higher. Outdated apps are the fastest-growing attack surface.'
-        ],
-        recast: [
-          'One platform, Complete control. Package, patch, and deliver 7,000+ apps from one workspace.',
-          'Scale without strain. Automates what people can’t keep up with manually.',
-          'Apps stop blocking innovation. By removing friction, Recast clears the path for cloud, security, and AI projects to move faster, safer, with less risk.'
-        ]
-      },
-      defaultsCurrentState() {
-        return JSON.parse(JSON.stringify({
-          change: [
-            'App management is the #1 bottleneck. New devices, platforms, and projects stall until apps are packaged, patched, and proven.',
-            'Too many apps, too many updates. Thousands of apps, constant versions — IT can’t keep up, slowing adoption and raising risk.',
-            'Innovation waits on apps. Every transformation — cloud, security, AI — gets delayed if app delivery isn’t solved first.'
-          ],
-          now: [
-            'Faster change cycles. OS updates, AI tools, and SaaS shifts are constant — apps must keep pace.',
-            'Rising risk. Zero-days and compliance rules make delayed patching unacceptable',
-            'Shrinking teams. IT capacity isn’t growing, but demands are. Fix app management first, or nothing else moves.'
-          ],
-          recast: [
-            'One platform for every app. Package, patch, and deliver from a single place across all devices and management tools.',
-            'Proven scale. 7,000+ curated apps, automated updates, and instant delivery slash manual effort.',
-            'Fuel for innovation. By removing app friction, Recast lets enterprises adopt new tech faster, safer, and with less risk.'
-          ]
-        }));
+  <head>
+    <meta charset="utf-8">
+    <title>Recast — Compact Click-Through (Realistic Catalog)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://unpkg.com">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            keyframes: {
+              tilePulse: {
+                '0%':  { transform: 'scale(0.6)', backgroundColor: '#334155', opacity: '0.3' },
+                '50%': { transform: 'scale(1.1)', backgroundColor: 'var(--re-blue-light)', opacity: '1' },
+                '100%':{ transform: 'scale(1)',   backgroundColor: '#334155', opacity: '0.85' },
+              },
+              barGrow: {
+                to: { transform: 'scaleX(1)' },
+              },
+              boltDrop: {
+                to: { transform: 'scaleY(1)' },
+              },
+              appPop: {
+                '0%':  { transform: 'scale(0.8)',  filter: 'saturate(0.5)', opacity: '0.6' },
+                '60%': { transform: 'scale(1.05)', filter: 'saturate(1)',   opacity: '1' },
+                '100%':{ transform: 'scale(1)' },
+              },
+              badgeDrop: {
+                to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+              },
+              modalEnter: {
+                '0%': { transform: 'scale(0.95)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              overlayFade: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+            },
+            animation: {
+              tilePulse: 'tilePulse 1.2s ease-in-out var(--d,0s) 1 forwards',
+              barGrow: 'barGrow 1.1s cubic-bezier(0.4,0,0.2,1) forwards var(--d,0s)',
+              boltDrop: 'boltDrop 0.9s ease forwards var(--d,0s)',
+              appPop: 'appPop 0.9s cubic-bezier(0.2,0.8,0.2,1) var(--d,0s) 1 forwards',
+              badgeDrop: 'badgeDrop 0.9s ease-out var(--d,0s) forwards',
+              modalEnter: 'modalEnter 300ms cubic-bezier(0.2,0.8,0.2,1)',
+              overlayFade: 'overlayFade 300ms ease',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Final calm state after animation */
+      .workspace-final .warning,
+      .workspace-final .duplicate,
+      .workspace-final .loading-indicator {
+          opacity: 0;
+          transition: opacity .25s ease-out;
       }
-    };
-    const TABS = [
-      { id: 'today', label: 'Today', icon: 'calendar-clock' },
-      { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
-      { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-      { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
-    ];
-    function cx(...a){ return a.filter(Boolean).join(' '); }
-    function round(n){ return Math.round(n*100)/100; }
-    function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
-    function routeRecommendation(ctx){
-      if(!ctx.compliant) return 'Web';
-      if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
-      return 'VDI';
-    }
-    function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
-    function render(){
-      const root=document.getElementById('app');
-      root.innerHTML = `
-        <div id="siteRoot" ${STATE.modalOpen ? 'inert aria-hidden="true"' : ''}>
+      .workspace-final .app-icon {
+          opacity: 1;
+          transform: scale(1);
+          transition: .25s ease-out;
+      }
+      .dimmed {
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+      }
+      .highlighted {
+        border-color: #10B981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.3);
+        transition: all 0.3s ease;
+      }
+      .processed {
+        background-color: #ECFDF5 !important;
+        border-color: #D1FAE5 !important;
+        color: #065F46 !important;
+        transition: all 0.3s ease;
+      }
+      .tile {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 3px;
+        background: #334155;
+        opacity: 0.85;
+      }
+      .run .tile { animation: tilePulse 1.2s ease-in-out var(--d,0s) 1 forwards; }
+
+      .logo-ring {
+        width: 2.2rem;
+        height: 2.2rem;
+        border-radius: 9999px;
+        background: #0b1445;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .logo-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.3s ease;
+      }
+      .logo-wrap:hover { transform: translateY(-2px); }
+      .run .logo-ring { animation: appPop 0.9s cubic-bezier(0.2,0.8,0.2,1) var(--d,0s) 1 forwards; }
+
+      .user-beam {
+        height: 0.3rem;
+        border-radius: 9999px;
+        transform-origin: left center;
+        transform: scaleX(0);
+      }
+      .run .user-beam { animation: barGrow 1.1s cubic-bezier(0.4,0,0.2,1) forwards var(--d,0s); }
+
+      .badge {
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 9999px;
+        opacity: 0;
+        transform: translateY(-8px) scale(0.8);
+      }
+      .run .badge { animation: badgeDrop 0.9s ease-out var(--d,0s) forwards; }
+
+      .logo-name {
+        font-size: 0.75rem;
+        color: #e5e7eb;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
+    <div id="app" class="min-h-screen"></div>
+    <script>
+      const STATE = {
+        activeTab: 'problems',
+        activeView: 'exec',
+        impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 },
+        defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 } },
+        ctx: { device: 'Windows', network: 'Corporate', compliant: true },
+        packHrs: 8, configHrs: 2, currentHrs: 24,
+        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 },
+        copied: false,
+        showLabels: false,
+        showSolutionCards: true,
+        openWhy: null,
+        openWhyModal: null,
+        openCards: { core: false, onboarding: false, trust: false },
+        visitedCards: [],
+        openBuckets: { one: false, zero: false, per: false, edit: false },
+        modalOpen: false,
+        editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
+        selectedBullets: {},
+        currentState: {
+          change: {
+            intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
+            bullets: [
+              'There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.',
+              'Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.',
+              'Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.',
+              'Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.'
+            ],
+            analyst: "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute."
+          },
+          now: {
+            intro: "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
+            bullets: [
+              'App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.',
+              'Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.',
+              'Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.',
+              'The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.'
+            ],
+            analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
+          },
+          recast: {
+            intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+            bullets: [
+              'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
+              'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
+              'Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.',
+              'Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.'
+            ],
+            analyst: "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default."
+          }
+        },
+        defaultsCurrentState() {
+          return JSON.parse(JSON.stringify({
+            change: {
+              intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
+              bullets: [
+                'There are too many apps to manage by hand. Commercial, internal, and legacy software are spread across Intune, ConfigMgr, VDI, Windows, and macOS.',
+                'Headcount hasn’t grown, but the work has exploded. Most teams are already over capacity and spend most of their day reacting to app issues.',
+                'Big initiatives keep getting stuck. Cloud moves, Citrix or AVD projects, hardware refreshes, and AI efforts all run into the same wall — app readiness.',
+                'Technical debt keeps piling up. Different versions of the same app are everywhere, creating more risk, more tickets, and slower recovery when things break.'
+              ],
+              analyst: "When the application layer is a mess, transformation projects stall or fail. It’s not because the strategy is wrong, but because there’s no capacity left to execute."
+            },
+            now: {
+              intro: "IT teams are being asked to manage more apps and more change with the same people and the same tools. The gap between what’s expected and what’s possible keeps getting wider.",
+              bullets: [
+                'App updates and complexity keep increasing, but team size stays the same. You can’t scale people the way you scale software.',
+                'Internal and custom apps don’t update themselves, so every change adds more manual work, more dependencies, and more risk.',
+                'Leadership wants progress on AI, modernization, and new platforms, but the teams who could drive that progress are stuck keeping apps running.',
+                'The longer this goes on, the worse it gets. Version sprawl grows, security and compliance get harder, and cleanup costs rise fast.'
+              ],
+              analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
+            },
+            recast: {
+              intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+              bullets: [
+                'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
+                'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
+                'Reduces technical debt and version sprawl, which means fewer variables when something breaks and far fewer app-related tickets.',
+                'Frees up IT capacity. What used to take hours now takes minutes, so migrations, pilots, patch cycles, and AI projects can finally move at business speed.'
+              ],
+              analyst: "Recast turns app management from a drag on every project into a stable foundation. Readiness stops being the blocker and becomes the default."
+            }
+          }));
+        },
+      };
+      const TABS = [
+        { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
+        { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
+        { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
+      ];
+      const NEW_CARDS = [
+        {
+          id: 'core',
+          icon: 'layers',
+          title: 'How Recast Does It.',
+          bullets: [
+            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
+            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
+            'Automated patching and validation keep apps secure and compliant.',
+            'Unified dashboard for visibility and governance across all environments.',
+            'Policy-driven automation reduces manual work by over 60%.',
+            'End users get the right app instantly — no tickets, no delays.'
+          ],
+          closer: 'Configured once — Delivered everywhere.',
+          timeline: false,
+          bgHeader: 'bg-gray-50',
+          bgContent: 'bg-gray-50'
+        },
+        {
+          id: 'onboarding',
+          icon: 'clock',
+          title: 'Onboard & Up to Speed Fast.',
+          bullets: [
+            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
+            'No new infrastructure — integrates with your existing management tools.',
+            'Guided setup with dedicated Customer Success Manager.',
+            'Typical resource: 1–2 IT engineers part-time.',
+            'Enablement includes training, certification, and success planning.'
+          ],
+          closer: 'From first call to production in weeks, not months.',
+          timeline: true,
+          bgHeader: 'bg-gray-50',
+          bgContent: 'bg-gray-50'
+        },
+        {
+          id: 'trust',
+          icon: 'shield-check',
+          title: 'Trusted by Customers',
+          bullets: [
+            '60M+ endpoints across 130+ countries.',
+            '70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.',
+            '87 CSAT Score | Most trusted in the industry',
+            'Proven scalability from small pilots to global deployments.',
+            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
+          ],
+          closer: 'Trusted by organizations that can’t afford downtime.',
+          timeline: false,
+          bgHeader: 'bg-gray-50',
+          bgContent: 'bg-gray-50'
+        }
+      ];
+      const onboardingMiniTimelineEnabled = true;
+      function cx(...a){ return a.filter(Boolean).join(' '); }
+      function round(n){ return Math.round(n*100)/100; }
+      function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
+      function routeRecommendation(ctx){
+        if(!ctx.compliant) return 'Web';
+        if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
+        return 'VDI';
+      }
+      function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+      function render(){
+        const root=document.getElementById('app');
+        root.innerHTML = `
           <header class="relative">
-            <div class="relative mx-auto max-w-7xl px-6 pt-10 pb-8">
-              <h1 class="text-5xl md:text-6xl font-bold leading-tight tracking-tight">Recast Software</h1>
-              <p class="mt-3 max-w-3xl text-lg leading-relaxed opacity-85">
-                ${STATE.activeTab==='problems' || STATE.activeTab==='today'
-                  ? 'Application Workspace | Modern Application Delivery, Simplified'
+            <div class="relative mx-auto max-w-6xl px-6 lg:px-12 pt-8 pb-6">
+              <h1 class="text-4xl md:text-5xl font-semibold leading-tight"><span class="text-blue-600">Re</span><span class="text-gray-900">cast Application Workspace</span></h1>
+              <p class="mt-2 max-w-2xl text-base leading-relaxed text-gray-700">
+                ${STATE.activeTab==='problems'
+                  ? ''
                   : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
               </p>
             </div>
-            <div class="relative mx-auto max-w-7xl px-6">
-              <div id="tablist" role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-3 rounded-lg bg-white/5 p-2 ring-1 ring-white/15 backdrop-blur-sm">
+            <div class="relative mx-auto max-w-6xl px-6 lg:px-12">
+              <div role="tablist" aria-label="Demo sections" class="flex flex-nowrap overflow-x-auto gap-2 rounded bg-gray-50 p-1 ring-1 ring-gray-200">
                 ${TABS.map(t=>`
-                  <button type="button"
-                    id="tab-${t.id}"
-                    role="tab"
-                    class="${cx('inline-flex items-center gap-2 px-4 py-2 text-base font-medium focus-ring transition rounded-md', STATE.activeTab===t.id ? 're-primary' : 'text-white hover:bg-white/10')}"
-                    data-action="switch-tab" data-tab="${t.id}"
-                    aria-controls="panel-${t.id}"
-                    aria-selected="${STATE.activeTab===t.id}"
-                    tabindex="${STATE.activeTab===t.id? '0':'-1'}">
-                    <i data-lucide="${t.icon}" class="w-5 h-5"></i><span>${t.label}</span>
+                  <button type="button" class="${cx('flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition rounded-full', STATE.activeTab===t.id ? 'bg-blue-600 text-white hover:bg-blue-700' : 'text-gray-900 hover:bg-gray-100')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                    <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
                   </button>
                 `).join('')}
               </div>
             </div>
           </header>
-          <main class="mx-auto max-w-7xl px-6 pb-20">
-            ${STATE.activeTab!=='problems' && STATE.activeTab!=='today' ? `
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              ${chip('Minutes saved (per user/per month)', String(STATE.impact.minutes), 'emerald')}
-              ${chip('Packaging hours avoided', String(STATE.impact.pkgHours), 'sky')}
-              ${chip('Zero-day window reduced (hrs)', String(round(STATE.impact.riskHrs)), 'yellow')}
-            </div>` : ''}
-            <section class="mt-8">${renderActivePanel()}</section>
+          <main class="mx-auto max-w-6xl px-6 lg:px-12 pb-8 gap-4">
+            <section class="mt-4">${renderActivePanel()}</section>
           </main>
-        </div>
-        ${renderModal()}
-      `;
-      if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
-      attachEvents();
-      wireTabsKeyboard();
-      if (STATE.activeTab === 'solution') { buildFlow(); }
-      if (STATE.activeTab === 'roi') { updateROIOutputs(); }
-      if (STATE.modalOpen) { setupModalA11y(); }
-    }
-    function chip(label,value,tone){
-      const tones={emerald:'from-emerald-500/90 to-teal-500/90',sky:'from-sky-500/90 to-indigo-500/90',yellow:'from-yellow-400/90 to-amber-500/90'};
-      return `
-        <div class="section-card p-4">
-          <div class="text-sm opacity-85">${label}</div>
-          <div class="mt-2 inline-flex items-center gap-2 rounded-md bg-gradient-to-r px-3 py-1 text-slate-900 font-medium ${tones[tone]}">
-            <i data-lucide="badge-check" class="w-5 h-5"></i><span class="text-base tabular-nums">${value}</span>
-          </div>
-        </div>
-      `;
-    }
-    function renderActivePanel(){
-      if (STATE.activeTab==='today') return renderToday();
-      if (STATE.activeTab==='problems') return renderProblems();
-      if (STATE.activeTab==='solution') return renderSolution();
-      if (STATE.activeTab==='roi') return renderROI();
-      return '';
-    }
-    function mdInline(str){
-      return str
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>');
-    }
-    function parseBullets(text){
-      const lines = (text||'').split('\n').map(l=>l.replace(/\t/g,' '));
-      const root = [];
-      const stack = [{level:0, children:root}];
-      lines.forEach(raw=>{
-        const m = raw.match(/^(\s*)(.*)$/);
-        const level = Math.floor((m[1]||'').length/2)+1;
-        const content = (m[2]||'').trim();
-        if(!content) return;
-        while(stack.length && stack[stack.length-1].level>=level) stack.pop();
-        const node = { text: content, children: [] };
-        stack[stack.length-1].children.push(node);
-        stack.push({level, children: node.children});
-      });
-      return root;
-    }
-    function bulletsToHTML(nodes){
-      if(!nodes.length) return '';
-      return `<ul class="mt-4 list-disc pl-6 text-xl leading-relaxed space-y-3">${nodes.map(n=>`
-        <li>${mdInline(n.text)}${n.children?.length?bulletsToHTMLSmall(n.children):''}</li>
-      `).join('')}</ul>`;
-    }
-    function bulletsToHTMLSmall(nodes){
-      return `<ul class="mt-2 list-circle pl-6 text-lg leading-relaxed space-y-2 opacity-90">${nodes.map(n=>`
-        <li>${mdInline(n.text)}${n.children?.length?bulletsToHTMLSmall(n.children):''}</li>
-      `).join('')}</ul>`;
-    }
-    function renderToday(){
-      const a = STATE.todayAgenda;
-      const tree = parseBullets(a.overviewText);
-      return `
-        <section id="panel-today" role="tabpanel" aria-labelledby="tab-today" class="space-y-8">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-5xl font-bold leading-none tracking-tight">${mdInline(a.title)}</h2>
-              ${bulletsToHTML(tree)}
-            </div>
-            <div class="shrink-0">
-              <button type="button" data-action="open-agenda-editor" class="inline-flex items-center gap-2 re-secondary px-4 py-3 text-base font-medium focus-ring" aria-label="Edit Agenda">
-                Edit
-              </button>
+          ${renderModal()}
+          ${renderWhyModal()}
+        `;
+        if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+        attachEvents();
+        if (STATE.activeTab === 'solution') { buildFlow(); }
+        if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+        if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
+      }
+      function chip(label,value,tone){
+        const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
+        return `
+          <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-2">
+            <div class="text-[11px] text-gray-600">${label}</div>
+            <div class="mt-0.5 inline-flex items-center gap-1.5 rounded bg-gradient-to-r px-1.5 py-0.5 text-gray-900 ${tones[tone]}">
+              <i data-lucide="badge-check" class="w-3.5 h-3.5"></i><span class="text-[12px] font-semibold tabular-nums">${value}</span>
             </div>
           </div>
-          <div class="pt-24"></div>
-        </section>
-      `;
-    }
-    function renderProblems(){
-      const items=[
-        {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
-        {t:'Packaging backlog',s:'Rebuild per version; updates stall.',i:'package'},
-        {t:'Zero-day exposure',s:'Patching takes days, not minutes.',i:'shield-alert'},
-        {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'refresh-cw'}
+        `;
+      }
+      function renderActivePanel(){
+        if (STATE.activeTab==='problems') return renderProblems();
+        if (STATE.activeTab==='solution') return renderSolution();
+        if (STATE.activeTab==='roi') return renderROI();
+        return '';
+      }
+      const pressures = [
+         { id: 'cost', title: 'CAPACITY & OPERATIONAL DRAG', bullets: ['Manual app management consumes skilled IT capacity.', 'Redundant installs create rework and escalation.', 'Teams can’t scale delivery as application demand increases.', 'Lack of standardization hides friction across the lifecycle.'] },
+        { id: 'risk', title: 'RISK, COMPLIANCE & SECURITY', bullets: ['Version sprawl and patch gaps increase organizational risk.', 'No unified view limits governance and response speed.', 'Manual processes increase human error and audit exposure.'] },
+        { id: 'capacity', title: 'CAPACITY & DELIVERY VELOCITY', bullets: ['Flat headcount limits the pace of change.', 'Repetitive tasks crowd out modernization efforts.', 'App readiness issues stall critical initiatives.'] },
+        { id: 'employee', title: 'EMPLOYEE EXPERIENCE & ENABLEMENT', bullets: ['App delays stall workflows and frustrate users.', 'Version mismatches break processes and erode IT trust.', 'Inconsistent delivery drives shadow IT and ticket volume.'] }
       ];
-      return `
-        <section id="panel-problems" role="tabpanel" aria-labelledby="tab-problems" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            ${items.map(p=>`
-              <article class="section-card p-5 transition hover:translate-y-[-2px]">
-                <div class="flex items-center gap-3"><i data-lucide="${p.i}" class="w-6 h-6 text-var(--re-orange)"></i><h3 class="text-lg font-semibold">${p.t}</h3></div>
-                <p class="mt-2 text-base opacity-85">${p.s}</p>
-              </article>
-            `).join('')}
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-            ${calloutDropdown('change','alert-triangle','Why Change',STATE.currentStateTexts.change, 'bg-[rgba(255,255,255,0.05)]')}
-            ${calloutDropdown('now','clock-4','Why Now',STATE.currentStateTexts.now, 'bg-[rgba(255,255,255,0.05)]')}
-            ${calloutDropdown('recast','sparkles','Why Recast',STATE.currentStateTexts.recast, 'bg-[rgba(255,255,255,0.05)]', true)}
-          </div>
-        </section>
-      `;
-    }
-    function calloutDropdown(id, icon, label, bullets, headerTone, cta=false){
-      const expanded = STATE.openWhy === id;
-      const contentId = `why-content-${id}`;
-      return `
-        <div class="h-full flex flex-col">
-          <button
-            type="button"
-            class="w-full overflow-hidden ring-1 ring-white/15 focus-ring transition hover:ring-white/25 hover:translate-y-[-2px]"
-            data-action="toggle-why"
-            data-why="${id}"
-            aria-expanded="${expanded}"
-            aria-controls="${contentId}"
-            style="border-radius: var(--radius); box-shadow: var(--shadow-soft)"
-          >
-            <div class="${cx('flex items-center justify-between px-6 py-4', headerTone)}" style="border-bottom: 1px solid var(--border-subtle)">
-              <div class="flex items-center gap-3">
-                <i data-lucide="${icon}" class="w-6 h-6 text-var(--re-orange)" aria-hidden="true"></i>
-                <span class="text-2xl font-bold tracking-tight text-white">${label}</span>
+      function renderProblems(){
+        return `
+          <section id="panel-problems" class="space-y-3">
+              <h2 class="text-3xl font-semibold leading-tight">Where Application Delivery Creates Friction</h2>
+                       <p class="text-xl text-gray-700 leading-relaxed">- The application layer is the #1 bottleneck to operational change.</p>
+            <p class="text-base text-gray-700 leading-relaxed">Most IT teams aren’t failing — they’re constrained by a delivery model that doesn’t scale with the pace of change.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+              ${pressures.map(p=>`
+                <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4 flex flex-col space-y-1 h-full">
+                  <h3 class="text-[14px] font-semibold mb-1">${p.title}</h3>
+                  <ul class="list-disc list-inside space-y-1 text-[12px] text-gray-700">
+                    ${p.bullets.map((b,i)=>{
+                      const selected = (STATE.selectedBullets[p.id] || []).includes(i);
+                      return `
+                        <li class="flex items-center gap-2 min-h-[1.25rem] ${selected ? 'bg-blue-50 rounded-md p-1 transition-colors' : ''} ${b ? '' : 'invisible' }">
+                          <label class="flex items-center gap-2 cursor-pointer select-none w-full">
+                            <input type="checkbox" class="sr-only" data-action="toggle-bullet" data-category="${p.id}" data-index="${i}" ${selected ? 'checked' : ''} aria-label="Select: ${b}">
+                            <div class="w-3.5 h-3.5 border-2 rounded-full flex items-center justify-center transition-all duration-200 ease-in-out shrink-0 ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}">
+                              ${selected ? '<i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i>' : ''}
+                            </div>
+                            <span class="${selected ? 'text-blue-800 font-medium' : ''}">${b}</span>
+                          </label>
+                        </li>
+                      `;
+                    }).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+            <div class="mt-6 flex justify-between items-center">
+              <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
+              <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
+            </div>
+          </section>
+        `;
+      }
+      function calloutDropdown(id, icon, label, headerTone, cta=false){
+        return `
+          <div class="h-full flex flex-col">
+            <button
+              type="button"
+              class="w-full overflow-hidden ring-1 ring-gray-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition hover:ring-gray-300 shadow-sm rounded-2xl"
+              data-action="open-why-modal"
+              data-why="${id}"
+            >
+              <div class="${cx('flex items-center justify-between px-4 py-3', headerTone)} border-b border-gray-200">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="${icon}" class="w-4.5 h-4.5 text-gray-900" aria-hidden="true"></i>
+                  <span class="text-lg font-semibold tracking-normal text-gray-900">${label}</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
               </div>
-              <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-6 h-6 text-white/85 transition-transform duration-300 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
-            </div>
-            <div id="${contentId}" class="bg-white/5 text-white overflow-hidden transition-all duration-300" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};padding:${expanded?'28px 24px':'0 24px'}">
-              <ul class="list-disc pl-6 text-lg leading-relaxed space-y-4 text-white/90">
-                ${bullets.map(b=>`<li>${b}</li>`).join('')}
-              </ul>
-              ${cta?`
-                <div class="mt-8 flex justify-end">
-                  <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex re-primary text-base font-medium px-5 py-3 items-center gap-3 focus-ring">
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    How Recast solves it
-                  </button>
+            </button>
+          </div>
+        `;
+      }
+      function renderWhyModal(){
+        if(!STATE.openWhyModal) return '';
+        const id = STATE.openWhyModal;
+        const iconMap = { change: 'alert-triangle', now: 'clock-4', recast: 'sparkles' };
+        const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
+        const data = STATE.currentState[id];
+        const headerTone = 'bg-gray-50';
+        const cta = id === 'recast';
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
+              <div class="${headerTone} px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="${iconMap[id]}" class="w-7 h-7 text-gray-900" aria-hidden="true"></i>
+                  <h2 id="why-modal-title-${id}" class="text-2xl font-bold tracking-tight text-gray-900">${labelMap[id]}</h2>
                 </div>
-              `:''}
-            </div>
-          </button>
-        </div>
-      `;
-    }
-    function renderSolution(){
-      const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
-      const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
-      const route=routeRecommendation(STATE.ctx);
-      return `
-        <section id="panel-solution" role="tabpanel" aria-labelledby="tab-solution" class="space-y-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            ${renderFlow()}
-            <div class="flex flex-col gap-4">
-              ${STATE.showSolutionCards ? `
-                ${cardUpdateOnce(saved)}
-                ${cardZeroDay(reduced)}
-                ${cardOneIcon(route)}
-              ` : `
-                <div class="section-card p-5 flex items-center justify-center">
-                  <button type="button" data-action="show-solution-cards" class="re-secondary px-5 py-3 text-base font-medium focus-ring">Show Solution Cards</button>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-why-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-6 bg-gray-50">
+                <p class="text-[15px] leading-relaxed text-gray-700 mb-3">${data.intro}</p>
+                <div class="space-y-3">
+                  ${data.bullets.map(b=>`
+                    <div class="bg-white p-3 rounded-lg shadow-sm flex items-start gap-2 hover:shadow-md transition-shadow duration-300">
+                      <i data-lucide="check-circle" class="w-4.5 h-4.5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                      <p class="text-[15px] leading-relaxed text-gray-700">${b}</p>
+                    </div>
+                  `).join('')}
                 </div>
-              `}
-            </div>
-          </div>
-        </section>
-      `;
-    }
-    function pill(label,active,action,value){
-      return `<button type="button" class="${cx('px-4 py-2 border text-sm font-medium rounded-md transition',active?'re-primary border-transparent':'bg-transparent text-white border-white/20 hover:border-white/30 hover:bg-white/5')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
-    }
-    function cardOneIcon(route){
-      const totalMin = Math.max(0, Number(STATE.impact.minutes));
-      return `
-        <div class="section-card p-5">
-          <div class="flex items-center gap-3"><i data-lucide="monitor-smartphone" class="w-6 h-6 text-var(--re-orange)"></i><h3 class="text-lg font-semibold">Smart icons → Always the right app (Windows / Mac / VPN / VDI)</h3></div>
-          <div class="sub-card p-4 text-base mt-3">
-            <div class="flex items-center gap-3 font-medium"><i data-lucide="mouse-pointer-click" class="w-5 h-5"></i> Per-user minutes saved</div>
-            <div class="mt-3 flex items-center justify-between rounded bg-black/20 px-4 py-2.5">
-              <span class="tabular-nums font-medium">9 → ${totalMin} min</span>
-              <strong class="tabular-nums text-var(--re-blue-light)">${totalMin} min saved</strong>
-            </div>
-          </div>
-          <div class="mt-3 grid grid-cols-3 gap-3 text-sm">
-            ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
-            ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
-            ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
-          </div>
-          <div class="mt-4"><button type="button" class="re-secondary px-4 py-2 text-sm font-medium" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
-        </div>
-      `;
-    }
-    function cardUpdateOnce(saved){
-      return `
-        <div class="section-card p-5">
-          <div class="flex items-center gap-3"><i data-lucide="package-open" class="w-6 h-6 text-var(--re-orange)"></i><h3 class="text-lg font-semibold">One package → Deploy anywhere (cloud / on-prem / hybrid)</h3></div>
-          <div class="sub-card p-4 text-base mt-3">
-            <div class="flex items-center gap-3 font-medium"><i data-lucide="wand-sparkles" class="w-5 h-5"></i> Critical app updates</div>
-            <label class="mt-3 flex items-center gap-3 text-sm">
-              <span class="opacity-85">Hours/package</span>
-              <input class="w-20 rounded bg-black/20 px-3 py-2 border border-white/15 focus-ring" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
-              <span>→</span>
-              <input class="w-20 rounded bg-black/20 px-3 py-2 border border-white/15 focus-ring" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
-            </label>
-            <div class="mt-3 flex items-center justify-between rounded bg-black/20 px-4 py-2.5"><span class="tabular-nums font-medium">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums text-var(--re-blue-light)">${saved} hrs saved</strong></div>
-            <div class="mt-3 flex flex-wrap gap-2 text-sm">
-              <span class="rounded px-3 py-1 bg-black/20">☁️ Cloud</span>
-              <span class="rounded px-3 py-1 bg-black/20">🖥️ On-Prem</span>
-              <span class="rounded px-3 py-1 bg-black/20">🔀 Hybrid</span>
-            </div>
-            <button type="button" class="mt-3 re-primary px-4 py-2 text-sm font-medium" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
-          </div>
-        </div>
-      `;
-    }
-    function cardZeroDay(reduced){
-      return `
-        <div class="section-card p-5">
-          <div class="flex items-center gap-3"><i data-lucide="shield-check" class="w-6 h-6 text-var(--re-orange)"></i><h3 class="text-lg font-semibold">Zero-Day Patches in Hours</h3></div>
-          <div class="sub-card p-4 text-base mt-3">
-            <div class="flex items-center gap-3 font-medium"><i data-lucide="shield-alert" class="w-5 h-5"></i> Zero-day rollout</div>
-            <label class="mt-3 flex items-center gap-3 text-sm">
-              <span class="opacity-85">Current hrs</span>
-              <input class="w-24 rounded bg-black/20 px-3 py-2 border border-white/15 focus-ring" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
-            </label>
-            <div class="mt-3 flex items-center justify-between rounded bg-black/20 px-4 py-2.5"><span class="tabular-nums font-medium">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums text-var(--re-blue-light)">${round(reduced)} hrs reduced</strong></div>
-            <button type="button" class="mt-3 re-primary px-4 py-2 text-sm font-medium" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
-          </div>
-        </div>
-      `;
-    }
-    function renderFlow(){
-      return `
-        <div class="section-card p-5">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <div class="h-7 w-7 rounded-md grid place-items-center bg-var(--re-blue-mid)"><i data-lucide="boxes" class="h-4 w-4 text-white"></i></div>
-              <div>
-                <h3 class="text-lg font-semibold">Application Workspace</h3>
-                <div class="text-sm opacity-85">Curated & secured catalog</div>
+                <div class="mt-5 bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex items-start gap-2">
+                  <i data-lucide="lightbulb" class="w-4.5 h-4.5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                  <p class="text-[15px] italic text-gray-700">${data.analyst}</p>
+                </div>
+                ${cta?`
+                  <div class="mt-6 flex justify-center">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-blue-600 text-white text-[15px] font-semibold px-5 py-2.5 items-center gap-2 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 shadow-md hover:shadow-lg hover:bg-blue-700 transition-shadow duration-300 rounded-full">
+                      <i data-lucide="arrow-right" class="w-4.5 h-4.5"></i>
+                      How Recast solves it
+                    </button>
+                  </div>
+                `:''}
               </div>
             </div>
-            <div class="flex items-center gap-3 text-sm">
-              <button type="button" class="re-secondary px-4 py-2 font-medium" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-              <button type="button" data-action="start-flow" class="re-primary px-4 py-2 font-medium">Start</button>
-              <button type="button" data-action="reset-flow" class="re-secondary px-4 py-2 font-medium">Reset</button>
-            </div>
           </div>
-          <div id="flowCard" class="mt-4 sub-card p-4" role="region" aria-label="Animated flow">
-            <div class="space-y-3">
-              ${CATALOG.map(s=>`
-                <div class="cat-row">
-                  <div class="cat-title text-var(--re-orange)">${s.title}</div>
-                  <div id="${s.id}" class="flex flex-wrap gap-3"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div id="flowHubFlash" class="mt-3 hidden" style="color:var(--re-blue-light)"><span class="inline-flex items-center gap-2 text-sm"><i data-lucide="bolt" class="h-5 w-5"></i><span>Update published</span></span></div>
-            <div class="mt-4 grid grid-cols-3 gap-3" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-3">
-                  <div class="text-sm opacity-85">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                  <div id="flowConn${k}" class="mt-2 grid grid-cols-10 gap-2"></div>
-                  <div class="mt-2 flow-bar w-full" style="background:linear-gradient(to right,var(--re-blue-light),var(--re-blue-bright));--d:${.55 + .12*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-4 grid grid-cols-3 gap-3" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-3">
-                  <div class="text-sm opacity-85">${['Business Unit','Subsidiary','Region'][i]}</div>
-                  <div id="flowGrp${k}" class="mt-2 grid grid-cols-8 gap-2"></div>
-                  <div class="mx-auto mt-2 bolt-line h-20 w-1" style="background:linear-gradient(to bottom,#fff,var(--re-blue-light));--d:${1 + .15*i}s"></div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-4 grid grid-cols-3 gap-3" aria-hidden="true">
-              ${['A','B','C'].map((k,i)=>`
-                <div class="sub-card p-3 text-center">
-                  <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-6 w-6 opacity-85"></i>
-                  <div id="flowDev${k}" class="mt-2 grid grid-cols-6 gap-2"></div>
-                  <div class="mt-2 text-sm opacity-85">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-4">
-              <div id="endUserCard" class="sub-card p-4">
-                <div class="flex items-center gap-4">
-                  <div id="endUserAvatar" class="h-10 w-10 grid place-items-center font-bold text-white rounded-full" style="background:#EA4335">U</div>
-                  <div class="text-base">
-                    <div class="font-medium">End user</div>
-                    <div class="opacity-85 text-sm">Apps on demand — no waiting, no tickets.</div>
+        `;
+      }
+      function popoutCard(card){
+        const expanded = STATE.openCards[card.id];
+        const contentId = `card-content-${card.id}`;
+        return `
+          <div class="h-full flex flex-col">
+            <button
+              type="button"
+              class="accordion-header w-full overflow-hidden ring-1 ring-gray-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition hover:ring-gray-300 shadow-sm rounded-2xl min-h-[44px]"
+              data-action="toggle-card"
+              data-card="${card.id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+            >
+              <div class="${card.bgHeader || 'bg-gray-50'} px-4 py-3 flex flex-col border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-1.5">
+                    <i data-lucide="${card.icon}" class="w-5 h-5 text-gray-900" aria-hidden="true"></i>
+                    <span class="text-lg font-medium text-left tracking-normal text-gray-900">${card.title}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[13px] text-gray-700">${expanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
                   </div>
                 </div>
-                <div class="mt-4 user-beam" style="background:linear-gradient(to right,var(--re-blue-light),var(--re-blue-bright));--d:2.1s"></div>
-                <div class="relative mt-3 rounded-lg border border-white/15 bg-white/5 p-4">
-                  <i data-lucide="laptop" class="h-6 w-6 opacity-85"></i>
-                  <div id="endUserBadge" class="absolute right-3 top-3 badge grid place-items-center font-bold text-sm" style="--d:2.4s;background:#E11D48;color:#fff">!</div>
-                  <div class="mt-2 text-sm opacity-85">Workspace launches the correct app instantly</div>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-blue-600 ${card.bgContent} ${expanded ? 'max-h-[1200px] opacity-100 p-4' : 'max-h-0 opacity-0 p-0'} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
+              <ul class="list-disc pl-5 text-[15px] leading-relaxed space-y-2 text-gray-700 text-left">
+                ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
+              </ul>
+              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
+              <p class="mt-3 italic text-[15px] text-gray-700">${card.closer}</p>
+            </div>
+          </div>
+        `;
+      }
+      function renderMiniTimeline(){
+        const phases = [
+          {icon: 'play-circle', label: 'Kickoff'},
+          {icon: 'hammer', label: 'Implementation'},
+          {icon: 'check-circle', label: 'UAT'},
+          {icon: 'flag', label: 'Launch'},
+          {icon: 'book-open', label: 'Enablement'}
+        ];
+        return `
+          <div class="flex items-center justify-between mt-3" aria-hidden="true">
+            ${phases.map((p, i) => `
+              ${i > 0 ? '<div class="flex-1 h-px bg-gray-200 mx-1.5"></div>' : ''}
+              <div class="flex flex-col items-center">
+                <i data-lucide="${p.icon}" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span class="text-[11px] mt-0.5 text-gray-700">${p.label}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      function bucketAccordion(id, icon, label, contentFunc, headerTone='bg-gray-50'){
+        const expanded = STATE.openBuckets[id];
+        const contentId = `bucket-content-${id}`;
+        return `
+          <div class="flex flex-col">
+            <button
+              type="button"
+              class="w-full overflow-hidden ring-1 ring-gray-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition hover:ring-gray-300 shadow-sm rounded-2xl"
+              data-action="toggle-bucket"
+              data-bucket="${id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+            >
+              <div class="flex items-center justify-between px-4 py-3 ${headerTone} border-b border-gray-200">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="${icon}" class="w-4.5 h-4.5 text-gray-900" aria-hidden="true"></i>
+                  <span class="text-[15px] font-semibold tracking-normal text-gray-900">${label}</span>
+                </div>
+                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-4.5 h-4.5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden ${expanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'} transition-[max-height] duration-150 ease-[cubic-bezier(0.2,0.8,0.2,1)] transition-opacity duration-150">
+              ${expanded ? contentFunc() : ''}
+            </div>
+          </div>
+        `;
+      }
+      function onePackageContent(){
+        const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="wand-sparkles" class="w-3.5 h-3.5"></i> Hours Saved from Packaging</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                <span class="text-gray-700">Hours/package</span>
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
+                <span>→</span>
+                <input class="w-14 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
+              </label>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
+              <div class="mt-1.5 text-[11px] flex flex-wrap gap-1.5">
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">☁️ Cloud</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🖥️ On-Prem</span>
+                <span class="rounded px-1.5 py-0.5 bg-gray-100">🔀 Hybrid</span>
+              </div>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function zeroDayContent(){
+        const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Hours Saved from Faster Patching</div>
+              <label class="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                <span class="text-gray-700">Current hrs</span>
+                <input class="w-16 rounded bg-gray-100 px-1.5 py-0.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
+              </label>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
+              <button type="button" class="mt-1.5 bg-blue-600 text-white px-2.5 py-0.5 text-[11px] font-semibold w-full rounded hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+            </div>
+          </div>
+        `;
+      }
+      function perUserContent(){
+        const totalMin = Math.max(0, Number(STATE.impact.minutes));
+        const route=routeRecommendation(STATE.ctx);
+        return `
+          <div class="p-3">
+            <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-2.5 text-[13px]">
+              <div class="flex items-center gap-1.5 font-medium"><i data-lucide="mouse-pointer" class="w-3.5 h-3.5"></i> Reactive Work Reduced</div>
+              <div class="mt-1.5 flex items-center justify-between rounded bg-gray-100 px-2 py-1">
+                <span class="tabular-nums">18 → ${totalMin} min</span>
+                <strong class="tabular-nums">${totalMin} min saved</strong>
+              </div>
+            </div>
+            <div class="mt-1.5 grid grid-cols-3 gap-1.5 text-[11px]">
+              ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
+              ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
+              ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
+            </div>
+            <div class="mt-2"><button type="button" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2.5 py-0.5 text-[11px] w-full rounded hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+          </div>
+        `;
+      }
+      function editContent(){
+        return `
+          <div class="p-4 bg-white rounded-xl shadow-inner">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="text-[15px] font-medium mb-3">Assumptions</h4>
+                <div class="space-y-3">
+                  ${inputNum('set-roi', '# users', 'users', STATE.roiInputs.users)}
+                  ${inputNum('set-roi', 'Tickets per user / mo', 'ticketsPerUserPerMonth', STATE.roiInputs.ticketsPerUserPerMonth)}
+                  ${inputNum('set-roi', 'Avg handle (mins)', 'avgHandleMins', STATE.roiInputs.avgHandleMins)}
                 </div>
               </div>
-              <div id="flowSuccess" class="mt-3 hidden inline-flex items-center gap-2 text-base" style="color:#10B981"><i data-lucide="sparkles" class="h-5 w-5"></i><span>Configured once → delivered everywhere.</span></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-    function renderROI(){
-      const r = calcROI();
-      return `
-        <section id="panel-roi" role="tabpanel" aria-labelledby="tab-roi" class="space-y-6">
-          <div class="section-card p-5"><div class="text-base font-medium leading-relaxed">Planting consistency in app delivery today is what prevents outages and chaos three years from now.</div></div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            ${kpiId('users','FTEs freed', r.fteEquivalent, 'Equivalent IT capacity', 'kpi-fte')}
-            ${kpiId('timer','Hours saved / mo', r.totalHoursSavedMonth, 'Per-user minutes × users + packaging + zero-day', 'kpi-hours')}
-            ${kpiId('line-chart','$ saved / yr', '$'+num(r.dollarSavedYear), 'Productivity Impact', 'kpi-year')}
-            ${kpiId('rocket','Tickets / mo', num(r.ticketsMonth), 'Scale context', 'kpi-tickets')}
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="section-card p-5 lg:col-span-2">
-              <h3 class="text-lg font-semibold">Assumptions (edit)</h3>
-              <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                ${numInput('# users','users', r.i.users)}
-                ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
-                ${numInput('Loaded cost ($/hr)','loadedCostPerHour', r.i.loadedCostPerHour)}
-                ${numInput('Recast annual cost ($)','recastAnnualCost', r.i.recastAnnualCost)}
-              </div>
-              <div class="mt-6 flex flex-wrap gap-3">
-                <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 re-secondary px-5 py-3 text-base font-medium focus-ring">
-                  <i data-lucide="edit-3" class="w-5 h-5"></i> Current State
-                </button>
-                <button type="button" data-action="open-agenda-editor" class="inline-flex items-center gap-2 re-secondary px-5 py-3 text-base font-medium focus-ring">
-                  <i data-lucide="edit-3" class="w-5 h-5"></i> Agenda
-                </button>
+              <div>
+                <h4 class="text-[15px] font-medium mb-3">Direct Impacts</h4>
+                <div class="space-y-3">
+                  ${inputNum('set-impact', 'Minutes saved per user / mo', 'minutes', STATE.impact.minutes)}
+                  ${inputNum('set-impact', 'Packaging hours avoided / mo', 'pkgHours', STATE.impact.pkgHours)}
+                  ${inputNum('set-impact', 'Patching hours avoided / mo', 'riskHrs', STATE.impact.riskHrs)}
+                </div>
               </div>
             </div>
-            <div class="section-card p-5">
-              <h3 class="text-lg font-semibold">Results</h3>
-              <div class="mt-4 space-y-3 text-base">
-                ${kvId('Hours saved / month', r.totalHoursSavedMonth, 'res-hours')}
-                ${kvId('$ saved / month', '$'+num(r.dollarSavedMonth), 'res-month')}
-                ${kvId('$ saved / year', '$'+num(r.dollarSavedYear), 'res-year')}
-                ${kvId('Net benefit / year', '$'+num(r.netBenefitYear), 'res-net')}
-                ${kvId('ROI', r.roiPct+'%', 'res-roi')}
-                ${kvId('Equivalent IT FTEs freed', r.fteEquivalent, 'res-fte')}
-              </div>
-              <div class="mt-6 flex flex-wrap gap-3">
-                <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 re-secondary px-5 py-3 text-base font-medium focus-ring">Reset</button>
-                <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 re-primary px-5 py-3 text-base font-medium focus-ring">
-                  <i data-lucide="clipboard" class="w-5 h-5"></i> ${STATE.copied ? 'Copied!' : 'Copy executive one-pager'}
-                </button>
-              </div>
+            <div class="mt-6 space-y-6">
+              ${perUserContent()}
+              ${onePackageContent()}
+              ${zeroDayContent()}
             </div>
           </div>
-        </section>
-      `;
-    }
-    function calcROI(){
-      const i = STATE.roiInputs;
-      const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-      const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-      const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-      const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-      const dollarSavedYear = dollarSavedMonth * 12;
-      const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-      const roiPct = i.recastAnnualCost ? round((netBenefitYear / i.recastAnnualCost) * 100) : 0;
-      const fteHoursYear = 2080;
-      const fteEquivalent = round((totalHoursSavedMonth * 12) / fteHoursYear);
-      return {
-        i,
-        ticketsMonth,
-        hoursFromMinutes: round(hoursFromMinutes),
-        totalHoursSavedMonth: round(totalHoursSavedMonth),
-        dollarSavedMonth: round(dollarSavedMonth),
-        dollarSavedYear: round(dollarSavedYear),
-        netBenefitYear: round(netBenefitYear),
-        roiPct,
-        fteEquivalent
-      };
-    }
-    function updateROIOutputs(){
-      const r = calcROI();
-      setText('kpi-hours', r.totalHoursSavedMonth);
-      setText('kpi-year', '$'+num(r.dollarSavedYear));
-      setText('kpi-fte', r.fteEquivalent);
-      setText('kpi-tickets', num(r.ticketsMonth));
-      setText('res-hours', r.totalHoursSavedMonth);
-      setText('res-month', '$'+num(r.dollarSavedMonth));
-      setText('res-year', '$'+num(r.dollarSavedYear));
-      setText('res-net', '$'+num(r.netBenefitYear));
-      setText('res-roi', r.roiPct+'%');
-      setText('res-fte', r.fteEquivalent);
-    }
-    function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
-    function kpiId(icon,label,value,hint,id){
-      return `
-        <div class="section-card p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm opacity-85">${label}</div>
-              <div id="${id}" class="text-2xl font-bold tabular-nums">${value}</div>
-            </div>
-            <i data-lucide="${icon}" class="w-6 h-6 text-var(--re-orange)"></i>
-          </div>
-          ${hint ? `<div class="mt-2 text-sm opacity-80">${hint}</div>` : ''}
-        </div>
-      `;
-    }
-    function kvId(label,value,id){
-      return `<div class="flex items-center justify-between rounded-md bg-black/20 px-4 py-3"><span class="opacity-85 font-medium">${label}</span><span id="${id}" class="font-bold tabular-nums text-var(--re-blue-light)">${value}</span></div>`;
-    }
-    function numInput(label,key,value){
-      return `<label class="flex flex-col gap-2 text-base"><span class="text-sm opacity-85">${label}</span><input class="rounded-md border border-white/15 bg-black/20 px-4 py-3 text-base focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
-    }
-    const CATALOG=[
-      {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Excel','X','#107C41'),
-        logo('PowerPoint','P','#D24726'),
-        logo('Outlook','O','#106EBE'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('Google Docs','Dc','#1A73E8'),
-        logo('Google Sheets','Sh','#1E8E3E'),
-        logo('Google Slides','Sl','#F9AB00')
-      ]},
-      {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-        multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-        logo('Zoom','Z','#0B5CFF'),
-        logo('Gmail','G','#EA4335'),
-        logo('Google Meet','GM','#0F9D58')
-      ]},
-      {title:'WEB BROWSERS',id:'cat-browsers',items:[
-        triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-        ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-        flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
-      ]},
-      {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-        logo('Salesforce','SF','#00A1E0'),
-        logo('Workday','WD','#1F5BFF'),
-        logo('ServiceNow','SN','#81B29A'),
-        logo('SAP','SAP','#0A6ED1'),
-        logo('Oracle NetSuite','NS','#C74634')
-      ]},
-      {title:'SECURITY & ACCESS',id:'cat-security',items:[
-        logo('Duo','D','#3CB371'),
-        logo('Okta','O','#007DC1'),
-        logo('Ping Identity','P','#C0172C'),
-        logo('Cisco AnyConnect','AC','#00B5AD'),
-        logo('Microsoft Defender','MD','#0067B8'),
-        logo('CrowdStrike Falcon','CS','#D61F26')
-      ]},
-      {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
-        logo('Adobe Acrobat','A','#ED2224'),
-        logo('Dropbox','DB','#0061FF'),
-        logo('Box','BX','#0061D5'),
-        logo('OneDrive','OD','#0A5BD5'),
-        logo('ZoomIt / Sysinternals','ZI','#58595B')
-      ]}
-    ];
-    function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
-    function mark(letter,color){
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" role="img" aria-label="${letter}">
-          <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.95)}"/><stop offset="1" stop-color="${shade(color,1.05)}"/></linearGradient></defs>
-          <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(255,255,255,.12)"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="24" font-family="Inter, sans-serif" font-weight="700" fill="white">${letter}</text>
-        </svg>`;
-    }
-    function multiLogo(name,colors){
-      const slices=colors.map((c,i)=>`<rect x="${4+i*10}" y="8" width="8" height="32" rx="4" fill="${c}"></rect>`).join('');
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.12)"/>${slices}</svg>` };
-    }
-    function triLogo(name,r1,r2,r3,r4){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.12)"/><circle cx="24" cy="24" r="13" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
-    }
-    function ringLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.12)"/><circle cx="24" cy="24" r="12" fill="${c1}"/><circle cx="20" cy="20" r="9" fill="${c2}"/></svg>` };
-    }
-    function flameLogo(name,c1,c2){
-      return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#111827" stroke="rgba(255,255,255,.12)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="5" fill="${c2}"/></svg>` };
-    }
-    function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-    const USER_ID = String(window.APP_USER_ID || "guest");
-    const PAGE_SCOPE = location.origin + location.pathname + location.search;
-    const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
-    let DEFAULT_CURRENT_STATE = null;
-    const $ = (sel, ctx = document) => ctx.querySelector(sel);
-    const fields = {
-      whyChange: () => $('#whyChange'),
-      whyNow: () => $('#whyNow'),
-      whyRecast: () => $('#whyRecast'),
-    };
-    function captureDefaultsOnce(){
-      if (DEFAULT_CURRENT_STATE) return;
-      DEFAULT_CURRENT_STATE = {
-        whyChange: fields.whyChange()?.value ?? "",
-        whyNow: fields.whyNow()?.value ?? "",
-        whyRecast: fields.whyRecast()?.value ?? "",
-      };
-    }
-    function readFields(){
-      return {
-        whyChange: fields.whyChange()?.value ?? "",
-        whyNow: fields.whyNow()?.value ?? "",
-        whyRecast: fields.whyRecast()?.value ?? "",
-      };
-    }
-    function writeFields(data){
-      if(!data) return;
-      if(fields.whyChange()) fields.whyChange().value = data.whyChange ?? "";
-      if(fields.whyNow()) fields.whyNow().value = data.whyNow ?? "";
-      if(fields.whyRecast()) fields.whyRecast().value = data.whyRecast ?? "";
-    }
-    function loadDraft(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
-      }catch{return null;}
-    }
-    function saveDraft(payload){
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
-      catch(e){ console.warn('Save failed (storage blocked or full):', e); }
-    }
-    function clearDraft(){
-      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-    }
-    function initCurrentStateModal(){
-      captureDefaultsOnce();
-      const draft = loadDraft();
-      if(draft) writeFields(draft);
-      const saveBtn = $('#btnSaveCurrentState');
-      const resetBtn = $('#btnResetCurrentState');
-      if (saveBtn && !saveBtn.dataset.wired){
-        saveBtn.dataset.wired = "1";
-        saveBtn.addEventListener('click', (e)=>{
-          e.preventDefault();
-          saveDraft(readFields());
-        });
+        `;
       }
-      if (resetBtn && !resetBtn.dataset.wired){
-        resetBtn.dataset.wired = "1";
-        resetBtn.addEventListener('click', (e)=>{
-          e.preventDefault();
-          clearDraft();
-          writeFields(DEFAULT_CURRENT_STATE);
-        });
-      }
-    }
-    const AGENDA_STORAGE_KEY = `agenda:${USER_ID}:${PAGE_SCOPE}`;
-    function loadAgendaDraft(){
-      try{ const raw = localStorage.getItem(AGENDA_STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch{return null;}
-    }
-    function saveAgendaDraft(payload){
-      try{ localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(payload)); }catch(e){ console.warn('Agenda save failed:', e); }
-    }
-    function clearAgendaDraft(){ try{ localStorage.removeItem(AGENDA_STORAGE_KEY); }catch{} }
-    function renderModal(){
-      if(!STATE.modalOpen) return '';
-      if (STATE.modalKind === 'agenda') {
-        const a = STATE.todayAgenda;
-        const draft = loadAgendaDraft();
-        const titleVal = draft?.title ?? a.title;
-        const overviewVal = (draft?.overviewText ?? a.overviewText);
+      function renderSolution(){
         return `
-          <div role="dialog" aria-modal="true" aria-labelledby="agenda-editor-title" class="fixed inset-0 z-50 overflow-auto bg-white">
-            <div class="relative mx-auto max-w-6xl px-8 py-12 text-black">
+          <section id="panel-solution" class="space-y-2">
+            <div class="grid grid-cols-1 gap-2 lg:grid-cols-12">
+              <div class="lg:col-span-9">
+                ${renderFlow()}
+              </div>
+              <div class="lg:col-span-3 flex flex-col gap-2 relative lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto">
+                <div class="sticky top-0 z-10 bg-gray-50 py-1 shadow-md">
+                  <div class="flex justify-between items-center text-[13px]">
+                    <span class="font-semibold">Recast Approach</span>
+                    <span class="text-gray-700">${STATE.visitedCards.length} of 3 explored</span>
+                  </div>
+                </div>
+                <button type="button" class="md:hidden bg-transparent text-gray-900 border-2 border-gray-900 py-1.5 text-[13px] rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="expand-all">Expand All</button>
+                ${NEW_CARDS.map(card => popoutCard(card)).join('')}
+                <div class="sticky bottom-0 bg-gray-50 py-2 shadow-lg mt-2">
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+      function pill(label,active,action,value){
+        return `<button type="button" class="${cx('px-2.5 py-0.5 border text-[11px] transition rounded',active?'bg-blue-600 text-white border-transparent hover:bg-blue-700':'bg-transparent text-gray-900 border-gray-200 hover:border-blue-600')} focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+      }
+      function renderFlow(){
+        return `
+          <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5">
+              <div class="h-5 w-5 rounded grid place-items-center bg-blue-600">   <i data-lucide="layers" class="h-3 w-3 text-white"></i> </div>
+                <div>
+                  <h3 class="text-[14px] font-semibold">One Application Workspace. One Way to Deliver Apps.</h3>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <button type="button" data-action="start-flow" id="workspaceStartButton" class="bg-blue-600 text-white px-2 py-1 text-[11px] font-semibold rounded-full hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2 py-1 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
+              </div>
+            </div>
+            <div class="mt-1 flex gap-1.5 text-[11px]">
+            </div>
+            <div class="mt-1 flex items-center justify-center gap-3 text-[13px] font-medium">
+              <div class="flex items-center gap-1">
+                <i data-lucide="building" class="w-4.5 h-4.5 text-gray-700"></i>
+                <span>Existing App Managers (SCCM, Intune, etc.)</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="truck" class="w-4.5 h-4.5 text-blue-600"></i>
+                <span>Application Delivery Control Plane</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-4.5 h-4.5 text-gray-500"></i>
+              <div class="flex items-center gap-1">
+                <i data-lucide="user" class="w-4.5 h-4.5 text-gray-700"></i>
+                <span>User</span>
+              </div>
+            </div>
+            <div class="mt-1 text-center">
+              </span>
+            </div>
+            <div class="mt-1 text-center bg-blue-50 p-1.5 rounded-lg text-[12px]">
+            Recast sits between your existing tools and your users, standardizing how applications are delivered without changing where they come from.
+            </div>
+            <div id="flowCard" class="mt-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+              <div class="space-y-1 relative">
+                ${CATALOG.map(s=>`
+                  <div class="grid grid-cols-[12ch_1fr] gap-0.5 items-center border-t border-gray-200 pt-0.5 transition-all duration-300 first:border-t-0 first:pt-0 show-labels:grid-cols-[12ch_1fr] show-labels:gap-3">
+                    <div class="text-[11px] uppercase text-gray-700 flex items-center gap-1.5"><i data-lucide="folder" class="w-2.5 h-2.5"></i>${s.title}</div>
+                    <div id="${s.id}" class="flex flex-wrap gap-1.5 show-labels:gap-3"></div>
+                  </div>
+                `).join('')}
+              </div>
+              <div id="flowHubFlash" class="mt-1 hidden text-blue-600"><span class="inline-flex items-center gap-1 text-[11px]"><i data-lucide="bolt" class="h-3.5 w-3.5"></i><span>Update published</span></span></div>
+              <div id="flowSuccess" class="hidden mt-2">
+                <span class="inline-flex items-center gap-2 text-base text-emerald-500">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                  <span>Configured once → delivered everywhere.</span>
+                </span>
+              </div>
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="platformsSection">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div id="flowConn${k}" class="mt-0.5 grid grid-cols-10 gap-1"></div>
+                    <div class="mt-0.5 h-[0.22rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${4 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="groupsSection">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 relative">
+                    <div class="text-[11px] text-gray-700">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div id="flowGrp${k}" class="mt-0.5 grid grid-cols-8 gap-1"></div>
+                    <div class="mx-auto mt-0.5 w-[0.22rem] h-12 rounded-[2px] origin-top scale-y-0 bg-gradient-to-b from-gray-900 to-blue-600" style="--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${6 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+              <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="devicesSection">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 p-1.5 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="flowDev${k}" class="mt-0.5 grid grid-cols-6 gap-1"></div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="opacity-0 absolute top-0.5 right-0.5 w-3.5 h-3.5 text-green-500 animate-fadeInOut" style="--d:${8 + .5*i}s"></i>
+                  </div>
+                `).join('')}
+                <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
+              </div>
+              <div class="mt-2">
+                <div id="endUserCard" class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 transition-all duration-500 p-2.5">
+                  <div class="flex items-center gap-2">
+                    <div id="endUserAvatar" class="h-8 w-8 grid place-items-center font-semibold rounded-full bg-red-600 text-white">U</div>
+                    <div class="text-[13px]">
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-gray-700">Apps on demand — without retraining users when IT changes.</div>
+                    </div>
+                  </div>
+                  <div class="mt-2 h-[0.38rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-blue-600 to-blue-700" style="--d:10s"></div>
+                  <div class="relative mt-1 border border-gray-200 bg-gray-50 rounded-2xl p-3">
+                    <i data-lucide="laptop" class="h-4.5 w-4.5 text-gray-700"></i>
+                    <div id="endUserBadge" class="badge absolute right-1.5 top-1.5 grid place-items-center font-bold text-black bg-red-600" style="--d:11s">!</div>
+                    <div class="mt-0.5 text-[10px] text-gray-700">The workspace delivers the right app, every time, regardless of backend platform.</div>
+                  </div>
+                  <div id="miniWorkspace" class="mt-2 hidden grid grid-cols-4 gap-1.5">
+                    ${miniApps.map(app => `<div class="w-[1.8rem] h-[1.8rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      const miniApps = [
+        logo('Microsoft Word','W','#185ABD'),
+        logo('Microsoft Teams','T','#5B53D6'),
+        logo('SAP','SAP','#0A6ED1'),
+        logo('Zoom','Z','#0B5CFF')
+      ];
+      function renderROI(){
+        const r = calcROI();
+        return `
+          <section id="panel-roi" class="space-y-4">
+            <div class="flex justify-center gap-2 mb-4">
+              <button type="button" data-action="set-view" data-view="exec" class="${STATE.activeView === 'exec' ? 'bg-blue-600 text-white' : 'bg-white border border-blue-600 text-blue-600'} px-4 py-2 rounded-full transition">Executive View</button>
+              <button type="button" data-action="set-view" data-view="operator" class="${STATE.activeView === 'operator' ? 'bg-blue-600 text-white' : 'bg-white border border-blue-600 text-blue-600'} px-4 py-2 rounded-full transition">Operator View</button>
+            </div>
+            ${STATE.activeView === 'exec' ? renderExecView(r) : renderOperatorView(r)}
+            <div class="mt-6">
+              ${bucketAccordion('edit', 'edit-3', 'Edit Assumptions & Impacts', editContent)}
+            </div>
+            <div class="mt-6 flex flex-wrap gap-3 justify-end">
+              <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-1.5 bg-transparent text-gray-600 border-2 border-gray-300 px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:text-blue-600 hover:border-blue-600">Reset</button>
+              <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 text-[15px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-full hover:bg-blue-700">
+                <i data-lucide="clipboard" class="w-4.5 h-4.5"></i> ${STATE.copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div class="mt-4 text-center text-sm text-gray-500">
+              Impacts shown vary by environment and depend on configuration and usage patterns.
+            </div>
+            <div class="mt-2 text-lg italic text-gray-800 text-center">“This isn’t cost savings — it’s recovered momentum.”</div>
+          </section>
+        `;
+      }
+      function renderExecView(r){
+        return `
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">Operational Model</h3>
+              <p class="text-gray-700">One standard way applications are delivered</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">End-User Experience</h3>
+              <p class="text-gray-700">Consistent workspace, even as IT modernizes</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">Risk Profile</h3>
+              <p class="text-gray-700">Fewer patch gaps and version sprawl</p>
+            </div>
+            <div class="rounded-2xl bg-white shadow-md p-4">
+              <h3 class="text-lg font-semibold mb-2">IT Focus</h3>
+              <p class="text-gray-700">Less reactive work, more planned change</p>
+            </div>
+          </div>
+          <div class="text-center py-8 bg-white rounded-2xl shadow-md mt-4">
+            <h2 class="text-4xl font-bold text-blue-700">${num(r.totalHoursMonth)} hours per month returned</h2>
+            <p class="text-gray-500 mt-1">Based on environment assumptions</p>
+            <p class="mt-2 text-gray-700">Equivalent to avoiding additional operational hires or accelerating strategic initiatives.</p>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Where Capacity Comes From</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>App-related support avoided</li>
+              <li>Faster patch cycles</li>
+              <li>Packaging automation</li>
+            </ul>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Technical Debt Reduced</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Fewer active app versions</li>
+                <li>Shorter patch times</li>
+                <li>Reduced tickets</li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Risk & Governance</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Improved compliance</li>
+                <li>Faster response to issues</li>
+                <li>Lower error rates</li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-xl p-4 border shadow-sm">
+              <h3 class="font-semibold text-[15px] mb-1">Project Velocity Gained</h3>
+              <ul class="list-disc ml-4 space-y-0.5 text-gray-700 text-[14px]">
+                <li>Faster migrations and pilots</li>
+                <li>Fewer blockers to modernization</li>
+                <li>Capacity for strategic work</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+      function renderOperatorView(r){
+        return `
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Metric Breakdown</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>Minutes saved per user per month: ${STATE.impact.minutes}</li>
+              <li>Hours saved from packaging: ${round(STATE.impact.pkgHours)}</li>
+              <li>Hours saved from faster patching: ${round(STATE.impact.riskHrs)}</li>
+              <li>Tickets avoided per month: ${num(r.ticketsAvoided)}</li>
+              <li>Patch time reduction: ${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}%)</li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Capacity Source Breakdown</h2>
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span>App-related support avoided</span>
+                <strong>${num(r.reactiveHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Faster patch cycles</span>
+                <strong>${num(r.patchHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between">
+                <span>Packaging automation</span>
+                <strong>${num(r.packagingHoursMonth)} hrs/mo</strong>
+              </div>
+              <div class="flex justify-between font-bold">
+                <span>Total</span>
+                <span>${num(r.totalHoursMonth)} hrs/mo</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">Technical Debt & Ops Detail</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>30–50% fewer active app versions</li>
+              <li>Patch time cut from ${STATE.currentHrs} to 1.5 hrs</li>
+              <li>~${num(r.ticketsAvoided)} tickets avoided / month</li>
+            </ul>
+          </div>
+          <div class="mt-4">
+            <h2 class="text-xl font-semibold mb-2">What This Enables</h2>
+            <ul class="list-disc ml-5 text-gray-700 space-y-1">
+              <li>Accelerated app readiness for migrations and AI pilots</li>
+              <li>Reduced variables in troubleshooting</li>
+              <li>Shift from reactive to proactive IT operations</li>
+            </ul>
+          </div>
+        `;
+      }
+      function calcROI(){
+        const i = STATE.roiInputs;
+        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
+        const reactiveHoursMonth = (STATE.impact.minutes * i.users) / 60;
+        const packagingHoursMonth = STATE.impact.pkgHours;
+        const patchHoursMonth = STATE.impact.riskHrs;
+        const totalHoursMonth = reactiveHoursMonth + packagingHoursMonth + patchHoursMonth;
+        const totalHoursYear = totalHoursMonth * 12;
+        const ticketsAvoided = (STATE.impact.minutes * i.users) / i.avgHandleMins;
+        const patchReductionPct = STATE.currentHrs > 0 ? Math.round(((STATE.currentHrs - 1.5) / STATE.currentHrs) * 100) : 94;
+        return {
+          i,
+          ticketsMonth: round(ticketsMonth),
+          reactiveHoursMonth: round(reactiveHoursMonth),
+          packagingHoursMonth: round(packagingHoursMonth),
+          patchHoursMonth: round(patchHoursMonth),
+          totalHoursMonth,
+          totalHoursYear,
+          ticketsAvoided,
+          patchReductionPct
+        };
+      }
+      function updateROIOutputs(){
+        // No need for outputs update beyond render
+      }
+      function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
+      function kv(label,value){
+        return `<div class="flex items-center justify-between rounded bg-gray-100 px-2 py-1"><span class="text-gray-700">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
+      }
+      function inputNum(action, label, key, value){
+        return `<label class="flex flex-col gap-0.5 text-[13px]"><span class="text-[11px] text-gray-700">${label}</span><input class="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-[13px] focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" inputmode="decimal" value="${value}" data-action="${action}" data-key="${key}"></label>`;
+      }
+      const CATALOG=[
+        {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+          logo('Microsoft Word','W','#185ABD'),
+          logo('Microsoft Excel','X','#107C41'),
+          logo('PowerPoint','P','#D24726'),
+          logo('Outlook','O','#106EBE'),
+          logo('Microsoft Teams','T','#5B53D6'),
+          logo('Google Docs','Dc','#1A73E8'),
+          logo('Google Sheets','Sh','#1E8E3E'),
+          logo('Google Slides','Sl','#F9AB00')
+        ]},
+        {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
+          multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
+          logo('Zoom','Z','#0B5CFF'),
+          logo('Gmail','G','#EA4335'),
+          logo('Google Meet','GM','#0F9D58')
+        ]},
+        {title:'WEB BROWSERS',id:'cat-browsers',items:[
+          triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
+          ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
+          flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
+        ]},
+        {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
+          logo('Salesforce','SF','#00A1E0'),
+          logo('Workday','WD','#1F5BFF'),
+          logo('ServiceNow','SN','#81B29A'),
+          logo('SAP','SAP','#0A6ED1'),
+          logo('Oracle NetSuite','NS','#C74634')
+        ]},
+        {title:'SECURITY & ACCESS',id:'cat-security',items:[
+          logo('Duo','D','#3CB371'),
+          logo('Okta','O','#007DC1'),
+          logo('Ping Identity','P','#C0172C'),
+          logo('Cisco AnyConnect','AC','#00B5AD'),
+          logo('Microsoft Defender','MD','#0067B8'),
+          logo('CrowdStrike Falcon','CS','#D61F26')
+        ]},
+        {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
+          logo('Adobe Acrobat','A','#ED2224'),
+          logo('Dropbox','DB','#0061FF'),
+          logo('Box','BX','#0061D5'),
+          logo('OneDrive','OD','#0A5BD5'),
+          logo('ZoomIt / Sysinternals','ZI','#58595B')
+        ]}
+      ];
+      const appConfigs = [
+        {stage:'Prod', policy:'MFA + VPN', region:'AMER', device:'Windows'},
+        {stage:'QA', policy:'Compliant only', region:'APAC', device:'Any'},
+        {stage:'Dev', policy:'MFA required', region:'EMEA', device:'Mac'},
+        {stage:'Prod', policy:'VPN only', region:'Global', device:'Windows'},
+        {stage:'QA', policy:'MFA required', region:'AMER', device:'Any'},
+        {stage:'Dev', policy:'MFA required', region:'APAC', device:'Mac'},
+        {stage:'Prod', policy:'Compliant only', region:'EMEA', device:'Windows'},
+        {stage:'QA', policy:'VPN only', region:'Global', device:'Any'}
+      ];
+      let flatIndex = 0;
+      CATALOG.forEach(sec => sec.items.forEach(itm => { itm.config = appConfigs[flatIndex % appConfigs.length]; flatIndex++; }));
+      function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
+      function mark(letter,color){
+        return `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
+            <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
+            <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(0,0,0,.15)"/>
+          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
+          </svg>`;
+      }
+      function multiLogo(name,colors){
+        const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/>${slices}</svg>` };
+      }
+      function triLogo(name,r1,r2,r3,r4){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
+      }
+      function ringLogo(name,c1,c2){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
+      }
+      function flameLogo(name,c1,c2){
+        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
+      }
+      function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+      /* ---------- Per-user cached Current State (IDs + storage) ---------- */
+      const USER_ID = String(window.APP_USER_ID || "guest");
+      const PAGE_SCOPE = location.origin + location.pathname + location.search;
+      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
+      let DEFAULT_CURRENT_STATE = null;
+      const $ = (sel, ctx = document) => ctx.querySelector(sel);
+      const fields = {
+        changeIntro: () => $('#changeIntro'),
+        changeBullets: () => $('#changeBullets'),
+        changeAnalyst: () => $('#changeAnalyst'),
+        nowIntro: () => $('#nowIntro'),
+        nowBullets: () => $('#nowBullets'),
+        nowAnalyst: () => $('#nowAnalyst'),
+        recastIntro: () => $('#recastIntro'),
+        recastBullets: () => $('#recastBullets'),
+        recastAnalyst: () => $('#recastAnalyst')
+      };
+      function captureDefaultsOnce(){
+        if (DEFAULT_CURRENT_STATE) return;
+        DEFAULT_CURRENT_STATE = STATE.defaultsCurrentState();
+      }
+      function readFields(){
+        return {
+          change: {
+            intro: fields.changeIntro()?.value ?? "",
+            bullets: fields.changeBullets()?.value ?? "",
+            analyst: fields.changeAnalyst()?.value ?? ""
+          },
+          now: {
+            intro: fields.nowIntro()?.value ?? "",
+            bullets: fields.nowBullets()?.value ?? "",
+            analyst: fields.nowAnalyst()?.value ?? ""
+          },
+          recast: {
+            intro: fields.recastIntro()?.value ?? "",
+            bullets: fields.recastBullets()?.value ?? "",
+            analyst: fields.recastAnalyst()?.value ?? ""
+          }
+        };
+      }
+      function writeFields(data){
+        if(!data) return;
+        if(fields.changeIntro()) fields.changeIntro().value = data.change.intro ?? "";
+        if(fields.changeBullets()) fields.changeBullets().value = data.change.bullets ?? "";
+        if(fields.changeAnalyst()) fields.changeAnalyst().value = data.change.analyst ?? "";
+        if(fields.nowIntro()) fields.nowIntro().value = data.now.intro ?? "";
+        if(fields.nowBullets()) fields.nowBullets().value = data.now.bullets ?? "";
+        if(fields.nowAnalyst()) fields.nowAnalyst().value = data.now.analyst ?? "";
+        if(fields.recastIntro()) fields.recastIntro().value = data.recast.intro ?? "";
+        if(fields.recastBullets()) fields.recastBullets().value = data.recast.bullets ?? "";
+        if(fields.recastAnalyst()) fields.recastAnalyst().value = data.recast.analyst ?? "";
+      }
+      function loadDraft(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        }catch{return null;}
+      }
+      function saveDraft(payload){
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
+        catch(e){ console.warn('Save failed (storage blocked or full):', e); }
+      }
+      function clearDraft(){
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+      }
+      function initCurrentStateModal(){
+        captureDefaultsOnce();
+        const draft = loadDraft();
+        if(draft) writeFields(draft);
+        const saveBtn = $('#btnSaveCurrentState');
+        const resetBtn = $('#btnResetCurrentState');
+        if (saveBtn && !saveBtn.dataset.wired){
+          saveBtn.dataset.wired = "1";
+          saveBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            saveDraft(readFields());
+          });
+        }
+        if (resetBtn && !resetBtn.dataset.wired){
+          resetBtn.dataset.wired = "1";
+          resetBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            clearDraft();
+            writeFields(DEFAULT_CURRENT_STATE);
+            STATE.currentState = STATE.defaultsCurrentState();
+            render();
+          });
+        }
+      }
+      /* ------------------------------------------------------------------- */
+      function renderModal(){
+        if(!STATE.modalOpen) return '';
+        const buf = STATE.editBuffers;
+        const toLines = arr => arr.join('\n');
+        const ensure = v => v ?? '';
+        return `
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8 animate-overlayFade">
+            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-6 overflow-y-auto animate-modalEnter">
               <div class="flex items-center justify-between">
-                <h2 id="agenda-editor-title" class="text-3xl font-bold">Edit Today Agenda</h2>
-                <button type="button" class="p-3 rounded-md border border-black/20 focus-ring" data-action="close-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-6 h-6 text-black"></i>
+                <h2 id="cs-editor-title" class="text-lg font-medium tracking-normal">Edit Current State</h2>
+                <button type="button" class="bg-transparent text-gray-900 p-1.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded" data-action="close-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
-              <p class="mt-2 text-base text-black/80">Update the agenda title and Overview bullets. Use two leading spaces for sub-bullets. Supports **bold** and *italics*.</p>
-              <div class="mt-6 grid grid-cols-1 gap-6">
-                <label class="flex flex-col gap-3">
-                  <span class="text-base font-medium">Agenda Title</span>
-                  <input id="agendaTitle" class="rounded-md border border-black/20 px-4 py-3 text-lg" value="${titleVal}" aria-label="Agenda Title">
-                </label>
-                <label class="flex flex-col gap-3">
-                  <span class="text-base font-medium">Overview (bullets)</span>
-                  <textarea id="agendaOverview" class="min-h-[280px] rounded-md border border-black/20 p-4 leading-relaxed text-lg" aria-label="Agenda Overview bullets" placeholder="One item per line. Use two spaces for sub-bullets.">${overviewVal}</textarea>
-                </label>
+              <p class="mt-0.5 text-[13px] text-gray-700">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
+              <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+                ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
+                ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
+                ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
               </div>
-              <div class="mt-8 flex flex-wrap gap-3">
-                <button type="button" data-action="save-agenda" class="inline-flex items-center gap-3 bg-var(--re-accent) text-white px-5 py-3 rounded-md focus-ring">
-                  <i data-lucide="save" class="w-5 h-5"></i> Save
+              <div class="mt-4 flex flex-wrap gap-1.5">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 text-[13px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:bg-blue-700">
+                  <i data-lucide="save" class="w-3.5 h-3.5"></i> Save
                 </button>
-                <button type="button" data-action="reset-agenda-defaults" class="inline-flex items-center gap-3 border border-black/20 px-5 py-3 rounded-md focus-ring">
-                  <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reset to default
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-1.5 bg-transparent text-gray-900 border-2 border-gray-900 px-3 py-1.5 text-[13px] font-semibold focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded hover:text-blue-600 hover:border-blue-600">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset to default
                 </button>
               </div>
             </div>
           </div>
         `;
       }
-      const buf = STATE.editBuffers;
-      const toLines = arr => arr.join('\n');
-      const ensure = v => v ?? '';
-      return `
-        <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 overflow-auto bg-white">
-          <div class="relative mx-auto max-w-6xl px-8 py-12 text-black">
-            <div class="flex items-center justify-between">
-              <h2 id="cs-editor-title" class="text-3xl font-bold">Edit Current State</h2>
-              <button type="button" class="p-3 rounded-md border border-black/20 focus-ring" data-action="close-modal" aria-label="Close">
-                <i data-lucide="x" class="w-6 h-6 text-black"></i>
-              </button>
-            </div>
-            <p class="mt-2 text-base text-black/80">Enter up to three bullet points per section. Each new line becomes a bullet.</p>
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              ${editorBox('change','Why Change', ensure(buf.change) || toLines(STATE.currentStateTexts.change))}
-              ${editorBox('now','Why Now', ensure(buf.now) || toLines(STATE.currentStateTexts.now))}
-              ${editorBox('recast','Why Recast', ensure(buf.recast) || toLines(STATE.currentStateTexts.recast))}
-            </div>
-            <div class="mt-8 flex flex-wrap gap-3">
-              <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-3 bg-var(--re-accent) text-white px-5 py-3 rounded-md focus-ring">
-                <i data-lucide="save" class="w-5 h-5"></i> Save
-              </button>
-              <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-3 border border-black/20 px-5 py-3 rounded-md focus-ring">
-                <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Reset to default
-              </button>
-            </div>
+      function editorSection(key,label,introValue,bulletsValue,analystValue){
+        return `
+          <div class="flex flex-col gap-3">
+            <span class="text-[13px] font-medium">${label}</span>
+            <label class="flex flex-col gap-0.5">
+              <span class="text-[11px] text-gray-700">Introduction</span>
+              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[70px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
+            </label>
+            <label class="flex flex-col gap-0.5">
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-700">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-blue-600"></i>
+                Bullets (one per line, max 4)
+              </div>
+              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[140px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} bullets editor" rows="5">${bulletsValue}</textarea>
+            </label>
+            <label class="flex flex-col gap-0.5">
+              <span class="text-[11px] text-gray-700">Analyst Trend</span>
+              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[70px] rounded border border-gray-200 bg-white p-2.5 text-[13px] leading-relaxed focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
+            </label>
           </div>
-        </div>
-      `;
-    }
-    function editorBox(key,label,value){
-      const idMap = { change:'whyChange', now:'whyNow', recast:'whyRecast' };
-      const tid = idMap[key] || ('why-'+key);
-      return `
-        <label class="flex flex-col gap-3">
-          <span class="text-base font-semibold">${label}</span>
-          <textarea id="${tid}" data-autosave data-action="edit-buffer" data-key="${key}" class="min-h-[200px] rounded-md border border-black/20 p-4 text-lg leading-relaxed focus-ring" aria-label="${label} editor" placeholder="One bullet per line (max 3)">${value}</textarea>
-        </label>
-      `;
-    }
-    function attachEvents(){
-      const root=document.getElementById('app');
-      root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-tab');
-        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
-        render();
-        $('#tab-'+STATE.activeTab)?.focus();
-      }));
-      root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
-        STATE.activeTab=e.currentTarget.getAttribute('data-next');
-        if(STATE.activeTab==='solution'){ STATE.showSolutionCards=false; }
-        render();
-        $('#tab-'+STATE.activeTab)?.focus();
-      }));
-      root.querySelectorAll('[data-action="toggle-why"]').forEach(b=>b.addEventListener('click',e=>{
-        const id=e.currentTarget.getAttribute('data-why');
-        STATE.openWhy = (STATE.openWhy === id) ? null : id;
-        render();
-      }));
-      root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
-      root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
-      root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
-      const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); render(); });
-      const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); render(); });
-      const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); render(); });
-      root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
-        const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
-        if (kind==='minutes') STATE.impact.minutes+=val;
-        if (kind==='pkgHours') STATE.impact.pkgHours+=val;
-        if (kind==='riskHrs') STATE.impact.riskHrs+=val;
-        updateROIOutputs();
-        render();
-      }));
-      root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
-        const key=e.currentTarget.getAttribute('data-key');
-        const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-        STATE.roiInputs[key]=isFinite(v)?v:0;
-        updateROIOutputs();
-        render();
-      }));
-      const resetCalc=root.querySelector('[data-action="reset-calculator"]');
-      if(resetCalc) resetCalc.addEventListener('click', ()=>{
-        STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18, loadedCostPerHour: 85, recastAnnualCost: 120000 };
-        STATE.impact = { ...STATE.defaults.impact };
-        STATE.copied = false;
-        render();
-      });
-      const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-      if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-        const i = STATE.roiInputs;
-        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const hoursFromMinutes = (STATE.impact.minutes * i.users) / 60;
-        const totalHoursSavedMonth = hoursFromMinutes + STATE.impact.pkgHours + STATE.impact.riskHrs;
-        const dollarSavedMonth = totalHoursSavedMonth * i.loadedCostPerHour;
-        const dollarSavedYear = dollarSavedMonth * 12;
-        const netBenefitYear = dollarSavedYear - i.recastAnnualCost;
-        const roiPct = i.recastAnnualCost ? (netBenefitYear / i.recastAnnualCost) * 100 : 0;
-        const fteHoursYear = 2080;
-        const fteEquivalent = (totalHoursSavedMonth * 12) / fteHoursYear;
-        const body =
-`Recast Application Workspace — Executive One-Pager
+        `;
+      }
+      function attachEvents(){
+        const root=document.getElementById('app');
+        root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
+          STATE.activeTab=e.currentTarget.getAttribute('data-tab');
+          STATE.visitedCards = [];
+          render();
+        }));
+        root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
+          STATE.activeTab=e.currentTarget.getAttribute('data-next');
+          STATE.openWhyModal = null;
+          render();
+        }));
+        root.querySelectorAll('[data-action="open-why-modal"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-why');
+          STATE.openWhyModal = id;
+          render();
+        }));
+        root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.openWhyModal = null;
+          render();
+        }));
+        root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-card');
+          const wasOpen = STATE.openCards[id];
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
+          STATE.openCards[id] = !wasOpen;
+          if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) {
+            STATE.visitedCards.push(id);
+          }
+          render();
+          if (STATE.openCards[id]) {
+            setTimeout(() => {
+              e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 200);
+          }
+        }));
+        root.querySelectorAll('[data-action="expand-all"]').forEach(b=>b.addEventListener('click',()=>{
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
+          STATE.visitedCards = ['core', 'onboarding', 'trust'];
+          render();
+        }));
+        root.querySelectorAll('[data-action="toggle-bucket"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-bucket');
+          STATE.openBuckets[id] = !STATE.openBuckets[id];
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
+        root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
+        root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
+        const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); render(); });
+        const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); render(); });
+        const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); render(); });
+        root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
+          const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
+          if (kind==='minutes') STATE.impact.minutes+=val;
+          if (kind==='pkgHours') STATE.impact.pkgHours+=val;
+          if (kind==='riskHrs') STATE.impact.riskHrs+=val;
+          updateROIOutputs();
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
+          const key=e.currentTarget.getAttribute('data-key');
+          const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+          STATE.roiInputs[key]=isFinite(v)?v:0;
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-impact"]').forEach(inp=>inp.addEventListener('input',e=>{
+          const key=e.currentTarget.getAttribute('data-key');
+          const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
+          STATE.impact[key]=isFinite(v)?v:0;
+          render();
+        }));
+        root.querySelectorAll('[data-action="set-view"]').forEach(b=>b.addEventListener('click',e=>{
+          STATE.activeView = e.currentTarget.getAttribute('data-view');
+          render();
+        }));
+        const resetCalc=root.querySelector('[data-action="reset-calculator"]');
+        if(resetCalc) resetCalc.addEventListener('click', ()=>{
+          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 };
+          STATE.impact = { ...STATE.defaults.impact };
+          STATE.copied = false;
+          render();
+        });
+        const copyBtn=root.querySelector('[data-action="copy-onepager"]');
+        if(copyBtn) copyBtn.addEventListener('click', async ()=>{
+          const r = calcROI();
+          const selectedPressures = Object.keys(STATE.selectedBullets).map(cat => {
+            const p = pressures.find(pp => pp.id === cat);
+            if (!p) return '';
+            const selBullets = STATE.selectedBullets[cat].map(idx => p.bullets[idx]).filter(Boolean);
+            if (selBullets.length === 0) return '';
+            return `${p.title}:\n${selBullets.map(b => `- ${b}`).join('\n')}`;
+          }).filter(Boolean).join('\n\n');
+          const currentStateSection = selectedPressures ? `Current State Selections:\n${selectedPressures}` : 'Current State Selections:\nNone selected';
+          const body =
+ `Recast Application Workspace — Executive Summary
+${currentStateSection}
 Assumptions
- - Users: ${i.users}
- - Tickets per user / month: ${i.ticketsPerUserPerMonth}
- - Avg handle: ${i.avgHandleMins} mins
- - Loaded cost: $${i.loadedCostPerHour}/hr
- - Subscription (annual): $${i.recastAnnualCost}
-Observed demo impact (illustrative)
- - Minutes saved per user (monthly): ${STATE.impact.minutes}
- - Packaging hours avoided (org): ${STATE.impact.pkgHours}
- - Zero-day window reduced (hrs): ${STATE.impact.riskHrs}
-Calculated outcomes
- - Tickets / month: ${num(ticketsMonth)}
- - Hours saved / month: ${round(totalHoursSavedMonth)}
- - $ saved / month: $${num(dollarSavedMonth)}
- - $ saved / year: $${num(dollarSavedYear)}
- - Net benefit / year: $${num(netBenefitYear)}
- - ROI: ${round(roiPct)}%
- - Equivalent IT FTEs freed: ${round(fteEquivalent)}
+  - Users: ${r.i.users}
+  - Tickets per user / month: ${r.i.ticketsPerUserPerMonth}
+  - Avg handle: ${r.i.avgHandleMins} mins
+Observed impact
+  - Minutes saved per user (monthly): ${STATE.impact.minutes}
+  - Packaging hours avoided: ${STATE.impact.pkgHours}
+  - Zero-day hours avoided: ${STATE.impact.riskHrs}
+Outcomes
+  - Hours Returned / Month: ${round(r.totalHoursMonth)}
+  - Hours Returned / Year: ${round(r.totalHoursYear)}
+  - Packaging Work Reduced / Month: ${round(r.packagingHoursMonth)}
+  - Zero-Day Patch Time Reduced / Month: ${round(r.patchHoursMonth)}
+  - App-Related Reactive Work Reduced / Month: ${round(r.reactiveHoursMonth)}
+  - Tickets Avoided (est.): ${round(r.ticketsAvoided)} / month
+  - Faster Patch Window: ${STATE.currentHrs} to 1.5 hrs (${r.patchReductionPct}% reduction)
+  - App Version Reduction (estimated): 30-50% fewer active versions
 Notes: Illustrative; replace with your data.`;
-        try { await navigator.clipboard.writeText(body); } catch {
-          const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-        }
-        STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
-      });
-      const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
-      const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
-      const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); render(); });
-      const showCards=root.querySelector('[data-action="show-solution-cards"]');
-      if(showCards) showCards.addEventListener('click', ()=>{ STATE.showSolutionCards=true; render(); });
-      const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
-      if(openEditor) openEditor.addEventListener('click', (ev)=>{
-        STATE.invoker = ev.currentTarget;
-        STATE.modalOpen = true;
-        STATE.modalKind = 'currentstate';
-        STATE.editBuffers = { change: '', now: '', recast: '' };
-        render();
-        setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
-        setTimeout(()=>{ initCurrentStateModal(); }, 0);
-      });
-      const openAgendaBtns = root.querySelectorAll('[data-action="open-agenda-editor"]');
-      openAgendaBtns.forEach(btn=>{
-        btn.addEventListener('click', (ev)=>{
-          STATE.invoker = ev.currentTarget;
+          try { await navigator.clipboard.writeText(body); } catch {
+            const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          }
+          STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
+        });
+        const startBtn=root.querySelector('[data-action="start-flow"]');
+        if(startBtn) startBtn.addEventListener('click', startFlow);
+        const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
+        const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; buildFlow(); });
+        root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('animate-iconLaunch'); setTimeout(()=>icon.classList.remove('animate-iconLaunch'), 500); }));
+        const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
+        if(openEditor) openEditor.addEventListener('click', ()=>{
           STATE.modalOpen = true;
-          STATE.modalKind = 'agenda';
+          STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
           render();
           setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
+          setTimeout(()=>{ initCurrentStateModal(); }, 0);
         });
-      });
-    }
-    function wireTabsKeyboard(){
-      const tablist = document.getElementById('tablist');
-      if(!tablist || tablist.dataset.kb) return;
-      tablist.dataset.kb = "1";
-      tablist.addEventListener('keydown', (e)=>{
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
-        const current = document.activeElement;
-        const idx = tabs.indexOf(current);
-        if(idx===-1) return;
-        let next = idx;
-        if(e.key==='ArrowRight') { next = (idx+1)%tabs.length; e.preventDefault(); }
-        if(e.key==='ArrowLeft') { next = (idx-1+tabs.length)%tabs.length; e.preventDefault(); }
-        if(e.key==='Home') { next = 0; e.preventDefault(); }
-        if(e.key==='End') { next = tabs.length-1; e.preventDefault(); }
-        if(next!==idx){ tabs[next].focus(); }
-        if(e.key==='Enter' || e.key===' ') {
-          const tab = tabs[idx];
-          const id = tab.getAttribute('data-tab');
-          STATE.activeTab = id;
+        root.querySelectorAll('[data-action="toggle-bullet"]').forEach(inp=>inp.addEventListener('change',e=>{
+          const category = e.target.getAttribute('data-category');
+          const index = parseInt(e.target.getAttribute('data-index'));
+          if (!STATE.selectedBullets[category]) STATE.selectedBullets[category] = [];
+          const arr = STATE.selectedBullets[category];
+          if (arr.includes(index)) {
+            STATE.selectedBullets[category] = arr.filter(x => x !== index);
+          } else {
+            arr.push(index);
+          }
           render();
-          $('#tab-'+STATE.activeTab)?.focus();
-          e.preventDefault();
+        }));
+        root.querySelectorAll('[data-action="reset-bullets"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.selectedBullets = {};
+          render();
+        }));
+        root.querySelectorAll('[data-action="next-tab"]').forEach(b=>b.addEventListener('click',()=>{
+          STATE.activeTab = 'solution';
+          render();
+        }));
+      }
+      function buildFlow(){
+        let base = 0;
+        CATALOG.forEach(section => {
+          const mount = document.getElementById(section.id);
+          if (!mount) return;
+          mount.innerHTML = '';
+
+          section.items.forEach((itm, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'logo-wrap';
+            wrap.style.setProperty('--d', (base + idx * 0.06).toFixed(2) + 's');
+
+            const ring = document.createElement('div');
+            ring.className = 'logo-ring';
+            ring.innerHTML = itm.svg;
+            ring.title = itm.name;
+            ring.setAttribute('role','img');
+            ring.setAttribute('aria-label', itm.name);
+
+            wrap.appendChild(ring);
+
+            if (STATE.showLabels) {
+              const label = document.createElement('span');
+              label.className = 'logo-name';
+              label.textContent = itm.name;
+              wrap.appendChild(label);
+            }
+
+            mount.appendChild(wrap);
+          });
+
+          base += 0.25;
+        });
+        buildTiles(document.getElementById('flowConnA'), 14, 0.50);
+        buildTiles(document.getElementById('flowConnB'), 14, 0.56);
+        buildTiles(document.getElementById('flowConnC'), 14, 0.62);
+
+        buildTiles(document.getElementById('flowGrpA'), 18, 0.95);
+        buildTiles(document.getElementById('flowGrpB'), 18, 1.00);
+        buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
+
+        buildTiles(document.getElementById('flowDevA'), 10, 1.50);
+        buildTiles(document.getElementById('flowDevB'), 10, 1.55);
+        buildTiles(document.getElementById('flowDevC'), 10, 1.60);
+        const avatar=document.getElementById('endUserAvatar');
+        const badge=document.getElementById('endUserBadge');
+        if(avatar){ avatar.style.background = '#EA4335'; avatar.textContent='U'; }
+        if(badge){ badge.textContent='!'; badge.style.background = '#E11D48'; }
+        const message = document.getElementById('endUserMessage');
+        if(message) message.textContent = 'Apps on demand — without retraining users when IT changes.';
+        const mini = document.getElementById('miniWorkspace');
+        if(mini) mini.classList.add('hidden');
+        const card = document.getElementById('flowCard');
+        if(card) card.classList.remove('run');
+        if(STATE.showLabels) card.classList.add('show-labels');
+        else card.classList.remove('show-labels');
+        const endCard = document.getElementById('endUserCard');
+        if(endCard) endCard.classList.remove('scale-105','bg-white','border-green-500');
+        const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+      }
+      function buildTiles(container, count, baseDelay) {
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const d = document.createElement('div');
+          d.className = 'tile';
+          d.style.setProperty('--d', (baseDelay + i * 0.04).toFixed(2) + 's');
+          container.appendChild(d);
+        }
+      }
+      function startFlow() {
+        const card = document.getElementById('flowCard');
+        if (!card) return;
+
+        // restart animation deterministically
+        card.classList.remove('run');
+        void card.offsetWidth;
+        card.classList.add('run');
+
+        const flash   = document.getElementById('flowHubFlash');
+        const success = document.getElementById('flowSuccess');
+        const avatar  = document.getElementById('endUserAvatar');
+        const badge   = document.getElementById('endUserBadge');
+
+        if (success) success.classList.add('hidden');
+
+        // Update published flash: 1000ms
+        if (flash) {
+          flash.classList.remove('hidden');
+          setTimeout(() => flash.classList.add('hidden'), 1000);
+        }
+
+        // 2100ms: avatar + badge success state
+        setTimeout(() => {
+          if (avatar) avatar.style.background = '#10B981';
+          if (badge) {
+            badge.textContent = '✓';
+            badge.style.background = '#10B981';
+          }
+        }, 2100);
+
+        // 2500ms: show success message
+        setTimeout(() => {
+          if (success) success.classList.remove('hidden');
+          try { window.lucide?.createIcons?.(); } catch {}
+        }, 2500);
+
+        // 6000ms: remove run to return to idle
+        setTimeout(() => card.classList.remove('run'), 6000);
+      }
+      function resetFlow() {
+        const card = document.getElementById('flowCard');
+        if (card) card.classList.remove('run');
+
+        const success = document.getElementById('flowSuccess');
+        if (success) success.classList.add('hidden');
+
+        const avatar  = document.getElementById('endUserAvatar');
+        const badge   = document.getElementById('endUserBadge');
+
+        if (avatar) avatar.style.background = '#EA4335';
+        if (badge) {
+          badge.textContent = '!';
+          badge.style.background = '#E11D48';
+        }
+      }
+      function attachAccordionKeyboard(){
+        document.addEventListener('keydown', (e) => {
+          const target = e.target;
+          if (!target.classList.contains('accordion-header')) return;
+          const headers = Array.from(document.querySelectorAll('.accordion-header'));
+          const idx = headers.indexOf(target);
+          if (e.key === 'ArrowDown') {
+            const nextIdx = (idx + 1) % headers.length;
+            headers[nextIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'ArrowUp') {
+            const prevIdx = (idx - 1 + headers.length) % headers.length;
+            headers[prevIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'Home') {
+            headers[0].focus();
+            e.preventDefault();
+          } else if (e.key === 'End') {
+            headers[headers.length - 1].focus();
+            e.preventDefault();
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            target.click();
+            e.preventDefault();
+          }
+        });
+      }
+      document.addEventListener('DOMContentLoaded', render);
+      document.addEventListener('click', (e)=>{
+        const act = e.target.closest('[data-action]');
+        if(!act) return;
+        const action = act.getAttribute('data-action');
+        if(action==='close-modal'){
+          STATE.modalOpen=false; render();
+        }
+        if(action==='edit-buffer'){
+          const key = act.getAttribute('data-key');
+          const subkey = act.getAttribute('data-subkey');
+          act.addEventListener('input', (evt)=>{ STATE.editBuffers[key][subkey] = evt.target.value; });
+        }
+        if(action==='save-currentstate'){
+          const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,4);
+          const fallback = STATE.defaultsCurrentState();
+          const formData = readFields();
+          STATE.currentState = {
+            change: {
+              intro: formData.change.intro.trim() || fallback.change.intro,
+              bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
+              analyst: formData.change.analyst.trim() || fallback.change.analyst
+            },
+            now: {
+              intro: formData.now.intro.trim() || fallback.now.intro,
+              bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
+              analyst: formData.now.analyst.trim() || fallback.now.analyst
+            },
+            recast: {
+              intro: formData.recast.intro.trim() || fallback.recast.intro,
+              bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
+              analyst: formData.recast.analyst.trim() || fallback.recast.analyst
+            }
+          };
+          saveDraft({
+            change: {
+              intro: $('#changeIntro')?.value || '',
+              bullets: $('#changeBullets')?.value || '',
+              analyst: $('#changeAnalyst')?.value || ''
+            },
+            now: {
+              intro: $('#nowIntro')?.value || '',
+              bullets: $('#nowBullets')?.value || '',
+              analyst: $('#nowAnalyst')?.value || ''
+            },
+            recast: {
+              intro: $('#recastIntro')?.value || '',
+              bullets: $('#recastBullets')?.value || '',
+              analyst: $('#recastAnalyst')?.value || ''
+            }
+          });
+          STATE.modalOpen=false;
+          STATE.activeTab='problems';
+          STATE.openWhy=null;
+          render();
+        }
+        if(action==='reset-currentstate-defaults'){
+          clearDraft();
+          captureDefaultsOnce();
+          writeFields(DEFAULT_CURRENT_STATE);
+          STATE.currentState = STATE.defaultsCurrentState();
+          render();
         }
       });
-    }
-    function setupModalA11y(){
-      const dialog = document.querySelector('[role="dialog"]');
-      if(!dialog) return;
-      const focusables = dialog.querySelectorAll('button,[href],input,textarea,select,[tabindex]:not([tabindex="-1"])');
-      const first = focusables[0]; const last = focusables[focusables.length-1];
-      if(first) first.focus();
-      function trap(e){
-        if(e.key!=='Tab') return;
-        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
-      }
-      dialog.addEventListener('keydown', trap);
-    }
-    function buildFlow(){
-      let base=0;
-      CATALOG.forEach(section=>{
-        const mount=document.getElementById(section.id); if(!mount) return;
-        mount.innerHTML='';
-        section.items.forEach((itm,idx)=>{
-          const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.06).toFixed(2)+'s');
-          const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
-          wrap.appendChild(ring);
-          if(STATE.showLabels){ const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label); }
-          mount.appendChild(wrap);
-        });
-        base+=0.25;
+      document.addEventListener('keydown',(e)=>{
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){
+          STATE.modalOpen=false;
+          STATE.openWhyModal=null;
+          render();
+        }
       });
-      buildTiles(document.getElementById('flowConnA'), 14, .5);
-      buildTiles(document.getElementById('flowConnB'), 14, .56);
-      buildTiles(document.getElementById('flowConnC'), 14, .62);
-      buildTiles(document.getElementById('flowGrpA'), 18, .95);
-      buildTiles(document.getElementById('flowGrpB'), 18, 1.0);
-      buildTiles(document.getElementById('flowGrpC'), 18, 1.05);
-      buildTiles(document.getElementById('flowDevA'), 10, 1.5);
-      buildTiles(document.getElementById('flowDevB'), 10, 1.55);
-      buildTiles(document.getElementById('flowDevC'), 10, 1.6);
-      const avatar=document.getElementById('endUserAvatar');
-      const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.style.background='#EA4335'; avatar.textContent='U'; }
-      if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
-    }
-    function buildTiles(container,count,baseDelay){
-      if(!container) return; container.innerHTML='';
-      for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.04).toFixed(2)+'s'); container.appendChild(d); }
-    }
-    function startFlow(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
-      const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),1000); }
-      if(success) success.classList.add('hidden');
-      setTimeout(()=>{
-        if(avatar){ avatar.style.background='#10B981'; }
-        if(badge){ badge.textContent='✓'; badge.style.background='#10B981'; }
-      }, 2100);
-      setTimeout(()=> success && success.classList.remove('hidden'), 2500);
-      setTimeout(()=> card.classList.remove('run'), 6000);
-    }
-    function resetFlow(){
-      const card=document.getElementById('flowCard'); if(!card) return;
-      card.classList.remove('run');
-      const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
-      const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-      if(avatar){ avatar.style.background='#EA4335'; }
-      if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
-    }
-    document.addEventListener('DOMContentLoaded', render);
-    document.addEventListener('click', (e)=>{
-      const act = e.target.closest('[data-action]');
-      if(!act) return;
-      const action = act.getAttribute('data-action');
-      if(action==='close-modal'){
-        STATE.modalOpen=false; STATE.modalKind=null; render();
-        setTimeout(()=>{ if(STATE.invoker && STATE.invoker.focus) STATE.invoker.focus(); },0);
-      }
-      if(action==='edit-buffer'){
-        const key = act.getAttribute('data-key');
-        act.addEventListener('input', (evt)=>{ STATE.editBuffers[key] = evt.target.value; });
-      }
-      if(action==='save-currentstate'){
-        const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
-        const change = parseLines($('#whyChange')?.value || '');
-        const now = parseLines($('#whyNow')?.value || '');
-        const recast = parseLines($('#whyRecast')?.value || '');
-        const fallback = STATE.defaultsCurrentState();
-        STATE.currentStateTexts = {
-          change: change.length?change:fallback.change,
-          now: now.length?now:fallback.now,
-          recast: recast.length?recast:fallback.recast
-        };
-        saveDraft({ whyChange: $('#whyChange')?.value || '', whyNow: $('#whyNow')?.value || '', whyRecast: $('#whyRecast')?.value || '' });
-        STATE.modalOpen=false;
-        STATE.modalKind=null;
-        STATE.activeTab='problems';
-        STATE.openWhy=null;
-        render();
-      }
-      if(action==='reset-currentstate-defaults'){
-        clearDraft();
-        captureDefaultsOnce();
-        writeFields(DEFAULT_CURRENT_STATE);
-      }
-      if(action==='save-agenda'){
-        const title = $('#agendaTitle')?.value?.trim() || 'Agenda';
-        const overviewText = ($('#agendaOverview')?.value || '').trim();
-        const def = STATE.defaultsAgenda();
-        STATE.todayAgenda = {
-          title: title || def.title,
-          overviewText: overviewText || def.overviewText
-        };
-        saveAgendaDraft({ title: $('#agendaTitle')?.value || '', overviewText });
-        STATE.modalOpen=false; STATE.modalKind=null; STATE.activeTab='today'; render();
-      }
-      if(action==='reset-agenda-defaults'){
-        clearAgendaDraft();
-        const def = STATE.defaultsAgenda();
-        const titleEl = $('#agendaTitle'); const ovEl = $('#agendaOverview');
-        if(titleEl) titleEl.value = def.title;
-        if(ovEl) ovEl.value = def.overviewText;
-      }
-    });
-    document.addEventListener('keydown',(e)=>{
-      if(e.key==='Escape' && STATE.modalOpen){ STATE.modalOpen=false; STATE.modalKind=null; render(); setTimeout(()=>{ if(STATE.invoker && STATE.invoker.focus) STATE.invoker.focus(); },0); }
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
