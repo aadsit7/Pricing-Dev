@@ -119,7 +119,6 @@
           opacity: 1;
         }
       }
-
       /* “Delivery truck” micro-motion (vertical travel is driven by JS) */
       @keyframes courierBob {
         0% {
@@ -156,7 +155,6 @@
       .animate-cardPop {
         animation: cardPop 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
       }
-
       /* ------------------------------
          Lightweight animation hooks
          ------------------------------ */
@@ -175,7 +173,6 @@
       .run [data-anim="badgeDrop"] {
         animation: badgeDrop 0.8s ease-out var(--d, 0s) forwards;
       }
-
       /* ------------------------------
          Overlay sits on top of the Application Workspace card
          ------------------------------ */
@@ -194,7 +191,6 @@
         height: 100%;
         display: none;
       }
-
       /* Final calm state after animation (scoped to the flow card, not the whole page) */
       #flowCard.workspace-final .warning,
       #flowCard.workspace-final .duplicate,
@@ -207,7 +203,6 @@
         transform: scale(1);
         transition: 0.25s ease-out;
       }
-
       .dimmed {
         opacity: 0.5;
         transition: opacity 0.3s ease;
@@ -223,7 +218,6 @@
         color: #065f46 !important;
         transition: all 0.3s ease;
       }
-
       /* Modal animation helpers */
       .animate-modalEnter {
         animation: modalEnter 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -240,7 +234,6 @@
       .animate-iconLaunch {
         animation: iconLaunch 0.5s ease forwards;
       }
-
       /* ------------------------------
          Stage-ready confetti (canvas)
          ------------------------------ */
@@ -257,7 +250,6 @@
       #confettiCanvas.on {
         opacity: 1;
       }
-
       /* ------------------------------
          Delivery truck indicator (top -> end user)
          - Vertical travel is driven by JS via CSS var --y
@@ -337,11 +329,9 @@
       }
     </style>
   </head>
-
   <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
     <div id="app" class="min-h-screen"></div>
-
     <script>
       /* =========================
          STATE + CONSTANTS
@@ -361,14 +351,11 @@
         showSolutionCards: true,
         openWhy: null,
         openWhyModal: null,
-
         // (Old accordion state left in place to avoid unintended side effects elsewhere.)
         openCards: { core: false, onboarding: false, trust: false },
-
         // New: wizard-style popout card navigation on the Recast Approach tab
         solutionStep: 0,
         visitedCards: [],
-
         openBuckets: { one: false, zero: false, per: false, edit: false },
         modalOpen: false,
         editBuffers: {
@@ -459,14 +446,15 @@
           );
         },
         progress: { apps: 0, time: 0, tickets: 0 },
+        uploadedImages: [], // New: Array of image data URLs (up to 5)
+        imageViewerOpen: false, // New: Flag for image viewer modal
+        currentImageIndex: 0, // New: Current index in image carousel
       };
-
       const TABS = [
         { id: "problems", label: "Current State", icon: "alert-triangle" },
         { id: "solution", label: "Recast Approach", icon: "workflow" },
         { id: "roi", label: "Business Impact", icon: "bar-chart-3" },
       ];
-
       const NEW_CARDS = [
         {
           id: "core",
@@ -518,9 +506,7 @@
           bgContent: "bg-gray-50",
         },
       ];
-
       const onboardingMiniTimelineEnabled = true;
-
       function cx(...a) {
         return a.filter(Boolean).join(" ");
       }
@@ -539,7 +525,6 @@
         v = Number(String(v).replace(/[^0-9.\-]/g, ""));
         return isFinite(v) ? v : 0;
       }
-
       /* =========================
          CONFETTI (CANVAS, NO LIBS)
          ========================= */
@@ -552,7 +537,6 @@
         let last = 0;
         let running = false;
         const PALETTE = ["#2563EB", "#60A5FA", "#10B981", "#F59E0B", "#EF4444", "#111827"];
-
         function resize() {
           if (!canvas) return;
           const w = window.innerWidth;
@@ -661,7 +645,6 @@
             p.x += p.vx * dt;
             p.y += p.vy * dt;
             p.rot += p.vr * dt;
-
             const alpha = t < 0.7 ? 1 : Math.max(0, 1 - (t - 0.7) / 0.3);
             ctx.globalAlpha = alpha;
             if (p.shape === "dot") drawDot(p);
@@ -690,7 +673,6 @@
           },
         };
       })();
-
       /* =========================
          LOTTIE OVERLAY (FIXED)
          ========================= */
@@ -773,19 +755,16 @@
           }, 3800)
         );
       }
-
       /* =========================
          DELIVERY TRUCK PATH (TOP -> END USER)
          ========================= */
       let flowInterval = null;
       let flowRunning = false;
-
       const TruckPath = {
         startY: -44,
         endY: 0,
         ready: false,
       };
-
       function computeTruckPath() {
         const card = document.getElementById("flowCard");
         const endCard = document.getElementById("endUserCard");
@@ -801,20 +780,17 @@
         TruckPath.ready = true;
         truck.style.setProperty("--y", TruckPath.startY + "px");
       }
-
       function setTruckProgress(appsProcessed) {
         const truck = document.getElementById("deliveryTruck");
         if (!truck) return;
         if (!TruckPath.ready) computeTruckPath();
         if (!TruckPath.ready) return;
-
         const total = 128;
         const t = Math.max(0, Math.min(1, (appsProcessed || 0) / total));
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const y = TruckPath.startY + (TruckPath.endY - TruckPath.startY) * eased;
         truck.style.setProperty("--y", y.toFixed(1) + "px");
       }
-
       function showTruck() {
         const truck = document.getElementById("deliveryTruck");
         if (!truck) return;
@@ -822,14 +798,12 @@
         truck.classList.add("show");
         setTruckProgress(0);
       }
-
       function hideTruck() {
         const truck = document.getElementById("deliveryTruck");
         if (!truck) return;
         truck.classList.remove("show");
         truck.style.setProperty("--y", "-44px");
       }
-
       /* =========================
          RENDER
          ========================= */
@@ -867,16 +841,14 @@
           </main>
           ${renderModal()}
           ${renderWhyModal()}
+          ${renderImageViewerModal()}
         `;
-
         if (window.lucide?.createIcons) {
           try {
             window.lucide.createIcons();
           } catch {}
         }
-
         attachEvents();
-
         if (STATE.activeTab === "solution") {
           buildFlow();
           ensureApproachAnimations();
@@ -885,17 +857,14 @@
             setTruckProgress(STATE.progress.apps);
           }, 0);
         }
-
         if (STATE.activeTab === "roi") updateROIOutputs();
       }
-
       function renderActivePanel() {
         if (STATE.activeTab === "problems") return renderProblems();
         if (STATE.activeTab === "solution") return renderSolution();
         if (STATE.activeTab === "roi") return renderROI();
         return "";
       }
-
       /* =========================
          CURRENT STATE (PROBLEMS TAB)
          ========================= */
@@ -938,10 +907,9 @@
           ],
         },
       ];
-
       function renderProblems() {
         return `
-          <section id="panel-problems" class="space-y-3">
+          <section id="panel-problems" class="space-y-3 relative">
             <h2 class="text-3xl font-semibold leading-tight">The application layer is the #1 bottleneck to operational change</h2>
             <p class="text-base text-gray-700 leading-relaxed">Most IT teams aren’t failing — they’re constrained by a delivery model that doesn’t scale with the pace of change.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
@@ -987,10 +955,51 @@
               <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
               <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
             </div>
+            <!-- Pencil icon on bottom left -->
+            <button type="button" data-action="upload-images" class="absolute bottom-0 left-0 p-2 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Upload images">
+              <i data-lucide="pencil" class="w-6 h-6"></i>
+            </button>
+            <!-- Hidden file input for image upload -->
+            <input type="file" id="imageUpload" accept="image/*" multiple class="hidden" data-action="handle-upload">
+            <!-- Play button if images are uploaded -->
+            ${STATE.uploadedImages.length > 0 ? `
+              <button type="button" data-action="open-image-viewer" class="absolute bottom-0 right-0 p-2 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Play images">
+                <i data-lucide="play" class="w-6 h-6"></i>
+              </button>
+            ` : ''}
           </section>
         `;
       }
-
+      /* =========================
+         IMAGE VIEWER MODAL (NEW)
+         ========================= */
+      function renderImageViewerModal() {
+        if (!STATE.imageViewerOpen) return "";
+        const images = STATE.uploadedImages;
+        const current = images[STATE.currentImageIndex] || "";
+        const canPrev = STATE.currentImageIndex > 0;
+        const canNext = STATE.currentImageIndex < images.length - 1;
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="image-viewer-title">
+            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
+              <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <h2 id="image-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">Image Viewer</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-image-viewer" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-6 bg-gray-50 flex flex-col items-center">
+                <img src="${current}" alt="Uploaded image ${STATE.currentImageIndex + 1}" class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-md">
+                <div class="mt-4 flex items-center gap-4">
+                  <button type="button" data-action="prev-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Back</button>
+                  <span class="text-gray-700">${STATE.currentImageIndex + 1} / ${images.length}</span>
+                  <button type="button" data-action="next-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canNext ? 'opacity-50 cursor-not-allowed' : '')}" ${!canNext ? 'disabled' : ''}>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
       /* =========================
          WHY MODAL
          ========================= */
@@ -1049,7 +1058,6 @@
           </div>
         `;
       }
-
       /* =========================
          SOLUTION TAB (UPDATED UX)
          - Right-side accordion replaced with popout wizard cards + Back/Next
@@ -1078,12 +1086,10 @@
           </div>
         `;
       }
-
       function renderApproachWizard() {
         const total = NEW_CARDS.length;
         const idx = Math.max(0, Math.min(total - 1, Number(STATE.solutionStep || 0)));
         const card = NEW_CARDS[idx];
-
         const visitedCount = STATE.visitedCards.length;
         const dots = NEW_CARDS.map((c, i) => {
           const active = i === idx;
@@ -1101,10 +1107,8 @@
             ></button>
           `;
         }).join("");
-
         const canBack = idx > 0;
         const canNext = idx < total - 1;
-
         return `
           <div class="flex flex-col gap-2 relative">
             <div class="sticky top-0 z-10 bg-gray-50 py-1 shadow-md">
@@ -1113,7 +1117,6 @@
                 <span class="text-gray-700">${visitedCount} of ${total} explored</span>
               </div>
             </div>
-
             <div class="rounded-2xl bg-white shadow-md hover:shadow-lg transition-shadow duration-300 ring-1 ring-gray-200 overflow-hidden animate-cardPop">
               <div class="${card.bgHeader || "bg-gray-50"} px-5 py-4 border-b border-gray-200 flex items-start justify-between gap-4">
                 <div class="flex items-center gap-3 min-w-0">
@@ -1129,7 +1132,6 @@
                   ${dots}
                 </div>
               </div>
-
               <div class="p-5 ${card.bgContent || "bg-gray-50"}">
                 <ul class="space-y-2.5 text-[15px] leading-relaxed text-gray-700">
                   ${card.bullets
@@ -1163,13 +1165,10 @@
                     })
                     .join("")}
                 </ul>
-
                 ${card.timeline && onboardingMiniTimelineEnabled ? renderMiniTimeline() : ""}
-
                 <div class="mt-4 rounded-xl bg-white border border-gray-200 p-3">
                   <p class="text-[14px] text-gray-700 italic">${card.closer}</p>
                 </div>
-
                 <div class="mt-5 flex items-center justify-between gap-2">
                   <button
                     type="button"
@@ -1186,7 +1185,6 @@
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     Back
                   </button>
-
                   ${
                     canNext
                       ? `
@@ -1217,7 +1215,6 @@
           </div>
         `;
       }
-
       function renderSolution() {
         return `
           <section id="panel-solution" class="space-y-2">
@@ -1228,7 +1225,6 @@
           </section>
         `;
       }
-
       function renderFlow() {
         return `
           <div class="relative rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-3">
@@ -1240,7 +1236,6 @@
               <div id="unify" class="lottie"></div>
               <div id="endstate" class="lottie"></div>
             </div>
-
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-1.5">
                 <div class="h-5 w-5 rounded grid place-items-center bg-blue-600">
@@ -1253,7 +1248,6 @@
                 <button type="button" data-action="reset-flow" class="bg-transparent text-gray-900 border-2 border-gray-900 px-2 py-1 rounded-full hover:text-blue-600 hover:border-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Reset</button>
               </div>
             </div>
-
             <div class="mt-1 flex items-center justify-center gap-3 text-[13px] font-medium">
               <div class="flex items-center gap-1">
                 <i data-lucide="building" class="w-4.5 h-4.5 text-gray-700"></i>
@@ -1270,21 +1264,17 @@
                 <span>User</span>
               </div>
             </div>
-
             <div class="mt-1 text-center bg-blue-50 p-1.5 rounded-lg text-[12px]">
               Users get one consistent app experience—while IT standardizes delivery behind the scenes across every platform.
             </div>
-
             <div id="flowCard" class="mt-2 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-inner relative overflow-hidden ${
               STATE.showLabels ? "show-labels" : ""
             }" role="region" aria-label="Animated flow">
-
               <div id="progressCounters" class="hidden mb-2 grid grid-cols-3 gap-1.5 text-[13px] text-center">
                 <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
                 <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
                 <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
               </div>
-
               <div class="space-y-1 relative">
                 ${CATALOG.map(
                   (s) => `
@@ -1296,18 +1286,15 @@
                   </div>
                 `
                 ).join("")}
-
                 <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-2xl shadow-md z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-[13px] text-gray-700">
                   Every app mapped to stage, policy, region, and device.
                 </div>
               </div>
-
               <div id="flowHubFlash" class="mt-1 hidden text-blue-600">
                 <span class="inline-flex items-center gap-1 text-[11px]">
                   <i data-lucide="bolt" class="h-3.5 w-3.5"></i><span>Update published</span>
                 </span>
               </div>
-
               <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="platformsSection">
                 ${["A", "B", "C"]
                   .map(
@@ -1323,7 +1310,6 @@
                   .join("")}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-
               <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="groupsSection">
                 ${["A", "B", "C"]
                   .map(
@@ -1339,7 +1325,6 @@
                   .join("")}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-
               <div class="mt-2 grid grid-cols-3 gap-1.5 relative" aria-hidden="true" id="devicesSection">
                 ${["A", "B", "C"]
                   .map(
@@ -1355,7 +1340,6 @@
                   .join("")}
                 <div class="absolute top-[-0.5rem] left-0 w-full h-px opacity-50" style="background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%); background-size:4px 1px; background-repeat:repeat-x;"></div>
               </div>
-
               <div class="mt-2">
                 <div id="endUserCard" class="rounded-xl border border-gray-200 bg-gray-50 transition-shadow duration-300 transition-all duration-500 p-2.5">
                   <div class="flex items-center gap-2">
@@ -1383,12 +1367,10 @@
                       .join("")}
                   </div>
                 </div>
-
                 <div id="flowSuccess" class="mt-1 hidden inline-flex items-center gap-1 text-[13px] opacity-0 animate-fadeIn text-green-500">
                   <i data-lucide="sparkles" class="h-3.5 w-3.5"></i><span>Configured once → delivered everywhere.</span>
                 </div>
               </div>
-
               <!-- Delivery truck indicator that travels DOWN in sync with apps processed -->
               <div id="deliveryTruck" aria-hidden="true">
                 <div class="motion">
@@ -1407,7 +1389,6 @@
                           <path d="M7.3 14.2h6.2" stroke="rgba(29,78,216,0.65)" stroke-width="1.6" stroke-linecap="round"/>
                         </svg>
                       </div>
-
                       <div class="flex flex-col leading-tight">
                         <div class="label">Recast Delivery</div>
                         <div class="sub"><span id="truckApps" class="tabular-nums">0</span> apps delivered</div>
@@ -1416,12 +1397,10 @@
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         `;
       }
-
       /* =========================
          ROI TAB (UNCHANGED LOGIC)
          ========================= */
@@ -1588,7 +1567,6 @@
           </div>
         `;
       }
-
       function renderExecView(r) {
         return `
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1725,7 +1703,6 @@
         };
       }
       function updateROIOutputs() {}
-
       /* =========================
          APP ICONS + CATALOG (UNCHANGED)
          ========================= */
@@ -1818,14 +1795,12 @@
         `;
         return { name, svg: appIconShell(inner, { bgA: "#FFFFFF", bgB: "#FEF3C7" }) };
       }
-
       const miniApps = [
         logo("Microsoft Word", "W", "#185ABD"),
         logo("Microsoft Teams", "T", "#5B53D6"),
         logo("SAP", "SAP", "#0A6ED1"),
         logo("Zoom", "Z", "#0B5CFF"),
       ];
-
       const CATALOG = [
         {
           title: "CORE PRODUCTIVITY",
@@ -1895,7 +1870,6 @@
           ],
         },
       ];
-
       const appConfigs = [
         { stage: "Prod", policy: "MFA + VPN", region: "AMER", device: "Windows" },
         { stage: "QA", policy: "Compliant only", region: "APAC", device: "Any" },
@@ -1913,7 +1887,6 @@
           flatIndex++;
         })
       );
-
       /* =========================
          PER-USER CURRENT STATE STORAGE (UNCHANGED)
          ========================= */
@@ -2012,7 +1985,6 @@
           });
         }
       }
-
       /* =========================
          CURRENT STATE EDITOR MODAL (UNCHANGED)
          ========================= */
@@ -2088,22 +2060,18 @@
           </div>
         `;
       }
-
       /* =========================
          EVENTS
          ========================= */
       function attachEvents() {
         const root = document.getElementById("app");
-
         // Tabs
         root.querySelectorAll('[data-action="switch-tab"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             const next = e.currentTarget.getAttribute("data-tab");
             STATE.activeTab = next;
-
             // stop any running flow visuals when leaving the tab
             stopFlowTimers();
-
             // Reset wizard when entering Solution for a clean narrative
             if (next === "solution") {
               STATE.solutionStep = 0;
@@ -2111,11 +2079,9 @@
             } else {
               STATE.visitedCards = [];
             }
-
             render();
           })
         );
-
         // Generic tab jump (used by wizard final CTA)
         root.querySelectorAll('[data-action="go-tab"]').forEach((b) =>
           b.addEventListener("click", (e) => {
@@ -2126,7 +2092,6 @@
             render();
           })
         );
-
         // Why modal
         root.querySelectorAll('[data-action="open-why-modal"]').forEach((b) =>
           b.addEventListener("click", (e) => {
@@ -2147,7 +2112,6 @@
             render();
           })
         );
-
         // Problems selections
         root.querySelectorAll('[data-action="toggle-bullet"]').forEach((inp) =>
           inp.addEventListener("change", (e) => {
@@ -2177,7 +2141,6 @@
             render();
           })
         );
-
         // Solution wizard navigation
         root.querySelectorAll('[data-action="solution-prev-card"]').forEach((b) =>
           b.addEventListener("click", () => {
@@ -2205,7 +2168,6 @@
             render();
           })
         );
-
         // Card bullet selections (still used inside wizard)
         root.querySelectorAll('[data-action="toggle-card-bullet"]').forEach((inp) =>
           inp.addEventListener("change", (e) => {
@@ -2221,7 +2183,6 @@
             render();
           })
         );
-
         // Buckets
         root.querySelectorAll('[data-action="toggle-bucket"]').forEach((b) =>
           b.addEventListener("click", (e) => {
@@ -2230,7 +2191,6 @@
             render();
           })
         );
-
         // ROI inputs
         root.querySelectorAll('[data-action="set-device"]').forEach((b) =>
           b.addEventListener("click", (e) => {
@@ -2250,7 +2210,6 @@
             render();
           })
         );
-
         const pack = root.querySelector('[data-action="set-pack-hrs"]');
         if (pack)
           pack.addEventListener("input", (e) => {
@@ -2269,7 +2228,6 @@
             STATE.currentHrs = cleanNum(e.target.value);
             render();
           });
-
         root.querySelectorAll('[data-action="add-impact"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             const kind = e.currentTarget.getAttribute("data-kind");
@@ -2280,7 +2238,6 @@
             render();
           })
         );
-
         root.querySelectorAll('[data-action="set-roi"]').forEach((inp) =>
           inp.addEventListener("input", (e) => {
             const key = e.currentTarget.getAttribute("data-key");
@@ -2297,14 +2254,12 @@
             render();
           })
         );
-
         root.querySelectorAll('[data-action="set-view"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             STATE.activeView = e.currentTarget.getAttribute("data-view");
             render();
           })
         );
-
         const resetCalc = root.querySelector('[data-action="reset-calculator"]');
         if (resetCalc)
           resetCalc.addEventListener("click", () => {
@@ -2313,13 +2268,11 @@
             STATE.copied = false;
             render();
           });
-
         // Flow controls
         const startBtn = root.querySelector('[data-action="start-flow"]');
         if (startBtn) startBtn.addEventListener("click", startFlow);
         const resetBtn = root.querySelector('[data-action="reset-flow"]');
         if (resetBtn) resetBtn.addEventListener("click", resetFlow);
-
         // App launch animation
         root.querySelectorAll('[data-action="launch-icon"]').forEach((icon) =>
           icon.addEventListener("click", () => {
@@ -2327,7 +2280,6 @@
             setTimeout(() => icon.classList.remove("animate-iconLaunch"), 500);
           })
         );
-
         // Modal controls
         root.querySelectorAll('[data-action="close-modal"]').forEach((b) =>
           b.addEventListener("click", () => {
@@ -2335,7 +2287,6 @@
             render();
           })
         );
-
         // Buffer inputs
         root.querySelectorAll('[data-action="edit-buffer"]').forEach((el) =>
           el.addEventListener("input", (evt) => {
@@ -2345,8 +2296,58 @@
             STATE.editBuffers[key][subkey] = evt.target.value;
           })
         );
+        // New: Image upload and viewer events
+        root.querySelectorAll('[data-action="upload-images"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            const input = document.getElementById("imageUpload");
+            if (input) input.click();
+          })
+        );
+        const uploadInput = document.getElementById("imageUpload");
+        if (uploadInput) {
+          uploadInput.addEventListener("change", (e) => {
+            const files = Array.from(e.target.files).slice(0, 5); // Limit to 5
+            STATE.uploadedImages = [];
+            files.forEach((file) => {
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                STATE.uploadedImages.push(evt.target.result);
+                if (STATE.uploadedImages.length === files.length) render();
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+        }
+        root.querySelectorAll('[data-action="open-image-viewer"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.imageViewerOpen = true;
+            STATE.currentImageIndex = 0;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="close-image-viewer"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.imageViewerOpen = false;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="prev-image"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentImageIndex > 0) {
+              STATE.currentImageIndex--;
+              render();
+            }
+          })
+        );
+        root.querySelectorAll('[data-action="next-image"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentImageIndex < STATE.uploadedImages.length - 1) {
+              STATE.currentImageIndex++;
+              render();
+            }
+          })
+        );
       }
-
       /* =========================
          FLOW BUILD + ANIMATION
          ========================= */
@@ -2361,7 +2362,6 @@
             wrap.className =
               "flex items-center gap-1 relative transition-all duration-300 show-labels:flex-col show-labels:items-start show-labels:gap-[0.2rem] show-labels:w-[calc(33.333%-0.666rem)] show-labels:mb-1";
             wrap.style.setProperty("--d", (base + idx * 0.2).toFixed(2) + "s");
-
             const ring = document.createElement("div");
             ring.className =
               "w-[1.95rem] h-[1.95rem] rounded-[0.85rem] grid place-items-center bg-white shadow-[0_8px_18px_rgba(15,23,42,0.06)] ring-1 ring-[rgba(15,23,42,0.08)] transition-all duration-300 hover:shadow-[0_10px_24px_rgba(37,99,235,0.14)] hover:ring-[rgba(37,99,235,0.22)] hover:scale-[1.03] show-labels:w-[1.7rem] show-labels:h-[1.7rem] show-labels:rounded-[0.75rem]";
@@ -2370,26 +2370,22 @@
             ring.setAttribute("role", "img");
             ring.setAttribute("aria-label", itm.name);
             wrap.appendChild(ring);
-
             if (STATE.showLabels) {
               const label = document.createElement("span");
               label.className =
                 "text-[0.6rem] text-gray-500 opacity-0 -translate-x-[10px] transition-all duration-300 show-labels:opacity-100 show-labels:translate-x-0 whitespace-normal text-left";
               label.textContent = itm.name;
               wrap.appendChild(label);
-
               const meta = document.createElement("div");
               meta.className =
                 "text-[0.5rem] text-gray-500 opacity-0 translate-y-[5px] transition-all duration-300 relative top-auto left-auto z-[5] whitespace-nowrap flex flex-col gap-[0.1rem] items-start w-full justify-start show-labels:opacity-100 show-labels:translate-y-0";
               meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
               wrap.appendChild(meta);
             }
-
             mount.appendChild(wrap);
           });
           base += 1.2;
         });
-
         buildTiles(document.getElementById("flowConnA"), 14, 3);
         buildTiles(document.getElementById("flowConnB"), 14, 3.5);
         buildTiles(document.getElementById("flowConnC"), 14, 4);
@@ -2399,7 +2395,6 @@
         buildTiles(document.getElementById("flowDevA"), 10, 8);
         buildTiles(document.getElementById("flowDevB"), 10, 8.5);
         buildTiles(document.getElementById("flowDevC"), 10, 9);
-
         const avatar = document.getElementById("endUserAvatar");
         const badge = document.getElementById("endUserBadge");
         if (avatar) {
@@ -2414,40 +2409,32 @@
           badge.style.opacity = "0";
           badge.style.transform = "translateY(-6px) scale(0.9)";
         }
-
         const message = document.getElementById("endUserMessage");
         if (message) message.textContent = "Apps on demand — without retraining users when IT changes.";
         const mini = document.getElementById("miniWorkspace");
         if (mini) mini.classList.add("hidden");
         const counters = document.getElementById("progressCounters");
         if (counters) counters.classList.add("hidden");
-
         const card = document.getElementById("flowCard");
         if (card) {
           card.classList.remove("run");
           card.classList.remove("workspace-final");
         }
-
         const endCard = document.getElementById("endUserCard");
         if (endCard) endCard.classList.remove("scale-105", "bg-white", "border-green-500");
-
         document.querySelectorAll(".processed").forEach((el) => el.classList.remove("processed"));
         document.querySelectorAll(".dimmed").forEach((el) => el.classList.remove("dimmed"));
         document.querySelectorAll(".highlighted").forEach((el) => el.classList.remove("highlighted"));
-
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
         updateProgress();
-
         const success = document.getElementById("flowSuccess");
         if (success) success.classList.add("hidden");
-
         hideTruck();
         setTimeout(() => {
           computeTruckPath();
           setTruckProgress(STATE.progress.apps);
         }, 0);
       }
-
       function buildTiles(container, count, baseDelay) {
         if (!container) return;
         container.innerHTML = "";
@@ -2459,31 +2446,24 @@
           container.appendChild(d);
         }
       }
-
       function stopFlowTimers() {
         flowRunning = false;
         if (flowInterval) clearInterval(flowInterval);
         flowInterval = null;
       }
-
       function startFlow() {
         stopFlowTimers();
         Confetti.clear();
-
         runWorkspaceAnimation();
-
         const startBtn = document.getElementById("workspaceStartButton");
         Confetti.burstAtElement(startBtn, { count: 90, spread: 85, power: 12 });
-
         const card = document.getElementById("flowCard");
         if (!card) return;
         card.classList.remove("run");
         void card.offsetWidth;
         card.classList.add("run");
-
         // Truck indicator starts at the top and moves DOWN in sync with apps processed
         showTruck();
-
         const flash = document.getElementById("flowHubFlash");
         const success = document.getElementById("flowSuccess");
         const avatar = document.getElementById("endUserAvatar");
@@ -2493,38 +2473,30 @@
         const counters = document.getElementById("progressCounters");
         const endCard = document.getElementById("endUserCard");
         const groups = document.getElementById("groupsSection");
-
         if (flash) {
           flash.classList.remove("hidden");
           setTimeout(() => flash.classList.add("hidden"), 2000);
         }
         if (success) success.classList.add("hidden");
         if (counters) counters.classList.remove("hidden");
-
         flowRunning = true;
         flowInterval = setInterval(updateProgress, 100);
-
         setTimeout(() => {
           if (groups) groups.classList.add("dimmed");
           if (endCard) endCard.classList.add("highlighted");
         }, 5000);
-
         const platformBuckets = document.querySelectorAll("#platformsSection > div");
         const groupBuckets = document.querySelectorAll("#groupsSection > div");
         const deviceBuckets = document.querySelectorAll("#devicesSection > div");
-
         setTimeout(() => platformBuckets[0] && platformBuckets[0].classList.add("processed"), 4500);
         setTimeout(() => platformBuckets[1] && platformBuckets[1].classList.add("processed"), 5000);
         setTimeout(() => platformBuckets[2] && platformBuckets[2].classList.add("processed"), 5500);
-
         setTimeout(() => groupBuckets[0] && groupBuckets[0].classList.add("processed"), 6500);
         setTimeout(() => groupBuckets[1] && groupBuckets[1].classList.add("processed"), 7000);
         setTimeout(() => groupBuckets[2] && groupBuckets[2].classList.add("processed"), 7500);
-
         setTimeout(() => deviceBuckets[0] && deviceBuckets[0].classList.add("processed"), 8500);
         setTimeout(() => deviceBuckets[1] && deviceBuckets[1].classList.add("processed"), 9000);
         setTimeout(() => deviceBuckets[2] && deviceBuckets[2].classList.add("processed"), 9500);
-
         // Completion state
         setTimeout(() => {
           if (avatar) {
@@ -2545,61 +2517,47 @@
             endCard.classList.remove("highlighted");
           }
           if (success) success.classList.remove("hidden");
-
           Confetti.burstAtElement(endCard, { count: 70, spread: 70, power: 10 });
-
           stopFlowTimers();
         }, 11000);
-
         setTimeout(() => card.classList.remove("run"), 12000);
       }
-
       function updateProgress() {
         if (STATE.progress.apps < 128) STATE.progress.apps += 4;
         if (STATE.progress.time < 46) STATE.progress.time += 2;
         if (STATE.progress.tickets < 73) STATE.progress.tickets += 3;
-
         const apps = STATE.progress.apps > 128 ? 128 : STATE.progress.apps;
         const time = STATE.progress.time > 46 ? 46 : STATE.progress.time;
         const tickets = STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets;
-
         setText("appsProcessed", apps);
         setText("timeSaved", time);
         setText("ticketsAvoided", tickets);
-
         // Keep the truck position + label in sync with app processing
         setText("truckApps", apps);
         setTruckProgress(apps);
       }
-
       function setText(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = String(value);
       }
-
       function resetFlow() {
         stopFlowTimers();
         clearApproachTimeouts();
         hideApproachLayers();
         Confetti.clear();
-
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
         STATE.showLabels = false;
         buildFlow();
-
         const card = document.getElementById("flowCard");
         if (card) {
           card.classList.remove("run");
           card.classList.remove("workspace-final");
         }
-
         document.querySelectorAll(".processed").forEach((el) => el.classList.remove("processed"));
         document.querySelectorAll(".dimmed").forEach((el) => el.classList.remove("dimmed"));
         document.querySelectorAll(".highlighted").forEach((el) => el.classList.remove("highlighted"));
-
         hideTruck();
       }
-
       /* =========================
          ESC HANDLING (safe, attach once)
          ========================= */
@@ -2608,21 +2566,20 @@
         if (escapeWired) return;
         escapeWired = true;
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal)) {
+          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal || STATE.imageViewerOpen)) {
             STATE.modalOpen = false;
             STATE.openWhyModal = null;
+            STATE.imageViewerOpen = false;
             render();
           }
         });
       }
-
       /* =========================
          BOOT
          ========================= */
       document.addEventListener("DOMContentLoaded", () => {
         Confetti.init();
         wireEscapeOnce();
-
         // Keep truck path accurate on resize (only matters on solution tab)
         window.addEventListener(
           "resize",
@@ -2633,10 +2590,8 @@
           },
           { passive: true }
         );
-
         // Ensure wizard has a starting “explored” state
         STATE.visitedCards = [NEW_CARDS[0].id];
-
         render();
       });
     </script>
