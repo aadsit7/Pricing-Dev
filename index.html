@@ -121,30 +121,6 @@
         }
       }
 
-      /* OLD motorcycle micro-motion (still used by some classes, harmless if unused) */
-      @keyframes riderBob {
-        0% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-2px);
-        }
-        100% {
-          transform: translateY(0);
-        }
-      }
-      @keyframes riderTilt {
-        0% {
-          transform: rotate(-1deg);
-        }
-        50% {
-          transform: rotate(1.5deg);
-        }
-        100% {
-          transform: rotate(-1deg);
-        }
-      }
-
       /* NEW: Truck motion (subtle, “alive”, while vertical travel is driven by JS via --y) */
       @keyframes truckBob {
         0% {
