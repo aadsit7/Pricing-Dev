@@ -446,10 +446,12 @@
           );
         },
         progress: { apps: 0, time: 0, tickets: 0 },
-        items: [], // Array of {type: 'image', data: dataURL} or {type: 'embed', url: string} (up to 5)
-        itemViewerOpen: false, // Flag for item viewer modal
-        currentItemIndex: 0, // Current index in item carousel
-        itemManagerOpen: false, // Flag for item manager modal
+        uploadedImages: [], // New: Array of image data URLs (up to 5)
+        imageViewerOpen: false, // New: Flag for image viewer modal
+        currentImageIndex: 0, // New: Current index in image carousel
+        imageManagerOpen: false, // New: Flag for image manager modal
+        currentStateViewerOpen: false,
+        currentBoxIndex: 0,
       };
       const TABS = [
         { id: "problems", label: "Current State", icon: "alert-triangle" },
@@ -842,8 +844,9 @@
           </main>
           ${renderModal()}
           ${renderWhyModal()}
-          ${renderItemViewerModal()}
-          ${renderItemManagerModal()}
+          ${renderImageViewerModal()}
+          ${renderImageManagerModal()}
+          ${renderCurrentStateViewerModal()}
         `;
         if (window.lucide?.createIcons) {
           try {
@@ -917,8 +920,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
               ${pressures
                 .map(
-                  (p) => `
-                <div class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4 flex flex-col space-y-1 h-full">
+                  (p, index) => `
+                <div data-action="open-box-viewer" data-index="${index}" class="rounded-2xl bg-white shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-shadow duration-300 transition-transform p-4 flex flex-col space-y-1 h-full cursor-pointer">
                   <h3 class="text-[14px] font-semibold mb-1">${p.title}</h3>
                   <ul class="list-disc list-inside space-y-1 text-[12px] text-gray-700">
                     ${p.bullets
@@ -953,26 +956,17 @@
                 )
                 .join("")}
             </div>
-            <div class="mt-4 grid grid-cols-5 gap-4">
-              ${STATE.items.map((item, i) => `
-                <button type="button" data-action="open-item-viewer" data-index="${i}" class="relative">
-                  ${item.type === 'image' ? `
-                    <img src="${item.data}" alt="Thumbnail ${i + 1}" class="w-full h-24 object-cover rounded-lg shadow">
-                  ` : `
-                    <div class="w-full h-24 bg-gray-200 rounded-lg shadow flex flex-col items-center justify-center text-center text-xs p-2">
-                      <i data-lucide="external-link" class="w-6 h-6 text-blue-600"></i>
-                      ${getDomain(item.url)}
-                    </div>
-                  `}
+            <div class="mt-6 flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <button type="button" data-action="open-image-manager" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Manage images">
+                  <i data-lucide="pencil" class="w-5 h-5"></i>
                 </button>
-              `).join('')}
-              ${STATE.items.length < 5 ? `
-                <button type="button" data-action="open-item-manager" class="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-500 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
-                  <i data-lucide="plus" class="w-6 h-6"></i>
-                </button>
-              ` : ''}
-            </div>
-            <div class="mt-6 flex justify-end items-center">
+                ${STATE.uploadedImages.length > 0 ? `
+                  <button type="button" data-action="open-image-viewer" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Play images">
+                    <i data-lucide="play" class="w-5 h-5"></i>
+                  </button>
+                ` : ''}
+              </div>
               <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
             </div>
             <!-- Hidden file input for image upload in manager -->
@@ -981,34 +975,29 @@
         `;
       }
       /* =========================
-         ITEM VIEWER MODAL
+         IMAGE VIEWER MODAL
          ========================= */
-      function renderItemViewerModal() {
-        if (!STATE.itemViewerOpen) return "";
-        const items = STATE.items;
-        const current = items[STATE.currentItemIndex] || {type: 'image', data: ''};
-        const canPrev = STATE.currentItemIndex > 0;
-        const canNext = STATE.currentItemIndex < items.length - 1;
+      function renderImageViewerModal() {
+        if (!STATE.imageViewerOpen) return "";
+        const images = STATE.uploadedImages;
+        const current = images[STATE.currentImageIndex] || "";
+        const canPrev = STATE.currentImageIndex > 0;
+        const canNext = STATE.currentImageIndex < images.length - 1;
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="item-viewer-title">
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="image-viewer-title">
             <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
               <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
-                <h2 id="item-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">Recast</h2>
-                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-item-viewer" aria-label="Close">
+                <h2 id="image-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">Recast</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-image-viewer" aria-label="Close">
                   <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
               </div>
               <div class="p-6 bg-gray-50 flex flex-col items-center">
-                ${current.type === 'image' ? `
-                  <img src="${current.data}" alt="Item ${STATE.currentItemIndex + 1}" class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-md">
-                ` : `
-                  <iframe src="${current.url}" class="w-full h-[60vh] rounded-lg shadow-md" frameborder="0" allowfullscreen sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-                `}
+                <img src="${current}" alt="Uploaded image ${STATE.currentImageIndex + 1}" class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-md">
                 <div class="mt-4 flex items-center gap-4">
-                  <button type="button" data-action="prev-item" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Back</button>
-                  <span class="text-gray-700">Item ${STATE.currentItemIndex + 1} / ${items.length}</span>
-                  <button type="button" data-action="next-item" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canNext ? 'opacity-50 cursor-not-allowed' : '')}" ${!canNext ? 'disabled' : ''}>Next</button>
-                  <button type="button" data-action="delete-item" data-index="${STATE.currentItemIndex}" class="px-4 py-2 rounded bg-red-600 text-white">Delete</button>
+                  <button type="button" data-action="prev-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Back</button>
+                  <span class="text-gray-700">${STATE.currentImageIndex + 1} / ${images.length}</span>
+                  <button type="button" data-action="next-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canNext ? 'opacity-50 cursor-not-allowed' : '')}" ${!canNext ? 'disabled' : ''}>Next</button>
                 </div>
               </div>
             </div>
@@ -1016,71 +1005,82 @@
         `;
       }
       /* =========================
-         ITEM MANAGER MODAL
+         IMAGE MANAGER MODAL (NEW)
          ========================= */
-      function renderItemManagerModal() {
-        if (!STATE.itemManagerOpen) return "";
-        const items = STATE.items;
-        const canAdd = items.length < 5;
+      function renderImageManagerModal() {
+        if (!STATE.imageManagerOpen) return "";
+        const images = STATE.uploadedImages;
+        const canAdd = images.length < 5;
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="item-manager-title">
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="image-manager-title">
             <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
               <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
-                <h2 id="item-manager-title" class="text-2xl font-bold tracking-tight text-gray-900">Manage Items (up to 5)</h2>
-                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-item-manager" aria-label="Close">
+                <h2 id="image-manager-title" class="text-2xl font-bold tracking-tight text-gray-900">Manage Images (up to 5)</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-image-manager" aria-label="Close">
                   <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
               </div>
               <div class="p-6 bg-gray-50">
-                <button type="button" data-action="upload-more-images" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-2', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add Images</button>
-                <input type="text" id="embedUrlInput" placeholder="Paste embed URL (e.g., Google Slides)" class="w-full px-3 py-2 border rounded mb-2">
-                <button type="button" data-action="add-embed-url" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-4', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add Embed</button>
+                <button type="button" data-action="upload-more-images" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-4', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add More Images</button>
                 <ul class="space-y-4">
-                  ${items.map((item, i) => `
+                  ${images.map((img, i) => `
                     <li class="flex items-center gap-4 bg-white p-2 rounded shadow-sm">
-                      ${item.type === 'image' ? `
-                        <img src="${item.data}" alt="Item ${i + 1}" class="w-16 h-16 object-cover rounded">
-                      ` : `
-                        <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-center text-xs p-1">
-                          Embed<br>${getDomain(item.url)}
-                        </div>
-                      `}
+                      <img src="${img}" alt="Uploaded image ${i + 1}" class="w-16 h-16 object-cover rounded">
                       <div class="flex gap-2">
-                        <button type="button" data-action="move-item-up" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === 0 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">
+                        <button type="button" data-action="move-image-up" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === 0 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">
                           <i data-lucide="arrow-up" class="w-4 h-4"></i>
                         </button>
-                        <button type="button" data-action="move-item-down" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === items.length - 1 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === items.length - 1 ? 'disabled' : ''} aria-label="Move down">
+                        <button type="button" data-action="move-image-down" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === images.length - 1 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === images.length - 1 ? 'disabled' : ''} aria-label="Move down">
                           <i data-lucide="arrow-down" class="w-4 h-4"></i>
                         </button>
-                        <button type="button" data-action="delete-item-manager" data-index="${i}" class="p-1 text-gray-600 hover:text-red-600" aria-label="Delete">
+                        <button type="button" data-action="delete-image" data-index="${i}" class="p-1 text-gray-600 hover:text-red-600" aria-label="Delete">
                           <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                       </div>
                     </li>
                   `).join('')}
                 </ul>
-                <button type="button" data-action="save-items" class="w-full px-4 py-2 rounded bg-green-600 text-white mt-4">Save Changes</button>
               </div>
             </div>
           </div>
         `;
       }
-      function getDomain(url) {
-        try {
-          return new URL(url).hostname.replace('www.', '');
-        } catch {
-          return 'Invalid';
-        }
-      }
-      function validateEmbedUrl(url) {
-        try {
-          const u = new URL(url);
-          const allowed = ['docs.google.com', 'app.powerbi.com', 'youtube.com', 'youtu.be'];
-          const host = u.hostname.replace('www.', '');
-          return allowed.includes(host);
-        } catch {
-          return false;
-        }
+      /* =========================
+         CURRENT STATE VIEWER MODAL
+         ========================= */
+      function renderCurrentStateViewerModal() {
+        if (!STATE.currentStateViewerOpen) return "";
+        const boxes = pressures;
+        const current = boxes[STATE.currentBoxIndex];
+        const canPrev = STATE.currentBoxIndex > 0;
+        const canNext = STATE.currentBoxIndex < boxes.length - 1;
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="box-viewer-title">
+            <div class="w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 80vh; overflow-y: auto;">
+              <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <h2 id="box-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">${current.title}</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-box-viewer" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-6 bg-gray-50">
+                <ul class="space-y-4 text-lg text-gray-700">
+                  ${current.bullets.map(b => `
+                    <li class="flex items-center gap-2">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-blue-600"></i>
+                      ${b}
+                    </li>
+                  `).join('')}
+                </ul>
+                <div class="mt-6 flex items-center justify-between">
+                  <button type="button" data-action="prev-box" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Previous</button>
+                  <span>${STATE.currentBoxIndex + 1} / ${boxes.length}</span>
+                  <button type="button" data-action="next-box" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canNext ? 'opacity-50 cursor-not-allowed' : '')}" ${!canNext ? 'disabled' : ''}>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
       }
       /* =========================
          WHY MODAL
@@ -1975,7 +1975,7 @@
       const USER_ID = String(window.APP_USER_ID || "guest");
       const PAGE_SCOPE = location.origin + location.pathname + location.search;
       const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
-      const ITEMS_KEY = `items:${USER_ID}:${PAGE_SCOPE}`;
+      const IMAGES_KEY = `uploadedImages:${USER_ID}:${PAGE_SCOPE}`;
       let DEFAULT_CURRENT_STATE = null;
       const $ = (sel, ctx = document) => ctx.querySelector(sel);
       const fields = {
@@ -2044,19 +2044,19 @@
           localStorage.removeItem(STORAGE_KEY);
         } catch {}
       }
-      function loadItems() {
+      function loadImages() {
         try {
-          const raw = localStorage.getItem(ITEMS_KEY);
+          const raw = localStorage.getItem(IMAGES_KEY);
           return raw ? JSON.parse(raw) : [];
         } catch {
           return [];
         }
       }
-      function saveItems() {
+      function saveImages(images) {
         try {
-          localStorage.setItem(ITEMS_KEY, JSON.stringify(STATE.items));
+          localStorage.setItem(IMAGES_KEY, JSON.stringify(images));
         } catch (e) {
-          console.warn("Items save failed:", e);
+          console.warn("Images save failed:", e);
         }
       }
       function initCurrentStateModal() {
@@ -2225,12 +2225,6 @@
             render();
           })
         );
-        root.querySelectorAll('[data-action="reset-bullets"]').forEach((b) =>
-          b.addEventListener("click", () => {
-            STATE.selectedBullets = {};
-            render();
-          })
-        );
         root.querySelectorAll('[data-action="next-tab"]').forEach((b) =>
           b.addEventListener("click", () => {
             STATE.activeTab = "solution";
@@ -2394,16 +2388,16 @@
             STATE.editBuffers[key][subkey] = evt.target.value;
           })
         );
-        // New: Item manager and viewer events
-        root.querySelectorAll('[data-action="open-item-manager"]').forEach((b) =>
+        // New: Image upload and viewer events
+        root.querySelectorAll('[data-action="open-image-manager"]').forEach((b) =>
           b.addEventListener("click", () => {
-            STATE.itemManagerOpen = true;
+            STATE.imageManagerOpen = true;
             render();
           })
         );
-        root.querySelectorAll('[data-action="close-item-manager"]').forEach((b) =>
+        root.querySelectorAll('[data-action="close-image-manager"]').forEach((b) =>
           b.addEventListener("click", () => {
-            STATE.itemManagerOpen = false;
+            STATE.imageManagerOpen = false;
             render();
           })
         );
@@ -2416,102 +2410,101 @@
         const managerUploadInput = document.getElementById("imageUploadManager");
         if (managerUploadInput) {
           managerUploadInput.addEventListener("change", (e) => {
-            const currentLength = STATE.items.length;
+            const currentLength = STATE.uploadedImages.length;
             const files = Array.from(e.target.files).slice(0, 5 - currentLength);
             files.forEach((file) => {
               const reader = new FileReader();
               reader.onload = (evt) => {
-                STATE.items.push({type: 'image', data: evt.target.result});
+                STATE.uploadedImages.push(evt.target.result);
                 render();
               };
               reader.readAsDataURL(file);
             });
           });
         }
-        root.querySelectorAll('[data-action="add-embed-url"]').forEach((b) =>
-          b.addEventListener("click", () => {
-            const input = document.getElementById("embedUrlInput");
-            const url = input.value.trim();
-            if (!url) return;
-            if (validateEmbedUrl(url)) {
-              STATE.items.push({type: 'embed', url});
-              input.value = '';
-              render();
-            } else {
-              alert('Invalid URL or domain not allowed.');
-            }
-          })
-        );
-        root.querySelectorAll('[data-action="move-item-up"]').forEach((b) =>
+        root.querySelectorAll('[data-action="move-image-up"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             const i = Number(e.currentTarget.getAttribute("data-index"));
             if (i > 0) {
-              [STATE.items[i - 1], STATE.items[i]] = [STATE.items[i], STATE.items[i - 1]];
+              [STATE.uploadedImages[i - 1], STATE.uploadedImages[i]] = [STATE.uploadedImages[i], STATE.uploadedImages[i - 1]];
               render();
             }
           })
         );
-        root.querySelectorAll('[data-action="move-item-down"]').forEach((b) =>
+        root.querySelectorAll('[data-action="move-image-down"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             const i = Number(e.currentTarget.getAttribute("data-index"));
-            if (i < STATE.items.length - 1) {
-              [STATE.items[i], STATE.items[i + 1]] = [STATE.items[i + 1], STATE.items[i]];
+            if (i < STATE.uploadedImages.length - 1) {
+              [STATE.uploadedImages[i], STATE.uploadedImages[i + 1]] = [STATE.uploadedImages[i + 1], STATE.uploadedImages[i]];
               render();
             }
           })
         );
-        root.querySelectorAll('[data-action="delete-item-manager"]').forEach((b) =>
+        root.querySelectorAll('[data-action="delete-image"]').forEach((b) =>
           b.addEventListener("click", (e) => {
             const i = Number(e.currentTarget.getAttribute("data-index"));
-            STATE.items.splice(i, 1);
-            saveItems();
+            STATE.uploadedImages.splice(i, 1);
             render();
           })
         );
-        root.querySelectorAll('[data-action="save-items"]').forEach((b) =>
+        root.querySelectorAll('[data-action="open-image-viewer"]').forEach((b) =>
           b.addEventListener("click", () => {
-            saveItems();
-            STATE.itemManagerOpen = false;
+            STATE.imageViewerOpen = true;
+            STATE.currentImageIndex = 0;
             render();
           })
         );
-        root.querySelectorAll('[data-action="open-item-viewer"]').forEach((b) =>
-          b.addEventListener("click", (e) => {
-            STATE.itemViewerOpen = true;
-            STATE.currentItemIndex = Number(e.currentTarget.getAttribute("data-index")) || 0;
-            render();
-          })
-        );
-        root.querySelectorAll('[data-action="close-item-viewer"]').forEach((b) =>
+        root.querySelectorAll('[data-action="close-image-viewer"]').forEach((b) =>
           b.addEventListener("click", () => {
-            STATE.itemViewerOpen = false;
+            STATE.imageViewerOpen = false;
             render();
           })
         );
-        root.querySelectorAll('[data-action="prev-item"]').forEach((b) =>
+        root.querySelectorAll('[data-action="prev-image"]').forEach((b) =>
           b.addEventListener("click", () => {
-            if (STATE.currentItemIndex > 0) {
-              STATE.currentItemIndex--;
+            if (STATE.currentImageIndex > 0) {
+              STATE.currentImageIndex--;
               render();
             }
           })
         );
-        root.querySelectorAll('[data-action="next-item"]').forEach((b) =>
+        root.querySelectorAll('[data-action="next-image"]').forEach((b) =>
           b.addEventListener("click", () => {
-            if (STATE.currentItemIndex < STATE.items.length - 1) {
-              STATE.currentItemIndex++;
+            if (STATE.currentImageIndex < STATE.uploadedImages.length - 1) {
+              STATE.currentImageIndex++;
               render();
             }
           })
         );
-        root.querySelectorAll('[data-action="delete-item"]').forEach((b) =>
+        // Current state box viewer
+        root.querySelectorAll('[data-action="open-box-viewer"]').forEach((b) =>
           b.addEventListener("click", (e) => {
-            const i = Number(e.currentTarget.getAttribute("data-index"));
-            STATE.items.splice(i, 1);
-            saveItems();
-            if (STATE.currentItemIndex >= STATE.items.length) STATE.currentItemIndex = STATE.items.length - 1;
-            if (STATE.items.length === 0) STATE.itemViewerOpen = false;
+            const index = Number(e.currentTarget.getAttribute("data-index"));
+            STATE.currentBoxIndex = index;
+            STATE.currentStateViewerOpen = true;
             render();
+          })
+        );
+        root.querySelectorAll('[data-action="close-box-viewer"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.currentStateViewerOpen = false;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="prev-box"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentBoxIndex > 0) {
+              STATE.currentBoxIndex--;
+              render();
+            }
+          })
+        );
+        root.querySelectorAll('[data-action="next-box"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentBoxIndex < pressures.length - 1) {
+              STATE.currentBoxIndex++;
+              render();
+            }
           })
         );
       }
@@ -2733,11 +2726,12 @@
         if (escapeWired) return;
         escapeWired = true;
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal || STATE.itemViewerOpen || STATE.itemManagerOpen)) {
+          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal || STATE.imageViewerOpen || STATE.imageManagerOpen || STATE.currentStateViewerOpen)) {
             STATE.modalOpen = false;
             STATE.openWhyModal = null;
-            STATE.itemViewerOpen = false;
-            STATE.itemManagerOpen = false;
+            STATE.imageViewerOpen = false;
+            STATE.imageManagerOpen = false;
+            STATE.currentStateViewerOpen = false;
             render();
           }
         });
@@ -2758,10 +2752,10 @@
           },
           { passive: true }
         );
-        // Load cached items
-        STATE.items = loadItems();
         // Ensure wizard has a starting “explored” state
         STATE.visitedCards = [NEW_CARDS[0].id];
+        // Load images from cache
+        STATE.uploadedImages = loadImages();
         render();
       });
     </script>
