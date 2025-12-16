@@ -1083,6 +1083,7 @@
         }
         try {
           const u = new URL(src);
+          if (u.protocol !== 'https:') return null;
           let host = u.hostname.replace('www.', '');
           if (host === 'docs.google.com' && u.pathname.includes('/pub')) {
             u.pathname = u.pathname.replace('/pub', '/embed');
@@ -1095,9 +1096,6 @@
             const vid = u.pathname.slice(1);
             if (vid) src = `https://www.youtube.com/embed/${vid}`;
           }
-          host = new URL(src).hostname.replace('www.', '');
-          const allowed = ['docs.google.com', 'app.powerbi.com', 'youtube.com', 'youtu.be'];
-          if (!allowed.includes(host)) return null;
           return src;
         } catch {
           return null;
@@ -2460,7 +2458,7 @@
               input.value = '';
               render();
             } else {
-              alert('Invalid embed URL or iframe. Only allowed domains: Google Docs, Power BI, YouTube.');
+              alert('Invalid embed URL or iframe. Must be a valid HTTPS URL.');
             }
           })
         );
