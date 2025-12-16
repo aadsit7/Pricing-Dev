@@ -446,9 +446,10 @@
           );
         },
         progress: { apps: 0, time: 0, tickets: 0 },
-        uploadedImages: [], // New: Array of image data URLs (up to 5)
-        imageViewerOpen: false, // New: Flag for image viewer modal
-        currentImageIndex: 0, // New: Current index in image carousel
+        embeddedUrls: [], // New: Array of iframe URLs (up to 5)
+        iframeViewerOpen: false, // New: Flag for iframe viewer modal
+        currentIframeIndex: 0, // New: Current index in iframe carousel
+        iframeManagerOpen: false, // New: Flag for iframe manager modal
       };
       const TABS = [
         { id: "problems", label: "Current State", icon: "alert-triangle" },
@@ -841,7 +842,8 @@
           </main>
           ${renderModal()}
           ${renderWhyModal()}
-          ${renderImageViewerModal()}
+          ${renderIframeViewerModal()}
+          ${renderIframeManagerModal()}
         `;
         if (window.lucide?.createIcons) {
           try {
@@ -952,49 +954,91 @@
                 .join("")}
             </div>
             <div class="mt-6 flex justify-between items-center">
-              <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
+              <div class="flex items-center gap-2">
+                <button type="button" data-action="reset-bullets" class="bg-transparent text-gray-900 border-2 border-gray-900 rounded-full px-4 py-1.5 hover:text-blue-600 hover:border-blue-600 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Reset</button>
+                <button type="button" data-action="open-iframe-manager" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Manage iframes">
+                  <i data-lucide="pencil" class="w-5 h-5"></i>
+                </button>
+                ${STATE.embeddedUrls.length > 0 ? `
+                  <button type="button" data-action="open-iframe-viewer" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Play iframes">
+                    <i data-lucide="play" class="w-5 h-5"></i>
+                  </button>
+                ` : ''}
+              </div>
               <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
             </div>
-            <!-- Pencil icon on bottom left -->
-            <button type="button" data-action="upload-images" class="absolute bottom-0 left-0 p-2 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Upload images">
-              <i data-lucide="pencil" class="w-6 h-6"></i>
-            </button>
-            <!-- Hidden file input for image upload -->
-            <input type="file" id="imageUpload" accept="image/*" multiple class="hidden" data-action="handle-upload">
-            <!-- Play button if images are uploaded -->
-            ${STATE.uploadedImages.length > 0 ? `
-              <button type="button" data-action="open-image-viewer" class="absolute bottom-0 right-0 p-2 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Play images">
-                <i data-lucide="play" class="w-6 h-6"></i>
-              </button>
-            ` : ''}
           </section>
         `;
       }
       /* =========================
-         IMAGE VIEWER MODAL (NEW)
+         IFRAME VIEWER MODAL
          ========================= */
-      function renderImageViewerModal() {
-        if (!STATE.imageViewerOpen) return "";
-        const images = STATE.uploadedImages;
-        const current = images[STATE.currentImageIndex] || "";
-        const canPrev = STATE.currentImageIndex > 0;
-        const canNext = STATE.currentImageIndex < images.length - 1;
+      function renderIframeViewerModal() {
+        if (!STATE.iframeViewerOpen) return "";
+        const urls = STATE.embeddedUrls;
+        const current = urls[STATE.currentIframeIndex] || "";
+        const canPrev = STATE.currentIframeIndex > 0;
+        const canNext = STATE.currentIframeIndex < urls.length - 1;
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="image-viewer-title">
-            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="iframe-viewer-title">
+            <div class="w-full max-w-7xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
               <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
-                <h2 id="image-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">Image Viewer</h2>
-                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-image-viewer" aria-label="Close">
+                <h2 id="iframe-viewer-title" class="text-2xl font-bold tracking-tight text-gray-900">Recast</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-iframe-viewer" aria-label="Close">
                   <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
               </div>
               <div class="p-6 bg-gray-50 flex flex-col items-center">
-                <img src="${current}" alt="Uploaded image ${STATE.currentImageIndex + 1}" class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-md">
+                <iframe src="${current}" class="w-full h-[80vh] border-0"></iframe>
                 <div class="mt-4 flex items-center gap-4">
-                  <button type="button" data-action="prev-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Back</button>
-                  <span class="text-gray-700">${STATE.currentImageIndex + 1} / ${images.length}</span>
-                  <button type="button" data-action="next-image" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canNext ? 'opacity-50 cursor-not-allowed' : '')}" ${!canNext ? 'disabled' : ''}>Next</button>
+                  <button type="button" data-action="prev-iframe" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canPrev ? 'opacity-50 cursor-not-allowed' : '')}" ${!canPrev ? 'disabled' : ''}>Back</button>
+                  <span class="text-gray-700">${STATE.currentIframeIndex + 1} / ${urls.length}</span>
+                  <button type="button" data-action="next-iframe" class="px-4 py-2 rounded bg-blue-600 text-white">${canNext ? 'Next' : 'Finish'}</button>
                 </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      /* =========================
+         IFRAME MANAGER MODAL
+         ========================= */
+      function renderIframeManagerModal() {
+        if (!STATE.iframeManagerOpen) return "";
+        const urls = STATE.embeddedUrls;
+        const canAdd = urls.length < 5;
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-overlayFade" role="dialog" aria-modal="true" aria-labelledby="iframe-manager-title">
+            <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-modalEnter" style="max-height: 95vh; overflow-y: auto;">
+              <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+                <h2 id="iframe-manager-title" class="text-2xl font-bold tracking-tight text-gray-900">Manage Iframes (up to 5)</h2>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 p-1.5" data-action="close-iframe-manager" aria-label="Close">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+              <div class="p-6 bg-gray-50">
+                <div class="flex gap-2 mb-4">
+                  <input type="text" id="urlInput" placeholder="Enter URL" class="flex-1 px-4 py-2 rounded border border-gray-300">
+                  <button type="button" data-action="add-url" class="${cx('px-4 py-2 rounded bg-blue-600 text-white', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add</button>
+                </div>
+                <ul class="space-y-4">
+                  ${urls.map((url, i) => `
+                    <li class="flex items-center gap-4 bg-white p-2 rounded shadow-sm">
+                      <span class="flex-1 truncate">${url}</span>
+                      <div class="flex gap-2">
+                        <button type="button" data-action="move-url-up" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === 0 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">
+                          <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" data-action="move-url-down" data-index="${i}" class="${cx('p-1 text-gray-600 hover:text-blue-600', i === urls.length - 1 ? 'opacity-50 cursor-not-allowed' : '')}" ${i === urls.length - 1 ? 'disabled' : ''} aria-label="Move down">
+                          <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </button>
+                        <button type="button" data-action="delete-url" data-index="${i}" class="p-1 text-gray-600 hover:text-red-600" aria-label="Delete">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </li>
+                  `).join('')}
+                </ul>
               </div>
             </div>
           </div>
@@ -2296,55 +2340,83 @@
             STATE.editBuffers[key][subkey] = evt.target.value;
           })
         );
-        // New: Image upload and viewer events
-        root.querySelectorAll('[data-action="upload-images"]').forEach((b) =>
+        // New: Iframe manager and viewer events
+        root.querySelectorAll('[data-action="open-iframe-manager"]').forEach((b) =>
           b.addEventListener("click", () => {
-            const input = document.getElementById("imageUpload");
-            if (input) input.click();
-          })
-        );
-        const uploadInput = document.getElementById("imageUpload");
-        if (uploadInput) {
-          uploadInput.addEventListener("change", (e) => {
-            const files = Array.from(e.target.files).slice(0, 5); // Limit to 5
-            STATE.uploadedImages = [];
-            files.forEach((file) => {
-              const reader = new FileReader();
-              reader.onload = (evt) => {
-                STATE.uploadedImages.push(evt.target.result);
-                if (STATE.uploadedImages.length === files.length) render();
-              };
-              reader.readAsDataURL(file);
-            });
-          });
-        }
-        root.querySelectorAll('[data-action="open-image-viewer"]').forEach((b) =>
-          b.addEventListener("click", () => {
-            STATE.imageViewerOpen = true;
-            STATE.currentImageIndex = 0;
+            STATE.iframeManagerOpen = true;
             render();
           })
         );
-        root.querySelectorAll('[data-action="close-image-viewer"]').forEach((b) =>
+        root.querySelectorAll('[data-action="close-iframe-manager"]').forEach((b) =>
           b.addEventListener("click", () => {
-            STATE.imageViewerOpen = false;
+            STATE.iframeManagerOpen = false;
             render();
           })
         );
-        root.querySelectorAll('[data-action="prev-image"]').forEach((b) =>
+        root.querySelectorAll('[data-action="add-url"]').forEach((b) =>
           b.addEventListener("click", () => {
-            if (STATE.currentImageIndex > 0) {
-              STATE.currentImageIndex--;
+            const input = document.getElementById("urlInput");
+            if (input && input.value && STATE.embeddedUrls.length < 5) {
+              STATE.embeddedUrls.push(input.value);
+              input.value = "";
               render();
             }
           })
         );
-        root.querySelectorAll('[data-action="next-image"]').forEach((b) =>
-          b.addEventListener("click", () => {
-            if (STATE.currentImageIndex < STATE.uploadedImages.length - 1) {
-              STATE.currentImageIndex++;
+        root.querySelectorAll('[data-action="move-url-up"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const i = Number(e.currentTarget.getAttribute("data-index"));
+            if (i > 0) {
+              [STATE.embeddedUrls[i - 1], STATE.embeddedUrls[i]] = [STATE.embeddedUrls[i], STATE.embeddedUrls[i - 1]];
               render();
             }
+          })
+        );
+        root.querySelectorAll('[data-action="move-url-down"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const i = Number(e.currentTarget.getAttribute("data-index"));
+            if (i < STATE.embeddedUrls.length - 1) {
+              [STATE.embeddedUrls[i], STATE.embeddedUrls[i + 1]] = [STATE.embeddedUrls[i + 1], STATE.embeddedUrls[i]];
+              render();
+            }
+          })
+        );
+        root.querySelectorAll('[data-action="delete-url"]').forEach((b) =>
+          b.addEventListener("click", (e) => {
+            const i = Number(e.currentTarget.getAttribute("data-index"));
+            STATE.embeddedUrls.splice(i, 1);
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="open-iframe-viewer"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.iframeViewerOpen = true;
+            STATE.currentIframeIndex = 0;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="close-iframe-viewer"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            STATE.iframeViewerOpen = false;
+            render();
+          })
+        );
+        root.querySelectorAll('[data-action="prev-iframe"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentIframeIndex > 0) {
+              STATE.currentIframeIndex--;
+              render();
+            }
+          })
+        );
+        root.querySelectorAll('[data-action="next-iframe"]').forEach((b) =>
+          b.addEventListener("click", () => {
+            if (STATE.currentIframeIndex < STATE.embeddedUrls.length - 1) {
+              STATE.currentIframeIndex++;
+            } else {
+              STATE.iframeViewerOpen = false;
+            }
+            render();
           })
         );
       }
@@ -2566,10 +2638,11 @@
         if (escapeWired) return;
         escapeWired = true;
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal || STATE.imageViewerOpen)) {
+          if (e.key === "Escape" && (STATE.modalOpen || STATE.openWhyModal || STATE.iframeViewerOpen || STATE.iframeManagerOpen)) {
             STATE.modalOpen = false;
             STATE.openWhyModal = null;
-            STATE.imageViewerOpen = false;
+            STATE.iframeViewerOpen = false;
+            STATE.iframeManagerOpen = false;
             render();
           }
         });
