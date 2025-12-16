@@ -327,6 +327,18 @@
         position: relative;
         z-index: 1;
       }
+      /* New styles for 2x2 grid on Current State tab */
+      .display-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        justify-content: center;
+      }
+      @media (max-width: 768px) {
+        .display-grid {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body class="min-h-screen antialiased bg-gray-50 text-gray-900 font-[Inter]">
@@ -446,7 +458,7 @@
           );
         },
         progress: { apps: 0, time: 0, tickets: 0 },
-        items: [], // Array of {type: 'image', src: dataURL} or {type: 'embed', src: string} (up to 5)
+        items: [], // Array of {type: 'image', src: string} or {type: 'embed', src: string} (up to 5)
         itemViewerOpen: false, // Flag for item viewer modal
         currentItemIndex: 0, // Current index in item carousel
         itemManagerOpen: false, // Flag for item manager modal
@@ -914,7 +926,7 @@
           <section id="panel-problems" class="space-y-3 relative">
             <h2 class="text-3xl font-semibold leading-tight">The application layer is the #1 bottleneck to operational change</h2>
             <p class="text-base text-gray-700 leading-relaxed">Most IT teams aren’t failing — they’re constrained by a delivery model that doesn’t scale with the pace of change.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            <div class="display-grid">
               ${pressures
                 .map(
                   (p) => `
@@ -953,26 +965,17 @@
                 )
                 .join("")}
             </div>
-            <div class="mt-4 grid grid-cols-5 gap-4">
-              ${STATE.items.map((item, i) => `
-                <button type="button" data-action="open-item-viewer" data-index="${i}" class="relative">
-                  ${item.type === 'image' ? `
-                    <img src="${item.src}" alt="Thumbnail ${i + 1}" class="w-full h-24 object-cover rounded-lg shadow">
-                  ` : `
-                    <div class="w-full h-24 bg-gray-200 rounded-lg shadow flex flex-col items-center justify-center text-center text-xs p-2">
-                      <i data-lucide="play" class="w-6 h-6 text-blue-600"></i>
-                      ${getDomain(item.src)}
-                    </div>
-                  `}
+            <div class="mt-6 flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <button type="button" data-action="open-item-manager" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Manage items">
+                  <i data-lucide="pencil" class="w-5 h-5"></i>
                 </button>
-              `).join('')}
-              ${STATE.items.length < 5 ? `
-                <button type="button" data-action="open-item-manager" class="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-end justify-start text-gray-500 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
-                  <i data-lucide="pencil" class="w-6 h-6 m-2"></i>
-                </button>
-              ` : ''}
-            </div>
-            <div class="mt-6 flex justify-end items-center">
+                ${STATE.items.length > 0 ? `
+                  <button type="button" data-action="open-item-viewer" class="p-1 text-gray-600 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" aria-label="Play items">
+                    <i data-lucide="play" class="w-5 h-5"></i>
+                  </button>
+                ` : ''}
+              </div>
               <button type="button" data-action="next-tab" class="bg-blue-600 text-white rounded-full px-4 py-1.5 hover:bg-blue-700 hover:scale-102 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 text-sm">Next</button>
             </div>
             <!-- Hidden file input for image upload in manager -->
@@ -1033,8 +1036,8 @@
               </div>
               <div class="p-6 bg-gray-50">
                 <button type="button" data-action="upload-more-images" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-2', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add Images</button>
-                <input type="text" id="embedUrlInput" placeholder="Paste embed URL (e.g., Google Slides)" class="w-full px-3 py-2 border rounded mb-2">
-                <button type="button" data-action="add-embed-url" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-4', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add Embed</button>
+                <input type="text" id="embedUrlInput" placeholder="Paste embed URL or iframe (e.g., Google Slides)" class="w-full px-3 py-2 border rounded mb-2">
+                <button type="button" data-action="add-embed" class="${cx('w-full px-4 py-2 rounded bg-blue-600 text-white mb-4', !canAdd ? 'opacity-50 cursor-not-allowed' : '')}" ${!canAdd ? 'disabled' : ''}>Add Embed</button>
                 <ul class="space-y-4">
                   ${items.map((item, i) => `
                     <li class="flex items-center gap-4 bg-white p-2 rounded shadow-sm">
@@ -2065,19 +2068,7 @@
       function loadItems() {
         try {
           const raw = localStorage.getItem(ITEMS_KEY);
-          const items = raw ? JSON.parse(raw) : [];
-          // Migrate old format if necessary
-          return items.map(item => {
-            if (item.type === 'image' && item.data) {
-              item.src = item.data;
-              delete item.data;
-            }
-            if (item.type === 'embed' && item.url) {
-              item.src = item.url;
-              delete item.url;
-            }
-            return item;
-          });
+          return raw ? JSON.parse(raw) : [];
         } catch {
           return [];
         }
@@ -2458,18 +2449,18 @@
             });
           });
         }
-        root.querySelectorAll('[data-action="add-embed-url"]').forEach((b) =>
+        root.querySelectorAll('[data-action="add-embed"]').forEach((b) =>
           b.addEventListener("click", () => {
             const input = document.getElementById("embedUrlInput");
-            const url = input.value.trim();
-            if (!url) return;
-            const sanitized = sanitizeEmbed(url);
+            const raw = input.value.trim();
+            if (!raw) return;
+            const sanitized = sanitizeEmbed(raw);
             if (sanitized) {
               STATE.items.push({type: 'embed', src: sanitized});
               input.value = '';
               render();
             } else {
-              alert('Invalid URL or domain not allowed.');
+              alert('Invalid embed URL or iframe. Only allowed domains: Google Docs, Power BI, YouTube.');
             }
           })
         );
@@ -2507,9 +2498,9 @@
           })
         );
         root.querySelectorAll('[data-action="open-item-viewer"]').forEach((b) =>
-          b.addEventListener("click", (e) => {
+          b.addEventListener("click", () => {
             STATE.itemViewerOpen = true;
-            STATE.currentItemIndex = Number(e.currentTarget.getAttribute("data-index")) || 0;
+            STATE.currentItemIndex = 0;
             render();
           })
         );
