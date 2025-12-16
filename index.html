@@ -960,15 +960,15 @@
                     <img src="${item.src}" alt="Thumbnail ${i + 1}" class="w-full h-24 object-cover rounded-lg shadow">
                   ` : `
                     <div class="w-full h-24 bg-gray-200 rounded-lg shadow flex flex-col items-center justify-center text-center text-xs p-2">
-                      <i data-lucide="external-link" class="w-6 h-6 text-blue-600"></i>
+                      <i data-lucide="play" class="w-6 h-6 text-blue-600"></i>
                       ${getDomain(item.src)}
                     </div>
                   `}
                 </button>
               `).join('')}
               ${STATE.items.length < 5 ? `
-                <button type="button" data-action="open-item-manager" class="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-500 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
-                  <i data-lucide="plus" class="w-6 h-6"></i>
+                <button type="button" data-action="open-item-manager" class="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-end justify-start text-gray-500 hover:text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                  <i data-lucide="pencil" class="w-6 h-6 m-2"></i>
                 </button>
               ` : ''}
             </div>
