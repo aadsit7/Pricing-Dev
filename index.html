@@ -9,87 +9,103 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'bg-main': '#f9fafb',
-              'text-primary': '#111827',
-              primary: '#2563eb',
-              'primary-hover': '#1d4ed8',
-              'border-subtle': '#e5e7eb',
-              'primary-blue': '#1e63ff',
-              'accent-amber': '#f59e0b',
-              'neutral-gray': '#94a3b8',
-            },
-            borderRadius: {
-              radius: '1rem',
-            },
-            boxShadow: {
-              card: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-              hover: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-              'aw-demo': '0 8px 24px rgba(2,6,23,0.08)',
-            },
-            keyframes: {
-              tilePulse: {
-                '0%': { transform: 'scale(0.7)', backgroundColor: '#e5e7eb', opacity: '0.4' },
-                '60%': { transform: 'scale(1)', backgroundColor: 'var(--primary)', opacity: '1' },
-                '100%': { backgroundColor: '#e5e7eb', opacity: '0.9' },
-              },
-              barGrow: {
-                to: { transform: 'scaleX(1)' },
-              },
-              boltDrop: {
-                to: { transform: 'scaleY(1)' },
-              },
-              appLiftPulse: {
-                '0%': { transform: 'translateY(0) scale(1)', filter: 'saturate(0.4)', opacity: '0.65' },
-                '30%': { transform: 'translateY(-4px) scale(1.05)' },
-                '60%': { transform: 'translateY(-2px) scale(1.02)', filter: 'saturate(1)', opacity: '1' },
-                '100%': { transform: 'translateY(0) scale(1)' },
-              },
-              badgeDrop: {
-                to: { opacity: '1', transform: 'translateY(0) scale(1)' },
-              },
-              fadeInOut: {
-                '0%': { opacity: '0' },
-                '30%': { opacity: '1' },
-                '70%': { opacity: '1' },
-                '100%': { opacity: '0' },
-              },
-              iconLaunch: {
-                '0%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.1)' },
-                '100%': { transform: 'scale(1)' },
-              },
-              fadeIn: {
-                to: { opacity: '1' },
-              },
-              awFadeIn: {
-                from: { opacity: '0', transform: 'translateY(5px)' },
-                to: { opacity: '1', transform: 'none' },
-              },
-            },
-            animation: {
-              tilePulse: 'tilePulse 1s ease-in-out var(--d, 0s) 1 forwards',
-              barGrow: 'barGrow 0.9s ease var(--d, 0s) forwards',
-              boltDrop: 'boltDrop 0.9s ease var(--d, 0s) forwards',
-              appLiftPulse: 'appLiftPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards',
-              badgeDrop: 'badgeDrop 0.8s ease-out var(--d, 0s) forwards',
-              fadeInOut: 'fadeInOut 1.5s ease var(--d,0s) forwards',
-              iconLaunch: 'iconLaunch 0.5s ease forwards',
-              fadeIn: 'fadeIn 1s ease 10s forwards',
-              awFadeIn: 'awFadeIn 0.4s ease',
-            },
-          },
-        },
-      };
-    </script>
     <link rel="preconnect" href="https://unpkg.com">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      :root {
+        --bg-main: #f9fafb;
+        --text-primary: #111827;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --radius: 1rem;
+        --border-subtle: #e5e7eb;
+        --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
+      html, body {
+        background: var(--bg-main);
+        color: var(--text-primary);
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      .focus-ring:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+      .section-card { border-radius: var(--radius); background: #ffffff; box-shadow: var(--shadow-card); transition: box-shadow 300ms ease, transform 300ms ease; }
+      .section-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+      .sub-card { border-radius: calc(var(--radius) / 1.5); border: 1px solid var(--border-subtle); background: #f9fafb; transition: box-shadow 300ms ease; }
+      .tile { width: 0.45rem; height: 0.45rem; border-radius: 2px; background: #e5e7eb; opacity: 0.9; }
+      .run .tile { animation: tilePulse 1s ease-in-out var(--d, 0s) 1 forwards; }
+      @keyframes tilePulse { 0% { transform: scale(0.7); background: #e5e7eb; opacity: 0.4; } 60% { transform: scale(1); background: var(--primary); opacity: 1; } 100% { background: #e5e7eb; opacity: 0.9; } }
+      .flow-bar { height: 0.22rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
+      .run .flow-bar { animation: barGrow 0.9s ease forwards var(--d, 0s); }
+      @keyframes barGrow { to { transform: scaleX(1); } }
+      .bolt-line { width: 0.22rem; border-radius: 2px; transform-origin: top center; transform: scaleY(0); }
+      .run .bolt-line { animation: boltDrop 0.9s ease forwards var(--d, 0s); }
+      @keyframes boltDrop { to { transform: scaleY(1); } }
+      .logo-ring { width: 2.1rem; height: 2.1rem; border-radius: 9999px; display: grid; place-items: center; background: #ffffff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+      .logo-ring:hover { box-shadow: 0 0 8px rgba(37,99,235,0.3); transform: scale(1.05); }
+      .logo-wrap { display: flex; align-items: center; gap: 0.4rem; position: relative; transition: all 300ms ease; }
+      .logo-name { font-size: 0.7rem; color: #6b7280; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+      .show-labels .logo-wrap { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+      .show-labels .logo-name { opacity: 1; transform: translateX(0); white-space: normal; text-align: left; }
+      .show-labels .logo-wrap .logo-ring { width: 1.8rem; height: 1.8rem; }
+      .run .logo-ring { animation: appLiftPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
+      @keyframes appLiftPulse { 0% { transform: translateY(0) scale(1); filter: saturate(0.4); opacity: 0.65; } 30% { transform: translateY(-4px) scale(1.05); } 60% { transform: translateY(-2px) scale(1.02); filter: saturate(1); opacity: 1; } 100% { transform: translateY(0) scale(1); } }
+      .user-beam { height: 0.38rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
+      .run .user-beam { animation: barGrow 1s ease forwards var(--d, 0s); }
+      .badge { width: 1.15rem; height: 1.15rem; border-radius: 9999px; opacity: 0; transform: translateY(-6px) scale(0.9); }
+      .run .badge { animation: badgeDrop 0.8s ease-out var(--d, 0s) forwards; }
+      @keyframes badgeDrop { to { opacity: 1; transform: translateY(0) scale(1); } }
+      .cat-row { display: grid; grid-template-columns: 15ch 1fr; gap: 0.5rem; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 0.5rem; transition: all 300ms ease; }
+      .cat-row:first-child { border-top: none; padding-top: 0; }
+      .cat-title { font-size: 0.7rem; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.5rem; }
+      .re-primary { background: var(--primary) !important; color: #fff !important; border: 0; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: background 0.2s ease, transform 0.2s ease; }
+      .re-primary:hover { background: var(--primary-hover) !important; transform: scale(1.02); }
+      .re-primary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+      .re-secondary { background: transparent !important; color: var(--text-primary) !important; border: 2px solid var(--text-primary) !important; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: all 0.2s ease, transform 0.2s ease; }
+      .re-secondary:hover { color: var(--primary) !important; border-color: var(--primary) !important; transform: scale(1.02); }
+      @media (prefers-reduced-motion: reduce) {
+        .accordion-content { transition: none !important; }
+      }
+      .modal-overlay { transition: opacity 300ms ease; }
+      .modal-content { transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease; }
+      .modal-open .modal-content { transform: scale(1); opacity: 1; }
+      .modal-closed .modal-content { transform: scale(0.95); opacity: 0; }
+      .check-appear{opacity:0;animation:fadeInOut 1.5s ease var(--d,0s) forwards}
+      @keyframes fadeInOut{0%{opacity:0}30%{opacity:1}70%{opacity:1}100%{opacity:0}}
+      .flow-connect{background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%);background-size:4px 1px;background-repeat:repeat-x;height:1px;opacity:0.5}
+      .end-user-expand{transition:all 0.5s ease;transform:scale(1.05);background:#ffffff;border-color:#10b981}
+      .icon-launch{animation:iconLaunch 0.5s ease forwards}
+      @keyframes iconLaunch{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+      .tagline-fade{opacity:0;animation:fadeIn 1s ease 10s forwards}
+      @keyframes fadeIn{to{opacity:1}}
+      .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:var(--shadow-card);z-index:10}
+      .show-labels .overlay-tag{opacity:1;transition-delay:0.5s}
+      .meta-label{font-size:0.6rem;color:#6b7280;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap;display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;width:100%;justify-content:flex-start}
+      .show-labels .meta-label{opacity:1;transform:translateY(0)}
+      .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
+      .show-labels #flowCard .flex-wrap{gap:1rem}
+      .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
+      .env-wrap { display: flex; align-items: center; gap: 0.4rem; position: relative; transition: all 300ms ease; width: calc(16.666% - 0.5rem); }
+      .show-labels .env-wrap { flex-direction: column; align-items: center; gap: 0.2rem; }
+      .show-labels .env-name { opacity: 1; transform: translateY(0); white-space: nowrap; text-align: center; }
+      .env-name { font-size: 0.7rem; color: #6b7280; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+      .show-labels .env-ring { width: 1.8rem; height: 1.8rem; }
+      .run .env-ring { animation: envPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
+      @keyframes envPulse { 0% { transform: scale(1); filter: saturate(0.4); opacity: 0.65; box-shadow: 0 0 0 rgba(37,99,235,0); } 30% { transform: scale(1.05); box-shadow: 0 0 12px rgba(37,99,235,0.5); } 60% { transform: scale(1.02); filter: saturate(1); opacity: 1; box-shadow: 0 0 8px rgba(37,99,235,0.3); } 100% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); } }
+      .arrow-line { height: 1.5rem; width: 0.15rem; background: linear-gradient(to bottom, #e5e7eb, #2563eb); transform-origin: top center; transform: scaleY(0); margin: 0 auto; position: relative; }
+      .arrow-line::after { content: ''; position: absolute; bottom: -0.3rem; left: -0.25rem; border-left: 0.4rem solid transparent; border-right: 0.4rem solid transparent; border-top: 0.6rem solid #1d4ed8; opacity: 0; transition: opacity 0.3s; }
+      .run .arrow-line { animation: arrowDrop 0.8s ease forwards var(--d, 0s); }
+      .run .arrow-line::after { animation: arrowTip 0.8s ease forwards var(--d, 0s); }
+      @keyframes arrowDrop { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
+      @keyframes arrowTip { 0% { opacity: 0; } 80% { opacity: 0; } 100% { opacity: 1; } }
+      .hub-card { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
+      .run .hub-card { animation: hubAppear 0.8s ease forwards var(--d, 2.5s); }
+      @keyframes hubAppear { to { opacity: 1; transform: translateY(0); } }
+      .metrics-banner { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; text-align: center; font-size: 0.9rem; font-weight: 500; color: #111827; }
+      .run .metrics-banner { animation: metricsAppear 0.8s ease forwards var(--d, 3.5s); }
+      @keyframes metricsAppear { to { opacity: 1; transform: translateY(0); } }
+    </style>
   </head>
-  <body class="min-h-screen antialiased bg-bg-main text-text-primary font-inter">
+  <body class="min-h-screen antialiased">
     <div id="app" class="min-h-screen"></div>
     <script>
       const STATE = {
@@ -101,7 +117,11 @@
         roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 },
         copied: false,
         showLabels: false,
+        showSolutionCards: true,
+        openWhy: null,
         openWhyModal: null,
+        openCards: { core: false, onboarding: false, trust: false },
+        visitedCards: [],
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
@@ -171,13 +191,66 @@
             }
           }));
         },
-        progress: { apps: 0, time: 0, tickets: 0 }
+        progress: { apps: 0, time: 0, tickets: 0 },
+        envProgress: { appsProcessed: 0 }
       };
       const TABS = [
         { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
         { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
         { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
       ];
+      const NEW_CARDS = [
+        {
+          id: 'core',
+          icon: 'layers',
+          title: 'How Recast Does It.',
+          bullets: [
+            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
+            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
+            'Automated patching and validation keep apps secure and compliant.',
+            'Unified dashboard for visibility and governance across all environments.',
+            'Policy-driven automation reduces manual work by over 60%.',
+            'End users get the right app instantly — no tickets, no delays.'
+          ],
+          closer: 'Configured once — Delivered everywhere.',
+          timeline: false,
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
+        },
+        {
+          id: 'onboarding',
+          icon: 'clock',
+          title: 'Onboard & Up to Speed Fast.',
+          bullets: [
+            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
+            'No new infrastructure — integrates with your existing management tools.',
+            'Guided setup with dedicated Customer Success Manager.',
+            'Typical resource: 1–2 IT engineers part-time.',
+            'Enablement includes training, certification, and success planning.'
+          ],
+          closer: 'From first call to production in weeks, not months.',
+          timeline: true,
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
+        },
+        {
+          id: 'trust',
+          icon: 'shield-check',
+          title: 'Trusted by Customers',
+          bullets: [
+            '60M+ endpoints across 130+ countries.',
+            '70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.',
+            '87 CSAT Score | Most trusted in the industry',
+            'Proven scalability from small pilots to global deployments.',
+            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
+          ],
+          closer: 'Trusted by organizations that can’t afford downtime.',
+          timeline: false,
+          bgHeader: 'bg-[#f9fafb]',
+          bgContent: 'bg-[#f9fafb]'
+        }
+      ];
+      const onboardingMiniTimelineEnabled = true;
       function cx(...a){ return a.filter(Boolean).join(' '); }
       function round(n){ return Math.round(n*100)/100; }
       function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
@@ -192,8 +265,8 @@
         root.innerHTML = `
           <header class="relative">
             <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span class="text-primary">Re</span><span class="text-[#0A1C60]">cast</span> Software</h1>
-              <p class="mt-2 max-w-2xl text-base leading-relaxed text-gray-600">
+              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
+              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
                   ? 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
                   : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
@@ -202,7 +275,7 @@
             <div class="relative mx-auto max-w-6xl px-4">
               <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200">
                 ${TABS.map(t=>`
-                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition', STATE.activeTab===t.id ? 'bg-primary text-white hover:bg-primary-hover rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
                     <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
                   </button>
                 `).join('')}
@@ -223,15 +296,16 @@
         `;
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
         attachEvents();
-        if (STATE.activeTab === 'solution') { buildFlow(); initAwDemo(); }
+        if (STATE.activeTab === 'solution') { buildFlow(); }
         if (STATE.activeTab === 'roi') { updateROIOutputs(); }
+        if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
       }
       function chip(label,value,tone){
         const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
         return `
-          <div class="bg-white rounded-radius shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-3">
-            <div class="text-xs text-gray-600">${label}</div>
-            <div class="mt-1 inline-flex items-center gap-2 rounded-sm bg-gradient-to-r ${tones[tone]} px-2 py-0.5 text-slate-900">
+          <div class="section-card p-3">
+            <div class="text-[11px] text-[#4A5568]">${label}</div>
+            <div class="mt-1 inline-flex items-center gap-2 rounded-[2px] bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
               <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
             </div>
           </div>
@@ -254,9 +328,9 @@
           <section id="panel-problems" class="space-y-4">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               ${items.map(p=>`
-                <article class="bg-white rounded-radius shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-primary"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
-                  <p class="mt-1 text-sm text-gray-600">${p.s}</p>
+                <article class="section-card p-4">
+                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-[#0070F3]"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
+                  <p class="mt-1 text-sm text-[#4A5568]">${p.s}</p>
                 </article>
               `).join('')}
             </div>
@@ -273,16 +347,17 @@
           <div class="h-full flex flex-col">
             <button
               type="button"
-              class="w-full overflow-hidden ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition hover:ring-slate-300 shadow-sm rounded-radius"
+              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
               data-action="open-why-modal"
               data-why="${id}"
+              style="border-radius:var(--radius)"
             >
-              <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)} border-b border-border-subtle">
+              <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-2">
                   <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
-                  <span class="text-2xl font-semibold tracking-normal text-[#0A1C60]">${label}</span>
+                  <span class="text-[22px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
           </div>
@@ -297,34 +372,34 @@
         const headerTone = 'bg-slate-50';
         const cta = id === 'recast';
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-300" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
-            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 ease-in-out scale-100 opacity-100 max-h-[95vh] overflow-y-auto">
-              <div class="${headerTone} px-8 py-6 flex items-center justify-between border-b border-border-subtle">
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 95vh; overflow-y: auto;">
+              <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
                   <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
                   <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${labelMap[id]}</h2>
                 </div>
-                <button type="button" class="text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 p-2" data-action="close-why-modal" aria-label="Close">
+                <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-why-modal" aria-label="Close">
                   <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
               </div>
               <div class="p-8 bg-slate-50">
-                <p class="text-base leading-relaxed text-gray-600 mb-4">${data.intro}</p>
+                <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
                 <div class="space-y-4">
                   ${data.bullets.map(b=>`
-                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow duration-300">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-primary flex-shrink-0 mt-0.5"></i>
-                      <p class="text-base leading-relaxed text-gray-600">${b}</p>
+                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
                     </div>
                   `).join('')}
                 </div>
-                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex items-start gap-3">
+                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
                   <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
-                  <p class="text-base italic text-gray-600">${data.analyst}</p>
+                  <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
                 </div>
                 ${cta?`
                   <div class="mt-8 flex justify-center">
-                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-primary text-white text-base font-semibold px-6 py-3 items-center gap-3 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-md hover:shadow-lg hover:bg-primary-hover transition-shadow duration-300 rounded-full">
+                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
                       <i data-lucide="arrow-right" class="w-5 h-5"></i>
                       How Recast solves it
                     </button>
@@ -335,6 +410,63 @@
           </div>
         `;
       }
+      function popoutCard(card){
+        const expanded = STATE.openCards[card.id];
+        const contentId = `card-content-${card.id}`;
+        return `
+          <div class="h-full flex flex-col">
+            <button
+              type="button"
+              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
+              data-action="toggle-card"
+              data-card="${card.id}"
+              aria-expanded="${expanded}"
+              aria-controls="${contentId}"
+              style="border-radius:var(--radius); min-height: 44px;"
+            >
+              <div class="${card.bgHeader || 'bg-slate-50'} px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="${card.icon}" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
+                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">${card.title}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-[#4A5568]">${expanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
+              <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
+                ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
+              </ul>
+              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
+              <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
+            </div>
+          </div>
+        `;
+      }
+      function renderMiniTimeline(){
+        const phases = [
+          {icon: 'play-circle', label: 'Kickoff'},
+          {icon: 'hammer', label: 'Implementation'},
+          {icon: 'check-circle', label: 'UAT'},
+          {icon: 'flag', label: 'Launch'},
+          {icon: 'book-open', label: 'Enablement'}
+        ];
+        return `
+          <div class="flex items-center justify-between mt-4" aria-hidden="true">
+            ${phases.map((p, i) => `
+              ${i > 0 ? '<div class="flex-1 h-px bg-slate-200 mx-2"></div>' : ''}
+              <div class="flex flex-col items-center">
+                <i data-lucide="${p.icon}" class="w-5 h-5 text-[#0070F3]"></i>
+                <span class="text-xs mt-1 text-[#4A5568]">${p.label}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
       function bucketAccordion(id, icon, label, contentFunc, headerTone='bg-slate-50'){
         const expanded = STATE.openBuckets[id];
         const contentId = `bucket-content-${id}`;
@@ -342,21 +474,22 @@
           <div class="flex flex-col">
             <button
               type="button"
-              class="w-full overflow-hidden ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition hover:ring-slate-300 shadow-sm rounded-radius"
+              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
               data-action="toggle-bucket"
               data-bucket="${id}"
               aria-expanded="${expanded}"
               aria-controls="${contentId}"
+              style="border-radius:var(--radius)"
             >
-              <div class="flex items-center justify-between px-5 py-4 ${headerTone} border-b border-border-subtle">
+              <div class="flex items-center justify-between px-5 py-4 ${headerTone}" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-2">
                   <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
-                  <span class="text-lg font-semibold tracking-normal text-[#0A1C60]">${label}</span>
+                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
                 </div>
-                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-gray-600 transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
               </div>
             </button>
-            <div id="${contentId}" class="overflow-hidden transition-[max-height,opacity] duration-150 ease-in-out ${expanded ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}">
+            <div id="${contentId}" class="accordion-content overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease">
               ${expanded ? contentFunc() : ''}
             </div>
           </div>
@@ -366,21 +499,21 @@
         const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
         return `
           <div class="p-4">
-            <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-3 text-sm">
+            <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Hours Saved from Packaging</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-gray-600">Hours/package</span>
+                <span class="text-[#4A5568]">Hours/package</span>
                 <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
                 <span>→</span>
                 <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
               </label>
               <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
-              <div class="mt-2 text-xs flex flex-wrap gap-2">
+              <div class="mt-2 text-[12px] flex flex-wrap gap-2">
                 <span class="rounded px-2 py-1 bg-slate-100">☁️ Cloud</span>
                 <span class="rounded px-2 py-1 bg-slate-100">🖥️ On-Prem</span>
                 <span class="rounded px-2 py-1 bg-slate-100">🔀 Hybrid</span>
               </div>
-              <button type="button" class="mt-2 bg-primary text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-primary-hover" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
             </div>
           </div>
         `;
@@ -389,14 +522,14 @@
         const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
         return `
           <div class="p-4">
-            <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-3 text-sm">
+            <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Hours Saved from Faster Patching</div>
               <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-gray-600">Current hrs</span>
+                <span class="text-[#4A5568]">Current hrs</span>
                 <input class="w-20 rounded bg-slate-100 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
               </label>
               <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
-              <button type="button" class="mt-2 bg-primary text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-primary-hover" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
+              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
             </div>
           </div>
         `;
@@ -406,7 +539,7 @@
         const route=routeRecommendation(STATE.ctx);
         return `
           <div class="p-4">
-            <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-3 text-sm">
+            <div class="sub-card p-3 text-sm">
               <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Reactive Work Reduced</div>
               <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2">
                 <span class="tabular-nums">18 → ${totalMin} min</span>
@@ -418,7 +551,7 @@
               ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
               ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
             </div>
-            <div class="mt-3"><button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-3 py-1 text-xs w-full rounded hover:text-primary hover:border-primary" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
+            <div class="mt-3"><button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-3 py-1 text-xs w-full rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
           </div>
         `;
       }
@@ -427,191 +560,68 @@
           <section id="panel-solution" class="space-y-3">
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
               ${renderFlow()}
-              <section id="awDemo" class="bg-white border border-[rgba(15,23,42,0.1)] rounded-[14px] shadow-aw-demo p-5 text-[#0f172a]">
-                <header class="mb-4">
-                  <h2 class="text-[18px] mb-1">Modern IT Challenges — Expectations vs. Reality</h2>
-                  <p class="text-[13px] text-[rgba(15,23,42,0.7)]">Requests and change are accelerating faster than IT resources can scale.</p>
-                </header>
-                <div class="aw-stage">
-                  <article class="aw-scene hidden" data-scene="0">
-                    <div>
-                      <div style="max-width:900px;">
-  <svg viewBox="0 0 900 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
-    <style>
-      .title { font: 700 30px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill:#111; }
-      .label { font: 600 18px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill:#111; }
-      .small { font: 500 16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill:#444; }
-      .axis  { stroke:#111; stroke-width:4; }
-      .tick  { stroke:#111; stroke-width:3; }
-    </style>
-
-    <defs>
-      <!-- light grid background -->
-      <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-        <path d="M24 0H0V24" fill="none" stroke="#d7d7d7" stroke-width="1"/>
-      </pattern>
-
-      <!-- diagonal hatch fill for the gap -->
-      <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
-        <line x1="0" y1="0" x2="0" y2="14" stroke="#c61a1a" stroke-width="4" opacity="0.75"/>
-      </pattern>
-    </defs>
-
-    <!-- chart area -->
-    <rect x="70" y="50" width="780" height="380" fill="url(#grid)" stroke="#111" stroke-width="4"/>
-
-    <!-- axes (left + bottom) -->
-    <line class="axis" x1="70" y1="50" x2="70" y2="430"/>
-    <line class="axis" x1="70" y1="430" x2="850" y2="430"/>
-
-    <!-- y-axis ticks -->
-    <g opacity="0.95">
-      <line class="tick" x1="70" y1="380" x2="52" y2="380"/>
-      <line class="tick" x1="70" y1="330" x2="52" y2="330"/>
-      <line class="tick" x1="70" y1="280" x2="52" y2="280"/>
-      <line class="tick" x1="70" y1="230" x2="52" y2="230"/>
-      <line class="tick" x1="70" y1="180" x2="52" y2="180"/>
-      <line class="tick" x1="70" y1="130" x2="52" y2="130"/>
-      <line class="tick" x1="70" y1="80"  x2="52" y2="80"/>
-    </g>
-
-    <!-- capacity line (flat, gray) -->
-    <!-- Adjust y=300 to move the capacity up/down -->
-    <line x1="70" y1="300" x2="850" y2="300" stroke="#7a7a7a" stroke-width="10" stroke-linecap="round"/>
-
-    <!-- demand curve (red, increasing) -->
-    <!-- Tweak these control points to change curvature -->
-    <path id="demandCurve"
-          d="M 90 390
-             C 210 380, 300 360, 380 330
-             C 470 295, 540 240, 610 190
-             C 690 130, 760 80, 840 65"
-          fill="none" stroke="#d31717" stroke-width="12" stroke-linecap="round"/>
-
-    <!-- widening gap: hatched region between curve and capacity line -->
-    <!-- This is a closed shape: follow curve, drop to capacity line, return along capacity -->
-    <path d="M 380 330
-             C 470 295, 540 240, 610 190
-             C 690 130, 760 80, 840 65
-             L 840 300
-             L 380 300
-             Z"
-          fill="url(#hatch)" opacity="0.9"/>
-
-    <!-- labels inside plot -->
-    <text x="585" y="135" class="label" fill="#d31717">Business Demand</text>
-    <text x="615" y="160" class="label" fill="#d31717">&amp; Complexity</text>
-
-    <text x="560" y="328" class="label" fill="#6a6a6a" opacity="0.9">IT Execution Capacity</text>
-
-    <!-- callout: The Widening Gap -->
-    <g>
-      <rect x="160" y="210" width="290" height="70" fill="white" stroke="#d31717" stroke-width="6"/>
-      <text x="180" y="255" class="label" fill="#d31717">The Widening Gap</text>
-
-      <!-- pointer to gap -->
-      <polyline points="450,280 505,280 545,312"
-                fill="none" stroke="#d31717" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    </g>
-
-    <!-- axis labels -->
-    <text x="460" y="495" class="label">Time</text>
-
-    <text x="-290" y="30" transform="rotate(-90)" class="label">Volume/Complexity</text>
-
-    <!-- x-axis segment labels -->
-    <text x="110" y="465" class="small">Past 3 Years</text>
-    <text x="420" y="465" class="small">Present</text>
-    <text x="685" y="465" class="small">Next 3 Years</text>
-  </svg>
-</div>
-                      <p class="mt-2 text-[12px] text-[rgba(15,23,42,0.6)]">IT isn’t failing — it’s being asked to do exponentially more with linear resources.</p>
-                    </div>
-                  </article>
-                  <article class="aw-scene hidden" data-scene="1">
-                    <div class="mt-[12px] text-center">
-                      <div class="flex flex-wrap justify-center gap-[3px]">
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Cloud Migration</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">AI Initiative</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">VDI Project</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Security Patch</span>
-                      </div>
-                      <div class="bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] p-[8px] rounded-[10px] mt-2 flex flex-wrap justify-center gap-[3px]">
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">SCCM</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Intune</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Citrix</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">AVD</span>
-                      </div>
-                      <div class="mt-2">⚠️ Slow delivery • Ticket volume rising</div>
-                    </div>
-                    <p class="mt-2 text-[12px] text-[rgba(15,23,42,0.6)]">
-                      “When the app layer is a mess, transformation projects stall — not because strategy is wrong, but because there’s no capacity left to execute.”
-                    </p>
-                  </article>
-                  <article class="aw-scene hidden" data-scene="2">
-                    <div class="mt-[12px] text-center flex justify-between items-center gap-2">
-                      <div class="flex flex-wrap justify-center gap-[3px]">
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">SCCM</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Intune</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Citrix</span>
-                        <span class="inline-block bg-[#f1f5f9] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">AVD</span>
-                      </div>
-                      <div class="bg-[rgba(30,99,255,0.1)] border border-[rgba(30,99,255,0.3)] rounded-[10px] px-[12px] py-[8px] m-[6px]">Application Workspace</div>
-                      <div class="flex flex-wrap justify-center gap-[3px]">
-                        <span class="inline-block bg-[rgba(30,99,255,0.08)] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Windows</span>
-                        <span class="inline-block bg-[rgba(30,99,255,0.08)] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">macOS</span>
-                        <span class="inline-block bg-[rgba(30,99,255,0.08)] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">VDI / AVD</span>
-                        <span class="inline-block bg-[rgba(30,99,255,0.08)] rounded-[8px] px-[10px] py-[6px] m-[3px] text-[12px]">Mobile</span>
-                      </div>
-                    </div>
-                    <div class="flex justify-around mt-[12px] text-[13px]">
-                      <div><strong id="appsCount" class="block text-[20px] text-primary-blue">0</strong> Apps Processed</div>
-                      <div><strong id="hoursSaved" class="block text-[20px] text-primary-blue">0</strong> Hours Saved</div>
-                      <div><strong id="ticketsAvoided" class="block text-[20px] text-primary-blue">0</strong> Tickets Avoided</div>
-                    </div>
-                    <p class="mt-2 text-[12px] text-[rgba(15,23,42,0.6)]">One front door for every app. One control plane for every platform.</p>
-                  </article>
-                </div>
-                <nav class="flex justify-between items-center mt-[14px]">
-                  <button class="border border-[rgba(15,23,42,0.15)] rounded-[10px] bg-white px-[12px] py-[8px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" data-aw-nav="prev">← Back</button>
-                  <div class="flex gap-[6px]">
-                    <button class="w-[8px] h-[8px] rounded-full bg-[rgba(30,99,255,0.2)] cursor-pointer [aria-selected=true]:bg-primary-blue" data-aw-dot="0" aria-selected="true"></button>
-                    <button class="w-[8px] h-[8px] rounded-full bg-[rgba(30,99,255,0.2)] cursor-pointer [aria-selected=true]:bg-primary-blue" data-aw-dot="1" aria-selected="false"></button>
-                    <button class="w-[8px] h-[8px] rounded-full bg-[rgba(30,99,255,0.2)] cursor-pointer [aria-selected=true]:bg-primary-blue" data-aw-dot="2" aria-selected="false"></button>
+              <div class="flex flex-col gap-3 relative">
+                <div class="sticky top-0 z-10 bg-[#F7F9FB] py-2 shadow-sm">
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="font-semibold">Recast Approach</span>
+                    <span class="text-[#4A5568]">${STATE.visitedCards.length} of 3 explored</span>
                   </div>
-                  <button class="bg-primary-blue hover:bg-[#1e63ff]/90 text-white border-transparent rounded-[10px] px-[12px] py-[8px] cursor-pointer transition-colors duration-300" data-aw-nav="next">Next →</button>
-                </nav>
-                <footer class="mt-4">
-                  <button class="bg-primary-blue hover:bg-[#1e63ff]/90 text-white border-transparent rounded-[10px] px-[12px] py-[8px] cursor-pointer transition-colors duration-300 w-full md:w-auto" id="awSeeImpact" data-action="advance" data-next="roi">See Business Impact</button>
-                </footer>
-              </section>
+                </div>
+                <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
+                ${NEW_CARDS.map(card => popoutCard(card)).join('')}
+                <div class="sticky bottom-0 bg-[#F7F9FB] py-3 shadow-lg mt-3">
+                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
+                </div>
+              </div>
             </div>
           </section>
         `;
       }
       function pill(label,active,action,value){
-        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition rounded-sm',active?'bg-primary text-white border-transparent hover:bg-primary-hover':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-primary')}" data-action="${action}" data-value="${String(value)}">${label}</button>`;
+        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
       }
       function renderFlow(){
         return `
-          <div class="bg-white rounded-radius shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-4">
+          <div class="section-card p-4">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded-sm grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
                 <div>
                   <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-xs text-gray-600">Curated & secured catalog</div>
+                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
                 </div>
               </div>
-              <div class="flex items-center gap-2 text-xs">
-                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-primary hover:border-primary" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-primary text-white px-2.5 py-1.5 text-xs font-semibold rounded hover:bg-primary-hover">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-primary hover:border-primary">Reset</button>
+              <div class="flex items-center gap-2 text-[12px]">
+                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
               </div>
             </div>
             <div class="mt-2 flex gap-2 text-xs">
             </div>
-            <div id="flowCard" class="mt-3 border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+            <div id="envFlow" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Environment flow">
+              <div id="envSources" class="flex flex-wrap justify-between gap-2">
+                ${ENV_SOURCES.map((env, idx) => `
+                  <div class="env-wrap" style="--d: ${idx * 0.2}s">
+                    <div class="env-ring logo-ring">${env.svg}</div>
+                    <span class="env-name">${env.name}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div id="envArrows" class="grid grid-cols-6 gap-2 mt-2 mb-2">
+                ${ENV_SOURCES.map((_, idx) => `<div class="arrow-line" style="--d: ${1 + idx * 0.2}s"></div>`).join('')}
+              </div>
+              <div id="envHub" class="hub-card sub-card p-2 text-center bg-white">
+                <div class="flex items-center justify-center gap-2">
+                  <i data-lucide="server" class="w-4 h-4 text-[#2563eb]"></i>
+                  <span class="text-sm font-medium">Application Workspace</span>
+                </div>
+              </div>
+              <div id="metricsBanner" class="metrics-banner mt-2">
+                <span id="appsProcessedCounter" class="tabular-nums">0</span>+ Apps Processed
+              </div>
+            </div>
+            <div id="flowCard" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
               <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
                 <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
                 <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
@@ -619,67 +629,67 @@
               </div>
               <div class="space-y-2 relative">
                 ${CATALOG.map(s=>`
-                  <div class="grid grid-cols-[15ch_1fr] gap-2 items-center border-t border-[#e5e7eb] pt-2 first:border-t-0 first:pt-0 transition-all duration-300">
-                    <div class="flex items-center gap-2 uppercase text-gray-600 text-xs tracking-widest"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
+                  <div class="cat-row">
+                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
                     <div id="${s.id}" class="flex flex-wrap gap-2"></div>
                   </div>
                 `).join('')}
-                <div id="overlayTag" class="opacity-0 transition-opacity duration-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 p-4 rounded-radius shadow-card z-10 show-labels:opacity-100 show-labels:delay-500 text-center text-sm text-gray-600">Every app mapped to stage, policy, region, and device.</div>
+                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
               </div>
-              <div id="flowHubFlash" class="mt-2 hidden text-primary"><span class="inline-flex items-center gap-1 text-xs"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
+              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-2 relative">
-                    <div class="text-xs text-gray-600">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
                     <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 h-[0.22rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-primary to-primary-hover run:animate-barGrow" style="--d:${3 + .5*i}s"></div>
-                    <i data-lucide="check-circle" class="absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${4 + .5*i}s"></i>
+                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
                   </div>
                 `).join('')}
-                <div class="absolute top-[-0.5rem] left-0 w-full h-px bg-gradient-to-r from-transparent to-[#e5e7eb] bg-[length:4px_1px] bg-repeat-x opacity-50"></div>
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
               </div>
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-2 relative">
-                    <div class="text-xs text-gray-600">${['Business Unit','Subsidiary','Region'][i]}</div>
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
                     <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 w-[0.22rem] h-16 rounded-[2px] origin-top scale-y-0 bg-gradient-to-b from-[#0A1C60] to-primary run:animate-boltDrop" style="--d:${5 + .5*i}s"></div>
-                    <i data-lucide="shield-check" class="absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${6 + .5*i}s"></i>
+                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
                   </div>
                 `).join('')}
-                <div class="absolute top-[-0.5rem] left-0 w-full h-px bg-gradient-to-r from-transparent to-[#e5e7eb] bg-[length:4px_1px] bg-repeat-x opacity-50"></div>
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
               </div>
               <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
                 ${['A','B','C'].map((k,i)=>`
-                  <div class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-gray-600"></i>
+                  <div class="sub-card p-2 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
                     <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-gray-600">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <i data-lucide="check-circle" class="absolute top-1 right-1 w-4 h-4 text-green-500 animate-fadeInOut" style="--d:${8 + .5*i}s"></i>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
                   </div>
                 `).join('')}
-                <div class="absolute top-[-0.5rem] left-0 w-full h-px bg-gradient-to-r from-transparent to-[#e5e7eb] bg-[length:4px_1px] bg-repeat-x opacity-50"></div>
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
               </div>
               <div class="mt-3">
-                <div id="endUserCard" class="border border-border-subtle bg-bg-main rounded-[0.666rem] transition-shadow duration-300 p-3 transition-all duration-500">
+                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
                   <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full bg-[#EA4335]">U</div>
+                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
                     <div class="text-sm">
                       <div class="font-medium">End user</div>
-                      <div id="endUserMessage" class="text-gray-600">Apps on demand — no waiting, no tickets.</div>
+                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
                     </div>
                   </div>
-                  <div class="mt-3 h-[0.38rem] rounded-[2px] origin-left scale-x-0 bg-gradient-to-r from-primary to-primary-hover run:animate-barGrow" style="--d:10s"></div>
-                  <div class="relative mt-2 border border-border-subtle bg-[#F7F9FB] rounded-radius p-4">
-                    <i data-lucide="laptop" class="h-5 w-5 text-gray-600"></i>
-                    <div id="endUserBadge" class="absolute right-2 top-2 w-[1.15rem] h-[1.15rem] rounded-full opacity-0 translate-y-[-6px] scale-90 bg-[#E11D48] grid place-items-center font-bold text-black run:animate-badgeDrop" style="--d:11s">!</div>
-                    <div class="mt-1 text-[11px] text-gray-600">Workspace launches the correct app instantly</div>
+                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
+                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
+                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
                   </div>
                   <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
-                    ${miniApps.map(app => `<div class="w-[2.1rem] h-[2.1rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
                   </div>
                 </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] animate-fadeIn text-green-500"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
               </div>
             </div>
           </div>
@@ -696,7 +706,7 @@
         return `
           <section id="panel-roi" class="space-y-6">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-              <div class="bg-white rounded-3xl shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-8">
+              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
                 <h3 class="text-2xl font-light mb-6 text-gray-900">Assumptions</h3>
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   ${numInput('# users','users', r.i.users)}
@@ -709,25 +719,25 @@
                   ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent)}
                 </div>
                 <div class="mt-8">
-                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full hover:text-primary hover:border-primary">
+                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">
                     <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
                   </button>
                 </div>
               </div>
-              <div class="bg-white rounded-3xl shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-8">
+              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
                 <h3 class="text-2xl font-light mb-6 text-gray-900">Results</h3>
                 <div class="space-y-4 text-lg">
                   ${kv('Hours Returned / Month', num(round(r.totalHoursMonth)))}
                   ${kv('Hours Returned / Year', num(round(r.totalHoursYear)))}
                 </div>
                 <div class="mt-8 flex flex-wrap gap-4">
-                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full hover:text-primary hover:border-primary">Reset</button>
-                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-primary text-white px-5 py-3 text-base font-light focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full hover:bg-primary-hover">
+                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-5 py-3 text-base font-light focus-ring rounded-full hover:bg-[#005AD0]">
                     <i data-lucide="clipboard" class="w-5 h-5"></i> ${STATE.copied ? 'Copied!' : 'Copy capacity summary'}
                   </button>
                 </div>
               </div>
-              <div class="bg-white rounded-3xl shadow-card transition-shadow duration-300 ease-in-out hover:shadow-hover hover:-translate-y-0.5 p-8 col-span-1 md:col-span-2">
+              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white col-span-1 md:col-span-2">
                 <h3 class="text-2xl font-light mb-6 text-gray-900">Impact Breakdown</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
@@ -783,13 +793,14 @@
         };
       }
       function updateROIOutputs(){
+        // No need for outputs update beyond render
       }
       function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
       function kv(label,value){
-        return `<div class="flex items-center justify-between rounded-sm bg-slate-100 px-3 py-2"><span class="text-gray-600">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
+        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
       }
       function numInput(label,key,value){
-        return `<label class="flex flex-col gap-1 text-sm"><span class="text-xs text-gray-600">${label}</span><input class="rounded-sm border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
+        return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[#4A5568]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
       }
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
@@ -836,6 +847,14 @@
           logo('ZoomIt / Sysinternals','ZI','#58595B')
         ]}
       ];
+      const ENV_SOURCES = [
+        { name: 'SCCM', svg: '<i data-lucide="server-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
+        { name: 'Intune', svg: '<i data-lucide="cloud-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
+        { name: 'Citrix', svg: '<i data-lucide="layout-dashboard" class="w-5 h-5 text-[#000000]"></i>' },
+        { name: 'AVD', svg: '<i data-lucide="monitor" class="w-5 h-5 text-[#0078D4]"></i>' },
+        { name: 'Windows 365', svg: '<i data-lucide="cloud" class="w-5 h-5 text-[#0078D4]"></i>' },
+        { name: 'Jamf', svg: '<i data-lucide="apple" class="w-5 h-5 text-[#000000]"></i>' }
+      ];
       const appConfigs = [
         {stage:'Prod', policy:'MFA + VPN', region:'AMER', device:'Windows'},
         {stage:'QA', policy:'Compliant only', region:'APAC', device:'Any'},
@@ -871,6 +890,7 @@
         return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
       }
       function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
+      /* ---------- Per-user cached Current State (IDs + storage) ---------- */
       const USER_ID = String(window.APP_USER_ID || "guest");
       const PAGE_SCOPE = location.origin + location.pathname + location.search;
       const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
@@ -959,31 +979,32 @@
           });
         }
       }
+      /* ------------------------------------------------------------------- */
       function renderModal(){
         if(!STATE.modalOpen) return '';
         const buf = STATE.editBuffers;
         const toLines = arr => arr.join('\n');
         const ensure = v => v ?? '';
         return `
-          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8 transition-opacity duration-300">
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
             <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
               <div class="flex items-center justify-between">
                 <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
-                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded" data-action="close-modal" aria-label="Close">
+                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
               </div>
-              <p class="mt-1 text-sm text-gray-600">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
+              <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
               <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                 ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
                 ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
                 ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
-                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded hover:bg-primary-hover">
+                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
                   <i data-lucide="save" class="w-4 h-4"></i> Save
                 </button>
-                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded hover:text-primary hover:border-primary">
+                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
                   <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
                 </button>
               </div>
@@ -996,19 +1017,19 @@
           <div class="flex flex-col gap-4">
             <span class="text-sm font-semibold">${label}</span>
             <label class="flex flex-col gap-1">
-              <span class="text-xs text-gray-600">Introduction</span>
-              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded-sm border border-slate-200 bg-white p-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
+              <span class="text-xs text-[#4A5568]">Introduction</span>
+              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
             </label>
             <label class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 text-xs text-gray-600">
-                <i data-lucide="check-circle" class="w-4 h-4 text-primary"></i>
+              <div class="flex items-center gap-2 text-xs text-[#4A5568]">
+                <i data-lucide="check-circle" class="w-4 h-4 text-[#0070F3]"></i>
                 Bullets (one per line, max 4)
               </div>
-              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded-sm border border-slate-200 bg-white p-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
+              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
             </label>
             <label class="flex flex-col gap-1">
-              <span class="text-xs text-gray-600">Analyst Trend</span>
-              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded-sm border border-slate-200 bg-white p-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
+              <span class="text-xs text-[#4A5568]">Analyst Trend</span>
+              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
             </label>
           </div>
         `;
@@ -1017,6 +1038,7 @@
         const root=document.getElementById('app');
         root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
           STATE.activeTab=e.currentTarget.getAttribute('data-tab');
+          STATE.visitedCards = [];
           render();
         }));
         root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1031,6 +1053,26 @@
         }));
         root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
           STATE.openWhyModal = null;
+          render();
+        }));
+        root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
+          const id=e.currentTarget.getAttribute('data-card');
+          const wasOpen = STATE.openCards[id];
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
+          STATE.openCards[id] = !wasOpen;
+          if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) {
+            STATE.visitedCards.push(id);
+          }
+          render();
+          if (STATE.openCards[id]) {
+            setTimeout(() => {
+              e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 200);
+          }
+        }));
+        root.querySelectorAll('[data-action="expand-all"]').forEach(b=>b.addEventListener('click',()=>{
+          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
+          STATE.visitedCards = ['core', 'onboarding', 'trust'];
           render();
         }));
         root.querySelectorAll('[data-action="toggle-bucket"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1096,7 +1138,7 @@
         const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
         const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
         const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; toggleOverlay(); buildFlow(); });
-        root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('animate-iconLaunch'); setTimeout(()=>icon.classList.remove('animate-iconLaunch'), 500); }));
+        root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('icon-launch'); setTimeout(()=>icon.classList.remove('icon-launch'), 500); }));
         const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
         if(openEditor) openEditor.addEventListener('click', ()=>{
           STATE.modalOpen = true;
@@ -1119,12 +1161,12 @@
           const mount=document.getElementById(section.id); if(!mount) return;
           mount.innerHTML='';
           section.items.forEach((itm,idx)=>{
-            const wrap=document.createElement('div'); wrap.className='flex items-center gap-1 transition-all duration-300 show-labels:flex-col show-labels:items-start show-labels:gap-[0.2rem]'; wrap.style.setProperty('--d',(base+idx*0.2).toFixed(2)+'s');
-            const ring=document.createElement('div'); ring.className='w-[2.1rem] h-[2.1rem] rounded-full grid place-items-center bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_8px_rgba(37,99,235,0.3)] hover:scale-105 show-labels:w-[1.8rem] show-labels:h-[1.8rem] run:animate-appLiftPulse'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
+            const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.2 + 4).toFixed(2)+'s'); // Delay catalog by 4s
+            const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
             wrap.appendChild(ring);
             if(STATE.showLabels){
-              const label=document.createElement('span'); label.className='text-[0.7rem] text-gray-500 opacity-0 -translate-x-[10px] transition-all duration-300 show-labels:opacity-100 show-labels:translate-x-0 whitespace-normal text-left'; label.textContent=itm.name; wrap.appendChild(label);
-              const meta=document.createElement('div'); meta.className='text-[0.6rem] text-gray-500 opacity-0 translate-y-[5px] transition-all duration-300 relative top-auto left-auto z-[5] whitespace-nowrap flex flex-col gap-[0.1rem] items-start w-full justify-start show-labels:opacity-100 show-labels:translate-y-0';
+              const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label);
+              const meta=document.createElement('div'); meta.className='meta-label';
               meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
               wrap.appendChild(meta);
             }
@@ -1132,15 +1174,15 @@
           });
           base+=1.5;
         });
-        buildTiles(document.getElementById('flowConnA'), 14, 3);
-        buildTiles(document.getElementById('flowConnB'), 14, 3.5);
-        buildTiles(document.getElementById('flowConnC'), 14, 4);
-        buildTiles(document.getElementById('flowGrpA'), 18, 5);
-        buildTiles(document.getElementById('flowGrpB'), 18, 5.5);
-        buildTiles(document.getElementById('flowGrpC'), 18, 6);
-        buildTiles(document.getElementById('flowDevA'), 10, 8);
-        buildTiles(document.getElementById('flowDevB'), 10, 8.5);
-        buildTiles(document.getElementById('flowDevC'), 10, 9);
+        buildTiles(document.getElementById('flowConnA'), 14, 7); // Delay existing by 4s
+        buildTiles(document.getElementById('flowConnB'), 14, 7.5);
+        buildTiles(document.getElementById('flowConnC'), 14, 8);
+        buildTiles(document.getElementById('flowGrpA'), 18, 9);
+        buildTiles(document.getElementById('flowGrpB'), 18, 9.5);
+        buildTiles(document.getElementById('flowGrpC'), 18, 10);
+        buildTiles(document.getElementById('flowDevA'), 10, 12);
+        buildTiles(document.getElementById('flowDevB'), 10, 12.5);
+        buildTiles(document.getElementById('flowDevC'), 10, 13);
         const avatar=document.getElementById('endUserAvatar');
         const badge=document.getElementById('endUserBadge');
         if(avatar){ avatar.style.background='#EA4335'; avatar.textContent='U'; }
@@ -1153,21 +1195,27 @@
         if(counters) counters.classList.add('hidden');
         const card = document.getElementById('flowCard');
         if(card) card.classList.remove('run');
-        if(STATE.showLabels) card.classList.add('show-labels');
-        else card.classList.remove('show-labels');
+        const envCard = document.getElementById('envFlow');
+        if(envCard) envCard.classList.remove('run');
+        if(STATE.showLabels) { card.classList.add('show-labels'); envCard.classList.add('show-labels'); }
+        else { card.classList.remove('show-labels'); envCard.classList.remove('show-labels'); }
         const endCard = document.getElementById('endUserCard');
-        if(endCard) endCard.classList.remove('scale-105', 'bg-white', 'border-green-500');
+        if(endCard) endCard.classList.remove('end-user-expand');
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.envProgress = { appsProcessed: 0 };
         updateProgress();
+        updateEnvProgress();
         const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
       }
       function buildTiles(container,count,baseDelay){
         if(!container) return; container.innerHTML='';
-        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='w-[0.45rem] h-[0.45rem] rounded-[2px] bg-gray-200 opacity-90 run:animate-tilePulse'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
+        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
       }
       function startFlow(){
+        const envCard=document.getElementById('envFlow'); if(!envCard) return;
         const card=document.getElementById('flowCard'); if(!card) return;
-        card.classList.remove('run'); void card.offsetWidth; card.classList.add('run');
+        envCard.classList.remove('run'); card.classList.remove('run'); void envCard.offsetWidth; void card.offsetWidth;
+        envCard.classList.add('run'); card.classList.add('run');
         const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
         const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
         const message = document.getElementById('endUserMessage'); const mini = document.getElementById('miniWorkspace');
@@ -1175,17 +1223,21 @@
         if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),2000); }
         if(success) success.classList.add('hidden');
         if(counters) counters.classList.remove('hidden');
-        let interval = setInterval(updateProgress, 100);
-        setTimeout(()=>{
-          if(avatar){ avatar.style.background= '#10b981'; }
-          if(badge){ badge.textContent='✓'; badge.style.background= '#10b981'; }
-          if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
-          if(mini) mini.classList.remove('hidden');
-          if(endCard) endCard.classList.add('scale-105', 'bg-white', 'border-green-500');
-          if(success) success.classList.remove('hidden');
-          clearInterval(interval);
-        }, 11000);
-        setTimeout(()=> card.classList.remove('run'), 12000);
+        let envInterval = setInterval(updateEnvProgress, 50);
+        setTimeout(() => {
+          clearInterval(envInterval);
+          let interval = setInterval(updateProgress, 100);
+          setTimeout(()=>{
+            if(avatar){ avatar.style.background= 'var(--re-green)'; }
+            if(badge){ badge.textContent='✓'; badge.style.background= 'var(--re-green)'; }
+            if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
+            if(mini) mini.classList.remove('hidden');
+            if(endCard) endCard.classList.add('end-user-expand');
+            if(success) success.classList.remove('hidden');
+            clearInterval(interval);
+          }, 7000); // Adjusted for env flow (4s env + 7s catalog)
+        }, 4000); // Env flow duration 4s
+        setTimeout(()=> { envCard.classList.remove('run'); card.classList.remove('run'); }, 16000);
       }
       function updateProgress(){
         if(STATE.progress.apps < 128) STATE.progress.apps += 4;
@@ -1195,62 +1247,41 @@
         setText('timeSaved', STATE.progress.time > 46 ? 46 : STATE.progress.time);
         setText('ticketsAvoided', STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets);
       }
+      function updateEnvProgress(){
+        if(STATE.envProgress.appsProcessed < 8000) STATE.envProgress.appsProcessed += 200;
+        setText('appsProcessedCounter', STATE.envProgress.appsProcessed > 8000 ? '8,000' : STATE.envProgress.appsProcessed);
+      }
       function resetFlow(){
         STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.envProgress = { appsProcessed: 0 };
         STATE.showLabels = false;
         buildFlow();
       }
-      function initAwDemo() {
-        const root = document.getElementById("awDemo");
-        if (!root) return;
-        const scenes = root.querySelectorAll(".aw-scene");
-        const dots = root.querySelectorAll("[data-aw-dot]");
-        const nextBtn = root.querySelector('[data-aw-nav="next"]');
-        const prevBtn = root.querySelector('[data-aw-nav="prev"]');
-        let idx = 0;
-        function setScene(i) {
-          idx = Math.max(0, Math.min(i, scenes.length - 1));
-          scenes.forEach((s, j) => {
-            if (j === idx) {
-              s.classList.remove('hidden');
-              s.classList.add('block');
-              s.classList.remove('animate-awFadeIn'); 
-              void s.offsetWidth; 
-              s.classList.add('animate-awFadeIn');
-            } else {
-              s.classList.remove('block', 'animate-awFadeIn');
-              s.classList.add('hidden');
-            }
-          });
-          dots.forEach((d, j) => d.setAttribute("aria-selected", j === idx ? "true" : "false"));
-          prevBtn.disabled = idx === 0;
-          nextBtn.textContent = idx === scenes.length - 1 ? "Restart ↺" : "Next →";
-          if (idx === 2) animateMetrics();
-        }
-        function animateMetrics() {
-          const metrics = [
-            { el: "#appsCount", target: 128 },
-            { el: "#hoursSaved", target: 46 },
-            { el: "#ticketsAvoided", target: 73 }
-          ];
-          metrics.forEach(m => {
-            const el = root.querySelector(m.el);
-            let start = 0;
-            const step = () => {
-              start++;
-              el.textContent = Math.min(m.target, start);
-              if (start < m.target) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
-          });
-        }
-        nextBtn.addEventListener("click", () => {
-          if (idx === scenes.length - 1) setScene(0);
-          else setScene(idx + 1);
+      function attachAccordionKeyboard(){
+        document.addEventListener('keydown', (e) => {
+          const target = e.target;
+          if (!target.classList.contains('accordion-header')) return;
+          const headers = Array.from(document.querySelectorAll('.accordion-header'));
+          const idx = headers.indexOf(target);
+          if (e.key === 'ArrowDown') {
+            const nextIdx = (idx + 1) % headers.length;
+            headers[nextIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'ArrowUp') {
+            const prevIdx = (idx - 1 + headers.length) % headers.length;
+            headers[prevIdx].focus();
+            e.preventDefault();
+          } else if (e.key === 'Home') {
+            headers[0].focus();
+            e.preventDefault();
+          } else if (e.key === 'End') {
+            headers[headers.length - 1].focus();
+            e.preventDefault();
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            target.click();
+            e.preventDefault();
+          }
         });
-        prevBtn.addEventListener("click", () => setScene(idx - 1));
-        dots.forEach((d, i) => d.addEventListener("click", () => setScene(i)));
-        setScene(0);
       }
       document.addEventListener('DOMContentLoaded', render);
       document.addEventListener('click', (e)=>{
@@ -1305,7 +1336,7 @@
           });
           STATE.modalOpen=false;
           STATE.activeTab='problems';
-          STATE.openWhyModal=null;
+          STATE.openWhy=null;
           render();
         }
         if(action==='reset-currentstate-defaults'){
