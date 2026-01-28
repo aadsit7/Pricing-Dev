@@ -84,10 +84,26 @@
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
       .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
-      .env-wrap { display: flex; align-items: center; gap: 0.4rem; position: relative; transition: all 300ms ease; width: calc(16.666% - 0.5rem); }
-      .show-labels .env-wrap { flex-direction: column; align-items: center; gap: 0.2rem; }
-      .show-labels .env-name { opacity: 1; transform: translateY(0); white-space: nowrap; text-align: center; }
-      .env-name { font-size: 0.7rem; color: #6b7280; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+      /* ALWAYS show env labels (SCCM/Intune/Citrix/AVD/W365/Jamf) */
+.env-wrap {
+  display: flex;
+  flex-direction: column;     /* always stacked */
+  align-items: center;
+  gap: 0.2rem;
+  position: relative;
+  transition: all 300ms ease;
+  width: calc(16.666% - 0.5rem);
+}
+
+.env-name {
+  font-size: 0.7rem;
+  color: #6b7280;
+  opacity: 1;                 /* was 0 */
+  transform: translateY(0);   /* was translateY(10px) */
+  white-space: nowrap;
+  text-align: center;
+}
+
       .show-labels .env-ring { width: 1.8rem; height: 1.8rem; }
       .run .env-ring { animation: envPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
       @keyframes envPulse { 0% { transform: scale(1); filter: saturate(0.4); opacity: 0.65; box-shadow: 0 0 0 rgba(37,99,235,0); } 30% { transform: scale(1.05); box-shadow: 0 0 12px rgba(37,99,235,0.5); } 60% { transform: scale(1.02); filter: saturate(1); opacity: 1; box-shadow: 0 0 8px rgba(37,99,235,0.3); } 100% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); } }
