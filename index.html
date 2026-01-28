@@ -84,27 +84,9 @@
       .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
       .show-labels #flowCard .flex-wrap{gap:1rem}
       .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
-      /* ALWAYS show env labels (SCCM/Intune/Citrix/AVD/W365/Jamf) */
-.env-wrap {
-  display: flex;
-  flex-direction: column;     /* always stacked */
-  align-items: center;
-  gap: 0.2rem;
-  position: relative;
-  transition: all 300ms ease;
-  width: calc(16.666% - 0.5rem);
-}
-
-.env-name {
-  font-size: 0.7rem;
-  color: #6b7280;
-  opacity: 1;                 /* was 0 */
-  transform: translateY(0);   /* was translateY(10px) */
-  white-space: nowrap;
-  text-align: center;
-}
-
-      .show-labels .env-ring { width: 1.8rem; height: 1.8rem; }
+      .env-wrap { display: flex; align-items: center; gap: 0.2rem; position: relative; transition: all 300ms ease; width: calc(16.666% - 0.5rem); flex-direction: column; }
+      .env-name { font-size: 0.7rem; color: #6b7280; opacity: 1; transform: translateY(0); transition: all 0.3s ease; white-space: nowrap; text-align: center; }
+      .env-ring { width: 1.8rem; height: 1.8rem; }
       .run .env-ring { animation: envPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
       @keyframes envPulse { 0% { transform: scale(1); filter: saturate(0.4); opacity: 0.65; box-shadow: 0 0 0 rgba(37,99,235,0); } 30% { transform: scale(1.05); box-shadow: 0 0 12px rgba(37,99,235,0.5); } 60% { transform: scale(1.02); filter: saturate(1); opacity: 1; box-shadow: 0 0 8px rgba(37,99,235,0.3); } 100% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); } }
       .arrow-line { height: 1.5rem; width: 0.15rem; background: linear-gradient(to bottom, #e5e7eb, #2563eb); transform-origin: top center; transform: scaleY(0); margin: 0 auto; position: relative; }
@@ -284,8 +266,8 @@
               <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
-                  ? 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'
-                  : 'Recast works across SCCM, Intune, Citrix, VMware Workspace ONE, and more—making the tools you already use faster, smarter, and easier to manage'}
+                  ? 'The Application Layer Is the #1 Bottleneck in Modern IT'
+                  : 'Application Workspace provides a single, stable application layer that absorbs platform change so IT can modernize continuously without disrupting users or increasing operational load.'}
               </p>
             </div>
             <div class="relative mx-auto max-w-6xl px-4">
@@ -349,6 +331,50 @@
                   <p class="mt-1 text-sm text-[#4A5568]">${p.s}</p>
                 </article>
               `).join('')}
+            </div>
+            <div class="section-card p-6">
+              <h3 class="text-xl font-semibold mb-4 text-center">Modern IT Reality</h3>
+              <div class="relative w-full h-64">
+                <svg viewBox="0 0 800 400" class="w-full h-full">
+                  <!-- Central node -->
+                  <circle cx="400" cy="200" r="40" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+                  <text x="400" y="205" text-anchor="middle" fill="white" font-size="16" font-weight="bold">IT Team</text>
+                  
+                  <!-- Connected nodes -->
+                  <g>
+                    <!-- Top left: Apps -->
+                    <line x1="400" y1="200" x2="200" y2="50" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="200" cy="50" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="200" y="55" text-anchor="middle" fill="#111827" font-size="14">Apps</text>
+                    
+                    <!-- Top right: Cloud -->
+                    <line x1="400" y1="200" x2="600" y2="50" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="600" cy="50" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="600" y="55" text-anchor="middle" fill="#111827" font-size="14">Cloud</text>
+                    
+                    <!-- Bottom left: End Users -->
+                    <line x1="400" y1="200" x2="200" y2="350" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="200" cy="350" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="200" y="355" text-anchor="middle" fill="#111827" font-size="14">End Users</text>
+                    
+                    <!-- Bottom right: Platforms -->
+                    <line x1="400" y1="200" x2="600" y2="350" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="600" cy="350" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="600" y="355" text-anchor="middle" fill="#111827" font-size="14">Platforms</text>
+                    
+                    <!-- Left middle: VDI -->
+                    <line x1="400" y1="200" x2="100" y2="200" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="100" cy="200" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="100" y="205" text-anchor="middle" fill="#111827" font-size="14">VDI</text>
+                    
+                    <!-- Right middle: Intune -->
+                    <line x1="400" y1="200" x2="700" y2="200" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
+                    <circle cx="700" cy="200" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
+                    <text x="700" y="205" text-anchor="middle" fill="#111827" font-size="14">Intune</text>
+                  </g>
+                </svg>
+              </div>
+              <p class="mt-4 text-sm text-center text-[#4A5568]">Complex interconnections in modern IT environments lead to bottlenecks in app delivery.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
               ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
@@ -637,7 +663,7 @@
                 <span id="appsProcessedCounter" class="tabular-nums">0</span>+ Apps Processed
               </div>
             </div>
-            <div id="flowCard" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+            <div id="flowCard" class="mt-3 sub-card p-2 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
               <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
                 <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
                 <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
