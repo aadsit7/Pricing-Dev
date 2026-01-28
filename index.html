@@ -333,47 +333,140 @@
               `).join('')}
             </div>
             <div class="section-card p-6">
-              <h3 class="text-xl font-semibold mb-4 text-center">Modern IT Reality</h3>
-              <div class="relative w-full h-64">
-                <svg viewBox="0 0 800 400" class="w-full h-full">
-                  <!-- Central node -->
-                  <circle cx="400" cy="200" r="40" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
-                  <text x="400" y="205" text-anchor="middle" fill="white" font-size="16" font-weight="bold">IT Team</text>
-                  
-                  <!-- Connected nodes -->
-                  <g>
-                    <!-- Top left: Apps -->
-                    <line x1="400" y1="200" x2="200" y2="50" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="200" cy="50" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="200" y="55" text-anchor="middle" fill="#111827" font-size="14">Apps</text>
-                    
-                    <!-- Top right: Cloud -->
-                    <line x1="400" y1="200" x2="600" y2="50" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="600" cy="50" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="600" y="55" text-anchor="middle" fill="#111827" font-size="14">Cloud</text>
-                    
-                    <!-- Bottom left: End Users -->
-                    <line x1="400" y1="200" x2="200" y2="350" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="200" cy="350" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="200" y="355" text-anchor="middle" fill="#111827" font-size="14">End Users</text>
-                    
-                    <!-- Bottom right: Platforms -->
-                    <line x1="400" y1="200" x2="600" y2="350" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="600" cy="350" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="600" y="355" text-anchor="middle" fill="#111827" font-size="14">Platforms</text>
-                    
-                    <!-- Left middle: VDI -->
-                    <line x1="400" y1="200" x2="100" y2="200" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="100" cy="200" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="100" y="205" text-anchor="middle" fill="#111827" font-size="14">VDI</text>
-                    
-                    <!-- Right middle: Intune -->
-                    <line x1="400" y1="200" x2="700" y2="200" stroke="#e5e7eb" stroke-width="2" stroke-dasharray="5,5"/>
-                    <circle cx="700" cy="200" r="30" fill="white" stroke="#2563eb" stroke-width="2"/>
-                    <text x="700" y="205" text-anchor="middle" fill="#111827" font-size="14">Intune</text>
-                  </g>
-                </svg>
-              </div>
+  <h3 class="text-xl font-semibold mb-4 text-center">Modern IT Reality</h3>
+
+  <div class="relative w-full h-72">
+    <svg viewBox="0 0 900 420" class="w-full h-full">
+
+      <!-- ===== INNER CONSTRAINED RING (Application Layer Bottleneck) ===== -->
+      <circle
+        cx="450"
+        cy="210"
+        r="85"
+        fill="none"
+        stroke="#f59e0b"
+        stroke-width="2"
+        stroke-dasharray="4 4"
+      />
+      <text
+        x="450"
+        y="140"
+        text-anchor="middle"
+        fill="#92400e"
+        font-size="13"
+        font-weight="600"
+      >
+        Application Delivery & Readiness
+      </text>
+      <text
+        x="450"
+        y="156"
+        text-anchor="middle"
+        fill="#92400e"
+        font-size="11"
+      >
+        Where all change converges
+      </text>
+
+      <!-- ===== CENTRAL NODE ===== -->
+      <circle
+        cx="450"
+        cy="210"
+        r="42"
+        fill="#2563eb"
+        stroke="#1d4ed8"
+        stroke-width="2"
+      />
+      <text
+        x="450"
+        y="206"
+        text-anchor="middle"
+        fill="white"
+        font-size="13"
+        font-weight="700"
+      >
+        Modern IT
+      </text>
+      <text
+        x="450"
+        y="222"
+        text-anchor="middle"
+        fill="white"
+        font-size="11"
+      >
+        Operating Model
+      </text>
+
+      <!-- ===== CONNECTING ARROWS (INWARD PRESSURE) ===== -->
+      <defs>
+        <marker
+          id="arrow"
+          viewBox="0 0 10 10"
+          refX="10"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5f5"/>
+        </marker>
+      </defs>
+      <!-- ===== OUTER PRESSURE NODES ===== -->
+      <!-- Platform Change -->
+      <line x1="220" y1="60" x2="390" y2="170" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="200" cy="50" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="200" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Platform</text>
+      <text x="200" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Change</text>
+      <text x="200" y="74" text-anchor="middle" font-size="10" fill="#6b7280">Cloud</text>
+      <text x="200" y="88" text-anchor="middle" font-size="10" fill="#6b7280">Endpoint / VDI</text>
+
+      <!-- Application Change -->
+      <line x1="680" y1="60" x2="510" y2="170" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="700" cy="50" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="700" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Application</text>
+      <text x="700" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Change</text>
+      <text x="700" y="74" text-anchor="middle" font-size="10" fill="#6b7280">New apps</text>
+      <text x="700" y="88" text-anchor="middle" font-size="10" fill="#6b7280">Continuous updates</text>
+
+      <!-- Security & Compliance -->
+      <line x1="220" y1="360" x2="390" y2="250" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="200" cy="370" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="200" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Security</text>
+      <text x="200" y="378" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">& Compliance</text>
+      <text x="200" y="394" text-anchor="middle" font-size="10" fill="#6b7280">MFA</text>
+      <text x="200" y="408" text-anchor="middle" font-size="10" fill="#6b7280">Zero Trust</text>
+
+      <!-- Device & OS Diversity -->
+      <line x1="680" y1="360" x2="510" y2="250" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="700" cy="370" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="700" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Device & OS</text>
+      <text x="700" y="378" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Diversity</text>
+      <text x="700" y="394" text-anchor="middle" font-size="10" fill="#6b7280">Windows / macOS</text>
+      <text x="700" y="408" text-anchor="middle" font-size="10" fill="#6b7280">ARM / VDI</text>
+
+      <!-- User Expectations -->
+      <line x1="90" y1="210" x2="365" y2="210" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="70" cy="210" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="70" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">User</text>
+      <text x="70" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Expectations</text>
+      <text x="70" y="234" text-anchor="middle" font-size="10" fill="#6b7280">Instant access</text>
+      <text x="70" y="248" text-anchor="middle" font-size="10" fill="#6b7280">No downtime</text>
+
+      <!-- Modernization Initiatives -->
+      <line x1="810" y1="210" x2="535" y2="210" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
+      <circle cx="830" cy="210" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+      <text x="830" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Modernization</text>
+      <text x="830" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Initiatives</text>
+      <text x="830" y="234" text-anchor="middle" font-size="10" fill="#6b7280">Cloud moves</text>
+      <text x="830" y="248" text-anchor="middle" font-size="10" fill="#6b7280">AI projects</text>
+
+    </svg>
+  </div>
+
+  <p class="mt-4 text-sm text-center text-gray-500">
+    Change is accelerating from every direction — and it all converges at the application layer.
+  </p>
+</div>
               <p class="mt-4 text-sm text-center text-[#4A5568]">Complex interconnections in modern IT environments lead to bottlenecks in app delivery.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
