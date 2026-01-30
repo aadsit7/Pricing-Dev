@@ -377,7 +377,7 @@
               <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
-                  ? 'The application layer is now the primary constraint in modern IT.'
+                  ? 'The application layer is now the #1 primary constraint in modern IT.'
                   : 'Application Workspace helps IT keep applications running smoothly as platforms change — without creating more work'}
               </p>
             </div>
@@ -435,10 +435,10 @@
       }
       function renderProblems(){
         const items=[
-          {t:'Same App, Different Experience',s:'Apps behave differently across Windows, macOS, VDI, and web — creating confusion, inconsistency, and support issues',i:'layers'},
-          {t:'App Changes Take Too Long',s:'Each update requires rebuilds, retesting, and rework — slowing delivery and piling up backlog.',i:'boxes'},
-          {t:'Zero-day exposure',s:'Patching takes days, not minutes.',i:'shield'},
-          {t:'Change Feels Risky',s:'Teams delay upgrades because app readiness and compatibility are uncertain.',i:'layout-grid'}
+          {t:'Inconsistent Apps',s:'Apps behave differently across Windows, macOS, VDI, and web — creating confusion, inconsistency, and support issues',i:'layers'},
+          {t:'Slow Changes',s:'Each update requires rebuilds, retesting, and rework — slowing delivery and piling up backlog.',i:'boxes'},
+          {t:'Delayed Patching',s:'Security patches sit in limbo while teams test compatibility and chase edge cases, leaving known gaps open longer than anyone’s comfortable with',i:'shield'},
+          {t:'Risky Upgrades',s:'Teams delay upgrades because app readiness and compatibility are uncertain.',i:'layout-grid'}
         ];
         return `
           <section id="panel-problems" class="space-y-4">
