@@ -101,6 +101,8 @@
       .metrics-banner { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; text-align: center; font-size: 0.9rem; font-weight: 500; color: #111827; }
       .run .metrics-banner { animation: metricsAppear 0.8s ease forwards var(--d, 3.5s); }
       @keyframes metricsAppear { to { opacity: 1; transform: translateY(0); } }
+      .interactive-node { transition: opacity 0.3s, transform 0.3s; }
+      .interactive-node:hover { opacity: 0.9; transform: scale(1.05); }
     </style>
   </head>
   <body class="min-h-screen antialiased">
@@ -123,6 +125,35 @@
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
+        insightContent: null,
+        mode: 'current_state',
+        activePopover: null,
+        years: [2025, 2026, 2027, 2028],
+        drivers: [
+          { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
+          { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
+          { id: "too_many_tools", label: "Hybrid Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
+          { id: "manual_rework", label: "Too Much Manual Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
+          { id: "security_compliance", label: "Security and Compliance Pressure", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
+        ],
+        tippingPointYear: 2027.5,
+        tippingPoint: {
+          title: "Inflection Point",
+          bullets: ["Changes take longer", "Risk increases", "Teams burn out", "Strategic initiatives stall"],
+          closing: "This isn’t failure — it’s the limit of a model that no longer scales."
+        },
+        chartConfig: {
+          yAxis: "Expectations and Requests",
+          xAxis: "Time",
+          center: "The widening gap",
+          footer: "IT Appreciation & Resources / Time",
+          tipping: "Operational breaking point"
+        },
+        currentDemandExponent: 1.6,
+        targetDemandExponent: 1.6,
+        currentCapacitySlope: 0,
+        targetCapacitySlope: 0,
+        showTippingPoint: false,
         currentState: {
           change: {
             intro: "The app layer has become the biggest slowdown in IT. Teams are drowning in apps, constant updates, and one-off fixes, and every project ends up paying the price.",
@@ -145,7 +176,7 @@
             analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
           },
           recast: {
-            intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+            intro: "Recast’s Application Workspace solves the core problem. Deliver to the User, Not the Device.",
             bullets: [
               'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
               'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
@@ -178,7 +209,7 @@
               analyst: "In the next few years, the organizations that succeed with AI and modernization will be the ones that fix app delivery first. Everyone else will hit a hard capacity wall."
             },
             recast: {
-              intro: "Recast’s Application Workspace solves the core problem. It gives IT one place to package, update, and manage every application so the app layer stops slowing everything down.",
+              intro: "Recast’s Application Workspace solves the core problem. Deliver to the User, Not the Device",
               bullets: [
                 'One workspace for every app, whether commercial, internal, or legacy. Installs, updates, and access all handled consistently across Intune, ConfigMgr, AVD, and other systems.',
                 'Automates what teams still do by hand — packaging, versioning, and pushing updates, especially for internal and custom apps.',
@@ -189,8 +220,29 @@
             }
           }));
         },
+        defaultsChartConfig() {
+          return JSON.parse(JSON.stringify({
+            yAxis: "Expectations and Requests",
+            xAxis: "Time",
+            center: "The widening gap",
+            footer: "Limited budget, flat headcount, and finite operational capacity",
+            tipping: "Operational breaking point"
+          }));
+        },
+        defaultsDrivers() {
+          return JSON.parse(JSON.stringify([
+            { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
+            { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
+            { id: "too_many_tools", label: "Hybrid Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
+            { id: "manual_rework", label: "Too Much Manual Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
+            { id: "security_compliance", label: "Security and Compliance Pressure", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
+          ]));
+        },
         progress: { apps: 0, time: 0, tickets: 0 },
-        envProgress: { appsProcessed: 0 }
+        envProgress: { appsProcessed: 0 },
+        calcInputs: { apps: 250, envs: 3, changes: 20 },
+        calcResult: null,
+        qualified: false
       };
       const TABS = [
         { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
@@ -249,6 +301,70 @@
         }
       ];
       const onboardingMiniTimelineEnabled = true;
+      const NODE_DATA = {
+        'platform': {
+          bullets: ['Cloud', 'Endpoint / VDI', 'SCCM to Intune', 'Citrix to AVD'],
+          pos: {x:200, y:50},
+          anchor: 'bottom'
+        },
+        'application': {
+          bullets: ['New apps', 'Continuous updates'],
+          pos: {x:700, y:50},
+          anchor: 'bottom'
+        },
+        'security': {
+          bullets: ['MFA', 'Zero Trust'],
+          pos: {x:200, y:370},
+          anchor: 'top'
+        },
+        'device': {
+          bullets: ['Windows / macOS', 'ARM / VDI'],
+          pos: {x:700, y:370},
+          anchor: 'top'
+        },
+        'user': {
+          bullets: ['Instant access', 'No downtime'],
+          pos: {x:70, y:210},
+          anchor: 'right'
+        },
+        'modernization': {
+          bullets: ['Cloud moves', 'AI projects'],
+          pos: {x:830, y:210},
+          anchor: 'left'
+        }
+      };
+      const NODE_DATA_RECAST = {
+        'platform': {
+          bullets: ['Cloud migrations without app rework', 'Endpoint to VDI seamless shift', 'SCCM to Intune automated transition', 'Citrix to AVD quick migration'],
+          pos: {x:200, y:50},
+          anchor: 'bottom'
+        },
+        'application': {
+          bullets: ['Automated new app onboarding', 'Continuous updates with zero touch', 'Version sprawl elimination', 'Legacy app virtualization'],
+          pos: {x:700, y:50},
+          anchor: 'bottom'
+        },
+        'security': {
+          bullets: ['Built-in MFA integration', 'Zero Trust app access', 'Automated compliance checks', 'Instant security patching'],
+          pos: {x:200, y:370},
+          anchor: 'top'
+        },
+        'device': {
+          bullets: ['Universal Windows/macOS support', 'ARM device compatibility', 'VDI/physical unified management', 'Cross-OS version consistency'],
+          pos: {x:700, y:370},
+          anchor: 'top'
+        },
+        'user': {
+          bullets: ['Instant self-service app access', 'Zero downtime updates', 'Seamless multi-device sync', 'Intuitive workspace portal'],
+          pos: {x:70, y:210},
+          anchor: 'right'
+        },
+        'modernization': {
+          bullets: ['Accelerated cloud migrations', 'AI readiness without app blocks', 'Streamlined hardware refreshes', 'Continuous digital transformation'],
+          pos: {x:830, y:210},
+          anchor: 'left'
+        }
+      };
       function cx(...a){ return a.filter(Boolean).join(' '); }
       function round(n){ return Math.round(n*100)/100; }
       function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
@@ -266,8 +382,8 @@
               <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
               <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
                 ${STATE.activeTab==='problems'
-                  ? 'The Application Layer Is the #1 Bottleneck in Modern IT'
-                  : 'Application Workspace provides a single, stable application layer that absorbs platform change so IT can modernize continuously without disrupting users or increasing operational load.'}
+                  ? 'The application layer is now the primary constraint in modern IT.'
+                  : 'Application Workspace helps IT keep applications running smoothly as platforms change — without creating more work'}
               </p>
             </div>
             <div class="relative mx-auto max-w-6xl px-4">
@@ -291,12 +407,19 @@
           </main>
           ${renderModal()}
           ${renderWhyModal()}
+          ${renderInsightModal()}
         `;
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
         attachEvents();
         if (STATE.activeTab === 'solution') { buildFlow(); }
         if (STATE.activeTab === 'roi') { updateROIOutputs(); }
         if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
+        if (STATE.activeTab === 'problems') {
+          renderCapacityGapChart();
+          if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
+            requestAnimationFrame(animateCurves);
+          }
+        }
       }
       function chip(label,value,tone){
         const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
@@ -317,10 +440,10 @@
       }
       function renderProblems(){
         const items=[
-          {t:'Fragmented delivery',s:'Windows / Mac / VDI / Web — users guess the right way.',i:'layers'},
-          {t:'Packaging backlog',s:'Rebuild per version; updates stall.',i:'boxes'},
+          {t:'Same App, Different Experience',s:'Apps behave differently across Windows, macOS, VDI, and web — creating confusion, inconsistency, and support issues',i:'layers'},
+          {t:'App Changes Take Too Long',s:'Each update requires rebuilds, retesting, and rework — slowing delivery and piling up backlog.',i:'boxes'},
           {t:'Zero-day exposure',s:'Patching takes days, not minutes.',i:'shield'},
-          {t:'Slow upgrades',s:'Stuck to old images; change is slow.',i:'layout-grid'}
+          {t:'Change Feels Risky',s:'Teams delay upgrades because app readiness and compatibility are uncertain.',i:'layout-grid'}
         ];
         return `
           <section id="panel-problems" class="space-y-4">
@@ -333,150 +456,315 @@
               `).join('')}
             </div>
             <div class="section-card p-6">
-  <h3 class="text-xl font-semibold mb-4 text-center">Modern IT Reality</h3>
-
-  <div class="relative w-full h-72">
-    <svg viewBox="0 0 900 420" class="w-full h-full">
-
-      <!-- ===== INNER CONSTRAINED RING (Application Layer Bottleneck) ===== -->
-      <circle
-        cx="450"
-        cy="210"
-        r="85"
-        fill="none"
-        stroke="#f59e0b"
-        stroke-width="2"
-        stroke-dasharray="4 4"
-      />
-      <text
-        x="450"
-        y="140"
-        text-anchor="middle"
-        fill="#92400e"
-        font-size="13"
-        font-weight="600"
-      >
-        Application Delivery & Readiness
-      </text>
-      <text
-        x="450"
-        y="156"
-        text-anchor="middle"
-        fill="#92400e"
-        font-size="11"
-      >
-        Where all change converges
-      </text>
-
-      <!-- ===== CENTRAL NODE ===== -->
-      <circle
-        cx="450"
-        cy="210"
-        r="42"
-        fill="#2563eb"
-        stroke="#1d4ed8"
-        stroke-width="2"
-      />
-      <text
-        x="450"
-        y="206"
-        text-anchor="middle"
-        fill="white"
-        font-size="13"
-        font-weight="700"
-      >
-        Modern IT
-      </text>
-      <text
-        x="450"
-        y="222"
-        text-anchor="middle"
-        fill="white"
-        font-size="11"
-      >
-        Operating Model
-      </text>
-
-      <!-- ===== CONNECTING ARROWS (INWARD PRESSURE) ===== -->
-      <defs>
-        <marker
-          id="arrow"
-          viewBox="0 0 10 10"
-          refX="10"
-          refY="5"
-          markerWidth="6"
-          markerHeight="6"
-          orient="auto-start-reverse"
-        >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5f5"/>
-        </marker>
-      </defs>
-      <!-- ===== OUTER PRESSURE NODES ===== -->
-      <!-- Platform Change -->
-      <line x1="220" y1="60" x2="390" y2="170" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="200" cy="50" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="200" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Platform</text>
-      <text x="200" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Change</text>
-      <text x="200" y="74" text-anchor="middle" font-size="10" fill="#6b7280">Cloud</text>
-      <text x="200" y="88" text-anchor="middle" font-size="10" fill="#6b7280">Endpoint / VDI</text>
-
-      <!-- Application Change -->
-      <line x1="680" y1="60" x2="510" y2="170" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="700" cy="50" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="700" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Application</text>
-      <text x="700" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Change</text>
-      <text x="700" y="74" text-anchor="middle" font-size="10" fill="#6b7280">New apps</text>
-      <text x="700" y="88" text-anchor="middle" font-size="10" fill="#6b7280">Continuous updates</text>
-
-      <!-- Security & Compliance -->
-      <line x1="220" y1="360" x2="390" y2="250" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="200" cy="370" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="200" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Security</text>
-      <text x="200" y="378" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">& Compliance</text>
-      <text x="200" y="394" text-anchor="middle" font-size="10" fill="#6b7280">MFA</text>
-      <text x="200" y="408" text-anchor="middle" font-size="10" fill="#6b7280">Zero Trust</text>
-
-      <!-- Device & OS Diversity -->
-      <line x1="680" y1="360" x2="510" y2="250" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="700" cy="370" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="700" y="364" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Device & OS</text>
-      <text x="700" y="378" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Diversity</text>
-      <text x="700" y="394" text-anchor="middle" font-size="10" fill="#6b7280">Windows / macOS</text>
-      <text x="700" y="408" text-anchor="middle" font-size="10" fill="#6b7280">ARM / VDI</text>
-
-      <!-- User Expectations -->
-      <line x1="90" y1="210" x2="365" y2="210" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="70" cy="210" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="70" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">User</text>
-      <text x="70" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Expectations</text>
-      <text x="70" y="234" text-anchor="middle" font-size="10" fill="#6b7280">Instant access</text>
-      <text x="70" y="248" text-anchor="middle" font-size="10" fill="#6b7280">No downtime</text>
-
-      <!-- Modernization Initiatives -->
-      <line x1="810" y1="210" x2="535" y2="210" stroke="#cbd5f5" stroke-width="2" marker-end="url(#arrow)" />
-      <circle cx="830" cy="210" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-      <text x="830" y="204" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Modernization</text>
-      <text x="830" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">Initiatives</text>
-      <text x="830" y="234" text-anchor="middle" font-size="10" fill="#6b7280">Cloud moves</text>
-      <text x="830" y="248" text-anchor="middle" font-size="10" fill="#6b7280">AI projects</text>
-
-    </svg>
-  </div>
-
-  <p class="mt-4 text-sm text-center text-gray-500">
-    Change is accelerating from every direction — and it all converges at the application layer.
-  </p>
-</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-16 items-stretch">
-              ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
-              ${calloutDropdown('now','clock-4','Why Now','bg-slate-50')}
-              ${calloutDropdown('recast','sparkles','Why Recast','bg-slate-50', true)}
+              <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
+                <div class="relative">
+                  <svg id="capacity-gap-chart" class="w-full h-96"></svg>
+                </div>
+                <div class="w-full lg:w-80 bg-white rounded-2xl shadow-md p-6">
+                  <h3 class="text-xl font-medium mb-6">Modern IT Challenges</h3>
+                  <div class="grid grid-cols-1 gap-6 items-stretch">
+                    ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
+                    ${calloutDropdown('now','clock-4','Why Now','bg-slate-50', false, "Because the current model can’t handle the amount of change that’s coming")}
+                    ${calloutDropdown('recast','sparkles','Why Recast','bg-slate-50', true)}
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         `;
       }
-      function calloutDropdown(id, icon, label, headerTone, cta=false){
+      function renderCapacityGapChart(){
+        const svg = document.getElementById('capacity-gap-chart');
+        if (!svg) return;
+        svg.innerHTML = '';
+        svg.setAttribute('viewBox', '0 0 800 400');
+        const width = 700, height = 300, margin = {left: 50, bottom: 50, top: 50, right: 50};
+        const xScale = t => margin.left + t * width;
+        const yScale = v => margin.top + height - v * height;
+        // Axes
+        const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        xAxis.innerHTML = `
+          <line x1="${margin.left}" y1="${margin.top + height}" x2="${margin.left + width}" y2="${margin.top + height}" stroke="#d1d5db" stroke-width="1"/>
+          <text x="${margin.left + width / 2}" y="${margin.top + height + 40}" text-anchor="middle" font-size="14" fill="#111827">${STATE.chartConfig.xAxis}</text>
+          ${STATE.years.map((year, i) => {
+            const x = xScale(i / 3);
+            return `
+              <line x1="${x}" y1="${margin.top + height}" x2="${x}" y2="${margin.top + height + 10}" stroke="#d1d5db" stroke-width="1"/>
+              <text x="${x}" y="${margin.top + height + 25}" text-anchor="middle" font-size="12" fill="#111827">${year}</text>
+            `;
+          }).join('')}
+          <text x="${margin.left + width / 2}" y="${margin.top + height + 60}" text-anchor="middle" font-size="12" fill="#6b7280"> ${STATE.chartConfig.footer}</text>
+        `;
+        svg.appendChild(xAxis);
+        const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        yAxis.innerHTML = `
+          <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + height}" stroke="#d1d5db" stroke-width="1"/>
+          <text x="${margin.left - 10}" y="${margin.top + height / 2}" text-anchor="middle" font-size="14" fill="#111827" transform="rotate(-90, ${margin.left - 10}, ${margin.top + height / 2})">${STATE.chartConfig.yAxis}</text>
+        `;
+        svg.appendChild(yAxis);
+        // Curves
+        const exp = STATE.currentDemandExponent;
+        const slope = STATE.currentCapacitySlope;
+        let demandPath = `M ${xScale(0)} ${yScale(0)}`;
+        let capacityPath = `M ${xScale(0)} ${yScale(0.3)}`;
+        let demandPoints = [];
+        let capacityPoints = [];
+        for (let i = 0; i <= 100; i++) {
+          let t = i / 100;
+          let dem = Math.pow(t, exp);
+          let cap = 0.3 + slope * t;
+          demandPath += ` L ${xScale(t)} ${yScale(dem)}`;
+          capacityPath += ` L ${xScale(t)} ${yScale(cap)}`;
+          demandPoints.push({x: xScale(t), y: yScale(dem)});
+          capacityPoints.push({x: xScale(t), y: yScale(cap)});
+        }
+        const demandLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        demandLine.setAttribute('d', demandPath);
+        demandLine.setAttribute('stroke', '#ef4444');
+        demandLine.setAttribute('stroke-width', '2');
+        demandLine.setAttribute('fill', 'none');
+        svg.appendChild(demandLine);
+        const capacityLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        capacityLine.setAttribute('d', capacityPath);
+        capacityLine.setAttribute('stroke', '#3b82f6');
+        capacityLine.setAttribute('stroke-width', '2');
+        capacityLine.setAttribute('fill', 'none');
+        svg.appendChild(capacityLine);
+        // Gap shading
+        let numNormal = 0, numAccelerating = 0;
+        STATE.drivers.forEach(d => { if (d.state === 'normal') numNormal++; if (d.state === 'accelerating') numAccelerating++; });
+        const pressure = numNormal + numAccelerating * 2;
+        const lightness = 95 - pressure * 1.5;
+        const gapPath = demandPoints.map(p => `L ${p.x} ${p.y}`).join(' ') + capacityPoints.reverse().map(p => `L ${p.x} ${p.y}`).join(' ') + 'Z';
+        const gap = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        gap.setAttribute('d', `M ${demandPoints[0].x} ${demandPoints[0].y} ` + gapPath);
+        gap.setAttribute('fill', `hsl(220, 10%, ${lightness}%)`);
+        svg.appendChild(gap);
+        const gapLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        gapLabel.setAttribute('x', xScale(0.5));
+        gapLabel.setAttribute('y', yScale(0.5));
+        gapLabel.setAttribute('text-anchor', 'middle');
+        gapLabel.setAttribute('font-size', '16');
+        gapLabel.setAttribute('fill', '#6b7280');
+        gapLabel.textContent = STATE.chartConfig.center;
+        svg.appendChild(gapLabel);
+        // Markers
+        STATE.drivers.forEach(d => {
+          if (d.markerYear && (d.state === 'normal' || d.state === 'accelerating')) {
+            const t = (d.markerYear - 2025) / 3;
+            const dem = Math.pow(t, exp);
+            const x = xScale(t);
+            const y = yScale(dem);
+            const emphasis = d.state === 'accelerating' ? 8 : 6;
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('role', 'button');
+            g.setAttribute('tabindex', '0');
+            g.setAttribute('aria-label', `Learn more about ${d.label}`);
+            g.innerHTML = `
+              <title>${d.short}</title>
+              <circle cx="${x}" cy="${y}" r="20" fill="transparent" stroke="none"/>
+              <circle cx="${x}" cy="${y}" r="${emphasis}" fill="#ef4444"/>
+              <text x="${x + 10}" y="${y + 4}" font-size="12" fill="#111827">${d.label}</text>
+            `;
+            g.addEventListener('click', () => openInsight(d));
+            g.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(d); });
+            svg.appendChild(g);
+          }
+        });
+        // Always-on resources limited label
+        const endT = 1;
+        const endCap = 0.3 + slope * endT;
+        const endX = xScale(endT);
+        const endY = yScale(endCap) + 20;
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', endX - 50);
+        text.setAttribute('y', endY);
+        text.setAttribute('font-size', '12');
+        text.setAttribute('fill', '#6b7280');
+        text.textContent = 'Limited Capacity';
+        svg.appendChild(text);
+        // Tipping point
+        if (STATE.showTippingPoint) {
+          const t = (STATE.tippingPointYear - 2025) / 3;
+          const x = xScale(t);
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', x);
+          line.setAttribute('y1', yScale(0));
+          line.setAttribute('x2', x);
+          line.setAttribute('y2', yScale(1));
+          line.setAttribute('stroke', '#ef4444');
+          line.setAttribute('stroke-width', '2');
+          line.setAttribute('stroke-dasharray', '5 5');
+          svg.appendChild(line);
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', x + 10);
+          label.setAttribute('y', yScale(1) - 10);
+          label.setAttribute('font-size', '12');
+          label.setAttribute('fill', '#111827');
+          label.textContent = 'IT Inflection Point';
+          svg.appendChild(label);
+          const ann = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          ann.setAttribute('x', x + 10);
+          ann.setAttribute('y', yScale(0.8) + 5);
+          ann.setAttribute('font-size', '12');
+          ann.setAttribute('fill', '#ef4444');
+          ann.textContent = STATE.chartConfig.tipping;
+          svg.appendChild(ann);
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('role', 'button');
+          g.setAttribute('tabindex', '0');
+          g.setAttribute('aria-label', 'Learn more about Projected Tipping Point');
+          g.innerHTML = `
+            <rect x="${x - 10}" y="${yScale(1) - 20}" width="20" height="${height}" fill="transparent"/>
+          `;
+          g.addEventListener('click', () => openInsight(STATE.tippingPoint));
+          g.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(STATE.tippingPoint); });
+          svg.appendChild(g);
+        }
+      }
+      function updateCurves(){
+        let numNormal = 0, numAccelerating = 0;
+        STATE.drivers.forEach(d => { if (d.state === 'normal') numNormal++; if (d.state === 'accelerating') numAccelerating++; });
+        STATE.targetDemandExponent = 1.6 + (numNormal * 0.15 + numAccelerating * 0.3);
+        STATE.targetDemandExponent = Math.min(STATE.targetDemandExponent, 3);
+        STATE.targetCapacitySlope = 0;
+        STATE.showTippingPoint = numAccelerating >= 3;
+      }
+      function animateCurves(timestamp){
+        STATE.currentDemandExponent += (STATE.targetDemandExponent - STATE.currentDemandExponent) * 0.1;
+        STATE.currentCapacitySlope += (STATE.targetCapacitySlope - STATE.currentCapacitySlope) * 0.1;
+        renderCapacityGapChart();
+        if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
+          requestAnimationFrame(animateCurves);
+        }
+      }
+      function setSlider(id, value){
+        const driver = STATE.drivers.find(d => d.id === id);
+        if (driver) {
+          driver.state = ['off', 'normal', 'accelerating'][value];
+          updateCurves();
+          requestAnimationFrame(animateCurves);
+          renderCapacityGapChart();
+        }
+      }
+      function resetSliders(){
+        STATE.drivers.forEach(d => d.state = 'off');
+        STATE.currentDemandExponent = 1.6;
+        STATE.targetDemandExponent = 1.6;
+        STATE.currentCapacitySlope = 0;
+        STATE.targetCapacitySlope = 0;
+        STATE.showTippingPoint = false;
+        render();
+      }
+      function openInsight(content){
+        STATE.insightContent = content;
+        render();
+      }
+      function renderInsightModal(){
+        if (!STATE.insightContent) return '';
+        const c = STATE.insightContent;
+        const title = c.title || c.label;
+        const intro = c.intro || c.short;
+        const bullets = c.bullets || [];
+        const closing = c.closing || '';
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="insight-modal-title">
+            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content">
+              <div class="bg-slate-50 px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="lightbulb" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
+                  <h2 id="insight-modal-title" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${title}</h2>
+                </div>
+                <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-insight-modal" aria-label="Close">
+                  <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+              </div>
+              <div class="p-8 bg-slate-50">
+                ${intro ? `<p class="text-base leading-relaxed text-[#4A5568] mb-4">${intro}</p>` : ''}
+                <div class="space-y-4">
+                  ${bullets.map(b=>`
+                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
+                    </div>
+                  `).join('')}
+                </div>
+                ${closing ? `
+                  <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                    <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                    <p class="text-base italic text-[#4A5568]">${closing}</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      function renderMindMap(isRecast = false, containerClass = 'relative w-full h-72') {
+        const centralFill = isRecast ? '#10b981' : '#2563eb';
+        const centralStroke = isRecast ? '#059669' : '#1d4ed8';
+        const ringStroke = isRecast ? '#10b981' : '#f59e0b';
+        const ringText1 = isRecast ? 'Application Workspace' : 'Application Delivery & Readiness';
+        const ringText2 = isRecast ? 'Absorbs all change' : 'Where all change converges';
+        const ringTextColor = isRecast ? '#059669' : '#92400e';
+        const centralText1 = isRecast ? 'Application Workspace' : 'Modern IT';
+        const centralText2 = isRecast ? 'Stable app layer' : 'Operating Model';
+        const arrowFill = isRecast ? '#6ee7b7' : '#cbd5f5';
+        const lineStroke = isRecast ? '#6ee7b7' : '#cbd5f5';
+        const markerAttr = isRecast ? 'marker-start="url(#arrow)"' : 'marker-end="url(#arrow)"';
+        const nodeData = isRecast ? NODE_DATA_RECAST : NODE_DATA;
+        const lines = isRecast ? [
+          {x1:390, y1:170, x2:220, y2:60},
+          {x1:510, y1:170, x2:680, y2:60},
+          {x1:390, y1:250, x2:220, y2:360},
+          {x1:510, y1:250, x2:680, y2:360},
+          {x1:365, y1:210, x2:90, y2:210},
+          {x1:535, y1:210, x2:810, y2:210}
+        ] : [
+          {x1:220, y1:60, x2:390, y2:170},
+          {x1:680, y1:60, x2:510, y2:170},
+          {x1:220, y1:360, x2:390, y2:250},
+          {x1:680, y1:360, x2:510, y2:250},
+          {x1:90, y1:210, x2:365, y2:210},
+          {x1:810, y1:210, x2:535, y2:210}
+        ];
+        const nodes = [
+          {id: 'platform', cx:200, cy:50, text1:'Platform', text2:'Change', sub1:'Cloud', sub2:'Endpoint / VDI'},
+          {id: 'application', cx:700, cy:50, text1:'Application', text2:'Change', sub1:'New apps', sub2:'Continuous updates'},
+          {id: 'security', cx:200, cy:370, text1:'Security', text2:'& Compliance', sub1:'MFA', sub2:'Zero Trust'},
+          {id: 'device', cx:700, cy:370, text1:'Device & OS', text2:'Diversity', sub1:'Windows / macOS', sub2:'ARM / VDI'},
+          {id: 'user', cx:70, cy:210, text1:'User', text2:'Expectations', sub1:'Instant access', sub2:'No downtime'},
+          {id: 'modernization', cx:830, cy:210, text1:'Modernization', text2:'Initiatives', sub1:'Cloud moves', sub2:'AI projects'}
+        ];
+        return `
+          <div class="${containerClass}">
+            <svg viewBox="0 0 900 420" class="w-full h-full">
+              <circle cx="450" cy="210" r="85" fill="none" stroke="${ringStroke}" stroke-width="2" stroke-dasharray="4 4" />
+              <text x="450" y="140" text-anchor="middle" fill="${ringTextColor}" font-size="13" font-weight="600">${ringText1}</text>
+              <text x="450" y="156" text-anchor="middle" fill="${ringTextColor}" font-size="11">${ringText2}</text>
+              <circle cx="450" cy="210" r="42" fill="${centralFill}" stroke="${centralStroke}" stroke-width="2" />
+              <text x="450" y="206" text-anchor="middle" fill="white" font-size="13" font-weight="700">${centralText1}</text>
+              <text x="450" y="222" text-anchor="middle" fill="white" font-size="11">${centralText2}</text>
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="${arrowFill}"/>
+                </marker>
+              </defs>
+              ${lines.map(l => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" stroke="${lineStroke}" stroke-width="2" ${markerAttr} />`).join('')}
+              ${nodes.map(n => `
+                <g class="interactive-node cursor-pointer" data-id="${n.id}" role="button" tabindex="0" aria-label="View details for ${n.text1} ${n.text2}" aria-expanded="${STATE.activePopover === n.id ? 'true' : 'false'}">
+                  <circle cx="${n.cx}" cy="${n.cy}" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
+                  <text x="${n.cx}" y="${n.cy - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">${n.text1}</text>
+                  <text x="${n.cx}" y="${n.cy + 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">${n.text2}</text>
+                  <text x="${n.cx}" y="${n.cy + 24}" text-anchor="middle" font-size="10" fill="#6b7280">${n.sub1}</text>
+                  <text x="${n.cx}" y="${n.cy + 38}" text-anchor="middle" font-size="10" fill="#6b7280">${n.sub2}</text>
+                </g>
+              `).join('')}
+            </svg>
+          </div>
+        `;
+      }
+      function calloutDropdown(id, icon, label, headerTone, cta=false, subtext=''){
         return `
           <div class="h-full flex flex-col">
             <button
@@ -494,9 +782,11 @@
                 <i data-lucide="chevron-right" class="w-5 h-5 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
+            ${subtext ? `<p class="px-5 py-2 text-sm text-gray-700">${subtext}</p>` : ''}
           </div>
         `;
       }
+      const whyOrder = ['change', 'now', 'recast'];
       function renderWhyModal(){
         if(!STATE.openWhyModal) return '';
         const id = STATE.openWhyModal;
@@ -504,10 +794,43 @@
         const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
         const data = STATE.currentState[id];
         const headerTone = 'bg-slate-50';
-        const cta = id === 'recast';
+        const cta = id === 'now';
+        const modalClass = 'w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content';
+        const currentIdx = whyOrder.indexOf(id);
+        const prev = currentIdx > 0 ? whyOrder[currentIdx - 1] : null;
+        const next = currentIdx < whyOrder.length - 1 ? whyOrder[currentIdx + 1] : null;
+        const content = `
+          <div class="p-8 bg-slate-50">
+            <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
+            <div class="space-y-4">
+              ${data.bullets.map(b=>`
+                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
+                  <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                  <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
+                </div>
+              `).join('')}
+            </div>
+            <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+              <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+              <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
+            </div>
+            ${cta?`
+              <div class="mt-8 flex justify-center">
+                <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
+                  <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                  How Recast solves it
+                </button>
+              </div>
+            `:''}
+            <div class="mt-8 flex justify-between">
+              ${prev ? `<button type="button" class="re-secondary inline-flex items-center gap-2" data-action="why-nav" data-to="${prev}"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>` : '<div></div>'}
+              ${next ? `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="why-nav" data-to="${next}">Next <i data-lucide="arrow-right" class="w-4 h-4"></i></button>` : `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="advance" data-next="solution">See Approach <i data-lucide="arrow-right" class="w-4 h-4"></i></button>`}
+            </div>
+          </div>
+        `;
         return `
           <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
-            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content" style="max-height: 95vh; overflow-y: auto;">
+            <div class="${modalClass}" style="max-height: none;" ${id === 'recast' ? 'id="recast-modal-content"' : ''}>
               <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
                   <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
@@ -517,29 +840,7 @@
                   <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
               </div>
-              <div class="p-8 bg-slate-50">
-                <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
-                <div class="space-y-4">
-                  ${data.bullets.map(b=>`
-                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
-                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
-                    </div>
-                  `).join('')}
-                </div>
-                <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
-                  <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
-                  <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
-                </div>
-                ${cta?`
-                  <div class="mt-8 flex justify-center">
-                    <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
-                      <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                      How Recast solves it
-                    </button>
-                  </div>
-                `:''}
-              </div>
+              ${content}
             </div>
           </div>
         `;
@@ -572,10 +873,96 @@
               </div>
             </button>
             <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
+              ${card.id === 'core' ? renderCoreContent(card) : `
+                <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
+                  ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
+                </ul>
+                ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
+                <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
+              `}
+            </div>
+          </div>
+        `;
+      }
+      function renderCoreContent(card){
+        const detailsExpanded = STATE.openCards['core-details'] || false;
+        const detailsId = 'core-details-content';
+        return `
+          <h3 class="text-xl font-semibold mb-2">How Application Delivery Changes with Recast</h3>
+          <p class="text-base text-[#4A5568] mb-4">From delivering applications to devices → delivering applications to users</p>
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr>
+                <th class="p-3 bg-slate-100 border border-slate-200">Today: Delivering to the Device</th>
+                <th class="p-3 bg-slate-100 border border-slate-200">With Recast: Delivering to the User</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-3 border border-slate-200">Applications are packaged and deployed based on device or platform</td>
+                <td class="p-3 border border-slate-200">Applications are assigned based on who the user is</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">The same app is built and supported differently for SCCM, Intune, VDI, macOS</td>
+                <td class="p-3 border border-slate-200">Each app is defined once and delivered consistently across platforms</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">IT must know where the app is installed to troubleshoot issues</td>
+                <td class="p-3 border border-slate-200">IT supports apps the same way regardless of how they are delivered</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">New platforms require rebuilding and retesting existing apps</td>
+                <td class="p-3 border border-slate-200">New platforms do not change how apps are defined</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">Backend changes surface as user issues or retraining</td>
+                <td class="p-3 border border-slate-200">Backend changes do not change the user experience</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">Users see different app behavior depending on where they log in</td>
+                <td class="p-3 border border-slate-200">Users see the same apps and experience wherever they log in</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">Application logic is spread across multiple tools</td>
+                <td class="p-3 border border-slate-200">Application delivery is centralized while tools stay in place</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">Support paths vary by platform</td>
+                <td class="p-3 border border-slate-200">Support follows one predictable path</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-slate-200">The environment works because people know the exceptions</td>
+                <td class="p-3 border border-slate-200">The environment works because it is consistent by design</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-6">
+            <button
+              type="button"
+              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
+              data-action="toggle-card"
+              data-card="core-details"
+              aria-expanded="${detailsExpanded}"
+              aria-controls="${detailsId}"
+              style="border-radius:var(--radius); min-height: 44px;"
+            >
+              <div class="bg-slate-50 px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="layers" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
+                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">What Makes This Work in Practice</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-[#4A5568]">${detailsExpanded ? 'Collapse' : 'Expand'}</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${detailsExpanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div id="${detailsId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${detailsExpanded?'1200px':'0'};opacity:${detailsExpanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; bg-[#f9fafb]; padding:${detailsExpanded?'24px 20px':'0 20px'}">
               <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
-              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
               <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
             </div>
           </div>
@@ -722,7 +1109,7 @@
                 <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
                 <div>
                   <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-[12px] text-[#4A5568]">Curated & secured catalog</div>
+                  <div class="text-[12px] text-[#4A5568]">Deliver applications to users — independent of device or platform</div>
                 </div>
               </div>
               <div class="flex items-center gap-2 text-[12px]">
@@ -838,70 +1225,87 @@
       function renderROI(){
         const r = calcROI();
         return `
-          <section id="panel-roi" class="space-y-6">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Assumptions</h3>
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                  ${numInput('# users','users', r.i.users)}
-                  ${numInput('Tickets per user / mo','ticketsPerUserPerMonth', r.i.ticketsPerUserPerMonth)}
-                  ${numInput('Avg handle (mins)','avgHandleMins', r.i.avgHandleMins)}
-                </div>
-                <div class="mt-8 space-y-6">
-                  ${bucketAccordion('per', 'mouse-pointer', 'Reactive Work Reduced', perUserContent)}
-                  ${bucketAccordion('one', 'wand-sparkles', 'Hours Saved from Packaging', onePackageContent)}
-                  ${bucketAccordion('zero', 'shield-check', 'Hours Saved from Faster Patching', zeroDayContent)}
-                </div>
-                <div class="mt-8">
-                  <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">
-                    <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
-                  </button>
-                </div>
+          <section id="panel-roi" class="space-y-8">
+            <div class="section-card p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 bg-white">
+              <h3 class="text-2xl font-semibold mb-6 text-gray-900">Business Impact Calculator</h3>
+              <div class="grid grid-cols-1 gap-6">
+                <label class="flex flex-col gap-1">
+                  <span class="text-base font-medium text-gray-900">How many applications does IT actively manage?</span>
+                  <span class="text-sm text-gray-600">Includes all applications IT packages, updates, patches, or supports.</span>
+                  <input type="number" id="calc-apps" min="10" max="5000" placeholder="250" value="${STATE.calcInputs.apps}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-base font-medium text-gray-900">Across how many environments do those apps need to run?</span>
+                  <span class="text-sm text-gray-600">Examples: Windows, macOS, VDI/AVD, Web.</span>
+                  <input type="number" id="calc-envs" min="1" max="5" placeholder="3" value="${STATE.calcInputs.envs}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span class="text-base font-medium text-gray-900">How many application changes occur per month?</span>
+                  <span class="text-sm text-gray-600">Includes vendor updates, security patches, and internal changes.</span>
+                  <input type="number" id="calc-changes" min="1" max="200" placeholder="20" value="${STATE.calcInputs.changes}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                </label>
               </div>
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Results</h3>
-                <div class="space-y-4 text-lg">
-                  ${kv('Hours Returned / Month', num(round(r.totalHoursMonth)))}
-                  ${kv('Hours Returned / Year', num(round(r.totalHoursYear)))}
-                </div>
-                <div class="mt-8 flex flex-wrap gap-4">
-                  <button type="button" data-action="reset-calculator" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-light focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
-                  <button type="button" data-action="copy-onepager" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-5 py-3 text-base font-light focus-ring rounded-full hover:bg-[#005AD0]">
-                    <i data-lucide="clipboard" class="w-5 h-5"></i> ${STATE.copied ? 'Copied!' : 'Copy capacity summary'}
-                  </button>
-                </div>
+              <div class="mt-6">
+                <button type="button" data-action="calculate-impact" class="bg-[#0070F3] text-white px-6 py-3 text-base font-semibold rounded-full hover:bg-[#005AD0] focus-ring">Calculate Impact</button>
               </div>
-              <div class="section-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow duration-300 bg-white col-span-1 md:col-span-2">
-                <h3 class="text-2xl font-light mb-6 text-gray-900">Impact Breakdown</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 class="text-xl font-light mb-4 text-gray-900">Where the Time Comes From</h4>
-                    <div class="space-y-4 text-lg">
-                      ${kv('Packaging Work Reduced / Month', num(round(r.packagingHoursMonth)))}
-                      ${kv('Zero-Day Patch Time Reduced / Month', num(round(r.patchHoursMonth)))}
-                      ${kv('App-Related Reactive Work Reduced / Month', num(round(r.reactiveHoursMonth)))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 class="text-xl font-light mb-4 text-gray-900">Technical Debt Impact</h4>
-                    <div class="space-y-4 text-lg">
-                      ${kv('App Version Reduction (estimated)', '30-50% fewer active versions')}
-                      ${kv('Faster Patch Window', `${STATE.currentHrs} → 1.5 hrs (${r.patchReductionPct}% reduction)`)}
-                      ${kv('Tickets Avoided (est.)', num(round(r.ticketsAvoided)) + ' / month')}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 class="text-xl font-light mb-4 text-gray-900">Project Velocity Impact</h4>
-                    <ul class="space-y-4 text-lg list-disc pl-5">
-                      <li>Faster migration and pilot cycles (apps ready sooner)</li>
-                      <li>Reduces blockers for AVD, W365, AI, and modernization projects</li>
-                      <li>Frees capacity for strategic initiatives</li>
-                    </ul>
-                  </div>
-                </div>
+              <div id="calc-output" class="mt-8">
+                ${STATE.calcResult ? renderCalcResult() : ''}
               </div>
             </div>
+            <div class="flex justify-center">
+              <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-medium focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">
+                <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
+              </button>
+            </div>
           </section>
+        `;
+      }
+      function renderCalcResult(){
+        if (!STATE.qualified) {
+          return `
+            <div class="p-4 rounded-lg bg-gray-50">
+              <h4 class="text-lg font-medium mb-2 text-gray-900">Your environment appears relatively simple today</h4>
+              <p class="text-base text-gray-700">Teams managing a small number of applications in a single environment
+often operate without significant delivery strain.
+As application count, delivery paths, or change frequency increases,
+application delivery becomes harder to scale predictably.</p>
+            </div>
+          `;
+        }
+        return `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="p-4 rounded-lg bg-gray-50">
+              <h4 class="text-lg font-medium mb-4 text-gray-900">Current State</h4>
+              <ul class="space-y-2 text-base list-disc pl-5 text-gray-700">
+                <li>Applications are packaged and delivered separately per environment.</li>
+                <li>Each change requires rebuilds, retesting, and coordination.</li>
+                <li>Operational work scales faster than available capacity.</li>
+              </ul>
+            </div>
+            <div class="p-4 rounded-lg bg-gray-50">
+              <h4 class="text-lg font-medium mb-4 text-gray-900">With Application Workspace</h4>
+              <ul class="space-y-2 text-base list-disc pl-5 text-gray-700">
+                <li>Applications are packaged once and delivered everywhere.</li>
+                <li>Consistent behavior across platforms.</li>
+                <li>Operational effort scales predictably.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            ${kvCalc('Hours Returned per Month', num(Math.round(STATE.calcResult.hoursSavedMonthly)))}
+            ${kvCalc('Hours Returned per Year', num(Math.round(STATE.calcResult.hoursSavedYearly)))}
+            ${kvCalc('Delivery Efficiency Gain', '60%')}
+            ${kvCalc('Support Load Reduction', '40%')}
+          </div>
+          <p class="mt-4 text-sm text-gray-600">Represents operational capacity returned to IT — not headcount reduction.</p>
+        `;
+      }
+      function kvCalc(label, value){
+        return `
+          <div class="p-4 rounded-lg bg-gray-50 flex flex-col items-center justify-center">
+            <span class="text-2xl font-bold text-gray-900 tabular-nums">${value}</span>
+            <span class="text-base text-gray-700 text-center">${label}</span>
+          </div>
         `;
       }
       function calcROI(){
@@ -1064,6 +1468,21 @@
           }
         };
       }
+      function readChartFieldsRaw(){
+        return {
+          chartConfig: {
+            yAxis: $('#chart-yaxis')?.value ?? "",
+            xAxis: $('#chart-xaxis')?.value ?? "",
+            center: $('#chart-center')?.value ?? "",
+            footer: $('#chart-footer')?.value ?? "",
+            tipping: $('#chart-tipping')?.value ?? ""
+          },
+          drivers: STATE.drivers.map((_,i) => ({
+            label: $(`#driver${i}-label`)?.value ?? "",
+            bullets: $(`#driver${i}-bullets`)?.value ?? ""
+          }))
+        };
+      }
       function writeFields(data){
         if(!data) return;
         if(fields.changeIntro()) fields.changeIntro().value = data.change.intro ?? "";
@@ -1075,6 +1494,19 @@
         if(fields.recastIntro()) fields.recastIntro().value = data.recast.intro ?? "";
         if(fields.recastBullets()) fields.recastBullets().value = data.recast.bullets ?? "";
         if(fields.recastAnalyst()) fields.recastAnalyst().value = data.recast.analyst ?? "";
+      }
+      function writeChartFields(config, drivers){
+        if($('#chart-yaxis')) $('#chart-yaxis').value = config?.yAxis ?? "";
+        if($('#chart-xaxis')) $('#chart-xaxis').value = config?.xAxis ?? "";
+        if($('#chart-center')) $('#chart-center').value = config?.center ?? "";
+        if($('#chart-footer')) $('#chart-footer').value = config?.footer ?? "";
+        if($('#chart-tipping')) $('#chart-tipping').value = config?.tipping ?? "";
+        drivers?.forEach((dd, i) => {
+          const labelEl = $(`#driver${i}-label`);
+          const bulletsEl = $(`#driver${i}-bullets`);
+          if(labelEl) labelEl.value = dd.label ?? "";
+          if(bulletsEl) bulletsEl.value = dd.bullets ?? "";
+        });
       }
       function loadDraft(){
         try{
@@ -1092,14 +1524,22 @@
       function initCurrentStateModal(){
         captureDefaultsOnce();
         const draft = loadDraft();
-        if(draft) writeFields(draft);
+        if(draft) {
+          writeFields(draft);
+          writeChartFields(draft.chartConfig, draft.drivers);
+        } else {
+          writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
+        }
         const saveBtn = $('#btnSaveCurrentState');
         const resetBtn = $('#btnResetCurrentState');
         if (saveBtn && !saveBtn.dataset.wired){
           saveBtn.dataset.wired = "1";
           saveBtn.addEventListener('click', (e)=>{
             e.preventDefault();
-            saveDraft(readFields());
+            const formData = readFields();
+            const chartDataRaw = readChartFieldsRaw();
+            const payload = { ...formData, chartConfig: chartDataRaw.chartConfig, drivers: chartDataRaw.drivers };
+            saveDraft(payload);
           });
         }
         if (resetBtn && !resetBtn.dataset.wired){
@@ -1108,6 +1548,9 @@
             e.preventDefault();
             clearDraft();
             writeFields(DEFAULT_CURRENT_STATE);
+            STATE.chartConfig = STATE.defaultsChartConfig();
+            STATE.drivers = STATE.defaultsDrivers();
+            writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
             STATE.currentState = STATE.defaultsCurrentState();
             render();
           });
@@ -1129,10 +1572,11 @@
                 </button>
               </div>
               <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
-              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
                 ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
                 ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
                 ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
+                ${editorSectionChart()}
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
                 <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
@@ -1142,6 +1586,47 @@
                   <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
                 </button>
               </div>
+            </div>
+          </div>
+        `;
+      }
+      function editorSectionChart(){
+        return `
+          <div class="flex flex-col gap-4">
+            <span class="text-sm font-semibold">XY Chart</span>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-[#4A5568]">Y-axis label</span>
+              <input id="chart-yaxis" value="${STATE.chartConfig.yAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-[#4A5568]">X-axis label</span>
+              <input id="chart-xaxis" value="${STATE.chartConfig.xAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-[#4A5568]">Center text</span>
+              <input id="chart-center" value="${STATE.chartConfig.center}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-[#4A5568]">Footer caption</span>
+              <input id="chart-footer" value="${STATE.chartConfig.footer}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span class="text-xs text-[#4A5568]">Operational breaking point annotation</span>
+              <input id="chart-tipping" value="${STATE.chartConfig.tipping}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+            </label>
+            <div class="space-y-4">
+              ${STATE.drivers.map((d, i) => `
+                <div>
+                  <label class="flex flex-col gap-1">
+                    <span class="text-xs text-[#4A5568]">Point ${i+1} title</span>
+                    <input id="driver${i}-label" value="${d.label}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+                  </label>
+                  <label class="flex flex-col gap-1 mt-2">
+                    <span class="text-xs text-[#4A5568]">Point ${i+1} bullets (one per line, exactly 3)</span>
+                    <textarea id="driver${i}-bullets" rows="4" class="min-h-[100px] rounded border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring">${d.bullets.join('\n')}</textarea>
+                  </label>
+                </div>
+              `).join('')}
             </div>
           </div>
         `;
@@ -1170,9 +1655,60 @@
       }
       function attachEvents(){
         const root=document.getElementById('app');
+        root.addEventListener('input', e => {
+          const act = e.target.closest('[data-action="set-slider"]');
+          if (act) {
+            const id = act.getAttribute('data-id');
+            const value = parseInt(act.value);
+            setSlider(id, value);
+          }
+          const calcApps = document.getElementById('calc-apps');
+          if (calcApps && e.target === calcApps) STATE.calcInputs.apps = cleanNum(e.target.value);
+          const calcEnvs = document.getElementById('calc-envs');
+          if (calcEnvs && e.target === calcApps) STATE.calcInputs.envs = cleanNum(e.target.value);
+          const calcChanges = document.getElementById('calc-changes');
+          if (calcChanges && e.target === calcChanges) STATE.calcInputs.changes = cleanNum(e.target.value);
+        });
+        root.addEventListener('click', e => {
+          const act = e.target.closest('[data-action]');
+          if (act) {
+            const action = act.getAttribute('data-action');
+            if (action === 'reset-sliders') {
+              resetSliders();
+            }
+            if (action === 'close-insight-modal') {
+              STATE.insightContent = null;
+              render();
+            }
+            if (action === 'why-nav') {
+              const to = act.getAttribute('data-to');
+              STATE.openWhyModal = to;
+              render();
+              return;
+            }
+            if (action === 'calculate-impact') {
+              calculateImpact();
+              render();
+              return;
+            }
+          }
+          const node = e.target.closest('.interactive-node');
+          if (node) {
+            const id = node.dataset.id;
+            STATE.activePopover = STATE.activePopover === id ? null : id;
+            render();
+            return;
+          }
+          if (STATE.activeTab === 'problems' && STATE.activePopover && !e.target.closest('.popover')) {
+            STATE.activePopover = null;
+            render();
+          }
+        });
         root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
           STATE.activeTab=e.currentTarget.getAttribute('data-tab');
           STATE.visitedCards = [];
+          STATE.activePopover = null;
+          STATE.calcResult = null;
           render();
         }));
         root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1182,11 +1718,27 @@
         }));
         root.querySelectorAll('[data-action="open-why-modal"]').forEach(b=>b.addEventListener('click',e=>{
           const id=e.currentTarget.getAttribute('data-why');
+          if (id === 'change') {
+            STATE.drivers.forEach(d => {
+              if (['more_apps', 'constant_updates', 'too_many_tools', 'manual_rework'].includes(d.id)) d.state = 'normal';
+            });
+          } else if (id === 'now') {
+            STATE.drivers.forEach(d => {
+              if (['more_apps', 'constant_updates', 'too_many_tools', 'manual_rework', 'security_compliance'].includes(d.id)) d.state = 'accelerating';
+            });
+            STATE.showTippingPoint = true;
+          } else if (id === 'recast') {
+            // Lock sliders, show absorption, narrow gap - but since no absorption line in spec, perhaps adjust exponents
+            STATE.targetDemandExponent -= 0.5; // Simulate narrowing
+          }
+          updateCurves();
+          requestAnimationFrame(animateCurves);
           STATE.openWhyModal = id;
           render();
         }));
         root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
           STATE.openWhyModal = null;
+          STATE.activePopover = null;
           render();
         }));
         root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
@@ -1391,6 +1943,24 @@
         STATE.showLabels = false;
         buildFlow();
       }
+      function calculateImpact(){
+        const apps = STATE.calcInputs.apps;
+        const envs = STATE.calcInputs.envs;
+        const changes = STATE.calcInputs.changes;
+        STATE.qualified = apps >= 50 && envs >= 2 && changes >= 10;
+        if (STATE.qualified) {
+          const currentMonthlyHours = (apps * envs * changes * 0.75) + (changes * 0.25);
+          const workspaceMonthlyHours = currentMonthlyHours * 0.4;
+          const hoursSavedMonthly = currentMonthlyHours - workspaceMonthlyHours;
+          const hoursSavedYearly = hoursSavedMonthly * 12;
+          STATE.calcResult = {
+            hoursSavedMonthly,
+            hoursSavedYearly
+          };
+        } else {
+          STATE.calcResult = null;
+        }
+      }
       function attachAccordionKeyboard(){
         document.addEventListener('keydown', (e) => {
           const target = e.target;
@@ -1417,6 +1987,16 @@
           }
         });
       }
+      function parseLines(s, max=4){
+        return (s || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, max);
+      }
+      STATE.drivers.forEach(d => d.state = 'accelerating');
+      STATE.showTippingPoint = true;
+      updateCurves();
+      STATE.currentDemandExponent = STATE.targetDemandExponent;
+      STATE.currentCapacitySlope = STATE.targetCapacitySlope;
+      STATE.tippingPointYear = 2027.5;
+      STATE.openCards['core-details'] = false;
       document.addEventListener('DOMContentLoaded', render);
       document.addEventListener('click', (e)=>{
         const act = e.target.closest('[data-action]');
@@ -1431,7 +2011,6 @@
           act.addEventListener('input', (evt)=>{ STATE.editBuffers[key][subkey] = evt.target.value; });
         }
         if(action==='save-currentstate'){
-          const parseLines = (s)=> (s||'').split('\n').map(l=>l.trim()).filter(Boolean).slice(0,4);
           const fallback = STATE.defaultsCurrentState();
           const formData = readFields();
           STATE.currentState = {
@@ -1451,22 +2030,20 @@
               analyst: formData.recast.analyst.trim() || fallback.recast.analyst
             }
           };
-          saveDraft({
-            change: {
-              intro: $('#changeIntro')?.value || '',
-              bullets: $('#changeBullets')?.value || '',
-              analyst: $('#changeAnalyst')?.value || ''
-            },
-            now: {
-              intro: $('#nowIntro')?.value || '',
-              bullets: $('#nowBullets')?.value || '',
-              analyst: $('#nowAnalyst')?.value || ''
-            },
-            recast: {
-              intro: $('#recastIntro')?.value || '',
-              bullets: $('#recastBullets')?.value || '',
-              analyst: $('#recastAnalyst')?.value || ''
-            }
+          const chartDataRaw = readChartFieldsRaw();
+          const fallbackChart = STATE.defaultsChartConfig();
+          STATE.chartConfig = {
+            yAxis: chartDataRaw.chartConfig.yAxis.trim() || fallbackChart.yAxis,
+            xAxis: chartDataRaw.chartConfig.xAxis.trim() || fallbackChart.xAxis,
+            center: chartDataRaw.chartConfig.center.trim() || fallbackChart.center,
+            footer: chartDataRaw.chartConfig.footer.trim() || fallbackChart.footer,
+            tipping: chartDataRaw.chartConfig.tipping.trim() || fallbackChart.tipping
+          };
+          const fallbackDrivers = STATE.defaultsDrivers();
+          STATE.drivers.forEach((d, i) => {
+            d.label = chartDataRaw.drivers[i].label.trim() || fallbackDrivers[i].label;
+            const b = parseLines(chartDataRaw.drivers[i].bullets, 3);
+            d.bullets = b.length === 3 ? b : fallbackDrivers[i].bullets;
           });
           STATE.modalOpen=false;
           STATE.activeTab='problems';
@@ -1477,14 +2054,18 @@
           clearDraft();
           captureDefaultsOnce();
           writeFields(DEFAULT_CURRENT_STATE);
+          STATE.chartConfig = STATE.defaultsChartConfig();
+          STATE.drivers = STATE.defaultsDrivers();
+          writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
           STATE.currentState = STATE.defaultsCurrentState();
           render();
         }
       });
       document.addEventListener('keydown',(e)=>{
-        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal)){
+        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal || STATE.insightContent)){
           STATE.modalOpen=false;
           STATE.openWhyModal=null;
+          STATE.insightContent=null;
           render();
         }
       });
