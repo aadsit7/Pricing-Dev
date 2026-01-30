@@ -124,6 +124,7 @@
         visitedCards: [],
         openBuckets: { one: false, zero: false, per: false },
         modalOpen: false,
+        editTab: 'change',
         editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
         insightContent: null,
         mode: 'current_state',
@@ -873,96 +874,10 @@
               </div>
             </button>
             <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
-              ${card.id === 'core' ? renderCoreContent(card) : `
-                <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
-                  ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
-                </ul>
-                ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
-                <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
-              `}
-            </div>
-          </div>
-        `;
-      }
-      function renderCoreContent(card){
-        const detailsExpanded = STATE.openCards['core-details'] || false;
-        const detailsId = 'core-details-content';
-        return `
-          <h3 class="text-xl font-semibold mb-2">How Application Delivery Changes with Recast</h3>
-          <p class="text-base text-[#4A5568] mb-4">From delivering applications to devices → delivering applications to users</p>
-          <table class="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr>
-                <th class="p-3 bg-slate-100 border border-slate-200">Today: Delivering to the Device</th>
-                <th class="p-3 bg-slate-100 border border-slate-200">With Recast: Delivering to the User</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="p-3 border border-slate-200">Applications are packaged and deployed based on device or platform</td>
-                <td class="p-3 border border-slate-200">Applications are assigned based on who the user is</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">The same app is built and supported differently for SCCM, Intune, VDI, macOS</td>
-                <td class="p-3 border border-slate-200">Each app is defined once and delivered consistently across platforms</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">IT must know where the app is installed to troubleshoot issues</td>
-                <td class="p-3 border border-slate-200">IT supports apps the same way regardless of how they are delivered</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">New platforms require rebuilding and retesting existing apps</td>
-                <td class="p-3 border border-slate-200">New platforms do not change how apps are defined</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">Backend changes surface as user issues or retraining</td>
-                <td class="p-3 border border-slate-200">Backend changes do not change the user experience</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">Users see different app behavior depending on where they log in</td>
-                <td class="p-3 border border-slate-200">Users see the same apps and experience wherever they log in</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">Application logic is spread across multiple tools</td>
-                <td class="p-3 border border-slate-200">Application delivery is centralized while tools stay in place</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">Support paths vary by platform</td>
-                <td class="p-3 border border-slate-200">Support follows one predictable path</td>
-              </tr>
-              <tr>
-                <td class="p-3 border border-slate-200">The environment works because people know the exceptions</td>
-                <td class="p-3 border border-slate-200">The environment works because it is consistent by design</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="mt-6">
-            <button
-              type="button"
-              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
-              data-action="toggle-card"
-              data-card="core-details"
-              aria-expanded="${detailsExpanded}"
-              aria-controls="${detailsId}"
-              style="border-radius:var(--radius); min-height: 44px;"
-            >
-              <div class="bg-slate-50 px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="layers" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
-                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">What Makes This Work in Practice</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm text-[#4A5568]">${detailsExpanded ? 'Collapse' : 'Expand'}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${detailsExpanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
-                  </div>
-                </div>
-              </div>
-            </button>
-            <div id="${detailsId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${detailsExpanded?'1200px':'0'};opacity:${detailsExpanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; bg-[#f9fafb]; padding:${detailsExpanded?'24px 20px':'0 20px'}">
               <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
+              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
               <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
             </div>
           </div>
@@ -1562,6 +1477,12 @@ application delivery becomes harder to scale predictably.</p>
         const buf = STATE.editBuffers;
         const toLines = arr => arr.join('\n');
         const ensure = v => v ?? '';
+        const editTabs = [
+          {id: 'change', label: 'Why Change'},
+          {id: 'now', label: 'Why Now'},
+          {id: 'recast', label: 'Why Recast'},
+          {id: 'chart', label: 'Chart Config'}
+        ];
         return `
           <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
             <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
@@ -1572,11 +1493,18 @@ application delivery becomes harder to scale predictably.</p>
                 </button>
               </div>
               <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
-              <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-                ${editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst)}
-                ${editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst)}
-                ${editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst)}
-                ${editorSectionChart()}
+              <div role="tablist" aria-label="Edit sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200 mt-4">
+                ${editTabs.map(t=>`
+                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.editTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-edit-tab" data-tab="${t.id}" aria-selected="${STATE.editTab===t.id}">
+                    <span>${t.label}</span>
+                  </button>
+                `).join('')}
+              </div>
+              <div class="mt-4">
+                ${STATE.editTab === 'change' ? editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst) : ''}
+                ${STATE.editTab === 'now' ? editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst) : ''}
+                ${STATE.editTab === 'recast' ? editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst) : ''}
+                ${STATE.editTab === 'chart' ? editorSectionChart() : ''}
               </div>
               <div class="mt-5 flex flex-wrap gap-2">
                 <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
@@ -1665,7 +1593,7 @@ application delivery becomes harder to scale predictably.</p>
           const calcApps = document.getElementById('calc-apps');
           if (calcApps && e.target === calcApps) STATE.calcInputs.apps = cleanNum(e.target.value);
           const calcEnvs = document.getElementById('calc-envs');
-          if (calcEnvs && e.target === calcApps) STATE.calcInputs.envs = cleanNum(e.target.value);
+          if (calcEnvs && e.target === calcEnvs) STATE.calcInputs.envs = cleanNum(e.target.value);
           const calcChanges = document.getElementById('calc-changes');
           if (calcChanges && e.target === calcChanges) STATE.calcInputs.changes = cleanNum(e.target.value);
         });
@@ -1673,6 +1601,11 @@ application delivery becomes harder to scale predictably.</p>
           const act = e.target.closest('[data-action]');
           if (act) {
             const action = act.getAttribute('data-action');
+            if (action === 'switch-edit-tab') {
+              STATE.editTab = act.getAttribute('data-tab');
+              render();
+              return;
+            }
             if (action === 'reset-sliders') {
               resetSliders();
             }
@@ -1828,6 +1761,7 @@ application delivery becomes harder to scale predictably.</p>
         const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
         if(openEditor) openEditor.addEventListener('click', ()=>{
           STATE.modalOpen = true;
+          STATE.editTab = 'change';
           STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
           render();
           setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
@@ -1996,7 +1930,6 @@ application delivery becomes harder to scale predictably.</p>
       STATE.currentDemandExponent = STATE.targetDemandExponent;
       STATE.currentCapacitySlope = STATE.targetCapacitySlope;
       STATE.tippingPointYear = 2027.5;
-      STATE.openCards['core-details'] = false;
       document.addEventListener('DOMContentLoaded', render);
       document.addEventListener('click', (e)=>{
         const act = e.target.closest('[data-action]');
