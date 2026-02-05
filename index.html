@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://unpkg.com">
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
       :root {
         --bg-main: #f9fafb;
@@ -103,10 +104,96 @@
       @keyframes metricsAppear { to { opacity: 1; transform: translateY(0); } }
       .interactive-node { transition: opacity 0.3s, transform 0.3s; }
       .interactive-node:hover { opacity: 0.9; transform: scale(1.05); }
+
+      /* New Chart Styles */
+      .chart-container { width: 100%; height: auto; aspect-ratio: 800 / 400; }
+      #capacity-gap-chart { width: 100%; height: 100%; }
+      .chart-text { font-size: 16px; font-weight: 500; fill: #0f172a; letter-spacing: 0.02em; }
+      .chart-axis { stroke: #e5e7eb; stroke-width: 1.5; }
+      .chart-axis-label { font-size: 18px; font-weight: bold; fill: #0A1C60; }
+      .chart-year-label { font-size: 14px; fill: #111827; }
+      @media (max-width: 640px) { .chart-year-label { font-size: 12px; transform: rotate(-45deg) translate(-10px, 10px); } }
+      .chart-annotation { font-size: 20px; font-weight: 500; fill: #6b7280; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+      .demand-line { stroke-width: 3; filter: drop-shadow(0 0 4px rgba(239,68,68,0.3)); }
+      .capacity-line { stroke-width: 3; }
+      .gap-fill { }
+      .marker-group:hover { transform: scale(1.1); transition: transform 0.2s ease; }
+      .marker-group:hover circle { animation: pulse 1.5s infinite; }
+      @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+      .chart-element { opacity: 0; animation: fadeIn 0.5s forwards; }
+      @keyframes fadeIn { to { opacity: 1; } }
+      .axis-element { animation-delay: 0s; }
+      .line-element { animation-delay: 0.3s; }
+      .gap-element { animation-delay: 0.6s; }
+      .marker-element { animation-delay: 0.9s; }
+      .label-element { animation-delay: 1.2s; }
+
+      /* =========================
+         2026 SaaS polish overrides
+         ========================= */
+
+      :root{
+        --bg-main:
+          radial-gradient(1200px 700px at 18% 0%, rgba(37,99,235,0.10), transparent 58%),
+          radial-gradient(900px 560px at 92% 28%, rgba(16,185,129,0.07), transparent 60%),
+          linear-gradient(180deg, #fbfdff 0%, #f7f8fb 55%, #f9fafb 100%);
+
+        --shadow-card:
+          0 2px 10px rgba(15, 23, 42, 0.06),
+          0 1px 3px rgba(15, 23, 42, 0.04);
+        --shadow-hover:
+          0 14px 36px rgba(15, 23, 42, 0.10),
+          0 4px 12px rgba(15, 23, 42, 0.06);
+        --shadow-elevated:
+          0 28px 70px rgba(15, 23, 42, 0.18),
+          0 10px 24px rgba(15, 23, 42, 0.10);
+
+        --re-green: #10b981;
+      }
+
+      html, body { background: var(--bg-main); background-attachment: fixed; }
+
+      .section-card{
+        background: rgba(255,255,255,0.88);
+        border: 1px solid rgba(226,232,240,0.70);
+      }
+
+      .glass{
+        background: rgba(255,255,255,0.72) !important;
+        border: 1px solid rgba(255,255,255,0.55);
+        box-shadow: var(--shadow-elevated) !important;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+      .glass-soft{
+        background: rgba(255,255,255,0.62) !important;
+        border: 1px solid rgba(255,255,255,0.50);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+
+      .modal-overlay{ background: rgba(2,6,23,0.55) !important; }
+      .modal-content{ box-shadow: var(--shadow-elevated) !important; }
+
+      .demand-line, .capacity-line{ stroke-linecap: round; stroke-linejoin: round; }
+
+      .marker-group{
+        transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+      }
+      .marker-group:hover{
+        filter: drop-shadow(0 10px 18px rgba(37,99,235,0.22));
+        transform: translateY(-1px) scale(1.02);
+      }
+
+      @media (prefers-reduced-motion: reduce){
+        .marker-group, .section-card, .logo-ring { transition: none !important; animation: none !important; }
+      }
     </style>
   </head>
+
   <body class="min-h-screen antialiased">
     <div id="app" class="min-h-screen"></div>
+
     <script>
       const STATE = {
         activeTab: 'problems',
@@ -134,8 +221,8 @@
           { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
           { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
           { id: "too_many_tools", label: "Hybrid Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
-          { id: "manual_rework", label: "Too Much Manual Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
-          { id: "security_compliance", label: "Security and Compliance Pressure", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
+          { id: "manual_rework", label: "Manual Re-Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
+          { id: "security_compliance", label: "Security", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
         ],
         tippingPointYear: 2027.5,
         tippingPoint: {
@@ -146,9 +233,9 @@
         chartConfig: {
           yAxis: "Expectations and Requests",
           xAxis: "Time",
-          center: "The widening gap",
-          footer: "IT Appreciation & Resources / Time",
-          tipping: "Operational breaking point"
+          center: "IT Capacity Gap",
+          footer: "",
+          tipping: ""
         },
         currentDemandExponent: 1.6,
         targetDemandExponent: 1.6,
@@ -159,9 +246,12 @@
           change: {
             intro: "The application layer has become the biggest drag on IT execution.",
             bullets: [
-              'Too many apps, too many platforms. The same applications are rebuilt, patched, and supported separately across Intune, ConfigMgr, VDI, Windows, and macOS.',
-              'Work has outgrown capacity. Headcount stays flat while app updates, fixes, and exceptions keep increasing.',
-              'Major initiatives stall on app readiness. Cloud moves, AVD/Citrix projects, hardware refreshes, and AI efforts all slow down at the same point.',
+              "TODAY applications are tied to the device. Apps are packaged/deployed for specific device types (e.g., SCCM, Intune, VDI, macOS). Deployment is device-based, not user-based.",
+              "Duplicated Effort for Every Platform. Same app must be rebuilt, packaged, and supported separately. Each delivery tool needs its own version of the app.",
+              "Support is Complex and Fragmented. IT must locate where an app is installed before addressing issues. Increases troubleshooting time and causes fragmented support paths.",
+              "Modernization is Difficult and Risky. Adding platforms or making backend changes often requires rebuilding apps. High risk of introducing bugs and breaking existing functionality.",
+              "Inconsistent User Experience. App behavior and availability vary depending on device used. Users may encounter different interfaces and capabilities.",
+              "Logic is Scattered Across Multiple Tools. Environment depends on tribal knowledge and workarounds. Decentralized system creates inefficiencies and hidden complexity."
             ],
             analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
           },
@@ -177,9 +267,12 @@
           recast: {
             intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
             bullets: [
-              'One workspace for every app. Commercial, internal, and legacy apps are delivered consistently across Intune, ConfigMgr, AVD, and other platforms.',
-              'Less version sprawl, fewer variables. Fewer app versions mean fewer tickets, faster fixes, and simpler support.',
-              'Capacity returns to the team. What used to take hours becomes minutes, freeing teams to move modernization forward.',
+              "Applications Are Tied to the User. Apps follow the user across platforms. Assigned by user identity, not device or location. Seamless transition regardless of login method.",
+              "Define Once, Deliver Everywhere. Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
+              "Support is Simple and Predictable. IT uses a single support model across all delivery methods. Consistency allows predictable troubleshooting and maintenance.",
+              "Modernization is Seamless and Agile. New platforms can be integrated without rework. Backend updates don’t affect user-facing experience. Enhancements are non-disruptive to users.",
+              "Consistent User Experience. Users see the same apps and interfaces every time. Uniformity across devices ensures familiarity. Reduces user confusion and support demand.",
+              "Logic is Centralized and Consistent. Central management of application delivery. Ensures design consistency across environments. Reduces fragmentation and configuration drift."
             ],
             analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change"
           }
@@ -189,27 +282,33 @@
             change: {
               intro: "The application layer has become the biggest drag on IT execution.",
               bullets: [
-              'Too many apps, too many platforms. The same applications are rebuilt, patched, and supported separately across Intune, ConfigMgr, VDI, Windows, and macOS.',
-              'Work has outgrown capacity. Headcount stays flat while app updates, fixes, and exceptions keep increasing.',
-              'Major initiatives stall on app readiness. Cloud moves, AVD/Citrix projects, hardware refreshes, and AI efforts all slow down at the same point.',
-            ],
-            analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
+                "Applications Are Tied to the Device. Apps are packaged/deployed for specific device types (e.g., SCCM, Intune, VDI, macOS). Deployment is device-based, not user-based.",
+                "Duplicated Effort for Every Platform. Same app must be rebuilt, packaged, and supported separately. Each delivery tool needs its own version of the app.",
+                "Support is Complex and Fragmented. IT must locate where an app is installed before addressing issues. Increases troubleshooting time and causes fragmented support paths.",
+                "Modernization is Difficult and Risky. Adding platforms or making backend changes often requires rebuilding apps. High risk of introducing bugs and breaking existing functionality.",
+                "Inconsistent User Experience. App behavior and availability vary depending on device used. Users may encounter different interfaces and capabilities.",
+                "Logic is Scattered Across Multiple Tools. Environment depends on tribal knowledge and workarounds. Decentralized system creates inefficiencies and hidden complexity."
+              ],
+              analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
             },
             now: {
               intro: "The gap between what IT is ASKED to deliver and what it CAN sustain is widening fast.",
               bullets: [
-              'Change is accelerating, not slowing down. More app updates, more security pressure, more platforms — with the same teams.',
-              'Manual app work compounds over time. Every custom or internal app adds more versions, more dependencies, and more risk with each change',
-              'Teams that should be driving innovation are stuck keeping apps alive.',
-            ],
-            analyst: "Organizations that succeed with AI, cloud, and new platforms over the next few years will be the ones that stabilize application delivery first. Everyone else hits a capacity wall where progress slows regardless of strategy"
+                'Change is accelerating, not slowing down. More app updates, more security pressure, more platforms — with the same teams.',
+                'Manual app work compounds over time. Every custom or internal app adds more versions, more dependencies, and more risk with each change',
+                'Teams that should be driving innovation are stuck keeping apps alive.',
+              ],
+              analyst: "Organizations that succeed with AI, cloud, and new platforms over the next few years will be the ones that stabilize application delivery first. Everyone else hits a capacity wall where progress slows regardless of strategy"
             },
             recast: {
               intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
               bullets: [
-                'One workspace for every app. Commercial, internal, and legacy apps are delivered consistently across Intune, ConfigMgr, AVD, and other platforms.',
-                'Less version sprawl, fewer variables. Fewer app versions mean fewer tickets, faster fixes, and simpler support..',
-                'Capacity returns to the team. What used to take hours becomes minutes, freeing teams to move modernization forward',
+                "Applications Are Tied to the User. Apps follow the user across platforms. Assigned by user identity, not device or location. Seamless transition regardless of login method.",
+                "Define Once, Deliver Everywhere. Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
+                "Support is Simple and Predictable. IT uses a single support model across all delivery methods. Consistency allows predictable troubleshooting and maintenance.",
+                "Modernization is Seamless and Agile. New platforms can be integrated without rework. Backend updates don’t affect user-facing experience. Enhancements are non-disruptive to users.",
+                "Consistent User Experience. Users see the same apps and interfaces every time. Uniformity across devices ensures familiarity. Reduces user confusion and support demand.",
+                "Logic is Centralized and Consistent. Central management of application delivery. Ensures design consistency across environments. Reduces fragmentation and configuration drift."
               ],
               analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change."
             }
@@ -219,8 +318,8 @@
           return JSON.parse(JSON.stringify({
             yAxis: "Expectations and Requests",
             xAxis: "Time",
-            center: "The widening gap",
-            footer: "Limited budget, flat headcount, and finite operational capacity",
+            center: "IT Capacity Gap",
+            footer: "",
             tipping: "Operational breaking point"
           }));
         },
@@ -235,15 +334,23 @@
         },
         progress: { apps: 0, time: 0, tickets: 0 },
         envProgress: { appsProcessed: 0 },
-        calcInputs: { apps: 250, envs: 3, changes: 20 },
+        calcInputs: { envs: 3, changes: 10, time: 4 },
         calcResult: null,
         qualified: false
       };
+
+      // New state fields (reliability + chart linking + flow timer safety)
+      STATE.recastMode = false;
+      STATE.flowTimers = { intervals: [], timeouts: [] };
+      STATE.editChartBuffer = null;
+      STATE.highlightDriverId = null;
+
       const TABS = [
         { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
         { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
         { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
       ];
+
       const NEW_CARDS = [
         {
           id: 'core',
@@ -295,71 +402,9 @@
           bgContent: 'bg-[#f9fafb]'
         }
       ];
+
       const onboardingMiniTimelineEnabled = true;
-      const NODE_DATA = {
-        'platform': {
-          bullets: ['Cloud', 'Endpoint / VDI', 'SCCM to Intune', 'Citrix to AVD'],
-          pos: {x:200, y:50},
-          anchor: 'bottom'
-        },
-        'application': {
-          bullets: ['New apps', 'Continuous updates'],
-          pos: {x:700, y:50},
-          anchor: 'bottom'
-        },
-        'security': {
-          bullets: ['MFA', 'Zero Trust'],
-          pos: {x:200, y:370},
-          anchor: 'top'
-        },
-        'device': {
-          bullets: ['Windows / macOS', 'ARM / VDI'],
-          pos: {x:700, y:370},
-          anchor: 'top'
-        },
-        'user': {
-          bullets: ['Instant access', 'No downtime'],
-          pos: {x:70, y:210},
-          anchor: 'right'
-        },
-        'modernization': {
-          bullets: ['Cloud moves', 'AI projects'],
-          pos: {x:830, y:210},
-          anchor: 'left'
-        }
-      };
-      const NODE_DATA_RECAST = {
-        'platform': {
-          bullets: ['Cloud migrations without app rework', 'Endpoint to VDI seamless shift', 'SCCM to Intune automated transition', 'Citrix to AVD quick migration'],
-          pos: {x:200, y:50},
-          anchor: 'bottom'
-        },
-        'application': {
-          bullets: ['Automated new app onboarding', 'Continuous updates with zero touch', 'Version sprawl elimination', 'Legacy app virtualization'],
-          pos: {x:700, y:50},
-          anchor: 'bottom'
-        },
-        'security': {
-          bullets: ['Built-in MFA integration', 'Zero Trust app access', 'Automated compliance checks', 'Instant security patching'],
-          pos: {x:200, y:370},
-          anchor: 'top'
-        },
-        'device': {
-          bullets: ['Universal Windows/macOS support', 'ARM device compatibility', 'VDI/physical unified management', 'Cross-OS version consistency'],
-          pos: {x:700, y:370},
-          anchor: 'top'
-        },
-        'user': {
-          bullets: ['Instant self-service app access', 'Zero downtime updates', 'Seamless multi-device sync', 'Intuitive workspace portal'],
-          pos: {x:70, y:210},
-          anchor: 'right'
-        },
-        'modernization': {
-          bullets: ['Accelerated cloud migrations', 'AI readiness without app blocks', 'Streamlined hardware refreshes', 'Continuous digital transformation'],
-          pos: {x:830, y:210},
-          anchor: 'left'
-        }
-      };
+
       function cx(...a){ return a.filter(Boolean).join(' '); }
       function round(n){ return Math.round(n*100)/100; }
       function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
@@ -369,6 +414,7 @@
         return 'VDI';
       }
       function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+
       function render(){
         const root=document.getElementById('app');
         root.innerHTML = `
@@ -381,34 +427,45 @@
                   : 'Application Workspace helps IT keep applications running smoothly as platforms change — without creating more work'}
               </p>
             </div>
+
             <div class="relative mx-auto max-w-6xl px-4">
-              <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200">
+              <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-white/60 backdrop-blur-lg p-1 ring-1 ring-slate-200">
                 ${TABS.map(t=>`
-                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-tab" data-tab="${t.id}" aria-controls="panel-${t.id}" aria-selected="${STATE.activeTab===t.id}">
+                  <button type="button"
+                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition',
+                      STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}"
+                    data-action="switch-tab"
+                    data-tab="${t.id}"
+                    aria-controls="panel-${t.id}"
+                    aria-selected="${STATE.activeTab===t.id}">
                     <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
                   </button>
                 `).join('')}
               </div>
             </div>
           </header>
+
           <main class="mx-auto max-w-6xl px-4 pb-16">
             ${STATE.activeTab==='roi' ? `
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              ${chip('Reactive Work Reduced', String(STATE.impact.minutes)+' min/user/mo', 'emerald')}
-              ${chip('Hours Saved from Packaging', String(round(STATE.impact.pkgHours)), 'sky')}
-              ${chip('Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
+              ${chip('Avg. Reactive Work Reduced', String(STATE.impact.minutes)+' min/user/mo', 'emerald')}
+              ${chip('Avg. Hours Saved from Packaging', String(round(STATE.impact.pkgHours)), 'sky')}
+              ${chip('Avg. Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
             </div>` : ''}
+
             <section class="mt-5">${renderActivePanel()}</section>
           </main>
+
           ${renderModal()}
           ${renderWhyModal()}
           ${renderInsightModal()}
         `;
+
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
         attachEvents();
-        if (STATE.activeTab === 'solution') { buildFlow(); }
+
+        if (STATE.activeTab === 'solution') { buildFlow(); attachAccordionKeyboard(); }
         if (STATE.activeTab === 'roi') { updateROIOutputs(); }
-        if (STATE.activeTab === 'solution') { attachAccordionKeyboard(); }
         if (STATE.activeTab === 'problems') {
           renderCapacityGapChart();
           if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
@@ -416,6 +473,7 @@
           }
         }
       }
+
       function chip(label,value,tone){
         const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
         return `
@@ -427,19 +485,22 @@
           </div>
         `;
       }
+
       function renderActivePanel(){
         if (STATE.activeTab==='problems') return renderProblems();
         if (STATE.activeTab==='solution') return renderSolution();
         if (STATE.activeTab==='roi') return renderROI();
         return '';
       }
+
       function renderProblems(){
         const items=[
-          {t:'Inconsistent Apps',s:'Apps behave differently across Windows, macOS, VDI, and web — creating confusion, inconsistency, and support issues',i:'layers'},
-          {t:'Slow Changes',s:'Each update requires rebuilds, retesting, and rework — slowing delivery and piling up backlog.',i:'boxes'},
+          {t:'Inconsistent Apps',s:'The same app works fine on one machine but breaks or behaves differently on another, which is why tickets keep bouncing around.',i:'layers'},
+          {t:'Slow Changes',s:'Even simple updates take way longer than they should because every platform needs its own build, testing, and rollout.',i:'boxes'},
           {t:'Delayed Patching',s:'Security patches sit in limbo while teams test compatibility and chase edge cases, leaving known gaps open longer than anyone’s comfortable with',i:'shield'},
-          {t:'Risky Upgrades',s:'Teams delay upgrades because app readiness and compatibility are uncertain.',i:'layout-grid'}
+          {t:'Risky Upgrades',s:'Teams delay upgrades because no one’s confident which apps will break, where they’ll break, or how painful the rollback will be.',i:'layout-grid'}
         ];
+
         return `
           <section id="panel-problems" class="space-y-4">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -450,16 +511,17 @@
                 </article>
               `).join('')}
             </div>
+
             <div class="section-card p-6">
-              <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-start">
-                <div class="relative">
-                  <svg id="capacity-gap-chart" class="w-full h-96"></svg>
+              <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+                <div class="chart-container relative">
+                  <svg id="capacity-gap-chart" viewBox="0 0 800 400"></svg>
                 </div>
-                <div class="w-full lg:w-80 bg-white rounded-2xl shadow-md p-6">
-                  <h3 class="text-xl font-medium mb-6">Modern IT Challenges</h3>
-                  <div class="grid grid-cols-1 gap-6 items-stretch">
+                <div class="w-full lg:w-64 bg-white/70 backdrop-blur-lg rounded-2xl shadow-md p-5 border border-slate-200">
+                  <h3 class="text-lg font-medium mb-4">Modern IT Challenges</h3>
+                  <div class="grid grid-cols-1 gap-4 items-stretch">
                     ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
-                    ${calloutDropdown('now','clock-4','Why Now','bg-slate-50', false, "Because the current model can’t handle the amount of change that’s coming")}
+                    ${calloutDropdown('now','clock-4','Why Now','bg-slate-50', false, "")}
                     ${calloutDropdown('recast','sparkles','Why Recast','bg-slate-50', true)}
                   </div>
                 </div>
@@ -468,81 +530,111 @@
           </section>
         `;
       }
+
       function renderCapacityGapChart(){
         const svg = document.getElementById('capacity-gap-chart');
         if (!svg) return;
+
         svg.innerHTML = '';
         svg.setAttribute('viewBox', '0 0 800 400');
+
         const width = 700, height = 300, margin = {left: 50, bottom: 50, top: 50, right: 50};
         const xScale = t => margin.left + t * width;
         const yScale = v => margin.top + height - v * height;
-        // Axes
+
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = `
+          <linearGradient id="demandGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ef4444"/>
+            <stop offset="100%" stop-color="#dc2626"/>
+          </linearGradient>
+          <linearGradient id="capacityGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#2563eb"/>
+          </linearGradient>
+          <linearGradient id="gapGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(239,68,68,0.10)"/>
+            <stop offset="100%" stop-color="rgba(59,130,246,0.10)"/>
+          </linearGradient>
+        `;
+        svg.appendChild(defs);
+
         const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        xAxis.classList.add('axis-element', 'chart-element');
         xAxis.innerHTML = `
-          <line x1="${margin.left}" y1="${margin.top + height}" x2="${margin.left + width}" y2="${margin.top + height}" stroke="#d1d5db" stroke-width="1"/>
-          <text x="${margin.left + width / 2}" y="${margin.top + height + 40}" text-anchor="middle" font-size="14" fill="#111827">${STATE.chartConfig.xAxis}</text>
+          <line x1="${margin.left}" y1="${margin.top + height}" x2="${margin.left + width}" y2="${margin.top + height}" class="chart-axis"/>
+          <text x="${margin.left + width / 2}" y="${margin.top + height + 40}" text-anchor="middle" class="chart-axis-label">${STATE.chartConfig.xAxis}</text>
           ${STATE.years.map((year, i) => {
             const x = xScale(i / 3);
             return `
-              <line x1="${x}" y1="${margin.top + height}" x2="${x}" y2="${margin.top + height + 10}" stroke="#d1d5db" stroke-width="1"/>
-              <text x="${x}" y="${margin.top + height + 25}" text-anchor="middle" font-size="12" fill="#111827">${year}</text>
+              <line x1="${x}" y1="${margin.top + height}" x2="${x}" y2="${margin.top + height + 10}" class="chart-axis"/>
+              <text x="${x}" y="${margin.top + height + 25}" text-anchor="middle" class="chart-year-label chart-text label-element chart-element">${year}</text>
             `;
           }).join('')}
-          <text x="${margin.left + width / 2}" y="${margin.top + height + 60}" text-anchor="middle" font-size="12" fill="#6b7280"> ${STATE.chartConfig.footer}</text>
+          <text x="${margin.left + width / 2}" y="${margin.top + height + 60}" text-anchor="middle" font-size="14" fill="#6b7280" font-family="Inter" class="label-element chart-element"> ${STATE.chartConfig.footer}</text>
         `;
         svg.appendChild(xAxis);
+
         const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        yAxis.classList.add('axis-element', 'chart-element');
         yAxis.innerHTML = `
-          <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + height}" stroke="#d1d5db" stroke-width="1"/>
-          <text x="${margin.left - 10}" y="${margin.top + height / 2}" text-anchor="middle" font-size="14" fill="#111827" transform="rotate(-90, ${margin.left - 10}, ${margin.top + height / 2})">${STATE.chartConfig.yAxis}</text>
+          <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + height}" class="chart-axis"/>
+          <text x="${margin.left - 10}" y="${margin.top + height / 2}" text-anchor="middle" class="chart-axis-label" transform="rotate(-90, ${margin.left - 10}, ${margin.top + height / 2})">${STATE.chartConfig.yAxis}</text>
         `;
         svg.appendChild(yAxis);
-        // Curves
+
         const exp = STATE.currentDemandExponent;
         const slope = STATE.currentCapacitySlope;
+
         let demandPath = `M ${xScale(0)} ${yScale(0)}`;
         let capacityPath = `M ${xScale(0)} ${yScale(0.3)}`;
-        let demandPoints = [];
-        let capacityPoints = [];
+
+        const demandPoints = [];
+        const capacityPoints = [];
+
         for (let i = 0; i <= 100; i++) {
-          let t = i / 100;
-          let dem = Math.pow(t, exp);
-          let cap = 0.3 + slope * t;
+          const t = i / 100;
+          const dem = Math.pow(t, exp);
+          const cap = 0.3 + slope * t;
+
           demandPath += ` L ${xScale(t)} ${yScale(dem)}`;
           capacityPath += ` L ${xScale(t)} ${yScale(cap)}`;
+
           demandPoints.push({x: xScale(t), y: yScale(dem)});
           capacityPoints.push({x: xScale(t), y: yScale(cap)});
         }
+
         const demandLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         demandLine.setAttribute('d', demandPath);
-        demandLine.setAttribute('stroke', '#ef4444');
-        demandLine.setAttribute('stroke-width', '2');
+        demandLine.setAttribute('stroke', 'url(#demandGradient)');
         demandLine.setAttribute('fill', 'none');
+        demandLine.classList.add('demand-line', 'line-element', 'chart-element');
         svg.appendChild(demandLine);
+
         const capacityLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         capacityLine.setAttribute('d', capacityPath);
-        capacityLine.setAttribute('stroke', '#3b82f6');
-        capacityLine.setAttribute('stroke-width', '2');
+        capacityLine.setAttribute('stroke', 'url(#capacityGradient)');
         capacityLine.setAttribute('fill', 'none');
+        capacityLine.classList.add('capacity-line', 'line-element', 'chart-element');
         svg.appendChild(capacityLine);
-        // Gap shading
-        let numNormal = 0, numAccelerating = 0;
-        STATE.drivers.forEach(d => { if (d.state === 'normal') numNormal++; if (d.state === 'accelerating') numAccelerating++; });
-        const pressure = numNormal + numAccelerating * 2;
-        const lightness = 95 - pressure * 1.5;
-        const gapPath = demandPoints.map(p => `L ${p.x} ${p.y}`).join(' ') + capacityPoints.reverse().map(p => `L ${p.x} ${p.y}`).join(' ') + 'Z';
+
+        const gapPath = demandPoints.map(p => `L ${p.x} ${p.y}`).join(' ') +
+          capacityPoints.slice().reverse().map(p => `L ${p.x} ${p.y}`).join(' ') + 'Z';
+
         const gap = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         gap.setAttribute('d', `M ${demandPoints[0].x} ${demandPoints[0].y} ` + gapPath);
-        gap.setAttribute('fill', `hsl(220, 10%, ${lightness}%)`);
+        gap.setAttribute('fill', 'url(#gapGradient)');
+        gap.classList.add('gap-fill', 'gap-element', 'chart-element');
         svg.appendChild(gap);
+
         const gapLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         gapLabel.setAttribute('x', xScale(0.5));
         gapLabel.setAttribute('y', yScale(0.5));
         gapLabel.setAttribute('text-anchor', 'middle');
-        gapLabel.setAttribute('font-size', '16');
-        gapLabel.setAttribute('fill', '#6b7280');
+        gapLabel.classList.add('chart-annotation', 'label-element', 'chart-element');
         gapLabel.textContent = STATE.chartConfig.center;
         svg.appendChild(gapLabel);
+
         // Markers
         STATE.drivers.forEach(d => {
           if (d.markerYear && (d.state === 'normal' || d.state === 'accelerating')) {
@@ -550,38 +642,33 @@
             const dem = Math.pow(t, exp);
             const x = xScale(t);
             const y = yScale(dem);
-            const emphasis = d.state === 'accelerating' ? 8 : 6;
+
+            const isHot = d.id && STATE.highlightDriverId === d.id;
+            const emphasis = isHot ? 10 : (d.state === 'accelerating' ? 8 : 6);
+            const dotColor = d.state === 'accelerating' ? '#ef4444' : '#2563eb';
+            const dotFilter = isHot ? 'filter: drop-shadow(0 10px 18px rgba(37,99,235,0.35));' : '';
+
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.classList.add('marker-group', 'marker-element', 'chart-element');
             g.setAttribute('role', 'button');
             g.setAttribute('tabindex', '0');
             g.setAttribute('aria-label', `Learn more about ${d.label}`);
             g.innerHTML = `
               <title>${d.short}</title>
               <circle cx="${x}" cy="${y}" r="20" fill="transparent" stroke="none"/>
-              <circle cx="${x}" cy="${y}" r="${emphasis}" fill="#ef4444"/>
-              <text x="${x + 10}" y="${y + 4}" font-size="12" fill="#111827">${d.label}</text>
+              <circle cx="${x}" cy="${y}" r="${emphasis}" fill="${dotColor}" stroke="white" stroke-width="2" style="${dotFilter}"/>
+              <text x="${x + 10}" y="${y + 4}" class="chart-text label-element chart-element">${d.label}</text>
             `;
             g.addEventListener('click', () => openInsight(d));
             g.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(d); });
             svg.appendChild(g);
           }
         });
-        // Always-on resources limited label
-        const endT = 1;
-        const endCap = 0.3 + slope * endT;
-        const endX = xScale(endT);
-        const endY = yScale(endCap) + 20;
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', endX - 50);
-        text.setAttribute('y', endY);
-        text.setAttribute('font-size', '12');
-        text.setAttribute('fill', '#6b7280');
-        text.textContent = 'Limited Capacity';
-        svg.appendChild(text);
-        // Tipping point
+
         if (STATE.showTippingPoint) {
           const t = (STATE.tippingPointYear - 2025) / 3;
           const x = xScale(t);
+
           const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           line.setAttribute('x1', x);
           line.setAttribute('y1', yScale(0));
@@ -590,71 +677,91 @@
           line.setAttribute('stroke', '#ef4444');
           line.setAttribute('stroke-width', '2');
           line.setAttribute('stroke-dasharray', '5 5');
+          line.classList.add('line-element', 'chart-element');
           svg.appendChild(line);
+
           const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           label.setAttribute('x', x + 10);
           label.setAttribute('y', yScale(1) - 10);
-          label.setAttribute('font-size', '12');
-          label.setAttribute('fill', '#111827');
+          label.classList.add('chart-text', 'label-element', 'chart-element');
           label.textContent = 'IT Inflection Point';
           svg.appendChild(label);
+
           const ann = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           ann.setAttribute('x', x + 10);
           ann.setAttribute('y', yScale(0.8) + 5);
-          ann.setAttribute('font-size', '12');
           ann.setAttribute('fill', '#ef4444');
+          ann.classList.add('chart-text', 'label-element', 'chart-element');
           ann.textContent = STATE.chartConfig.tipping;
           svg.appendChild(ann);
-          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-          g.setAttribute('role', 'button');
-          g.setAttribute('tabindex', '0');
-          g.setAttribute('aria-label', 'Learn more about Projected Tipping Point');
-          g.innerHTML = `
-            <rect x="${x - 10}" y="${yScale(1) - 20}" width="20" height="${height}" fill="transparent"/>
-          `;
-          g.addEventListener('click', () => openInsight(STATE.tippingPoint));
-          g.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(STATE.tippingPoint); });
-          svg.appendChild(g);
+
+          const hit = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          hit.setAttribute('role', 'button');
+          hit.setAttribute('tabindex', '0');
+          hit.setAttribute('aria-label', 'Learn more about Projected Tipping Point');
+          hit.innerHTML = `<rect x="${x - 10}" y="${yScale(1) - 20}" width="20" height="${height}" fill="transparent"/>`;
+          hit.addEventListener('click', () => openInsight(STATE.tippingPoint));
+          hit.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(STATE.tippingPoint); });
+          svg.appendChild(hit);
         }
       }
+
       function updateCurves(){
+        if (STATE.recastMode) {
+          STATE.targetDemandExponent = 1.55;
+          STATE.targetCapacitySlope = 0.18;
+          STATE.showTippingPoint = false;
+          return;
+        }
+
         let numNormal = 0, numAccelerating = 0;
         STATE.drivers.forEach(d => { if (d.state === 'normal') numNormal++; if (d.state === 'accelerating') numAccelerating++; });
+
         STATE.targetDemandExponent = 1.6 + (numNormal * 0.15 + numAccelerating * 0.3);
-        STATE.targetDemandExponent = Math.min(STATE.targetDemandExponent, 3);
+        STATE.targetDemandExponent = Math.min(Math.max(STATE.targetDemandExponent, 1.2), 3);
+
         STATE.targetCapacitySlope = 0;
         STATE.showTippingPoint = numAccelerating >= 3;
       }
-      function animateCurves(timestamp){
+
+      function animateCurves(){
         STATE.currentDemandExponent += (STATE.targetDemandExponent - STATE.currentDemandExponent) * 0.1;
         STATE.currentCapacitySlope += (STATE.targetCapacitySlope - STATE.currentCapacitySlope) * 0.1;
         renderCapacityGapChart();
+
         if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
           requestAnimationFrame(animateCurves);
         }
       }
+
       function setSlider(id, value){
         const driver = STATE.drivers.find(d => d.id === id);
         if (driver) {
           driver.state = ['off', 'normal', 'accelerating'][value];
+          STATE.recastMode = false;
           updateCurves();
           requestAnimationFrame(animateCurves);
-          renderCapacityGapChart();
         }
       }
+
       function resetSliders(){
+        STATE.recastMode = false;
         STATE.drivers.forEach(d => d.state = 'off');
         STATE.currentDemandExponent = 1.6;
         STATE.targetDemandExponent = 1.6;
         STATE.currentCapacitySlope = 0;
         STATE.targetCapacitySlope = 0;
         STATE.showTippingPoint = false;
+        STATE.highlightDriverId = null;
         render();
       }
+
       function openInsight(content){
         STATE.insightContent = content;
+        STATE.highlightDriverId = content?.id || null;
         render();
       }
+
       function renderInsightModal(){
         if (!STATE.insightContent) return '';
         const c = STATE.insightContent;
@@ -662,10 +769,11 @@
         const intro = c.intro || c.short;
         const bullets = c.bullets || [];
         const closing = c.closing || '';
+
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="insight-modal-title">
-            <div class="w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content">
-              <div class="bg-slate-50 px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
+          <div class="fixed inset-0 z-50 flex items-center justify-center modal-overlay" role="dialog" aria-modal="true" aria-labelledby="insight-modal-title">
+            <div class="w-full max-w-4xl mx-4 rounded-2xl overflow-hidden transform modal-content glass">
+              <div class="bg-white/40 backdrop-blur-lg px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
                   <i data-lucide="lightbulb" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
                   <h2 id="insight-modal-title" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${title}</h2>
@@ -674,19 +782,19 @@
                   <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
               </div>
-              <div class="p-8 bg-slate-50">
+              <div class="p-8 bg-white/35 backdrop-blur-lg">
                 ${intro ? `<p class="text-base leading-relaxed text-[#4A5568] mb-4">${intro}</p>` : ''}
                 <div class="space-y-4">
                   ${bullets.map(b=>`
-                    <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
+                    <div class="bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
                       <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
                       <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
                     </div>
                   `).join('')}
                 </div>
                 ${closing ? `
-                  <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
-                    <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
+                  <div class="mt-6 bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
                     <p class="text-base italic text-[#4A5568]">${closing}</p>
                   </div>
                 ` : ''}
@@ -695,70 +803,9 @@
           </div>
         `;
       }
-      function renderMindMap(isRecast = false, containerClass = 'relative w-full h-72') {
-        const centralFill = isRecast ? '#10b981' : '#2563eb';
-        const centralStroke = isRecast ? '#059669' : '#1d4ed8';
-        const ringStroke = isRecast ? '#10b981' : '#f59e0b';
-        const ringText1 = isRecast ? 'Application Workspace' : 'Application Delivery & Readiness';
-        const ringText2 = isRecast ? 'Absorbs all change' : 'Where all change converges';
-        const ringTextColor = isRecast ? '#059669' : '#92400e';
-        const centralText1 = isRecast ? 'Application Workspace' : 'Modern IT';
-        const centralText2 = isRecast ? 'Stable app layer' : 'Operating Model';
-        const arrowFill = isRecast ? '#6ee7b7' : '#cbd5f5';
-        const lineStroke = isRecast ? '#6ee7b7' : '#cbd5f5';
-        const markerAttr = isRecast ? 'marker-start="url(#arrow)"' : 'marker-end="url(#arrow)"';
-        const nodeData = isRecast ? NODE_DATA_RECAST : NODE_DATA;
-        const lines = isRecast ? [
-          {x1:390, y1:170, x2:220, y2:60},
-          {x1:510, y1:170, x2:680, y2:60},
-          {x1:390, y1:250, x2:220, y2:360},
-          {x1:510, y1:250, x2:680, y2:360},
-          {x1:365, y1:210, x2:90, y2:210},
-          {x1:535, y1:210, x2:810, y2:210}
-        ] : [
-          {x1:220, y1:60, x2:390, y2:170},
-          {x1:680, y1:60, x2:510, y2:170},
-          {x1:220, y1:360, x2:390, y2:250},
-          {x1:680, y1:360, x2:510, y2:250},
-          {x1:90, y1:210, x2:365, y2:210},
-          {x1:810, y1:210, x2:535, y2:210}
-        ];
-        const nodes = [
-          {id: 'platform', cx:200, cy:50, text1:'Platform', text2:'Change', sub1:'Cloud', sub2:'Endpoint / VDI'},
-          {id: 'application', cx:700, cy:50, text1:'Application', text2:'Change', sub1:'New apps', sub2:'Continuous updates'},
-          {id: 'security', cx:200, cy:370, text1:'Security', text2:'& Compliance', sub1:'MFA', sub2:'Zero Trust'},
-          {id: 'device', cx:700, cy:370, text1:'Device & OS', text2:'Diversity', sub1:'Windows / macOS', sub2:'ARM / VDI'},
-          {id: 'user', cx:70, cy:210, text1:'User', text2:'Expectations', sub1:'Instant access', sub2:'No downtime'},
-          {id: 'modernization', cx:830, cy:210, text1:'Modernization', text2:'Initiatives', sub1:'Cloud moves', sub2:'AI projects'}
-        ];
-        return `
-          <div class="${containerClass}">
-            <svg viewBox="0 0 900 420" class="w-full h-full">
-              <circle cx="450" cy="210" r="85" fill="none" stroke="${ringStroke}" stroke-width="2" stroke-dasharray="4 4" />
-              <text x="450" y="140" text-anchor="middle" fill="${ringTextColor}" font-size="13" font-weight="600">${ringText1}</text>
-              <text x="450" y="156" text-anchor="middle" fill="${ringTextColor}" font-size="11">${ringText2}</text>
-              <circle cx="450" cy="210" r="42" fill="${centralFill}" stroke="${centralStroke}" stroke-width="2" />
-              <text x="450" y="206" text-anchor="middle" fill="white" font-size="13" font-weight="700">${centralText1}</text>
-              <text x="450" y="222" text-anchor="middle" fill="white" font-size="11">${centralText2}</text>
-              <defs>
-                <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="${arrowFill}"/>
-                </marker>
-              </defs>
-              ${lines.map(l => `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" stroke="${lineStroke}" stroke-width="2" ${markerAttr} />`).join('')}
-              ${nodes.map(n => `
-                <g class="interactive-node cursor-pointer" data-id="${n.id}" role="button" tabindex="0" aria-label="View details for ${n.text1} ${n.text2}" aria-expanded="${STATE.activePopover === n.id ? 'true' : 'false'}">
-                  <circle cx="${n.cx}" cy="${n.cy}" r="34" fill="white" stroke="#2563eb" stroke-width="2" />
-                  <text x="${n.cx}" y="${n.cy - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">${n.text1}</text>
-                  <text x="${n.cx}" y="${n.cy + 8}" text-anchor="middle" font-size="12" font-weight="600" fill="#111827">${n.text2}</text>
-                  <text x="${n.cx}" y="${n.cy + 24}" text-anchor="middle" font-size="10" fill="#6b7280">${n.sub1}</text>
-                  <text x="${n.cx}" y="${n.cy + 38}" text-anchor="middle" font-size="10" fill="#6b7280">${n.sub2}</text>
-                </g>
-              `).join('')}
-            </svg>
-          </div>
-        `;
-      }
+
+      const whyOrder = ['change', 'now', 'recast'];
+
       function calloutDropdown(id, icon, label, headerTone, cta=false, subtext=''){
         return `
           <div class="h-full flex flex-col">
@@ -769,64 +816,33 @@
               data-why="${id}"
               style="border-radius:var(--radius)"
             >
-              <div class="${cx('flex items-center justify-between px-5 py-4', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
+              <div class="${cx('flex items-center justify-between px-4 py-3', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
-                  <span class="text-[22px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
+                  <i data-lucide="${icon}" class="w-4 h-4 text-[#0A1C60]" aria-hidden="true"></i>
+                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
               </div>
             </button>
             ${subtext ? `<p class="px-5 py-2 text-sm text-gray-700">${subtext}</p>` : ''}
           </div>
         `;
       }
-      const whyOrder = ['change', 'now', 'recast'];
+
       function renderWhyModal(){
         if(!STATE.openWhyModal) return '';
         const id = STATE.openWhyModal;
         const iconMap = { change: 'alert-triangle', now: 'clock-4', recast: 'sparkles' };
         const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
         const data = STATE.currentState[id];
-        const headerTone = 'bg-slate-50';
-        const cta = id === 'now';
-        const modalClass = 'w-full max-w-4xl mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform modal-content';
         const currentIdx = whyOrder.indexOf(id);
         const prev = currentIdx > 0 ? whyOrder[currentIdx - 1] : null;
         const next = currentIdx < whyOrder.length - 1 ? whyOrder[currentIdx + 1] : null;
-        const content = `
-          <div class="p-8 bg-slate-50">
-            <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
-            <div class="space-y-4">
-              ${data.bullets.map(b=>`
-                <div class="bg-white p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                  <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
-                  <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
-                </div>
-              `).join('')}
-            </div>
-            <div class="mt-6 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
-              <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5"></i>
-              <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
-            </div>
-            ${cta?`
-              <div class="mt-8 flex justify-center">
-                <button id="btnAdvanceToSolution" type="button" data-action="advance" data-next="solution" class="inline-flex bg-[#0070F3] text-white text-base font-semibold px-6 py-3 items-center gap-3 focus-ring shadow-md hover:shadow-lg hover:bg-[#005AD0] transition-shadow">
-                  <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                  How Recast solves it
-                </button>
-              </div>
-            `:''}
-            <div class="mt-8 flex justify-between">
-              ${prev ? `<button type="button" class="re-secondary inline-flex items-center gap-2" data-action="why-nav" data-to="${prev}"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>` : '<div></div>'}
-              ${next ? `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="why-nav" data-to="${next}">Next <i data-lucide="arrow-right" class="w-4 h-4"></i></button>` : `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="advance" data-next="solution">See Approach <i data-lucide="arrow-right" class="w-4 h-4"></i></button>`}
-            </div>
-          </div>
-        `;
+
         return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
-            <div class="${modalClass}" style="max-height: none;" ${id === 'recast' ? 'id="recast-modal-content"' : ''}>
-              <div class="${headerTone} px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
+          <div class="fixed inset-0 z-50 flex items-center justify-center modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
+            <div class="w-full max-w-4xl mx-4 rounded-2xl overflow-hidden transform modal-content glass">
+              <div class="bg-white/40 backdrop-blur-lg px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
                 <div class="flex items-center gap-3">
                   <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
                   <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${labelMap[id]}</h2>
@@ -835,14 +851,38 @@
                   <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
               </div>
-              ${content}
+
+              <div class="p-8 bg-white/35 backdrop-blur-lg">
+                <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
+
+                <div class="space-y-4">
+                  ${data.bullets.map(b=>`
+                    <div class="bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
+                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
+                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <div class="mt-6 bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+                  <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                  <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
+                </div>
+
+                <div class="mt-8 flex items-center justify-between w-full">
+                  ${prev ? `<button type="button" class="re-secondary inline-flex items-center gap-2" data-action="why-nav" data-to="${prev}"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>` : '<div></div>'}
+                  ${next ? `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="why-nav" data-to="${next}">Next <i data-lucide="arrow-right" class="w-4 h-4"></i></button>` : `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="advance" data-next="solution">See Approach <i data-lucide="arrow-right" class="w-4 h-4"></i></button>`}
+                </div>
+              </div>
             </div>
           </div>
         `;
       }
+
       function popoutCard(card){
         const expanded = STATE.openCards[card.id];
         const contentId = `card-content-${card.id}`;
+
         return `
           <div class="h-full flex flex-col">
             <button
@@ -867,7 +907,12 @@
                 </div>
               </div>
             </button>
-            <div id="${contentId}" class="accordion-content overflow-hidden border-l-4 border-[#0070F3]" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease; ${card.bgContent}; padding:${expanded?'24px 20px':'0 20px'}">
+
+            <div
+              id="${contentId}"
+              class="accordion-content overflow-hidden border-l-4 border-[#0070F3] ${expanded ? 'glass-soft' : ''}"
+              style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 180ms cubic-bezier(.2,.8,.2,1),opacity 180ms ease; padding:${expanded?'24px 20px':'0 20px'}"
+            >
               <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
                 ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
               </ul>
@@ -877,6 +922,7 @@
           </div>
         `;
       }
+
       function renderMiniTimeline(){
         const phases = [
           {icon: 'play-circle', label: 'Kickoff'},
@@ -897,101 +943,14 @@
           </div>
         `;
       }
-      function bucketAccordion(id, icon, label, contentFunc, headerTone='bg-slate-50'){
-        const expanded = STATE.openBuckets[id];
-        const contentId = `bucket-content-${id}`;
-        return `
-          <div class="flex flex-col">
-            <button
-              type="button"
-              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
-              data-action="toggle-bucket"
-              data-bucket="${id}"
-              aria-expanded="${expanded}"
-              aria-controls="${contentId}"
-              style="border-radius:var(--radius)"
-            >
-              <div class="flex items-center justify-between px-5 py-4 ${headerTone}" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-5 h-5 text-[#0A1C60]" aria-hidden="true"></i>
-                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
-                </div>
-                <i data-lucide="${expanded?'chevron-up':'chevron-down'}" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded?'rotate-180':''}" aria-hidden="true"></i>
-              </div>
-            </button>
-            <div id="${contentId}" class="accordion-content overflow-hidden" style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 150ms cubic-bezier(.2,.8,.2,1),opacity 150ms ease">
-              ${expanded ? contentFunc() : ''}
-            </div>
-          </div>
-        `;
-      }
-      function onePackageContent(){
-        const saved=Math.max(0, Number(STATE.packHrs)-Number(STATE.configHrs));
-        return `
-          <div class="p-4">
-            <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="wand-sparkles" class="w-4 h-4"></i> Hours Saved from Packaging</div>
-              <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-[#4A5568]">Hours/package</span>
-                <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.packHrs}" inputmode="decimal" data-action="set-pack-hrs" aria-label="Hours per package">
-                <span>→</span>
-                <input class="w-16 rounded bg-slate-100 px-2 py-1" value="${STATE.configHrs}" inputmode="decimal" data-action="set-config-hrs" aria-label="Hours to configure">
-              </label>
-              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.packHrs} → ${STATE.configHrs} hrs</span><strong class="tabular-nums">${saved} hrs saved</strong></div>
-              <div class="mt-2 text-[12px] flex flex-wrap gap-2">
-                <span class="rounded px-2 py-1 bg-slate-100">☁️ Cloud</span>
-                <span class="rounded px-2 py-1 bg-slate-100">🖥️ On-Prem</span>
-                <span class="rounded px-2 py-1 bg-slate-100">🔀 Hybrid</span>
-              </div>
-              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="pkgHours" data-value="${saved}">Add to impact</button>
-            </div>
-          </div>
-        `;
-      }
-      function zeroDayContent(){
-        const reduced=Math.max(0, Number(STATE.currentHrs)-1.5);
-        return `
-          <div class="p-4">
-            <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Hours Saved from Faster Patching</div>
-              <label class="mt-2 flex items-center gap-2 text-xs">
-                <span class="text-[#4A5568]">Current hrs</span>
-                <input class="w-20 rounded bg-slate-100 px-2 py-1" value="${STATE.currentHrs}" inputmode="decimal" data-action="set-current-hrs" aria-label="Current time to deploy (hours)">
-              </label>
-              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2"><span class="tabular-nums">${STATE.currentHrs} → 1.5 hrs</span><strong class="tabular-nums">${round(reduced)} hrs reduced</strong></div>
-              <button type="button" class="mt-2 bg-[#0070F3] text-white px-3 py-1 text-xs font-semibold w-full rounded hover:bg-[#005AD0]" data-action="add-impact" data-kind="riskHrs" data-value="${reduced}">Add to impact</button>
-            </div>
-          </div>
-        `;
-      }
-      function perUserContent(){
-        const totalMin = Math.max(0, Number(STATE.impact.minutes));
-        const route=routeRecommendation(STATE.ctx);
-        return `
-          <div class="p-4">
-            <div class="sub-card p-3 text-sm">
-              <div class="flex items-center gap-2 font-medium"><i data-lucide="mouse-pointer" class="w-4 h-4"></i> Reactive Work Reduced</div>
-              <div class="mt-2 flex items-center justify-between rounded bg-slate-100 px-3 py-2">
-                <span class="tabular-nums">18 → ${totalMin} min</span>
-                <strong class="tabular-nums">${totalMin} min saved</strong>
-              </div>
-            </div>
-            <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
-              ${['Windows','Mac'].map(d=>pill(d,STATE.ctx.device===d,'set-device',d)).join('')}
-              ${['Corporate','VPN'].map(n=>pill(n,STATE.ctx.network===n,'set-network',n)).join('')}
-              ${pill(STATE.ctx.compliant?'Compliant':'Non-compliant',STATE.ctx.compliant,'toggle-compliance','')}
-            </div>
-            <div class="mt-3"><button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-3 py-1 text-xs w-full rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="add-impact" data-kind="minutes" data-value="2">Add to impact (+2 min saved per user)</button></div>
-          </div>
-        `;
-      }
+
       function renderSolution(){
         return `
           <section id="panel-solution" class="space-y-3">
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
               ${renderFlow()}
               <div class="flex flex-col gap-3 relative">
-                <div class="sticky top-0 z-10 bg-[#F7F9FB] py-2 shadow-sm">
+                <div class="sticky top-0 z-10 bg-white/60 backdrop-blur-lg py-2 shadow-sm rounded-xl px-2">
                   <div class="flex justify-between items-center text-sm">
                     <span class="font-semibold">Recast Approach</span>
                     <span class="text-[#4A5568]">${STATE.visitedCards.length} of 3 explored</span>
@@ -999,7 +958,7 @@
                 </div>
                 <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
                 ${NEW_CARDS.map(card => popoutCard(card)).join('')}
-                <div class="sticky bottom-0 bg-[#F7F9FB] py-3 shadow-lg mt-3">
+                <div class="sticky bottom-0 bg-white/70 backdrop-blur-lg py-3 shadow-lg mt-3 rounded-xl px-2 border border-slate-200">
                   <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
                 </div>
               </div>
@@ -1007,151 +966,48 @@
           </section>
         `;
       }
-      function pill(label,active,action,value){
-        return `<button type="button" class="${cx('px-3 py-1 border text-xs transition',active?'bg-[#0070F3] text-white border-transparent hover:bg-[#005AD0]':'bg-transparent text-[#0A1C60] border-slate-200 hover:border-[#0070F3]')} rounded-[2px]" data-action="${action}" data-value="${String(value)}">${label}</button>`;
-      }
-      function renderFlow(){
-        return `
-          <div class="section-card p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
-                <div>
-                  <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-[12px] text-[#4A5568]">Deliver applications to users — independent of device or platform</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 text-[12px]">
-                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
-              </div>
-            </div>
-            <div class="mt-2 flex gap-2 text-xs">
-            </div>
-            <div id="envFlow" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Environment flow">
-              <div id="envSources" class="flex flex-wrap justify-between gap-2">
-                ${ENV_SOURCES.map((env, idx) => `
-                  <div class="env-wrap" style="--d: ${idx * 0.2}s">
-                    <div class="env-ring logo-ring">${env.svg}</div>
-                    <span class="env-name">${env.name}</span>
-                  </div>
-                `).join('')}
-              </div>
-              <div id="envArrows" class="grid grid-cols-6 gap-2 mt-2 mb-2">
-                ${ENV_SOURCES.map((_, idx) => `<div class="arrow-line" style="--d: ${1 + idx * 0.2}s"></div>`).join('')}
-              </div>
-              <div id="envHub" class="hub-card sub-card p-2 text-center bg-white">
-                <div class="flex items-center justify-center gap-2">
-                  <i data-lucide="server" class="w-4 h-4 text-[#2563eb]"></i>
-                  <span class="text-sm font-medium">Application Workspace</span>
-                </div>
-              </div>
-              <div id="metricsBanner" class="metrics-banner mt-2">
-                <span id="appsProcessedCounter" class="tabular-nums">0</span>+ Apps Processed
-              </div>
-            </div>
-            <div id="flowCard" class="mt-3 sub-card p-2 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
-              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
-                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
-                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
-                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
-              </div>
-              <div class="space-y-2 relative">
-                ${CATALOG.map(s=>`
-                  <div class="cat-row">
-                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
-                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
-                  </div>
-                `).join('')}
-                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
-              </div>
-              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]"><span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span></div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${4 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
-                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
-                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${6 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4 text-var(--re-green)" style="--d:${8 + .5*i}s"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-              <div class="mt-3">
-                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
-                  <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
-                    <div class="text-sm">
-                      <div class="font-medium">End user</div>
-                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
-                    </div>
-                  </div>
-                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
-                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
-                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
-                  </div>
-                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
-                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
-                  </div>
-                </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:#10B981"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      const miniApps = [
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('SAP','SAP','#0A6ED1'),
-        logo('Zoom','Z','#0B5CFF')
-      ];
+
       function renderROI(){
-        const r = calcROI();
         return `
           <section id="panel-roi" class="space-y-8">
             <div class="section-card p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 bg-white">
-              <h3 class="text-2xl font-semibold mb-6 text-gray-900">Business Impact Calculator</h3>
+              <h3 class="text-2xl font-semibold mb-6 text-gray-900">Application Workspace Impact Calculator</h3>
+              <div class="mb-6">
+                <p class="text-base text-gray-700 leading-relaxed">Most app work isn’t hard — it’s just repeated. The same update gets packaged, tested, and rolled out again for every environment you support. This calculator shows how much time that repetition creates — and how much of it disappears when changes are defined once instead of per platform.</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="p-4 rounded-lg bg-gray-50">
+                  <h4 class="text-lg font-medium mb-4 text-gray-900">How App Work Happens Today</h4>
+                  <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
+                    <li>The same change is handled separately for each environment</li>
+                    <li>More platforms = more rebuilds, retesting, and coordination</li>
+                    <li>Time adds up quietly every month</li>
+                  </ul>
+                </div>
+                <div class="p-4 rounded-lg bg-gray-50">
+                  <h4 class="text-lg font-medium mb-4 text-gray-900">With Application Workspace</h4>
+                  <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
+                    <li>A change is defined once, then delivered consistently across environments</li>
+                    <li>It’s delivered consistently wherever users need it</li>
+                    <li>Repeated work drops away</li>
+                  </ul>
+                </div>
+              </div>
               <div class="grid grid-cols-1 gap-6">
                 <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">How many applications does IT actively manage?</span>
-                  <span class="text-sm text-gray-600">Includes all applications IT packages, updates, patches, or supports.</span>
-                  <input type="number" id="calc-apps" min="10" max="5000" placeholder="250" value="${STATE.calcInputs.apps}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                  <span class="text-base font-medium text-gray-900">How many environments do your apps have to work in?</span>
+                  <span class="text-sm text-gray-600">Examples: Windows/ConfigMgr, Intune, macOS/Jamf, VDI/AVD/Citrix, Web.</span>
+                  <input type="number" id="calc-envs" min="1" max="10" placeholder="3" value="${STATE.calcInputs.envs}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
                 </label>
                 <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">Across how many environments do those apps need to run?</span>
-                  <span class="text-sm text-gray-600">Examples: Windows, macOS, VDI/AVD, Web.</span>
-                  <input type="number" id="calc-envs" min="1" max="5" placeholder="3" value="${STATE.calcInputs.envs}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                  <span class="text-base font-medium text-gray-900">About how many app changes do you push in a typical month?</span>
+                  <span class="text-sm text-gray-600">Includes: vendor updates, security patches that require validation, internal app releases, urgent fixes.</span>
+                  <input type="number" id="calc-changes" min="1" max="500" placeholder="10" value="${STATE.calcInputs.changes}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
                 </label>
                 <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">How many application changes occur per month?</span>
-                  <span class="text-sm text-gray-600">Includes vendor updates, security patches, and internal changes.</span>
-                  <input type="number" id="calc-changes" min="1" max="200" placeholder="20" value="${STATE.calcInputs.changes}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
+                  <span class="text-base font-medium text-gray-900">Roughly how long does one change take per environment?</span>
+                  <span class="text-sm text-gray-600">Include: packaging work, validation/testing, pilot ring, deployment coordination, and troubleshooting fallout.</span>
+                  <input type="number" id="calc-time" min="1" max="100" placeholder="4" value="${STATE.calcInputs.time}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
                 </label>
               </div>
               <div class="mt-6">
@@ -1161,7 +1017,8 @@
                 ${STATE.calcResult ? renderCalcResult() : ''}
               </div>
             </div>
-            <div class="flex justify-center">
+
+            <div class="flex justify-start">
               <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-medium focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">
                 <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
               </button>
@@ -1169,86 +1026,46 @@
           </section>
         `;
       }
+
       function renderCalcResult(){
-        if (!STATE.qualified) {
-          return `
-            <div class="p-4 rounded-lg bg-gray-50">
-              <h4 class="text-lg font-medium mb-2 text-gray-900">Your environment appears relatively simple today</h4>
-              <p class="text-base text-gray-700">Teams managing a small number of applications in a single environment
-often operate without significant delivery strain.
-As application count, delivery paths, or change frequency increases,
-application delivery becomes harder to scale predictably.</p>
-            </div>
-          `;
-        }
+        const r = STATE.calcResult;
+        const qualified = r.envs >= 2 && r.changes >= 10;
         return `
+          <div class="mb-4 text-base text-gray-700">
+            <p>Today: ${r.changes} changes × ${r.envs} environments × ${r.time} hours = ${r.h_current} hours/month</p>
+            <p>With Application Workspace: ${r.changes} changes × 1 × ${r.time} hours = ${r.h_aw} hours/month</p>
+            <p>Qualification: ${qualified ? 'Likely a real problem worth solving' : 'May still help, but smaller value'}</p>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="p-4 rounded-lg bg-gray-50">
-              <h4 class="text-lg font-medium mb-4 text-gray-900">Current State</h4>
-              <ul class="space-y-2 text-base list-disc pl-5 text-gray-700">
-                <li>Applications are packaged and delivered separately per environment.</li>
-                <li>Each change requires rebuilds, retesting, and coordination.</li>
-                <li>Operational work scales faster than available capacity.</li>
+              <h4 class="text-lg font-medium mb-4 text-gray-900">Capacity Returned</h4>
+              <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
+                <li>Hours/month: ${r.h_saved}</li>
+                <li>Hours/year: ${r.h_saved_year}</li>
+                <li>FTE-equivalent capacity/year: ${r.fte_eq} (capacity equivalent, not people eliminated)</li>
               </ul>
             </div>
             <div class="p-4 rounded-lg bg-gray-50">
-              <h4 class="text-lg font-medium mb-4 text-gray-900">With Application Workspace</h4>
-              <ul class="space-y-2 text-base list-disc pl-5 text-gray-700">
-                <li>Applications are packaged once and delivered everywhere.</li>
-                <li>Consistent behavior across platforms.</li>
-                <li>Operational effort scales predictably.</li>
+              <h4 class="text-lg font-medium mb-4 text-gray-900">Value for the Team</h4>
+              <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
+                <li>Reduce repeated app work across platforms</li>
+                <li>Make support more predictable</li>
+                <li>Increase change throughput without adding staff</li>
               </ul>
             </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            ${kvCalc('Hours Returned per Month', num(Math.round(STATE.calcResult.hoursSavedMonthly)))}
-            ${kvCalc('Hours Returned per Year', num(Math.round(STATE.calcResult.hoursSavedYearly)))}
-            ${kvCalc('Delivery Efficiency Gain', '60%')}
-            ${kvCalc('Support Load Reduction', '40%')}
-          </div>
-          <p class="mt-4 text-sm text-gray-600">Represents operational capacity returned to IT — not headcount reduction.</p>
         `;
       }
-      function kvCalc(label, value){
-        return `
-          <div class="p-4 rounded-lg bg-gray-50 flex flex-col items-center justify-center">
-            <span class="text-2xl font-bold text-gray-900 tabular-nums">${value}</span>
-            <span class="text-base text-gray-700 text-center">${label}</span>
-          </div>
-        `;
+
+      function updateROIOutputs(){ /* render-driven */ }
+
+      function setText(id, value){
+        const el=document.getElementById(id);
+        if(el) el.textContent = String(value);
       }
-      function calcROI(){
-        const i = STATE.roiInputs;
-        const ticketsMonth = i.users * i.ticketsPerUserPerMonth;
-        const reactiveHoursMonth = (STATE.impact.minutes * i.users) / 60;
-        const packagingHoursMonth = STATE.impact.pkgHours;
-        const patchHoursMonth = STATE.impact.riskHrs;
-        const totalHoursMonth = reactiveHoursMonth + packagingHoursMonth + patchHoursMonth;
-        const totalHoursYear = totalHoursMonth * 12;
-        const ticketsAvoided = (STATE.impact.minutes * i.users) / i.avgHandleMins;
-        const patchReductionPct = STATE.currentHrs > 0 ? Math.round((STATE.impact.riskHrs / STATE.currentHrs) * 100) : 0;
-        return {
-          i,
-          ticketsMonth: round(ticketsMonth),
-          reactiveHoursMonth: round(reactiveHoursMonth),
-          packagingHoursMonth: round(packagingHoursMonth),
-          patchHoursMonth: round(patchHoursMonth),
-          totalHoursMonth,
-          totalHoursYear,
-          ticketsAvoided,
-          patchReductionPct
-        };
-      }
-      function updateROIOutputs(){
-        // No need for outputs update beyond render
-      }
-      function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = String(value); }
-      function kv(label,value){
-        return `<div class="flex items-center justify-between rounded-[2px] bg-slate-100 px-3 py-2"><span class="text-[#4A5568]">${label}</span><span class="font-semibold tabular-nums">${value}</span></div>`;
-      }
-      function numInput(label,key,value){
-        return `<label class="flex flex-col gap-1 text-sm"><span class="text-[12px] text-[#4A5568]">${label}</span><input class="rounded-[2px] border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm focus-ring" inputmode="decimal" value="${value}" data-action="set-roi" data-key="${key}"></label>`;
-      }
+
+      /* ---------- Catalog / Flow assets ---------- */
+
       const CATALOG=[
         {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
           logo('Microsoft Word','W','#185ABD'),
@@ -1294,6 +1111,7 @@ application delivery becomes harder to scale predictably.</p>
           logo('ZoomIt / Sysinternals','ZI','#58595B')
         ]}
       ];
+
       const ENV_SOURCES = [
         { name: 'SCCM', svg: '<i data-lucide="server-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
         { name: 'Intune', svg: '<i data-lucide="cloud-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
@@ -1302,6 +1120,7 @@ application delivery becomes harder to scale predictably.</p>
         { name: 'Windows 365', svg: '<i data-lucide="cloud" class="w-5 h-5 text-[#0078D4]"></i>' },
         { name: 'Jamf', svg: '<i data-lucide="apple" class="w-5 h-5 text-[#000000]"></i>' }
       ];
+
       const appConfigs = [
         {stage:'Prod', policy:'MFA + VPN', region:'AMER', device:'Windows'},
         {stage:'QA', policy:'Compliant only', region:'APAC', device:'Any'},
@@ -1314,13 +1133,14 @@ application delivery becomes harder to scale predictably.</p>
       ];
       let flatIndex = 0;
       CATALOG.forEach(sec => sec.items.forEach(itm => { itm.config = appConfigs[flatIndex % appConfigs.length]; flatIndex++; }));
+
       function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
       function mark(letter,color){
         return `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
             <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
             <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(0,0,0,.15)"/>
-          <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
+            <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
           </svg>`;
       }
       function multiLogo(name,colors){
@@ -1336,13 +1156,357 @@ application delivery becomes harder to scale predictably.</p>
       function flameLogo(name,c1,c2){
         return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
       }
-      function shade(hex,m){ const c=hex.replace('#',''); const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16)); const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m)))); return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join(''); }
-      /* ---------- Per-user cached Current State (IDs + storage) ---------- */
+      function shade(hex,m){
+        const c=hex.replace('#','');
+        const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16));
+        const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m))));
+        return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join('');
+      }
+
+      const miniApps = [
+        logo('Microsoft Word','W','#185ABD'),
+        logo('Microsoft Teams','T','#5B53D6'),
+        logo('SAP','SAP','#0A6ED1'),
+        logo('Zoom','Z','#0B5CFF')
+      ];
+
+      function renderFlow(){
+        return `
+          <div class="section-card p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
+                <div>
+                  <h3 class="text-base font-semibold">Application Workspace</h3>
+                  <div class="text-[12px] text-[#4A5568]">Deliver applications to users — independent of device or platform</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-[12px]">
+                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
+                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
+                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
+              </div>
+            </div>
+
+            <div id="envFlow" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Environment flow">
+              <div id="envSources" class="flex flex-wrap justify-between gap-2">
+                ${ENV_SOURCES.map((env, idx) => `
+                  <div class="env-wrap" style="--d: ${idx * 0.2}s">
+                    <div class="env-ring logo-ring">${env.svg}</div>
+                    <span class="env-name">${env.name}</span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <div id="envArrows" class="grid grid-cols-6 gap-2 mt-2 mb-2">
+                ${ENV_SOURCES.map((_, idx) => `<div class="arrow-line" style="--d: ${1 + idx * 0.2}s"></div>`).join('')}
+              </div>
+
+              <div id="envHub" class="hub-card sub-card p-2 text-center bg-white">
+                <div class="flex items-center justify-center gap-2">
+                  <i data-lucide="server" class="w-4 h-4 text-[#2563eb]"></i>
+                  <span class="text-sm font-medium">Application Workspace</span>
+                </div>
+              </div>
+
+              <div id="metricsBanner" class="metrics-banner mt-2">
+                <span id="appsProcessedCounter" class="tabular-nums">0</span>+ Apps Processed
+              </div>
+            </div>
+
+            <div id="flowCard" class="mt-3 sub-card p-2 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
+              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
+                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
+                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
+                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
+              </div>
+
+              <div class="space-y-2 relative">
+                ${CATALOG.map(s=>`
+                  <div class="cat-row">
+                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
+                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
+                  </div>
+                `).join('')}
+                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
+              </div>
+
+              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]">
+                <span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span>
+              </div>
+
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
+                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
+                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${4 + .5*i}s;color:var(--re-green)"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 relative">
+                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
+                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
+                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
+                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${6 + .5*i}s;color:var(--re-green)"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
+                ${['A','B','C'].map((k,i)=>`
+                  <div class="sub-card p-2 text-center relative">
+                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
+                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${8 + .5*i}s;color:var(--re-green)"></i>
+                  </div>
+                `).join('')}
+                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
+              </div>
+
+              <div class="mt-3">
+                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
+                  <div class="flex items-center gap-3">
+                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
+                    <div class="text-sm">
+                      <div class="font-medium">End user</div>
+                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
+                    </div>
+                  </div>
+                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
+                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
+                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
+                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
+                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
+                  </div>
+                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
+                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
+                  </div>
+                </div>
+                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:var(--re-green)"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function buildFlow(){
+        let base=0;
+        CATALOG.forEach(section=>{
+          const mount=document.getElementById(section.id); if(!mount) return;
+          mount.innerHTML='';
+          section.items.forEach((itm,idx)=>{
+            const wrap=document.createElement('div');
+            wrap.className='logo-wrap';
+            wrap.style.setProperty('--d',(base+idx*0.2 + 4).toFixed(2)+'s');
+
+            const ring=document.createElement('div');
+            ring.className='logo-ring';
+            ring.innerHTML=itm.svg;
+            ring.title=itm.name;
+            ring.setAttribute('role','img');
+            ring.setAttribute('aria-label',itm.name);
+            wrap.appendChild(ring);
+
+            if(STATE.showLabels){
+              const label=document.createElement('span');
+              label.className='logo-name';
+              label.textContent=itm.name;
+              wrap.appendChild(label);
+
+              const meta=document.createElement('div');
+              meta.className='meta-label';
+              meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
+              wrap.appendChild(meta);
+            }
+
+            mount.appendChild(wrap);
+          });
+          base+=1.5;
+        });
+
+        buildTiles(document.getElementById('flowConnA'), 14, 7);
+        buildTiles(document.getElementById('flowConnB'), 14, 7.5);
+        buildTiles(document.getElementById('flowConnC'), 14, 8);
+        buildTiles(document.getElementById('flowGrpA'), 18, 9);
+        buildTiles(document.getElementById('flowGrpB'), 18, 9.5);
+        buildTiles(document.getElementById('flowGrpC'), 18, 10);
+        buildTiles(document.getElementById('flowDevA'), 10, 12);
+        buildTiles(document.getElementById('flowDevB'), 10, 12.5);
+        buildTiles(document.getElementById('flowDevC'), 10, 13);
+
+        const avatar=document.getElementById('endUserAvatar');
+        const badge=document.getElementById('endUserBadge');
+        if(avatar){ avatar.style.background='#EA4335'; avatar.style.color='#fff'; avatar.textContent='U'; }
+        if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; badge.style.color='#000'; }
+
+        const message = document.getElementById('endUserMessage');
+        if(message) message.textContent = 'Apps on demand — no waiting, no tickets.';
+
+        const mini = document.getElementById('miniWorkspace');
+        if(mini) mini.classList.add('hidden');
+
+        const counters = document.getElementById('progressCounters');
+        if(counters) counters.classList.add('hidden');
+
+        const card = document.getElementById('flowCard');
+        if(card) card.classList.remove('run');
+
+        const envCard = document.getElementById('envFlow');
+        if(envCard) envCard.classList.remove('run');
+
+        if(STATE.showLabels) { card?.classList.add('show-labels'); envCard?.classList.add('show-labels'); }
+        else { card?.classList.remove('show-labels'); envCard?.classList.remove('show-labels'); }
+
+        const endCard = document.getElementById('endUserCard');
+        endCard?.classList.remove('end-user-expand');
+
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.envProgress = { appsProcessed: 0 };
+        updateProgress();
+        updateEnvProgress();
+
+        const success=document.getElementById('flowSuccess');
+        success?.classList.add('hidden');
+      }
+
+      function buildTiles(container,count,baseDelay){
+        if(!container) return;
+        container.innerHTML='';
+        for(let i=0;i<count;i++){
+          const d=document.createElement('div');
+          d.className='tile';
+          d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s');
+          container.appendChild(d);
+        }
+      }
+
+      function toggleOverlay(){
+        const overlay = document.getElementById('overlayTag');
+        if(!overlay) return;
+        if(STATE.showLabels){
+          overlay.classList.remove('hidden');
+          setTimeout(()=>{ overlay.classList.add('hidden'); },3000);
+        }
+      }
+
+      function clearFlowTimers(){
+        if (!STATE.flowTimers) STATE.flowTimers = { intervals: [], timeouts: [] };
+        STATE.flowTimers.intervals.forEach(id => clearInterval(id));
+        STATE.flowTimers.timeouts.forEach(id => clearTimeout(id));
+        STATE.flowTimers.intervals = [];
+        STATE.flowTimers.timeouts = [];
+      }
+
+      function startFlow(){
+        clearFlowTimers();
+
+        const envCard=document.getElementById('envFlow'); if(!envCard) return;
+        const card=document.getElementById('flowCard'); if(!card) return;
+
+        envCard.classList.remove('run'); card.classList.remove('run');
+        void envCard.offsetWidth; void card.offsetWidth;
+        envCard.classList.add('run'); card.classList.add('run');
+
+        const flash=document.getElementById('flowHubFlash');
+        const success=document.getElementById('flowSuccess');
+        const avatar=document.getElementById('endUserAvatar');
+        const badge=document.getElementById('endUserBadge');
+        const message = document.getElementById('endUserMessage');
+        const mini = document.getElementById('miniWorkspace');
+        const counters = document.getElementById('progressCounters');
+        const endCard = document.getElementById('endUserCard');
+
+        if(flash){
+          flash.classList.remove('hidden');
+          STATE.flowTimers.timeouts.push(setTimeout(()=>flash.classList.add('hidden'),2000));
+        }
+        success?.classList.add('hidden');
+        counters?.classList.remove('hidden');
+
+        const envInterval = setInterval(updateEnvProgress, 50);
+        STATE.flowTimers.intervals.push(envInterval);
+
+        STATE.flowTimers.timeouts.push(setTimeout(() => {
+          clearInterval(envInterval);
+
+          const interval = setInterval(updateProgress, 100);
+          STATE.flowTimers.intervals.push(interval);
+
+          STATE.flowTimers.timeouts.push(setTimeout(()=> {
+            if(avatar){
+              avatar.style.background = 'var(--re-green)';
+              avatar.style.color = '#fff';
+            }
+            if(badge){
+              badge.textContent='✓';
+              badge.style.background = 'var(--re-green)';
+              badge.style.color = '#fff';
+            }
+            if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
+            mini?.classList.remove('hidden');
+            endCard?.classList.add('end-user-expand');
+            success?.classList.remove('hidden');
+
+            clearInterval(interval);
+          }, 7000));
+        }, 4000));
+
+        STATE.flowTimers.timeouts.push(setTimeout(()=> {
+          envCard.classList.remove('run');
+          card.classList.remove('run');
+        }, 16000));
+      }
+
+      function updateProgress(){
+        if(STATE.progress.apps < 128) STATE.progress.apps += 4;
+        if(STATE.progress.time < 46) STATE.progress.time += 2;
+        if(STATE.progress.tickets < 73) STATE.progress.tickets += 3;
+        setText('appsProcessed', STATE.progress.apps > 128 ? 128 : STATE.progress.apps);
+        setText('timeSaved', STATE.progress.time > 46 ? 46 : STATE.progress.time);
+        setText('ticketsAvoided', STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets);
+      }
+
+      function updateEnvProgress(){
+        if(STATE.envProgress.appsProcessed < 8000) STATE.envProgress.appsProcessed += 200;
+        setText('appsProcessedCounter', STATE.envProgress.appsProcessed > 8000 ? '8,000' : STATE.envProgress.appsProcessed);
+      }
+
+      function resetFlow(){
+        clearFlowTimers();
+        STATE.progress = { apps: 0, time: 0, tickets: 0 };
+        STATE.envProgress = { appsProcessed: 0 };
+        STATE.showLabels = false;
+        buildFlow();
+      }
+
+      function calculateImpact(){
+        const envs = Math.max(1, STATE.calcInputs.envs);
+        const changes = Math.max(0, STATE.calcInputs.changes);
+        const time = Math.max(0, STATE.calcInputs.time);
+        const h_current = changes * envs * time;
+        const h_aw = changes * 1 * time;
+        const h_saved = changes * (envs - 1) * time;
+        const h_saved_year = h_saved * 12;
+        const fte_eq = round(h_saved_year / 1920);
+        STATE.calcResult = { envs, changes, time, h_current, h_aw, h_saved, h_saved_year, fte_eq };
+      }
+
+      /* ---------- Current State editor (storage helpers) ---------- */
+
       const USER_ID = String(window.APP_USER_ID || "guest");
       const PAGE_SCOPE = location.origin + location.pathname + location.search;
       const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
       let DEFAULT_CURRENT_STATE = null;
       const $ = (sel, ctx = document) => ctx.querySelector(sel);
+
       const fields = {
         changeIntro: () => $('#changeIntro'),
         changeBullets: () => $('#changeBullets'),
@@ -1354,10 +1518,12 @@ application delivery becomes harder to scale predictably.</p>
         recastBullets: () => $('#recastBullets'),
         recastAnalyst: () => $('#recastAnalyst')
       };
+
       function captureDefaultsOnce(){
         if (DEFAULT_CURRENT_STATE) return;
         DEFAULT_CURRENT_STATE = STATE.defaultsCurrentState();
       }
+
       function readFields(){
         return {
           change: {
@@ -1377,21 +1543,27 @@ application delivery becomes harder to scale predictably.</p>
           }
         };
       }
+
       function readChartFieldsRaw(){
+        const getVal = (id) => {
+          const el = document.getElementById(id);
+          return el ? el.value : undefined;
+        };
         return {
           chartConfig: {
-            yAxis: $('#chart-yaxis')?.value ?? "",
-            xAxis: $('#chart-xaxis')?.value ?? "",
-            center: $('#chart-center')?.value ?? "",
-            footer: $('#chart-footer')?.value ?? "",
-            tipping: $('#chart-tipping')?.value ?? ""
+            yAxis: getVal('chart-yaxis'),
+            xAxis: getVal('chart-xaxis'),
+            center: getVal('chart-center'),
+            footer: getVal('chart-footer'),
+            tipping: getVal('chart-tipping')
           },
           drivers: STATE.drivers.map((_,i) => ({
-            label: $(`#driver${i}-label`)?.value ?? "",
-            bullets: $(`#driver${i}-bullets`)?.value ?? ""
+            label: getVal(`driver${i}-label`),
+            bullets: getVal(`driver${i}-bullets`)
           }))
         };
       }
+
       function writeFields(data){
         if(!data) return;
         if(fields.changeIntro()) fields.changeIntro().value = data.change.intro ?? "";
@@ -1404,6 +1576,7 @@ application delivery becomes harder to scale predictably.</p>
         if(fields.recastBullets()) fields.recastBullets().value = data.recast.bullets ?? "";
         if(fields.recastAnalyst()) fields.recastAnalyst().value = data.recast.analyst ?? "";
       }
+
       function writeChartFields(config, drivers){
         if($('#chart-yaxis')) $('#chart-yaxis').value = config?.yAxis ?? "";
         if($('#chart-xaxis')) $('#chart-xaxis').value = config?.xAxis ?? "";
@@ -1417,55 +1590,45 @@ application delivery becomes harder to scale predictably.</p>
           if(bulletsEl) bulletsEl.value = dd.bullets ?? "";
         });
       }
+
       function loadDraft(){
         try{
           const raw = localStorage.getItem(STORAGE_KEY);
           return raw ? JSON.parse(raw) : null;
         }catch{return null;}
       }
+
       function saveDraft(payload){
         try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
         catch(e){ console.warn('Save failed (storage blocked or full):', e); }
       }
+
       function clearDraft(){
         try{ localStorage.removeItem(STORAGE_KEY); }catch{}
       }
+
       function initCurrentStateModal(){
         captureDefaultsOnce();
         const draft = loadDraft();
+
         if(draft) {
           writeFields(draft);
+          STATE.editChartBuffer = {
+            chartConfig: draft.chartConfig || {},
+            drivers: draft.drivers || []
+          };
           writeChartFields(draft.chartConfig, draft.drivers);
         } else {
+          STATE.editChartBuffer = {
+            chartConfig: { ...STATE.chartConfig },
+            drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
+          };
           writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
         }
-        const saveBtn = $('#btnSaveCurrentState');
-        const resetBtn = $('#btnResetCurrentState');
-        if (saveBtn && !saveBtn.dataset.wired){
-          saveBtn.dataset.wired = "1";
-          saveBtn.addEventListener('click', (e)=>{
-            e.preventDefault();
-            const formData = readFields();
-            const chartDataRaw = readChartFieldsRaw();
-            const payload = { ...formData, chartConfig: chartDataRaw.chartConfig, drivers: chartDataRaw.drivers };
-            saveDraft(payload);
-          });
-        }
-        if (resetBtn && !resetBtn.dataset.wired){
-          resetBtn.dataset.wired = "1";
-          resetBtn.addEventListener('click', (e)=>{
-            e.preventDefault();
-            clearDraft();
-            writeFields(DEFAULT_CURRENT_STATE);
-            STATE.chartConfig = STATE.defaultsChartConfig();
-            STATE.drivers = STATE.defaultsDrivers();
-            writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
-            STATE.currentState = STATE.defaultsCurrentState();
-            render();
-          });
-        }
       }
-      /* ------------------------------------------------------------------- */
+
+      /* ---------- Edit modal ---------- */
+
       function renderModal(){
         if(!STATE.modalOpen) return '';
         const buf = STATE.editBuffers;
@@ -1478,8 +1641,8 @@ application delivery becomes harder to scale predictably.</p>
           {id: 'chart', label: 'Chart Config'}
         ];
         return `
-          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-auto p-4 md:p-8">
-            <div class="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl p-8 overflow-y-auto">
+          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay overflow-auto p-4 md:p-8">
+            <div class="w-[95vw] h-[95vh] rounded-2xl shadow-2xl p-8 overflow-y-auto glass">
               <div class="flex items-center justify-between">
                 <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
                 <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
@@ -1487,19 +1650,27 @@ application delivery becomes harder to scale predictably.</p>
                 </button>
               </div>
               <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
-              <div role="tablist" aria-label="Edit sections" class="flex w-full flex-wrap gap-2 rounded bg-slate-50 p-1 ring-1 ring-slate-200 mt-4">
+
+              <div role="tablist" aria-label="Edit sections" class="flex w-full flex-wrap gap-2 rounded bg-white/60 backdrop-blur-lg p-1 ring-1 ring-slate-200 mt-4">
                 ${editTabs.map(t=>`
-                  <button type="button" class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition', STATE.editTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}" data-action="switch-edit-tab" data-tab="${t.id}" aria-selected="${STATE.editTab===t.id}">
+                  <button type="button"
+                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition',
+                      STATE.editTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}"
+                    data-action="switch-edit-tab"
+                    data-tab="${t.id}"
+                    aria-selected="${STATE.editTab===t.id}">
                     <span>${t.label}</span>
                   </button>
                 `).join('')}
               </div>
+
               <div class="mt-4">
                 ${STATE.editTab === 'change' ? editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst) : ''}
                 ${STATE.editTab === 'now' ? editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst) : ''}
                 ${STATE.editTab === 'recast' ? editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst) : ''}
                 ${STATE.editTab === 'chart' ? editorSectionChart() : ''}
               </div>
+
               <div class="mt-5 flex flex-wrap gap-2">
                 <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
                   <i data-lucide="save" class="w-4 h-4"></i> Save
@@ -1512,55 +1683,75 @@ application delivery becomes harder to scale predictably.</p>
           </div>
         `;
       }
+
       function editorSectionChart(){
+        const buffer = STATE.editChartBuffer || {
+          chartConfig: { ...STATE.chartConfig },
+          drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
+        };
+        const conf = buffer.chartConfig || {};
+        const drv = buffer.drivers || [];
+
         return `
           <div class="flex flex-col gap-4">
             <span class="text-sm font-semibold">XY Chart</span>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">Y-axis label</span>
-              <input id="chart-yaxis" value="${STATE.chartConfig.yAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+              <input id="chart-yaxis" value="${conf.yAxis ?? STATE.chartConfig.yAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
             </label>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">X-axis label</span>
-              <input id="chart-xaxis" value="${STATE.chartConfig.xAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+              <input id="chart-xaxis" value="${conf.xAxis ?? STATE.chartConfig.xAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
             </label>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">Center text</span>
-              <input id="chart-center" value="${STATE.chartConfig.center}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+              <input id="chart-center" value="${conf.center ?? STATE.chartConfig.center}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
             </label>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">Footer caption</span>
-              <input id="chart-footer" value="${STATE.chartConfig.footer}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+              <input id="chart-footer" value="${conf.footer ?? STATE.chartConfig.footer}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
             </label>
+
             <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Operational breaking point annotation</span>
-              <input id="chart-tipping" value="${STATE.chartConfig.tipping}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+              <span class="text-xs text-[#4A5568]">------ annotation</span>
+              <input id="chart-tipping" value="${conf.tipping ?? STATE.chartConfig.tipping}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
             </label>
+
             <div class="space-y-4">
-              ${STATE.drivers.map((d, i) => `
-                <div>
-                  <label class="flex flex-col gap-1">
-                    <span class="text-xs text-[#4A5568]">Point ${i+1} title</span>
-                    <input id="driver${i}-label" value="${d.label}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-                  </label>
-                  <label class="flex flex-col gap-1 mt-2">
-                    <span class="text-xs text-[#4A5568]">Point ${i+1} bullets (one per line, exactly 3)</span>
-                    <textarea id="driver${i}-bullets" rows="4" class="min-h-[100px] rounded border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring">${d.bullets.join('\n')}</textarea>
-                  </label>
-                </div>
-              `).join('')}
+              ${STATE.drivers.map((d, i) => {
+                const dBuf = drv[i] || {};
+                return `
+                  <div>
+                    <label class="flex flex-col gap-1">
+                      <span class="text-xs text-[#4A5568]">Point ${i+1} title</span>
+                      <input id="driver${i}-label" value="${(dBuf.label ?? d.label)}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
+                    </label>
+                    <label class="flex flex-col gap-1 mt-2">
+                      <span class="text-xs text-[#4A5568]">Point ${i+1} bullets (one per line, exactly 3)</span>
+                      <textarea id="driver${i}-bullets" rows="4" class="min-h-[100px] rounded border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring">${(dBuf.bullets ?? d.bullets.join('\n'))}</textarea>
+                    </label>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         `;
       }
+
       function editorSection(key,label,introValue,bulletsValue,analystValue){
         return `
           <div class="flex flex-col gap-4">
             <span class="text-sm font-semibold">${label}</span>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">Introduction</span>
               <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
             </label>
+
             <label class="flex flex-col gap-1">
               <div class="flex items-center gap-2 text-xs text-[#4A5568]">
                 <i data-lucide="check-circle" class="w-4 h-4 text-[#0070F3]"></i>
@@ -1568,6 +1759,7 @@ application delivery becomes harder to scale predictably.</p>
               </div>
               <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
             </label>
+
             <label class="flex flex-col gap-1">
               <span class="text-xs text-[#4A5568]">Analyst Trend</span>
               <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
@@ -1575,50 +1767,22 @@ application delivery becomes harder to scale predictably.</p>
           </div>
         `;
       }
+
+      function parseLines(s, max=4){
+        return (s || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, max);
+      }
+
+      /* ---------- Event system (idempotent + delegated) ---------- */
+
       function attachEvents(){
-        const root=document.getElementById('app');
-        root.addEventListener('input', e => {
-          const act = e.target.closest('[data-action="set-slider"]');
-          if (act) {
-            const id = act.getAttribute('data-id');
-            const value = parseInt(act.value);
-            setSlider(id, value);
-          }
-          const calcApps = document.getElementById('calc-apps');
-          if (calcApps && e.target === calcApps) STATE.calcInputs.apps = cleanNum(e.target.value);
-          const calcEnvs = document.getElementById('calc-envs');
-          if (calcEnvs && e.target === calcEnvs) STATE.calcInputs.envs = cleanNum(e.target.value);
-          const calcChanges = document.getElementById('calc-changes');
-          if (calcChanges && e.target === calcChanges) STATE.calcInputs.changes = cleanNum(e.target.value);
-        });
-        root.addEventListener('click', e => {
+        const root = document.getElementById('app');
+        if (!root || root.dataset.bound === '1') return;
+        root.dataset.bound = '1';
+
+        root.addEventListener('click', (e) => {
           const act = e.target.closest('[data-action]');
-          if (act) {
-            const action = act.getAttribute('data-action');
-            if (action === 'switch-edit-tab') {
-              STATE.editTab = act.getAttribute('data-tab');
-              render();
-              return;
-            }
-            if (action === 'reset-sliders') {
-              resetSliders();
-            }
-            if (action === 'close-insight-modal') {
-              STATE.insightContent = null;
-              render();
-            }
-            if (action === 'why-nav') {
-              const to = act.getAttribute('data-to');
-              STATE.openWhyModal = to;
-              render();
-              return;
-            }
-            if (action === 'calculate-impact') {
-              calculateImpact();
-              render();
-              return;
-            }
-          }
+          const action = act?.getAttribute('data-action');
+
           const node = e.target.closest('.interactive-node');
           if (node) {
             const id = node.dataset.id;
@@ -1626,288 +1790,274 @@ application delivery becomes harder to scale predictably.</p>
             render();
             return;
           }
-          if (STATE.activeTab === 'problems' && STATE.activePopover && !e.target.closest('.popover')) {
+
+          if (!action) return;
+
+          if (action === 'switch-tab') {
+            STATE.activeTab = act.getAttribute('data-tab');
+            STATE.visitedCards = [];
             STATE.activePopover = null;
+            STATE.calcResult = null;
+            STATE.openWhyModal = null;
+            STATE.insightContent = null;
             render();
+            return;
           }
-        });
-        root.querySelectorAll('[data-action="switch-tab"]').forEach(b=>b.addEventListener('click',e=>{
-          STATE.activeTab=e.currentTarget.getAttribute('data-tab');
-          STATE.visitedCards = [];
-          STATE.activePopover = null;
-          STATE.calcResult = null;
-          render();
-        }));
-        root.querySelectorAll('[data-action="advance"]').forEach(b=>b.addEventListener('click',e=>{
-          STATE.activeTab=e.currentTarget.getAttribute('data-next');
-          STATE.openWhyModal = null;
-          render();
-        }));
-        root.querySelectorAll('[data-action="open-why-modal"]').forEach(b=>b.addEventListener('click',e=>{
-          const id=e.currentTarget.getAttribute('data-why');
-          if (id === 'change') {
-            STATE.drivers.forEach(d => {
-              if (['more_apps', 'constant_updates', 'too_many_tools', 'manual_rework'].includes(d.id)) d.state = 'normal';
-            });
-          } else if (id === 'now') {
-            STATE.drivers.forEach(d => {
-              if (['more_apps', 'constant_updates', 'too_many_tools', 'manual_rework', 'security_compliance'].includes(d.id)) d.state = 'accelerating';
-            });
-            STATE.showTippingPoint = true;
-          } else if (id === 'recast') {
-            // Lock sliders, show absorption, narrow gap - but since no absorption line in spec, perhaps adjust exponents
-            STATE.targetDemandExponent -= 0.5; // Simulate narrowing
+
+          if (action === 'advance') {
+            STATE.activeTab = act.getAttribute('data-next');
+            STATE.openWhyModal = null;
+            render();
+            return;
           }
-          updateCurves();
-          requestAnimationFrame(animateCurves);
-          STATE.openWhyModal = id;
-          render();
-        }));
-        root.querySelectorAll('[data-action="close-why-modal"]').forEach(b=>b.addEventListener('click',()=>{
-          STATE.openWhyModal = null;
-          STATE.activePopover = null;
-          render();
-        }));
-        root.querySelectorAll('[data-action="toggle-card"]').forEach(b=>b.addEventListener('click',e=>{
-          const id=e.currentTarget.getAttribute('data-card');
-          const wasOpen = STATE.openCards[id];
-          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
-          STATE.openCards[id] = !wasOpen;
-          if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) {
-            STATE.visitedCards.push(id);
+
+          if (action === 'close-modal') {
+            STATE.modalOpen = false;
+            render();
+            return;
           }
-          render();
-          if (STATE.openCards[id]) {
-            setTimeout(() => {
-              e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 200);
+
+          if (action === 'close-why-modal') {
+            STATE.openWhyModal = null;
+            render();
+            return;
           }
-        }));
-        root.querySelectorAll('[data-action="expand-all"]').forEach(b=>b.addEventListener('click',()=>{
-          Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
-          STATE.visitedCards = ['core', 'onboarding', 'trust'];
-          render();
-        }));
-        root.querySelectorAll('[data-action="toggle-bucket"]').forEach(b=>b.addEventListener('click',e=>{
-          const id=e.currentTarget.getAttribute('data-bucket');
-          STATE.openBuckets[id] = !STATE.openBuckets[id];
-          render();
-        }));
-        root.querySelectorAll('[data-action="set-device"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.device=e.currentTarget.getAttribute('data-value'); render(); }));
-        root.querySelectorAll('[data-action="set-network"]').forEach(b=>b.addEventListener('click',e=>{ STATE.ctx.network=e.currentTarget.getAttribute('data-value'); render(); }));
-        root.querySelectorAll('[data-action="toggle-compliance"]').forEach(b=>b.addEventListener('click',()=>{ STATE.ctx.compliant=!STATE.ctx.compliant; render(); }));
-        const pack=root.querySelector('[data-action="set-pack-hrs"]'); if(pack) pack.addEventListener('input',e=>{ STATE.packHrs=cleanNum(e.target.value); render(); });
-        const cfg=root.querySelector('[data-action="set-config-hrs"]'); if(cfg) cfg.addEventListener('input',e=>{ STATE.configHrs=cleanNum(e.target.value); render(); });
-        const cur=root.querySelector('[data-action="set-current-hrs"]'); if(cur) cur.addEventListener('input',e=>{ STATE.currentHrs=cleanNum(e.target.value); render(); });
-        root.querySelectorAll('[data-action="add-impact"]').forEach(b=>b.addEventListener('click',e=>{
-          const kind=e.currentTarget.getAttribute('data-kind'); const val=Number(e.currentTarget.getAttribute('data-value'))||0;
-          if (kind==='minutes') STATE.impact.minutes+=val;
-          if (kind==='pkgHours') STATE.impact.pkgHours+=val;
-          if (kind==='riskHrs') STATE.impact.riskHrs+=val;
-          updateROIOutputs();
-          render();
-        }));
-        root.querySelectorAll('[data-action="set-roi"]').forEach(inp=>inp.addEventListener('input',e=>{
-          const key=e.currentTarget.getAttribute('data-key');
-          const v=Number(String(e.target.value).replace(/[^0-9.\-]/g,''));
-          STATE.roiInputs[key]=isFinite(v)?v:0;
-          render();
-        }));
-        const resetCalc=root.querySelector('[data-action="reset-calculator"]');
-        if(resetCalc) resetCalc.addEventListener('click', ()=>{
-          STATE.roiInputs = { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 };
-          STATE.impact = { ...STATE.defaults.impact };
-          STATE.copied = false;
-          render();
-        });
-        const copyBtn=root.querySelector('[data-action="copy-onepager"]');
-        if(copyBtn) copyBtn.addEventListener('click', async ()=>{
-          const r = calcROI();
-          const body =
- `Recast Application Workspace — Capacity Dashboard
- Assumptions
-  - Users: ${r.i.users}
-  - Tickets per user / month: ${r.i.ticketsPerUserPerMonth}
-  - Avg handle: ${r.i.avgHandleMins} mins
- Observed impact
-  - Minutes saved per user (monthly): ${STATE.impact.minutes}
-  - Packaging hours avoided: ${STATE.impact.pkgHours}
-  - Zero-day hours avoided: ${STATE.impact.riskHrs}
- Outcomes
-  - Hours Returned / Month: ${round(r.totalHoursMonth)}
-  - Hours Returned / Year: ${round(r.totalHoursYear)}
-  - Packaging Work Reduced / Month: ${round(r.packagingHoursMonth)}
-  - Zero-Day Patch Time Reduced / Month: ${round(r.patchHoursMonth)}
-  - App-Related Reactive Work Reduced / Month: ${round(r.reactiveHoursMonth)}
-  - Tickets Avoided (est.): ${round(r.ticketsAvoided)} / month
-  - Faster Patch Window: ${STATE.currentHrs} to 1.5 hrs (${r.patchReductionPct}% reduction)
-  - App Version Reduction (estimated): 30-50% fewer active versions
- Notes: Illustrative; replace with your data.`;
-          try { await navigator.clipboard.writeText(body); } catch {
-            const ta=document.createElement('textarea'); ta.value=body; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+
+          if (action === 'close-insight-modal') {
+            STATE.insightContent = null;
+            STATE.highlightDriverId = null;
+            render();
+            return;
           }
-          STATE.copied = true; render(); setTimeout(()=>{ STATE.copied = false; render(); }, 1200);
-        });
-        const startBtn=root.querySelector('[data-action="start-flow"]'); if(startBtn) startBtn.addEventListener('click', startFlow);
-        const resetBtn=root.querySelector('[data-action="reset-flow"]'); if(resetBtn) resetBtn.addEventListener('click', resetFlow);
-        const toggleLabels=root.querySelector('[data-action="toggle-labels"]'); if(toggleLabels) toggleLabels.addEventListener('click', ()=>{ STATE.showLabels=!STATE.showLabels; toggleOverlay(); buildFlow(); });
-        root.querySelectorAll('[data-action="launch-icon"]').forEach(icon=>icon.addEventListener('click', ()=>{ icon.classList.add('icon-launch'); setTimeout(()=>icon.classList.remove('icon-launch'), 500); }));
-        const openEditor=root.querySelector('[data-action="open-currentstate-editor"]');
-        if(openEditor) openEditor.addEventListener('click', ()=>{
-          STATE.modalOpen = true;
-          STATE.editTab = 'change';
-          STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
-          render();
-          setTimeout(()=>{ try { window.lucide.createIcons(); } catch{} }, 0);
-          setTimeout(()=>{ initCurrentStateModal(); }, 0);
-        });
-      }
-      function toggleOverlay(){
-        const overlay = document.getElementById('overlayTag');
-        if(STATE.showLabels){
-          overlay.classList.remove('hidden');
-          setTimeout(()=>{ overlay.classList.add('hidden'); },3000);
-        }
-      }
-      function buildFlow(){
-        let base=0;
-        CATALOG.forEach(section=>{
-          const mount=document.getElementById(section.id); if(!mount) return;
-          mount.innerHTML='';
-          section.items.forEach((itm,idx)=>{
-            const wrap=document.createElement('div'); wrap.className='logo-wrap'; wrap.style.setProperty('--d',(base+idx*0.2 + 4).toFixed(2)+'s'); // Delay catalog by 4s
-            const ring=document.createElement('div'); ring.className='logo-ring'; ring.innerHTML=itm.svg; ring.title=itm.name; ring.setAttribute('role','img'); ring.setAttribute('aria-label',itm.name);
-            wrap.appendChild(ring);
-            if(STATE.showLabels){
-              const label=document.createElement('span'); label.className='logo-name'; label.textContent=itm.name; wrap.appendChild(label);
-              const meta=document.createElement('div'); meta.className='meta-label';
-              meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
-              wrap.appendChild(meta);
+
+          if (action === 'why-nav') {
+            STATE.openWhyModal = act.getAttribute('data-to');
+            render();
+            return;
+          }
+
+          if (action === 'open-why-modal') {
+            const id = act.getAttribute('data-why');
+            STATE.recastMode = false;
+
+            STATE.drivers.forEach(d => d.state = 'off');
+            STATE.showTippingPoint = false;
+
+            if (id === 'change') {
+              STATE.drivers.forEach(d => {
+                if (['more_apps','constant_updates','too_many_tools','manual_rework'].includes(d.id)) d.state = 'normal';
+              });
+            } else if (id === 'now') {
+              STATE.drivers.forEach(d => {
+                if (['more_apps','constant_updates','too_many_tools','manual_rework','security_compliance'].includes(d.id)) d.state = 'accelerating';
+              });
+              STATE.showTippingPoint = true;
+            } else if (id === 'recast') {
+              STATE.recastMode = true;
             }
-            mount.appendChild(wrap);
-          });
-          base+=1.5;
+
+            updateCurves();
+            requestAnimationFrame(animateCurves);
+
+            STATE.openWhyModal = id;
+            render();
+            return;
+          }
+
+          if (action === 'toggle-card') {
+            const id = act.getAttribute('data-card');
+            const wasOpen = STATE.openCards[id];
+            Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
+            STATE.openCards[id] = !wasOpen;
+
+            if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) STATE.visitedCards.push(id);
+
+            render();
+
+            if (STATE.openCards[id]) {
+              setTimeout(() => act.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+            }
+            return;
+          }
+
+          if (action === 'expand-all') {
+            Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
+            STATE.visitedCards = ['core','onboarding','trust'];
+            render();
+            return;
+          }
+
+          if (action === 'calculate-impact') {
+            calculateImpact();
+            render();
+            return;
+          }
+
+          if (action === 'start-flow') { startFlow(); return; }
+          if (action === 'reset-flow') { resetFlow(); return; }
+
+          if (action === 'toggle-labels') {
+            STATE.showLabels = !STATE.showLabels;
+            toggleOverlay();
+            buildFlow();
+            return;
+          }
+
+          if (action === 'launch-icon') {
+            act.classList.add('icon-launch');
+            setTimeout(() => act.classList.remove('icon-launch'), 500);
+            return;
+          }
+
+          if (action === 'open-currentstate-editor') {
+            STATE.modalOpen = true;
+            STATE.editTab = 'change';
+            STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
+            STATE.editChartBuffer = null;
+            render();
+            setTimeout(()=>{ try { window.lucide?.createIcons?.(); } catch{} }, 0);
+            setTimeout(()=>{ initCurrentStateModal(); }, 0);
+            return;
+          }
+
+          if (action === 'switch-edit-tab') {
+            STATE.editTab = act.getAttribute('data-tab');
+            render();
+            setTimeout(()=>{ try { window.lucide?.createIcons?.(); } catch{} }, 0);
+            return;
+          }
+
+          if (action === 'save-currentstate') {
+            const fallback = STATE.defaultsCurrentState();
+            const formData = readFields();
+
+            STATE.currentState = {
+              change: {
+                intro: (formData.change.intro || '').trim() || fallback.change.intro,
+                bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
+                analyst: (formData.change.analyst || '').trim() || fallback.change.analyst
+              },
+              now: {
+                intro: (formData.now.intro || '').trim() || fallback.now.intro,
+                bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
+                analyst: (formData.now.analyst || '').trim() || fallback.now.analyst
+              },
+              recast: {
+                intro: (formData.recast.intro || '').trim() || fallback.recast.intro,
+                bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
+                analyst: (formData.recast.analyst || '').trim() || fallback.recast.analyst
+              }
+            };
+
+            // Chart edits: only apply if we actually have values (prevents wiping chart when saving from another tab)
+            const raw = STATE.editChartBuffer || readChartFieldsRaw();
+
+            const pick = (v, keep) => (typeof v === 'string' && v.trim()) ? v.trim() : keep;
+
+            const fallbackChart = STATE.defaultsChartConfig();
+            const cfg = raw?.chartConfig || {};
+
+            STATE.chartConfig = {
+              yAxis: pick(cfg.yAxis, STATE.chartConfig.yAxis || fallbackChart.yAxis),
+              xAxis: pick(cfg.xAxis, STATE.chartConfig.xAxis || fallbackChart.xAxis),
+              center: pick(cfg.center, STATE.chartConfig.center || fallbackChart.center),
+              footer: pick(cfg.footer, STATE.chartConfig.footer || fallbackChart.footer),
+              tipping: pick(cfg.tipping, STATE.chartConfig.tipping || fallbackChart.tipping)
+            };
+
+            const fallbackDrivers = STATE.defaultsDrivers();
+            const dRaw = raw?.drivers || [];
+
+            STATE.drivers.forEach((d, i) => {
+              const lbl = dRaw[i]?.label;
+              d.label = pick(lbl, d.label || fallbackDrivers[i].label);
+
+              const bulletsRaw = dRaw[i]?.bullets;
+              if (typeof bulletsRaw === 'string') {
+                const b = parseLines(bulletsRaw, 3);
+                d.bullets = b.length === 3 ? b : (d.bullets || fallbackDrivers[i].bullets);
+              } else {
+                d.bullets = d.bullets || fallbackDrivers[i].bullets;
+              }
+            });
+
+            // Persist full snapshot so refresh keeps everything
+            saveDraft({
+              ...formData,
+              chartConfig: { ...STATE.chartConfig },
+              drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
+            });
+
+            STATE.modalOpen = false;
+            STATE.activeTab = 'problems';
+            render();
+            return;
+          }
+
+          if (action === 'reset-currentstate-defaults') {
+            clearDraft();
+            STATE.chartConfig = STATE.defaultsChartConfig();
+            STATE.drivers = STATE.defaultsDrivers();
+            STATE.currentState = STATE.defaultsCurrentState();
+            STATE.editChartBuffer = null;
+            render();
+            return;
+          }
+
+          if (action === 'reset-sliders') { resetSliders(); return; }
         });
-        buildTiles(document.getElementById('flowConnA'), 14, 7); // Delay existing by 4s
-        buildTiles(document.getElementById('flowConnB'), 14, 7.5);
-        buildTiles(document.getElementById('flowConnC'), 14, 8);
-        buildTiles(document.getElementById('flowGrpA'), 18, 9);
-        buildTiles(document.getElementById('flowGrpB'), 18, 9.5);
-        buildTiles(document.getElementById('flowGrpC'), 18, 10);
-        buildTiles(document.getElementById('flowDevA'), 10, 12);
-        buildTiles(document.getElementById('flowDevB'), 10, 12.5);
-        buildTiles(document.getElementById('flowDevC'), 10, 13);
-        const avatar=document.getElementById('endUserAvatar');
-        const badge=document.getElementById('endUserBadge');
-        if(avatar){ avatar.style.background='#EA4335'; avatar.textContent='U'; }
-        if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; }
-        const message = document.getElementById('endUserMessage');
-        if(message) message.textContent = 'Apps on demand — no waiting, no tickets.';
-        const mini = document.getElementById('miniWorkspace');
-        if(mini) mini.classList.add('hidden');
-        const counters = document.getElementById('progressCounters');
-        if(counters) counters.classList.add('hidden');
-        const card = document.getElementById('flowCard');
-        if(card) card.classList.remove('run');
-        const envCard = document.getElementById('envFlow');
-        if(envCard) envCard.classList.remove('run');
-        if(STATE.showLabels) { card.classList.add('show-labels'); envCard.classList.add('show-labels'); }
-        else { card.classList.remove('show-labels'); envCard.classList.remove('show-labels'); }
-        const endCard = document.getElementById('endUserCard');
-        if(endCard) endCard.classList.remove('end-user-expand');
-        STATE.progress = { apps: 0, time: 0, tickets: 0 };
-        STATE.envProgress = { appsProcessed: 0 };
-        updateProgress();
-        updateEnvProgress();
-        const success=document.getElementById('flowSuccess'); if(success) success.classList.add('hidden');
+
+        root.addEventListener('input', (e) => {
+          const slider = e.target.closest('[data-action="set-slider"]');
+          if (slider) {
+            const id = slider.getAttribute('data-id');
+            const value = parseInt(slider.value, 10);
+            setSlider(id, isFinite(value) ? value : 0);
+            return;
+          }
+
+          if (e.target?.id === 'calc-envs')   { STATE.calcInputs.envs = cleanNum(e.target.value); render(); return; }
+          if (e.target?.id === 'calc-changes'){ STATE.calcInputs.changes = cleanNum(e.target.value); render(); return; }
+          if (e.target?.id === 'calc-time')  { STATE.calcInputs.time = cleanNum(e.target.value); render(); return; }
+
+          const buf = e.target.closest('[data-action="edit-buffer"]');
+          if (buf) {
+            const key = buf.getAttribute('data-key');
+            const sub = buf.getAttribute('data-subkey');
+            if (STATE.editBuffers?.[key]) STATE.editBuffers[key][sub] = e.target.value;
+          }
+
+          if (STATE.modalOpen && STATE.editTab === 'chart') {
+            STATE.editChartBuffer = readChartFieldsRaw();
+          }
+        });
       }
-      function buildTiles(container,count,baseDelay){
-        if(!container) return; container.innerHTML='';
-        for(let i=0;i<count;i++){ const d=document.createElement('div'); d.className='tile'; d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s'); container.appendChild(d); }
-      }
-      function startFlow(){
-        const envCard=document.getElementById('envFlow'); if(!envCard) return;
-        const card=document.getElementById('flowCard'); if(!card) return;
-        envCard.classList.remove('run'); card.classList.remove('run'); void envCard.offsetWidth; void card.offsetWidth;
-        envCard.classList.add('run'); card.classList.add('run');
-        const flash=document.getElementById('flowHubFlash'); const success=document.getElementById('flowSuccess');
-        const avatar=document.getElementById('endUserAvatar'); const badge=document.getElementById('endUserBadge');
-        const message = document.getElementById('endUserMessage'); const mini = document.getElementById('miniWorkspace');
-        const counters = document.getElementById('progressCounters'); const endCard = document.getElementById('endUserCard');
-        if(flash){ flash.classList.remove('hidden'); setTimeout(()=>flash.classList.add('hidden'),2000); }
-        if(success) success.classList.add('hidden');
-        if(counters) counters.classList.remove('hidden');
-        let envInterval = setInterval(updateEnvProgress, 50);
-        setTimeout(() => {
-          clearInterval(envInterval);
-          let interval = setInterval(updateProgress, 100);
-          setTimeout(()=>{
-            if(avatar){ avatar.style.background= 'var(--re-green)'; }
-            if(badge){ badge.textContent='✓'; badge.style.background= 'var(--re-green)'; }
-            if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
-            if(mini) mini.classList.remove('hidden');
-            if(endCard) endCard.classList.add('end-user-expand');
-            if(success) success.classList.remove('hidden');
-            clearInterval(interval);
-          }, 7000); // Adjusted for env flow (4s env + 7s catalog)
-        }, 4000); // Env flow duration 4s
-        setTimeout(()=> { envCard.classList.remove('run'); card.classList.remove('run'); }, 16000);
-      }
-      function updateProgress(){
-        if(STATE.progress.apps < 128) STATE.progress.apps += 4;
-        if(STATE.progress.time < 46) STATE.progress.time += 2;
-        if(STATE.progress.tickets < 73) STATE.progress.tickets += 3;
-        setText('appsProcessed', STATE.progress.apps > 128 ? 128 : STATE.progress.apps);
-        setText('timeSaved', STATE.progress.time > 46 ? 46 : STATE.progress.time);
-        setText('ticketsAvoided', STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets);
-      }
-      function updateEnvProgress(){
-        if(STATE.envProgress.appsProcessed < 8000) STATE.envProgress.appsProcessed += 200;
-        setText('appsProcessedCounter', STATE.envProgress.appsProcessed > 8000 ? '8,000' : STATE.envProgress.appsProcessed);
-      }
-      function resetFlow(){
-        STATE.progress = { apps: 0, time: 0, tickets: 0 };
-        STATE.envProgress = { appsProcessed: 0 };
-        STATE.showLabels = false;
-        buildFlow();
-      }
-      function calculateImpact(){
-        const apps = STATE.calcInputs.apps;
-        const envs = STATE.calcInputs.envs;
-        const changes = STATE.calcInputs.changes;
-        STATE.qualified = apps >= 50 && envs >= 2 && changes >= 10;
-        if (STATE.qualified) {
-          const currentMonthlyHours = (apps * envs * changes * 0.75) + (changes * 0.25);
-          const workspaceMonthlyHours = currentMonthlyHours * 0.4;
-          const hoursSavedMonthly = currentMonthlyHours - workspaceMonthlyHours;
-          const hoursSavedYearly = hoursSavedMonthly * 12;
-          STATE.calcResult = {
-            hoursSavedMonthly,
-            hoursSavedYearly
-          };
-        } else {
-          STATE.calcResult = null;
-        }
-      }
+
+      /* ---------- Accordion keyboard (idempotent) ---------- */
+
+      let accordionKeyboardBound = false;
       function attachAccordionKeyboard(){
+        if (accordionKeyboardBound) return;
+        accordionKeyboardBound = true;
+
         document.addEventListener('keydown', (e) => {
           const target = e.target;
-          if (!target.classList.contains('accordion-header')) return;
+          if (!target || !target.classList || !target.classList.contains('accordion-header')) return;
+
           const headers = Array.from(document.querySelectorAll('.accordion-header'));
           const idx = headers.indexOf(target);
+
           if (e.key === 'ArrowDown') {
-            const nextIdx = (idx + 1) % headers.length;
-            headers[nextIdx].focus();
+            headers[(idx + 1) % headers.length]?.focus();
             e.preventDefault();
           } else if (e.key === 'ArrowUp') {
-            const prevIdx = (idx - 1 + headers.length) % headers.length;
-            headers[prevIdx].focus();
+            headers[(idx - 1 + headers.length) % headers.length]?.focus();
             e.preventDefault();
           } else if (e.key === 'Home') {
-            headers[0].focus();
+            headers[0]?.focus();
             e.preventDefault();
           } else if (e.key === 'End') {
-            headers[headers.length - 1].focus();
+            headers[headers.length - 1]?.focus();
             e.preventDefault();
           } else if (e.key === 'Enter' || e.key === ' ') {
             target.click();
@@ -1915,84 +2065,24 @@ application delivery becomes harder to scale predictably.</p>
           }
         });
       }
-      function parseLines(s, max=4){
-        return (s || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, max);
-      }
+
+      /* ---------- Boot ---------- */
+
+      // Keep your original default “accelerating” mode if you want the demo to open hot:
       STATE.drivers.forEach(d => d.state = 'accelerating');
       STATE.showTippingPoint = true;
       updateCurves();
       STATE.currentDemandExponent = STATE.targetDemandExponent;
       STATE.currentCapacitySlope = STATE.targetCapacitySlope;
-      STATE.tippingPointYear = 2027.5;
+
       document.addEventListener('DOMContentLoaded', render);
-      document.addEventListener('click', (e)=>{
-        const act = e.target.closest('[data-action]');
-        if(!act) return;
-        const action = act.getAttribute('data-action');
-        if(action==='close-modal'){
-          STATE.modalOpen=false; render();
-        }
-        if(action==='edit-buffer'){
-          const key = act.getAttribute('data-key');
-          const subkey = act.getAttribute('data-subkey');
-          act.addEventListener('input', (evt)=>{ STATE.editBuffers[key][subkey] = evt.target.value; });
-        }
-        if(action==='save-currentstate'){
-          const fallback = STATE.defaultsCurrentState();
-          const formData = readFields();
-          STATE.currentState = {
-            change: {
-              intro: formData.change.intro.trim() || fallback.change.intro,
-              bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
-              analyst: formData.change.analyst.trim() || fallback.change.analyst
-            },
-            now: {
-              intro: formData.now.intro.trim() || fallback.now.intro,
-              bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
-              analyst: formData.now.analyst.trim() || fallback.now.analyst
-            },
-            recast: {
-              intro: formData.recast.intro.trim() || fallback.recast.intro,
-              bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
-              analyst: formData.recast.analyst.trim() || fallback.recast.analyst
-            }
-          };
-          const chartDataRaw = readChartFieldsRaw();
-          const fallbackChart = STATE.defaultsChartConfig();
-          STATE.chartConfig = {
-            yAxis: chartDataRaw.chartConfig.yAxis.trim() || fallbackChart.yAxis,
-            xAxis: chartDataRaw.chartConfig.xAxis.trim() || fallbackChart.xAxis,
-            center: chartDataRaw.chartConfig.center.trim() || fallbackChart.center,
-            footer: chartDataRaw.chartConfig.footer.trim() || fallbackChart.footer,
-            tipping: chartDataRaw.chartConfig.tipping.trim() || fallbackChart.tipping
-          };
-          const fallbackDrivers = STATE.defaultsDrivers();
-          STATE.drivers.forEach((d, i) => {
-            d.label = chartDataRaw.drivers[i].label.trim() || fallbackDrivers[i].label;
-            const b = parseLines(chartDataRaw.drivers[i].bullets, 3);
-            d.bullets = b.length === 3 ? b : fallbackDrivers[i].bullets;
-          });
-          STATE.modalOpen=false;
-          STATE.activeTab='problems';
-          STATE.openWhy=null;
-          render();
-        }
-        if(action==='reset-currentstate-defaults'){
-          clearDraft();
-          captureDefaultsOnce();
-          writeFields(DEFAULT_CURRENT_STATE);
-          STATE.chartConfig = STATE.defaultsChartConfig();
-          STATE.drivers = STATE.defaultsDrivers();
-          writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
-          STATE.currentState = STATE.defaultsCurrentState();
-          render();
-        }
-      });
+
       document.addEventListener('keydown',(e)=>{
         if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal || STATE.insightContent)){
           STATE.modalOpen=false;
           STATE.openWhyModal=null;
           STATE.insightContent=null;
+          STATE.highlightDriverId=null;
           render();
         }
       });
