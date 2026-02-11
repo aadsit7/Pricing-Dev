@@ -188,6 +188,35 @@
       @media (prefers-reduced-motion: reduce){
         .marker-group, .section-card, .logo-ring { transition: none !important; animation: none !important; }
       }
+
+      /* === Impact tab mini icon buttons (Added 2026-02-11) === */
+      .icon-btn{
+        width: 40px;
+        height: 40px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(226,232,240,0.9);
+        background: rgba(255,255,255,0.75);
+        transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      }
+      .icon-btn:hover{
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(15,23,42,0.08);
+        background: rgba(255,255,255,0.9);
+      }
+      .icon-btn:active{ transform: translateY(0); }
+      .icon-btn:focus-visible{ outline: 2px solid var(--primary); outline-offset: 2px; }
+
+      .impact-pulse{
+        box-shadow: 0 0 0 0 rgba(37,99,235,0.35);
+        animation: impactPulse 900ms ease-out 1;
+      }
+      @keyframes impactPulse{
+        0%   { box-shadow: 0 0 0 0 rgba(37,99,235,0.35); }
+        100% { box-shadow: 0 0 0 14px rgba(37,99,235,0); }
+      }
     </style>
   </head>
 
@@ -220,8 +249,8 @@
         drivers: [
           { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
           { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
-          { id: "too_many_tools", label: "Hybrid Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
-          { id: "manual_rework", label: "Manual Re-Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
+          { id: "too_many_tools", label: " Multiple Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
+          { id: "manual_rework", label: "Re-Work Multiplier", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
           { id: "security_compliance", label: "Security", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
         ],
         tippingPointYear: 2027.5,
@@ -231,9 +260,9 @@
           closing: "This isn’t failure — it’s the limit of a model that no longer scales."
         },
         chartConfig: {
-          yAxis: "Expectations and Requests",
+          yAxis: "Expectations & Requests",
           xAxis: "Time",
-          center: "IT Capacity Gap",
+          center: "Resources & Appreciation",
           footer: "",
           tipping: ""
         },
@@ -244,17 +273,17 @@
         showTippingPoint: false,
         currentState: {
           change: {
-            intro: "The application layer has become the biggest drag on IT execution.",
+            intro: "Forrester, Gartner, and McKinsey all highlight the application layer is the #1 drag on IT delivery and modernization.",
             bullets: [
-              "TODAY applications are tied to the device. Apps are packaged/deployed for specific device types (e.g., SCCM, Intune, VDI, macOS). Deployment is device-based, not user-based.",
-              "Duplicated Effort for Every Platform. Same app must be rebuilt, packaged, and supported separately. Each delivery tool needs its own version of the app.",
-              "Support is Complex and Fragmented. IT must locate where an app is installed before addressing issues. Increases troubleshooting time and causes fragmented support paths.",
-              "Modernization is Difficult and Risky. Adding platforms or making backend changes often requires rebuilding apps. High risk of introducing bugs and breaking existing functionality.",
-              "Inconsistent User Experience. App behavior and availability vary depending on device used. Users may encounter different interfaces and capabilities.",
-              "Logic is Scattered Across Multiple Tools. Environment depends on tribal knowledge and workarounds. Decentralized system creates inefficiencies and hidden complexity."
+              "TODAY Apps are tied to devices, not people = The same app has to be built and managed differently for Intune, SCCM, VDI, macOS, etc.",
+              "The same app gets rebuilt multiple times = Each platform needs its own version, packaging, testing, and fixes.",
+              "Change becomes risky = New platforms, migrations, or updates often break apps, so teams delay changes",
+              "Inconsistent User Experience = What works on one device doesn’t always work on another. = Higher Support Tickets",
+              "Tribal Knowledge is a huge risk = Tribal knowledge (workarounds) is heavliy relying on individuals"
             ],
             analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
           },
+
           now: {
             intro: "The gap between what IT is ASKED to deliver and what it CAN sustain is widening fast.",
             bullets: [
@@ -267,12 +296,12 @@
           recast: {
             intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
             bullets: [
-              "Applications Are Tied to the User. Apps follow the user across platforms. Assigned by user identity, not device or location. Seamless transition regardless of login method.",
-              "Define Once, Deliver Everywhere. Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
-              "Support is Simple and Predictable. IT uses a single support model across all delivery methods. Consistency allows predictable troubleshooting and maintenance.",
-              "Modernization is Seamless and Agile. New platforms can be integrated without rework. Backend updates don’t affect user-facing experience. Enhancements are non-disruptive to users.",
-              "Consistent User Experience. Users see the same apps and interfaces every time. Uniformity across devices ensures familiarity. Reduces user confusion and support demand.",
-              "Logic is Centralized and Consistent. Central management of application delivery. Ensures design consistency across environments. Reduces fragmentation and configuration drift."
+              "Applications Are Tied to the User = Apps follow the user across platforms. Assigned by user identity, not device or location.",
+              "Define Once, Deliver Everywhere = Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
+              "Support is Simplfied = IT uses a single support model across all delivery methods.",
+              " New platforms can be integrated without rework = Backend updates don’t affect user-facing experience.",
+              "Consistent User Experience = Users see the same apps and interfaces every time. Reduces user confusion and support demand.",
+              "Central management of application delivery = Ensures design consistency across environments. Reduces fragmentation and configuration drift."
             ],
             analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change"
           }
@@ -280,17 +309,17 @@
         defaultsCurrentState() {
           return JSON.parse(JSON.stringify({
             change: {
-              intro: "The application layer has become the biggest drag on IT execution.",
+              intro: "Forrester, Gartner, and McKinsey all highlight the application layer is the #1 drag on IT delivery and modernization.",
               bullets: [
-                "Applications Are Tied to the Device. Apps are packaged/deployed for specific device types (e.g., SCCM, Intune, VDI, macOS). Deployment is device-based, not user-based.",
-                "Duplicated Effort for Every Platform. Same app must be rebuilt, packaged, and supported separately. Each delivery tool needs its own version of the app.",
-                "Support is Complex and Fragmented. IT must locate where an app is installed before addressing issues. Increases troubleshooting time and causes fragmented support paths.",
-                "Modernization is Difficult and Risky. Adding platforms or making backend changes often requires rebuilding apps. High risk of introducing bugs and breaking existing functionality.",
-                "Inconsistent User Experience. App behavior and availability vary depending on device used. Users may encounter different interfaces and capabilities.",
-                "Logic is Scattered Across Multiple Tools. Environment depends on tribal knowledge and workarounds. Decentralized system creates inefficiencies and hidden complexity."
+                "TODAY Apps are tied to devices, not people = The same app has to be built and managed differently for Intune, SCCM, VDI, macOS, etc.",
+                "The same app gets rebuilt multiple times = Each platform needs its own version, packaging, testing, and fixes.",
+                "Change becomes risky = New platforms, migrations, or updates often break apps, so teams delay changes",
+                "Inconsistent User Experience = What works on one device doesn’t always work on another. = Higher Support Tickets",
+                "Tribal Knowledge is a huge risk = Tribal knowledge (workarounds) is heavliy relying on individuals"
               ],
               analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
             },
+
             now: {
               intro: "The gap between what IT is ASKED to deliver and what it CAN sustain is widening fast.",
               bullets: [
@@ -303,12 +332,12 @@
             recast: {
               intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
               bullets: [
-                "Applications Are Tied to the User. Apps follow the user across platforms. Assigned by user identity, not device or location. Seamless transition regardless of login method.",
-                "Define Once, Deliver Everywhere. Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
-                "Support is Simple and Predictable. IT uses a single support model across all delivery methods. Consistency allows predictable troubleshooting and maintenance.",
-                "Modernization is Seamless and Agile. New platforms can be integrated without rework. Backend updates don’t affect user-facing experience. Enhancements are non-disruptive to users.",
-                "Consistent User Experience. Users see the same apps and interfaces every time. Uniformity across devices ensures familiarity. Reduces user confusion and support demand.",
-                "Logic is Centralized and Consistent. Central management of application delivery. Ensures design consistency across environments. Reduces fragmentation and configuration drift."
+                "Applications Are Tied to the User = Apps follow the user across platforms. Assigned by user identity, not device or location.",
+                "Define Once, Deliver Everywhere = Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
+                "Support is Simplfied = IT uses a single support model across all delivery methods.",
+                " New platforms can be integrated without rework = Backend updates don’t affect user-facing experience.",
+                "Consistent User Experience = Users see the same apps and interfaces every time. Reduces user confusion and support demand.",
+                "Central management of application delivery = Ensures design consistency across environments. Reduces fragmentation and configuration drift."
               ],
               analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change."
             }
@@ -316,9 +345,9 @@
         },
         defaultsChartConfig() {
           return JSON.parse(JSON.stringify({
-            yAxis: "Expectations and Requests",
+            yAxis: "Expectations & Requests",
             xAxis: "Time",
-            center: "IT Capacity Gap",
+            center: "Resources & Appreciation",
             footer: "",
             tipping: "Operational breaking point"
           }));
@@ -327,7 +356,7 @@
           return JSON.parse(JSON.stringify([
             { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
             { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
-            { id: "too_many_tools", label: "Hybrid Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
+            { id: "too_many_tools", label: "Multiple Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
             { id: "manual_rework", label: "Too Much Manual Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
             { id: "security_compliance", label: "Security and Compliance Pressure", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
           ]));
@@ -344,6 +373,9 @@
       STATE.flowTimers = { intervals: [], timeouts: [] };
       STATE.editChartBuffer = null;
       STATE.highlightDriverId = null;
+
+      // (Added 2026-02-11) ROI footer pulse flag
+      STATE.impactPulse = false;
 
       const TABS = [
         { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
@@ -1013,8 +1045,32 @@
               <div class="mt-6">
                 <button type="button" data-action="calculate-impact" class="bg-[#0070F3] text-white px-6 py-3 text-base font-semibold rounded-full hover:bg-[#005AD0] focus-ring">Calculate Impact</button>
               </div>
-              <div id="calc-output" class="mt-8">
+
+              <div id="calc-output" class="mt-8 ${STATE.impactPulse ? 'impact-pulse' : ''}">
                 ${STATE.calcResult ? renderCalcResult() : ''}
+              </div>
+
+              <!-- Impact tab footer actions (Added 2026-02-11) -->
+              <div class="mt-6 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  class="icon-btn focus-ring"
+                  data-action="impact-play"
+                  aria-label="Play impact demo"
+                  title="Play impact demo"
+                >
+                  <i data-lucide="play" class="w-5 h-5 text-[#0A1C60]"></i>
+                </button>
+
+                <button
+                  type="button"
+                  class="icon-btn focus-ring"
+                  data-action="impact-edit"
+                  aria-label="Edit inputs"
+                  title="Edit inputs"
+                >
+                  <i data-lucide="pencil" class="w-5 h-5 text-[#0A1C60]"></i>
+                </button>
               </div>
             </div>
 
@@ -1884,6 +1940,37 @@
             Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
             STATE.visitedCards = ['core','onboarding','trust'];
             render();
+            return;
+          }
+
+          // (Added 2026-02-11) ROI footer actions
+          if (action === 'impact-play') {
+            STATE.calcInputs.envs = 3;
+            STATE.calcInputs.changes = 10;
+            STATE.calcInputs.time = 4;
+
+            calculateImpact();
+            STATE.impactPulse = true;
+            render();
+
+            setTimeout(() => {
+              document.getElementById('calc-output')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+
+            setTimeout(() => {
+              STATE.impactPulse = false;
+              render();
+            }, 900);
+
+            return;
+          }
+
+          if (action === 'impact-edit') {
+            render();
+            setTimeout(() => {
+              const el = document.getElementById('calc-envs');
+              if (el) { el.focus(); el.select?.(); }
+            }, 0);
             return;
           }
 
