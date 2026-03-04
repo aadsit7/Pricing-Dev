@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://unpkg.com">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
       :root {
@@ -256,6 +257,60 @@
       }
       @keyframes hcShimmer { 0% { background-position: 0% } 100% { background-position: 200% } }
 
+      /* ── Wizard Step Styles ── */
+      .hc-step-dot {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700;
+        border: 2px solid #e5e7eb;
+        background: #fff;
+        color: #9ca3af;
+        transition: all 0.25s ease;
+        position: relative; z-index: 1;
+      }
+      .hc-step-dot.active { border-color: #2563eb; background: #2563eb; color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.15); }
+      .hc-step-dot.done { border-color: #10b981; background: #10b981; color: #fff; }
+      .hc-step-connector { flex: 1; height: 2px; background: #e5e7eb; transition: background 0.3s; }
+      .hc-step-connector.done { background: #10b981; }
+
+      .hc-category-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 10px; border-radius: 100px;
+        font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+      }
+      .hc-category-infra { background: #eff6ff; color: #1d4ed8; }
+      .hc-category-it { background: #f0fdf4; color: #059669; }
+      .hc-category-clinical { background: #fff7ed; color: #c2410c; }
+
+      .hc-running-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed #f3f4f6;
+      }
+      .hc-running-row:last-child { border-bottom: none; }
+
+      .hc-big-total {
+        font-size: clamp(28px, 5vw, 42px);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      .hc-chart-wrap { position: relative; width: 100%; }
+
+      .hc-insight-pill {
+        display: flex; align-items: flex-start; gap: 10px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 13px;
+        color: #7c2d12;
+        line-height: 1.5;
+      }
+
       /* =========================
          2026 SaaS polish overrides
          ========================= */
@@ -467,19 +522,37 @@
         qualified: false,
 
         // ── Healthcare ROI state ──
+        hcStep: 1,
         hcInputs: {
-          totalUsers: 5000,
-          citrixSeats: 5000,
+          // Screen 1 — Org Overview
+          totalEmployees: 5000,
+          physicians: 800,
+          nurses: 300,
+          endpoints: 4500,
+          citrixSeats: 4000,
+          // Screen 2 — Infrastructure
           citrixCostPerUser: 150,
           renewalMultiplier: 2.5,
-          targetCitrixSeats: 1000,
-          avdCost: 25,
-          nerdioCost: 8,
-          recastCost: 4,
+          citrixRetainPct: 20,
+          avdCostPerUser: 25,
+          nerdioCostPerUser: 8,
+          recastCostPerUser: 4,
           migrationCost: 250000,
-          years: 3
+          years: 3,
+          // Screen 3 — IT Ops
+          adminCount: 10,
+          adminSalary: 120000,
+          troubleshootingHrsWeek: 8,
+          itReductionPct: 40,
+          // Screen 4 — Clinical Productivity
+          minutesLostDaily: 5,
+          physicianHourlyValue: 200,
+          workingDays: 220,
+          nurseMinutesSaved: 2.5,
+          nurseHourlyValue: 45
         },
-        hcResult: null
+        hcResult: null,
+        hcChartInstances: {}
       };
 
       // New state fields (reliability + chart linking + flow timer safety)
@@ -576,31 +649,73 @@
 
       function calcHealthcare() {
         const h = STATE.hcInputs;
-        const citrixSeats        = +h.citrixSeats || 0;
-        const citrixCostPerUser  = +h.citrixCostPerUser || 0;
-        const renewalMult        = +h.renewalMultiplier || 1;
-        const targetCitrix       = +h.targetCitrixSeats || 0;
-        const avdCost            = +h.avdCost || 0;
-        const nerdioCost         = +h.nerdioCost || 0;
-        const recastCost         = +h.recastCost || 0;
-        const migrationCost      = +h.migrationCost || 0;
-        const years              = +h.years || 1;
+
+        // ── Category 1: Infrastructure Cost Avoidance ──
+        const citrixSeats       = +h.citrixSeats || 0;
+        const citrixCostPerUser = +h.citrixCostPerUser || 0;
+        const renewalMult       = +h.renewalMultiplier || 1;
+        const retainPct         = Math.min(100, Math.max(0, +h.citrixRetainPct || 0));
+        const retainedSeats     = Math.round(citrixSeats * retainPct / 100);
+        const migratedSeats     = Math.max(0, citrixSeats - retainedSeats);
+        const avdCostPU         = +h.avdCostPerUser || 0;
+        const nerdioCostPU      = +h.nerdioCostPerUser || 0;
+        const recastCostPU      = +h.recastCostPerUser || 0;
+        const migrationCost     = +h.migrationCost || 0;
+        const years             = +h.years || 1;
 
         const currentCitrixAnnual  = citrixSeats * citrixCostPerUser;
         const renewalCitrixAnnual  = currentCitrixAnnual * renewalMult;
-        const postMinCitrixAnnual  = targetCitrix * citrixCostPerUser * renewalMult;
-        const usersMigrated        = Math.max(0, citrixSeats - targetCitrix);
-        const avdAnnual            = usersMigrated * avdCost * 12;
-        const nerdioAnnual         = usersMigrated * nerdioCost * 12;
-        const recastAnnual         = usersMigrated * recastCost * 12;
-        const newRunRate           = postMinCitrixAnnual + avdAnnual + nerdioAnnual + recastAnnual;
-        const avoidedCost          = renewalCitrixAnnual - newRunRate;
-        const grossBenefit         = avoidedCost * years;
-        const netBenefit           = grossBenefit - migrationCost;
+        const postCitrixAnnual     = retainedSeats * citrixCostPerUser * renewalMult;
+        const avdAnnual            = migratedSeats * avdCostPU * 12;
+        const nerdioAnnual         = migratedSeats * nerdioCostPU * 12;
+        const recastAnnual         = migratedSeats * recastCostPU * 12;
+        const newRunRate           = postCitrixAnnual + avdAnnual + nerdioAnnual + recastAnnual;
+        const infraSavings         = renewalCitrixAnnual - newRunRate;
 
-        return { currentCitrixAnnual, renewalCitrixAnnual, postMinCitrixAnnual,
-                 usersMigrated, avdAnnual, nerdioAnnual, recastAnnual,
-                 newRunRate, avoidedCost, grossBenefit, netBenefit, years };
+        // ── Category 2: IT Operational Efficiency ──
+        const adminCount        = +h.adminCount || 0;
+        const adminSalary       = +h.adminSalary || 0;
+        const troubleHrsWk      = +h.troubleshootingHrsWeek || 0;
+        const itReductionPct    = Math.min(100, Math.max(0, +h.itReductionPct || 0));
+
+        const hourlyAdmin       = adminSalary / 2080;
+        const hrsSavedPerWk     = troubleHrsWk * (itReductionPct / 100);
+        const itSavings         = adminCount * hrsSavedPerWk * 52 * hourlyAdmin;
+
+        // ── Category 3: Clinical Productivity (End User) ──
+        const physicians        = +h.physicians || 0;
+        const minutesLostDaily  = +h.minutesLostDaily || 0;
+        const physicianHrValue  = +h.physicianHourlyValue || 0;
+        const workingDays       = +h.workingDays || 220;
+        const nurses            = +h.nurses || 0;
+        const nurseMinSaved     = +h.nurseMinutesSaved || 0;
+        const nurseHrValue      = +h.nurseHourlyValue || 45;
+
+        const hrsSavedPerPhysician = (minutesLostDaily * workingDays) / 60;
+        const physicianProductivity = hrsSavedPerPhysician * physicianHrValue * physicians;
+
+        const hrsSavedPerNurse = (nurseMinSaved * workingDays) / 60;
+        const nurseProductivity = hrsSavedPerNurse * nurseHrValue * nurses;
+
+        const clinicalProductivity = physicianProductivity + nurseProductivity;
+
+        // ── Totals ──
+        const totalAnnualValue = infraSavings + itSavings + clinicalProductivity;
+        const gross3yr         = totalAnnualValue * years;
+        const net3yr           = gross3yr - migrationCost;
+
+        return {
+          // infra
+          currentCitrixAnnual, renewalCitrixAnnual, postCitrixAnnual,
+          retainedSeats, migratedSeats, avdAnnual, nerdioAnnual, recastAnnual,
+          newRunRate, infraSavings,
+          // it
+          hourlyAdmin, hrsSavedPerWk, itSavings,
+          // clinical
+          hrsSavedPerPhysician, physicianProductivity, nurseProductivity, clinicalProductivity,
+          // totals
+          totalAnnualValue, gross3yr, net3yr, years, migrationCost
+        };
       }
 
       function render(){
@@ -685,263 +800,527 @@
       }
 
       // ══════════════════════════════════════════════════
-      // HEALTHCARE ROI TAB
+      // HEALTHCARE ROI — 5-Step Wizard
       // ══════════════════════════════════════════════════
+
+      const HC_STEPS = [
+        { num: 1, label: 'Organization',  icon: 'building-2'   },
+        { num: 2, label: 'Infrastructure', icon: 'server'        },
+        { num: 3, label: 'IT Operations',  icon: 'shield-check'  },
+        { num: 4, label: 'Clinical',       icon: 'heart-pulse'   },
+        { num: 5, label: 'Results',        icon: 'bar-chart-3'   }
+      ];
+
       function renderHealthcareROI() {
         const h = STATE.hcInputs;
-        const r = STATE.hcResult;
+        const s = STATE.hcStep;
+        const r = STATE.hcResult || calcHealthcare();
 
-        const sliderVal = (v) => isFinite(+v) ? +v : 0;
+        const stepInputs = [
+          renderHCStep1(h), renderHCStep2(h), renderHCStep3(h), renderHCStep4(h), renderHCStep5(r, h)
+        ][s - 1];
 
         return `
-          <section id="panel-healthcare" class="space-y-5">
+          <section id="panel-healthcare" class="space-y-4">
 
-            <!-- Context banner -->
-            <div class="hc-card p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <!-- Header -->
+            <div class="hc-card p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 grid place-items-center">
                   <i data-lucide="heart-pulse" class="w-5 h-5 text-[#0070F3]"></i>
                 </div>
                 <div>
-                  <div class="text-base font-semibold text-[#0A1C60]">Citrix → AVD Migration ROI</div>
-                  <div class="text-[12px] text-[#6b7280]">Healthcare IT · Workspace Modernization</div>
+                  <div class="text-base font-semibold text-[#0A1C60]">Healthcare Workspace ROI</div>
+                  <div class="text-[12px] text-[#6b7280]">Citrix → AVD · IT Ops · Clinical Productivity</div>
                 </div>
               </div>
               <p class="text-sm text-[#4A5568] leading-relaxed">
-                Model the financial impact of minimizing Citrix and migrating to Azure Virtual Desktop with Nerdio and Recast AW.
-                Quantify avoided renewal shock, new run-rate economics, and multi-year net benefit.
+                ROI in healthcare is not just infrastructure cost. <strong>Physician time is worth $200+/hr</strong> — even 5 minutes saved per day scales to millions annually. This model captures all three value drivers.
               </p>
             </div>
 
-            <!-- Input + Results grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-              <!-- LEFT: Inputs -->
-              <div class="space-y-5">
-
-                <!-- Current State Card -->
-                <div class="hc-card p-5">
-                  <div class="hc-section-title">
-                    <i data-lucide="building-2" class="w-4 h-4"></i>
-                    Current State · Citrix
-                  </div>
-                  <div class="space-y-4">
-
-                    <div class="hc-field">
-                      <label class="hc-label">Total Workspace Users</label>
-                      <div class="hc-input-wrap">
-                        <input type="number" class="hc-input" id="hc-totalUsers" value="${h.totalUsers}" min="0" data-hc="totalUsers">
-                      </div>
+            <!-- Step indicator -->
+            <div class="hc-card px-5 py-4">
+              <div class="flex items-center gap-0">
+                ${HC_STEPS.map((step, i) => `
+                  <button type="button" data-action="hc-step" data-to="${step.num}"
+                    class="flex flex-col items-center gap-1 cursor-pointer group" style="min-width:60px">
+                    <div class="hc-step-dot ${s === step.num ? 'active' : s > step.num ? 'done' : ''}">
+                      ${s > step.num ? '✓' : step.num}
                     </div>
+                    <span class="text-[10px] font-medium ${s === step.num ? 'text-[#2563eb]' : s > step.num ? 'text-[#059669]' : 'text-[#9ca3af]'} hidden sm:block">${step.label}</span>
+                  </button>
+                  ${i < HC_STEPS.length - 1 ? `<div class="hc-step-connector ${s > step.num ? 'done' : ''}" style="margin-bottom:18px"></div>` : ''}
+                `).join('')}
+              </div>
+            </div>
 
-                    <div class="hc-field">
-                      <label class="hc-label">Current Citrix Licensed Seats</label>
-                      <div class="hc-input-wrap">
-                        <input type="number" class="hc-input" id="hc-citrixSeats" value="${h.citrixSeats}" min="0" data-hc="citrixSeats">
-                      </div>
-                    </div>
+            <!-- Main grid: left inputs, right running totals -->
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4">
 
-                    <div class="hc-field">
-                      <label class="hc-label">Citrix Cost per User / Year ($)</label>
-                      <div class="hc-input-wrap">
-                        <span class="hc-prefix">$</span>
-                        <input type="number" class="hc-input has-prefix" id="hc-citrixCostPerUser" value="${h.citrixCostPerUser}" min="0" data-hc="citrixCostPerUser">
-                      </div>
-                      <span class="hc-hint">~$150 typical enterprise rate</span>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">Renewal Increase Multiplier</label>
-                      <div class="flex items-center gap-3 mb-2">
-                        <input type="range" class="hc-range" id="hc-renewalSlider"
-                          min="1.0" max="5.0" step="0.1" value="${h.renewalMultiplier}"
-                          oninput="document.getElementById('hc-renewalMultiplier').value=this.value;STATE.hcInputs.renewalMultiplier=parseFloat(this.value);document.getElementById('hc-renewalDisplay').textContent=parseFloat(this.value).toFixed(1)+'×';STATE.hcResult=calcHealthcare();renderHCResults();">
-                        <span class="hc-range-value" id="hc-renewalDisplay">${(+h.renewalMultiplier).toFixed(1)}×</span>
-                      </div>
-                      <div class="hc-input-wrap">
-                        <input type="number" class="hc-input has-suffix" id="hc-renewalMultiplier" value="${h.renewalMultiplier}" min="1" max="10" step="0.1" data-hc="renewalMultiplier">
-                        <span class="hc-suffix">×</span>
-                      </div>
-                      <span class="hc-hint">Typical Citrix shock: 2–3× at renewal</span>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">Citrix Seats Retained Post-Migration</label>
-                      <div class="hc-input-wrap">
-                        <input type="number" class="hc-input" id="hc-targetCitrixSeats" value="${h.targetCitrixSeats}" min="0" data-hc="targetCitrixSeats">
-                      </div>
-                      <span class="hc-hint">Users that still require Citrix after minimization</span>
-                    </div>
-
-                  </div>
+              <!-- LEFT: Step inputs -->
+              <div class="hc-card p-5">
+                <div class="hc-section-title">
+                  <i data-lucide="${HC_STEPS[s-1].icon}" class="w-4 h-4"></i>
+                  Step ${s} of 5 — ${HC_STEPS[s-1].label}
                 </div>
+                ${stepInputs}
 
-                <!-- Future State Card -->
-                <div class="hc-card p-5">
-                  <div class="hc-section-title">
-                    <i data-lucide="cloud" class="w-4 h-4"></i>
-                    Future State · AVD + Nerdio + Recast
-                  </div>
-                  <div class="space-y-4">
-
-                    <div class="hc-field">
-                      <label class="hc-label">AVD Cost per User / Month ($)</label>
-                      <div class="hc-input-wrap">
-                        <span class="hc-prefix">$</span>
-                        <input type="number" class="hc-input has-prefix" id="hc-avdCost" value="${h.avdCost}" min="0" data-hc="avdCost">
-                      </div>
-                      <span class="hc-hint">Azure compute-dominant cost</span>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">Nerdio Cost per User / Month ($)</label>
-                      <div class="hc-input-wrap">
-                        <span class="hc-prefix">$</span>
-                        <input type="number" class="hc-input has-prefix" id="hc-nerdioCost" value="${h.nerdioCost}" min="0" data-hc="nerdioCost">
-                      </div>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">Recast AW Cost per User / Month ($)</label>
-                      <div class="hc-input-wrap">
-                        <span class="hc-prefix">$</span>
-                        <input type="number" class="hc-input has-prefix" id="hc-recastCost" value="${h.recastCost}" min="0" data-hc="recastCost">
-                      </div>
-                      <span class="hc-hint">~$4 list price</span>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">One-Time Migration / Services ($)</label>
-                      <div class="hc-input-wrap">
-                        <span class="hc-prefix">$</span>
-                        <input type="number" class="hc-input has-prefix" id="hc-migrationCost" value="${h.migrationCost}" min="0" data-hc="migrationCost">
-                      </div>
-                    </div>
-
-                    <div class="hc-field">
-                      <label class="hc-label">Time Horizon</label>
-                      <div class="flex items-center gap-3 mb-2">
-                        <input type="range" class="hc-range" id="hc-yearsSlider"
-                          min="1" max="5" step="1" value="${h.years}"
-                          oninput="document.getElementById('hc-years').value=this.value;STATE.hcInputs.years=parseInt(this.value);document.getElementById('hc-yearsDisplay').textContent=this.value+' yr';STATE.hcResult=calcHealthcare();renderHCResults();">
-                        <span class="hc-range-value" id="hc-yearsDisplay">${h.years} yr</span>
-                      </div>
-                      <div class="hc-input-wrap">
-                        <input type="number" class="hc-input has-suffix" id="hc-years" value="${h.years}" min="1" max="10" data-hc="years">
-                        <span class="hc-suffix">yrs</span>
-                      </div>
-                    </div>
-
-                  </div>
+                <!-- Navigation -->
+                <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                  <button type="button" data-action="hc-step" data-to="${Math.max(1, s-1)}"
+                    class="${s === 1 ? 'opacity-30 pointer-events-none' : ''} inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold rounded-full hover:border-[#0070F3] hover:text-[#0070F3] focus-ring transition">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+                  </button>
+                  ${s < 5 ? `
+                    <button type="button" data-action="hc-step" data-to="${s+1}"
+                      class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-5 py-2 text-sm font-semibold rounded-full hover:bg-[#005AD0] focus-ring transition">
+                      ${s === 4 ? 'View Results' : 'Next'} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                  ` : `
+                    <button type="button" data-action="hc-step" data-to="1"
+                      class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold rounded-full hover:border-[#0070F3] hover:text-[#0070F3] focus-ring transition">
+                      <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Start Over
+                    </button>
+                  `}
                 </div>
-
-              </div><!-- /LEFT -->
-
-              <!-- RIGHT: Results -->
-              <div class="hc-card p-5 flex flex-col" id="hc-results-panel">
-                ${r ? renderHCResultsHTML(r) : renderHCResultsEmpty()}
               </div>
 
-            </div><!-- /grid -->
+              <!-- RIGHT: Live running totals -->
+              <div class="hc-card p-5 flex flex-col" id="hc-results-panel">
+                ${renderHCRunningTotals(r, s)}
+              </div>
+
+            </div>
 
             <!-- Disclaimer -->
-            <div class="rounded-xl border border-slate-200 bg-white/60 p-4 text-[12px] text-[#9ca3af] leading-relaxed">
-              <strong class="text-[#6b7280]">Disclaimer:</strong> Estimates are illustrative only. Actual costs vary based on contract terms, Azure consumption, VM type, region, and org complexity. Citrix costs reflect post-renewal pricing. Engage Microsoft, Nerdio, and Recast representatives for detailed quotes. All values in USD.
+            <div class="rounded-xl border border-slate-200 bg-white/60 p-3 text-[11px] text-[#9ca3af] leading-relaxed">
+              <strong class="text-[#6b7280]">Disclaimer:</strong> Estimates are illustrative only. Physician and nurse hourly values, IT savings rates, and Azure/Citrix pricing will vary. Engage your Microsoft, Nerdio, and Recast representatives for a detailed quote. All values in USD.
             </div>
 
           </section>
         `;
       }
 
-      function renderHCResultsEmpty() {
+      // ── Step 1: Organization Overview ──
+      function renderHCStep1(h) {
         return `
-          <div class="flex flex-col items-center justify-center h-full gap-4 py-12 text-center">
-            <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 grid place-items-center">
-              <i data-lucide="calculator" class="w-7 h-7 text-[#2563eb]"></i>
+          <div class="space-y-4">
+            <p class="text-sm text-[#4A5568] leading-relaxed">Hospitals today rely on virtualization to deliver clinical apps like Epic. Start by telling us about your organization.</p>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('Total Hospital Employees', 'totalEmployees', h.totalEmployees, null, null, 'e.g. 5,000')}
+              ${hcField('Number of Physicians', 'physicians', h.physicians, null, null, 'e.g. 800')}
+              ${hcField('Nurses / Clinical Staff', 'nurses', h.nurses, null, null, 'e.g. 300')}
+              ${hcField('Total Endpoints', 'endpoints', h.endpoints, null, null, 'Workstations, tablets')}
             </div>
-            <div>
-              <p class="text-base font-medium text-[#0A1C60]">Results appear here</p>
-              <p class="text-sm text-[#6b7280] mt-1">Adjust any input on the left to see live ROI calculations.</p>
+            ${hcField('Current Citrix Licensed Seats', 'citrixSeats', h.citrixSeats, null, null, 'Seats covered under Citrix today')}
+          </div>
+        `;
+      }
+
+      // ── Step 2: Infrastructure Costs ──
+      function renderHCStep2(h) {
+        return `
+          <div class="space-y-4">
+            <div class="hc-insight-pill">
+              <i data-lucide="zap" class="w-4 h-4 flex-shrink-0 mt-0.5" style="color:#ea580c"></i>
+              <span>Citrix renewal shocks of <strong>2–3×</strong> are common. Most hospitals retain only 20% of seats — the rest migrate to Azure Virtual Desktop.</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('Citrix Cost / User / Year', 'citrixCostPerUser', h.citrixCostPerUser, '$', null, '~$150 enterprise rate')}
+              ${hcFieldSuffix('% Citrix Seats Retained', 'citrixRetainPct', h.citrixRetainPct, '%', 'After minimization', 0, 100)}
+            </div>
+            ${hcSlider('Citrix Renewal Multiplier', 'renewalMultiplier', h.renewalMultiplier, 1.0, 5.0, 0.1, '×', 'Typical shock: 2–3×')}
+            <div class="grid grid-cols-3 gap-3">
+              ${hcField('AVD / User / Mo', 'avdCostPerUser', h.avdCostPerUser, '$', null, 'Azure compute')}
+              ${hcField('Nerdio / User / Mo', 'nerdioCostPerUser', h.nerdioCostPerUser, '$', null, '')}
+              ${hcField('Recast / User / Mo', 'recastCostPerUser', h.recastCostPerUser, '$', null, '~$4 list')}
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('One-Time Migration Cost', 'migrationCost', h.migrationCost, '$', null, 'Services & implementation')}
+              ${hcFieldSuffix('Time Horizon', 'years', h.years, null, 'years', 1, 10)}
             </div>
           </div>
         `;
       }
 
-      function renderHCResultsHTML(r) {
-        const years = STATE.hcInputs.years;
-        const netPositive = r.netBenefit >= 0;
-        const avoidedPositive = r.avoidedCost >= 0;
+      // ── Step 3: IT Operations ──
+      function renderHCStep3(h) {
+        return `
+          <div class="space-y-4">
+            <div class="hc-insight-pill">
+              <i data-lucide="wrench" class="w-4 h-4 flex-shrink-0 mt-0.5" style="color:#ea580c"></i>
+              <span>Endpoint admins spend significant hours weekly troubleshooting broken or inconsistent apps. Recast reduces that friction by <strong>40%+</strong>.</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('Endpoint Admins', 'adminCount', h.adminCount, null, null, 'IT staff managing apps')}
+              ${hcField('Average Admin Salary', 'adminSalary', h.adminSalary, '$', null, 'Annual, fully loaded')}
+            </div>
+            ${hcSlider('Troubleshooting Hours / Week (per team)', 'troubleshootingHrsWeek', h.troubleshootingHrsWeek, 1, 40, 1, ' hrs', 'Total team hours on app issues weekly')}
+            ${hcSlider('Reduction with Recast + AVD', 'itReductionPct', h.itReductionPct, 5, 80, 5, '%', 'Typical: 35–50% fewer troubleshooting hours')}
+          </div>
+        `;
+      }
+
+      // ── Step 4: Clinical Productivity ──
+      function renderHCStep4(h) {
+        return `
+          <div class="space-y-4">
+            <div class="hc-insight-pill">
+              <i data-lucide="trending-up" class="w-4 h-4 flex-shrink-0 mt-0.5" style="color:#ea580c"></i>
+              <span>This is your <strong>biggest ROI lever.</strong> Physician time is worth $200+/hr — 5 minutes saved per day × 800 physicians = <strong>$2.88M annually.</strong></span>
+            </div>
+
+            <div class="text-[11px] font-semibold uppercase tracking-widest text-[#2563eb] mb-1 mt-2">Physician Workflow</div>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('Physicians', 'physicians', h.physicians, null, null, 'Confirm from Step 1')}
+              ${hcField('Physician Hourly Value ($)', 'physicianHourlyValue', h.physicianHourlyValue, '$', null, 'Billing or salary equivalent')}
+            </div>
+            ${hcSlider('Minutes Lost Daily (latency, login, broken apps)', 'minutesLostDaily', h.minutesLostDaily, 1, 20, 0.5, ' min', 'Epic login + app latency + workarounds')}
+            ${hcField('Working Days / Year', 'workingDays', h.workingDays, null, null, 'Typically 220')}
+
+            <div class="text-[11px] font-semibold uppercase tracking-widest text-[#2563eb] mb-1 mt-4">Nursing & Clinical Staff</div>
+            <div class="grid grid-cols-2 gap-4">
+              ${hcField('Clinical Staff Count', 'nurses', h.nurses, null, null, 'Nurses, techs, etc.')}
+              ${hcField('Staff Hourly Value ($)', 'nurseHourlyValue', h.nurseHourlyValue, '$', null, 'Avg. loaded cost/hr')}
+            </div>
+            ${hcSlider('Minutes Saved Per Shift (clinical staff)', 'nurseMinutesSaved', h.nurseMinutesSaved, 0.5, 10, 0.5, ' min', 'Faster logins, fewer broken apps, less IT wait')}
+          </div>
+        `;
+      }
+
+      // ── Step 5: Results Dashboard ──
+      function renderHCStep5(r, h) {
+        const netColor = r.net3yr >= 0 ? '#059669' : '#dc2626';
+        return `
+          <div class="space-y-5">
+
+            <!-- Headline number -->
+            <div class="rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white">
+              <div class="text-[11px] font-semibold uppercase tracking-widest opacity-70 mb-1">Total ${h.years}-Year Net ROI</div>
+              <div class="hc-big-total text-white">${hcFmt(r.net3yr)}</div>
+              <div class="text-sm opacity-75 mt-1">After $${(+h.migrationCost/1000).toFixed(0)}K one-time migration cost</div>
+            </div>
+
+            <!-- 3 categories -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 rounded-xl border border-blue-100 bg-blue-50">
+                <div>
+                  <span class="hc-category-badge hc-category-infra">Infrastructure</span>
+                  <div class="text-[11px] text-[#6b7280] mt-1">Citrix → AVD migration savings</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-[#1d4ed8] font-variant-numeric: tabular-nums">${hcFmt(r.infraSavings)}</div>
+                  <div class="text-[10px] text-[#6b7280]">per year</div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-xl border border-green-100 bg-green-50">
+                <div>
+                  <span class="hc-category-badge hc-category-it">IT Operations</span>
+                  <div class="text-[11px] text-[#6b7280] mt-1">Admin hours freed by Recast</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-[#059669]">${hcFmt(r.itSavings)}</div>
+                  <div class="text-[10px] text-[#6b7280]">per year</div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-xl border border-orange-100 bg-orange-50">
+                <div>
+                  <span class="hc-category-badge hc-category-clinical">Clinical Productivity</span>
+                  <div class="text-[11px] text-[#6b7280] mt-1">Physician + nursing time recovered</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-bold text-[#c2410c]">${hcFmt(r.clinicalProductivity)}</div>
+                  <div class="text-[10px] text-[#6b7280]">per year</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-widest text-[#6b7280] mb-3">${h.years}-Year ROI Growth</div>
+              <div class="hc-chart-wrap" style="height:160px">
+                <canvas id="hc-bar-chart"></canvas>
+              </div>
+            </div>
+
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-widest text-[#6b7280] mb-3">Annual Value Breakdown</div>
+              <div class="hc-chart-wrap" style="height:160px">
+                <canvas id="hc-pie-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Key formulas -->
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 space-y-2">
+              <div class="text-[11px] font-semibold uppercase tracking-widest text-[#6b7280]">Key Formulas</div>
+              <div class="text-[12px] text-[#4A5568] leading-relaxed">
+                <div>📋 <strong>Physician:</strong> ${h.minutesLostDaily} min/day × ${h.workingDays} days ÷ 60 = <strong>${r.hrsSavedPerPhysician.toFixed(1)} hrs/yr</strong> × $${h.physicianHourlyValue}/hr × ${h.physicians} physicians</div>
+                <div class="mt-1">🔧 <strong>IT Ops:</strong> ${h.adminCount} admins × ${r.hrsSavedPerWk.toFixed(1)} hrs saved/wk × 52 × $${Math.round(r.hourlyAdmin)}/hr</div>
+                <div class="mt-1">🏗️ <strong>Infra:</strong> $${hcFmt(r.renewalCitrixAnnual)}/yr Citrix renewal → $${hcFmt(r.newRunRate)}/yr AVD run rate</div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }
+
+      // ── Running totals panel (right side, all steps) ──
+      function renderHCRunningTotals(r, step) {
+        const h = STATE.hcInputs;
+        const showInfra = step >= 2;
+        const showIT    = step >= 3;
+        const showClin  = step >= 4;
+        const total     = (showInfra ? r.infraSavings : 0) + (showIT ? r.itSavings : 0) + (showClin ? r.clinicalProductivity : 0);
+
+        if (step === 1) {
+          return `
+            <div class="flex flex-col items-center justify-center h-full gap-4 py-8 text-center">
+              <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 grid place-items-center">
+                <i data-lucide="building-2" class="w-7 h-7 text-[#2563eb]"></i>
+              </div>
+              <div>
+                <p class="text-base font-semibold text-[#0A1C60]">Your Organization Profile</p>
+                <p class="text-sm text-[#6b7280] mt-1 max-w-[240px]">Complete the next steps to see your full ROI across all three value categories.</p>
+              </div>
+              <div class="w-full mt-2 space-y-2 text-left">
+                ${hcStatRow('Physicians', (+h.physicians).toLocaleString(), '#2563eb')}
+                ${hcStatRow('Clinical Staff', (+h.nurses).toLocaleString(), '#2563eb')}
+                ${hcStatRow('Citrix Seats', (+h.citrixSeats).toLocaleString(), '#2563eb')}
+                ${hcStatRow('Endpoints', (+h.endpoints).toLocaleString(), '#2563eb')}
+              </div>
+              <div class="w-full mt-3 p-3 rounded-xl bg-orange-50 border border-orange-100 text-left">
+                <div class="text-[11px] font-semibold text-[#c2410c] uppercase tracking-wide mb-1">Heads up</div>
+                <p class="text-[12px] text-[#7c2d12]">With ${h.physicians} physicians at $${h.physicianHourlyValue}/hr, just 5 min/day saved = <strong>${hcFmt(5 * 220 / 60 * h.physicianHourlyValue * h.physicians)} annually</strong>.</p>
+              </div>
+            </div>
+          `;
+        }
 
         return `
           <div class="hc-results-bar"></div>
+          <div class="text-[11px] font-semibold uppercase tracking-widest text-[#6b7280] mb-3">Running ROI Total</div>
 
-          <div class="hc-section-title">
-            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-            ROI Analysis · Results
+          <!-- Big total -->
+          <div class="text-center mb-4">
+            <div class="text-[10px] uppercase tracking-widest text-[#9ca3af] mb-1">Estimated Annual Value</div>
+            <div class="hc-big-total text-[#0A1C60]">${hcFmt(total)}</div>
+            <div class="text-[11px] text-[#6b7280] mt-1">${h.years}-yr gross: ${hcFmt(total * h.years)} · net: ${hcFmt(total * h.years - h.migrationCost)}</div>
           </div>
 
-          <!-- Key metrics -->
-          <div class="grid grid-cols-2 gap-3 mb-5">
-            <div class="hc-metric highlight col-span-2">
-              <span class="hc-metric-label">${years}-Year Net Benefit</span>
-              <span class="hc-metric-value">${hcFmt(r.netBenefit)}</span>
-              <span class="hc-metric-sub">After one-time migration costs</span>
+          <!-- Category rows -->
+          <div class="space-y-1 mb-4">
+            <div class="hc-running-row">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full ${showInfra ? 'bg-[#2563eb]' : 'bg-[#e5e7eb]'}"></div>
+                <span class="text-[12px] text-[#4A5568]">Infrastructure Savings</span>
+              </div>
+              <span class="text-[13px] font-semibold ${showInfra ? 'text-[#1d4ed8]' : 'text-[#9ca3af]'}">${showInfra ? hcFmt(r.infraSavings) : '—'}</span>
             </div>
-            <div class="hc-metric ${avoidedPositive ? 'positive' : 'negative'}">
-              <span class="hc-metric-label">Annual Avoided Cost</span>
-              <span class="hc-metric-value">${hcFmt(r.avoidedCost)}</span>
-              <span class="hc-metric-sub">vs. full Citrix renewal</span>
+            <div class="hc-running-row">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full ${showIT ? 'bg-[#059669]' : 'bg-[#e5e7eb]'}"></div>
+                <span class="text-[12px] text-[#4A5568]">IT Operations</span>
+              </div>
+              <span class="text-[13px] font-semibold ${showIT ? 'text-[#059669]' : 'text-[#9ca3af]'}">${showIT ? hcFmt(r.itSavings) : '—'}</span>
             </div>
-            <div class="hc-metric">
-              <span class="hc-metric-label">New Annual Run Rate</span>
-              <span class="hc-metric-value">${hcFmt(r.newRunRate)}</span>
-              <span class="hc-metric-sub">Steady-state after migration</span>
-            </div>
-            <div class="hc-metric negative">
-              <span class="hc-metric-label">Renewal Citrix Cost</span>
-              <span class="hc-metric-value">${hcFmt(r.renewalCitrixAnnual)}</span>
-              <span class="hc-metric-sub">If no migration occurs</span>
-            </div>
-            <div class="hc-metric">
-              <span class="hc-metric-label">Users Migrated to AVD</span>
-              <span class="hc-metric-value">${r.usersMigrated.toLocaleString()}</span>
-              <span class="hc-metric-sub">Off Citrix, onto AVD</span>
+            <div class="hc-running-row">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full ${showClin ? 'bg-[#c2410c]' : 'bg-[#e5e7eb]'}"></div>
+                <span class="text-[12px] text-[#4A5568]">Clinical Productivity</span>
+              </div>
+              <span class="text-[13px] font-semibold ${showClin ? 'text-[#c2410c]' : 'text-[#9ca3af]'}">${showClin ? hcFmt(r.clinicalProductivity) : '—'}</span>
             </div>
           </div>
 
-          <!-- Breakdown table -->
-          <div class="rounded-xl border border-slate-200 overflow-hidden">
-            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold uppercase tracking-widest text-[#6b7280]">Full Cost Breakdown</div>
-            <table class="hc-table">
-              <tbody>
-                <tr class="hc-section-row"><td colspan="2">Current State</td></tr>
-                <tr><td>Current Citrix Annual Cost</td><td>${hcFmtFull(r.currentCitrixAnnual)}</td></tr>
-                <tr><td>Renewal Citrix Annual Cost (if no change)</td><td style="color:#dc2626">${hcFmtFull(r.renewalCitrixAnnual)}</td></tr>
+          ${showClin ? `
+            <div class="hc-insight-pill mt-2">
+              <i data-lucide="trending-up" class="w-4 h-4 flex-shrink-0 mt-0.5" style="color:#ea580c"></i>
+              <span>Clinical productivity (<strong>${hcFmt(r.clinicalProductivity)}</strong>) is <strong>${r.infraSavings > 0 ? Math.round(r.clinicalProductivity / r.infraSavings * 10)/10 + '×' : '—'}</strong> larger than infrastructure savings alone.</span>
+            </div>
+          ` : ''}
 
-                <tr class="hc-section-row"><td colspan="2">Post-Migration Annual Costs</td></tr>
-                <tr><td>Retained Citrix Seats</td><td>${hcFmtFull(r.postMinCitrixAnnual)}</td></tr>
-                <tr><td>AVD (Azure Compute)</td><td>${hcFmtFull(r.avdAnnual)}</td></tr>
-                <tr><td>Nerdio Management</td><td>${hcFmtFull(r.nerdioAnnual)}</td></tr>
-                <tr><td>Recast AW</td><td>${hcFmtFull(r.recastAnnual)}</td></tr>
-                <tr class="hc-total-row"><td>New Annual Run Rate</td><td>${hcFmtFull(r.newRunRate)}</td></tr>
+          ${showInfra ? `
+            <div class="mt-4 space-y-2">
+              <div class="text-[10px] uppercase tracking-widest text-[#9ca3af]">Infrastructure Detail</div>
+              ${hcStatRow('Current Citrix Annual', hcFmt(r.currentCitrixAnnual), '#6b7280')}
+              ${hcStatRow('Renewal Cost (no change)', hcFmt(r.renewalCitrixAnnual), '#dc2626')}
+              ${hcStatRow('New AVD Run Rate', hcFmt(r.newRunRate), '#4A5568')}
+              ${hcStatRow('Annual Savings', hcFmt(r.infraSavings), r.infraSavings >= 0 ? '#059669' : '#dc2626')}
+            </div>
+          ` : ''}
 
-                <tr class="hc-section-row"><td colspan="2">ROI Summary</td></tr>
-                <tr class="hc-saving-row"><td>Annual Avoided Cost vs. Renewal</td><td style="color:${avoidedPositive?'#059669':'#dc2626'}">${hcFmtFull(r.avoidedCost)}</td></tr>
-                <tr><td>One-Time Migration / Services</td><td>${hcFmtFull(STATE.hcInputs.migrationCost)}</td></tr>
-                <tr><td>${years}-Year Gross Benefit</td><td>${hcFmtFull(r.grossBenefit)}</td></tr>
-                <tr class="hc-total-row"><td>${years}-Year Net Benefit</td><td style="color:${netPositive?'#1d4ed8':'#dc2626'}">${hcFmtFull(r.netBenefit)}</td></tr>
-              </tbody>
-            </table>
+          ${showIT ? `
+            <div class="mt-3 space-y-2">
+              <div class="text-[10px] uppercase tracking-widest text-[#9ca3af]">IT Ops Detail</div>
+              ${hcStatRow('Hours Saved / Week', r.hrsSavedPerWk.toFixed(1) + ' hrs', '#6b7280')}
+              ${hcStatRow('Annual Savings', hcFmt(r.itSavings), '#059669')}
+            </div>
+          ` : ''}
+
+          ${showClin ? `
+            <div class="mt-3 space-y-2">
+              <div class="text-[10px] uppercase tracking-widest text-[#9ca3af]">Clinical Detail</div>
+              ${hcStatRow('Hrs saved / physician / yr', r.hrsSavedPerPhysician.toFixed(1) + ' hrs', '#6b7280')}
+              ${hcStatRow('Physician value', hcFmt(r.physicianProductivity), '#c2410c')}
+              ${hcStatRow('Nursing staff value', hcFmt(r.nurseProductivity), '#c2410c')}
+            </div>
+          ` : ''}
+
+          ${step === 5 ? '' : `
+            <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-[#9ca3af] text-center">
+              ${step < 5 ? `Continue through Step 5 to unlock the full results dashboard →` : ''}
+            </div>
+          `}
+        `;
+      }
+
+      function hcStatRow(label, value, color) {
+        return `
+          <div class="flex items-center justify-between py-1">
+            <span class="text-[12px] text-[#6b7280]">${label}</span>
+            <span class="text-[12px] font-semibold" style="color:${color}">${value}</span>
           </div>
         `;
       }
+
+      // ── Reusable field helpers ──
+      function hcField(label, key, value, prefix, suffix, hint) {
+        return `
+          <div class="hc-field">
+            <label class="hc-label">${label}</label>
+            <div class="hc-input-wrap">
+              ${prefix ? `<span class="hc-prefix">${prefix}</span>` : ''}
+              <input type="number" class="hc-input${prefix ? ' has-prefix' : ''}${suffix ? ' has-suffix' : ''}"
+                value="${value}" min="0" data-hc="${key}">
+              ${suffix ? `<span class="hc-suffix">${suffix}</span>` : ''}
+            </div>
+            ${hint ? `<span class="hc-hint">${hint}</span>` : ''}
+          </div>
+        `;
+      }
+
+      function hcFieldSuffix(label, key, value, prefix, suffix, min, max) {
+        return `
+          <div class="hc-field">
+            <label class="hc-label">${label}</label>
+            <div class="hc-input-wrap">
+              ${prefix ? `<span class="hc-prefix">${prefix}</span>` : ''}
+              <input type="number" class="hc-input${prefix ? ' has-prefix' : ''}${suffix ? ' has-suffix' : ''}"
+                value="${value}" min="${min}" max="${max}" data-hc="${key}">
+              ${suffix ? `<span class="hc-suffix">${suffix}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      function hcSlider(label, key, value, min, max, step, unit, hint) {
+        const id = 'hc-sl-' + key;
+        const dspId = 'hc-dsp-' + key;
+        const inpId = 'hc-inp-' + key;
+        return `
+          <div class="hc-field">
+            <label class="hc-label">${label}</label>
+            <div class="flex items-center gap-3 mb-1">
+              <input type="range" class="hc-range" id="${id}"
+                min="${min}" max="${max}" step="${step}" value="${value}"
+                oninput="document.getElementById('${inpId}').value=this.value;STATE.hcInputs['${key}']=parseFloat(this.value);document.getElementById('${dspId}').textContent=this.value+'${unit}';renderHCResults();">
+              <span class="hc-range-value" id="${dspId}">${value}${unit}</span>
+            </div>
+            <div class="hc-input-wrap">
+              <input type="number" class="hc-input has-suffix" id="${inpId}"
+                value="${value}" min="${min}" max="${max}" step="${step}" data-hc="${key}">
+              <span class="hc-suffix">${unit}</span>
+            </div>
+            ${hint ? `<span class="hc-hint">${hint}</span>` : ''}
+          </div>
+        `;
+      }
+
+      function renderHCResultsEmpty() {
+        return `<div class="flex flex-col items-center justify-center h-full gap-4 py-12 text-center">
+          <i data-lucide="calculator" class="w-8 h-8 text-[#2563eb]"></i>
+          <p class="text-sm text-[#6b7280]">Adjust inputs to update results</p>
+        </div>`;
+      }
+
+      function renderHCResultsHTML(r) { return ''; } // legacy stub
 
       function renderHCResults() {
         const panel = document.getElementById('hc-results-panel');
         if (!panel) return;
         STATE.hcResult = calcHealthcare();
-        panel.innerHTML = STATE.hcResult ? renderHCResultsHTML(STATE.hcResult) : renderHCResultsEmpty();
+        panel.innerHTML = renderHCRunningTotals(STATE.hcResult, STATE.hcStep);
         if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
+        if (STATE.hcStep === 5) { setTimeout(renderHCCharts, 50); }
+      }
+
+      function renderHCCharts() {
+        const r = STATE.hcResult;
+        if (!r) return;
+        const h = STATE.hcInputs;
+
+        // Destroy existing
+        Object.values(STATE.hcChartInstances).forEach(c => { try { c.destroy(); } catch {} });
+        STATE.hcChartInstances = {};
+
+        // Bar chart — cumulative ROI by year
+        const barCtx = document.getElementById('hc-bar-chart');
+        if (barCtx) {
+          const labels = Array.from({length: +h.years}, (_, i) => `Year ${i+1}`);
+          const data   = labels.map((_, i) => Math.round(r.totalAnnualValue * (i+1) - r.migrationCost));
+          STATE.hcChartInstances.bar = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Cumulative Net ROI',
+                data,
+                backgroundColor: data.map(v => v >= 0 ? 'rgba(37,99,235,0.75)' : 'rgba(220,38,38,0.65)'),
+                borderRadius: 6,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ' ' + hcFmt(ctx.raw) } } },
+              scales: {
+                y: { ticks: { callback: v => hcFmt(v), font: { size: 10 } }, grid: { color: '#f3f4f6' } },
+                x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        // Pie chart — category breakdown
+        const pieCtx = document.getElementById('hc-pie-chart');
+        if (pieCtx && r.totalAnnualValue > 0) {
+          const vals = [Math.max(0,r.infraSavings), Math.max(0,r.itSavings), Math.max(0,r.clinicalProductivity)];
+          STATE.hcChartInstances.pie = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Infrastructure', 'IT Operations', 'Clinical Productivity'],
+              datasets: [{
+                data: vals,
+                backgroundColor: ['#2563eb', '#10b981', '#f97316'],
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              cutout: '62%',
+              plugins: {
+                legend: { position: 'right', labels: { font: { size: 11 }, boxWidth: 12, padding: 12 } },
+                tooltip: { callbacks: { label: ctx => ' ' + hcFmt(ctx.raw) + ' / yr' } }
+              }
+            }
+          });
+        }
       }
 
       function renderProblems(){
@@ -2451,6 +2830,14 @@
           }
 
           if (action === 'reset-sliders') { resetSliders(); return; }
+
+          if (action === 'hc-step') {
+            STATE.hcStep = parseInt(act.getAttribute('data-to'), 10) || 1;
+            STATE.hcResult = calcHealthcare();
+            render();
+            if (STATE.hcStep === 5) { setTimeout(renderHCCharts, 80); }
+            return;
+          }
         });
 
         root.addEventListener('input', (e) => {
@@ -2472,19 +2859,6 @@
             const val = parseFloat(e.target.value);
             if (isFinite(val)) {
               STATE.hcInputs[hcAttr] = val;
-              // sync slider display for multiplier and years
-              if (hcAttr === 'renewalMultiplier') {
-                const s = document.getElementById('hc-renewalSlider');
-                const d = document.getElementById('hc-renewalDisplay');
-                if (s) s.value = val;
-                if (d) d.textContent = val.toFixed(1) + '×';
-              }
-              if (hcAttr === 'years') {
-                const s = document.getElementById('hc-yearsSlider');
-                const d = document.getElementById('hc-yearsDisplay');
-                if (s) s.value = val;
-                if (d) d.textContent = val + ' yr';
-              }
               renderHCResults();
             }
             return;
