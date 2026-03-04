@@ -1,2178 +1,821 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Recast — Compact Click-Through (Realistic Catalog)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="dark light">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://unpkg.com">
-    <script src="https://unpkg.com/lucide@latest"></script>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthcare Workspace ROI Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-      :root {
-        --bg-main: #f9fafb;
-        --text-primary: #111827;
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --radius: 1rem;
-        --border-subtle: #e5e7eb;
-        --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      }
-      html, body {
-        background: var(--bg-main);
-        color: var(--text-primary);
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      }
-      .focus-ring:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-      .section-card { border-radius: var(--radius); background: #ffffff; box-shadow: var(--shadow-card); transition: box-shadow 300ms ease, transform 300ms ease; }
-      .section-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
-      .sub-card { border-radius: calc(var(--radius) / 1.5); border: 1px solid var(--border-subtle); background: #f9fafb; transition: box-shadow 300ms ease; }
-      .tile { width: 0.45rem; height: 0.45rem; border-radius: 2px; background: #e5e7eb; opacity: 0.9; }
-      .run .tile { animation: tilePulse 1s ease-in-out var(--d, 0s) 1 forwards; }
-      @keyframes tilePulse { 0% { transform: scale(0.7); background: #e5e7eb; opacity: 0.4; } 60% { transform: scale(1); background: var(--primary); opacity: 1; } 100% { background: #e5e7eb; opacity: 0.9; } }
-      .flow-bar { height: 0.22rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
-      .run .flow-bar { animation: barGrow 0.9s ease forwards var(--d, 0s); }
-      @keyframes barGrow { to { transform: scaleX(1); } }
-      .bolt-line { width: 0.22rem; border-radius: 2px; transform-origin: top center; transform: scaleY(0); }
-      .run .bolt-line { animation: boltDrop 0.9s ease forwards var(--d, 0s); }
-      @keyframes boltDrop { to { transform: scaleY(1); } }
-      .logo-ring { width: 2.1rem; height: 2.1rem; border-radius: 9999px; display: grid; place-items: center; background: #ffffff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); transition: all 0.3s ease; }
-      .logo-ring:hover { box-shadow: 0 0 8px rgba(37,99,235,0.3); transform: scale(1.05); }
-      .logo-wrap { display: flex; align-items: center; gap: 0.4rem; position: relative; transition: all 300ms ease; }
-      .logo-name { font-size: 0.7rem; color: #6b7280; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
-      .show-labels .logo-wrap { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
-      .show-labels .logo-name { opacity: 1; transform: translateX(0); white-space: normal; text-align: left; }
-      .show-labels .logo-wrap .logo-ring { width: 1.8rem; height: 1.8rem; }
-      .run .logo-ring { animation: appLiftPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
-      @keyframes appLiftPulse { 0% { transform: translateY(0) scale(1); filter: saturate(0.4); opacity: 0.65; } 30% { transform: translateY(-4px) scale(1.05); } 60% { transform: translateY(-2px) scale(1.02); filter: saturate(1); opacity: 1; } 100% { transform: translateY(0) scale(1); } }
-      .user-beam { height: 0.38rem; border-radius: 2px; transform-origin: left center; transform: scaleX(0); }
-      .run .user-beam { animation: barGrow 1s ease forwards var(--d, 0s); }
-      .badge { width: 1.15rem; height: 1.15rem; border-radius: 9999px; opacity: 0; transform: translateY(-6px) scale(0.9); }
-      .run .badge { animation: badgeDrop 0.8s ease-out var(--d, 0s) forwards; }
-      @keyframes badgeDrop { to { opacity: 1; transform: translateY(0) scale(1); } }
-      .cat-row { display: grid; grid-template-columns: 15ch 1fr; gap: 0.5rem; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 0.5rem; transition: all 300ms ease; }
-      .cat-row:first-child { border-top: none; padding-top: 0; }
-      .cat-title { font-size: 0.7rem; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.5rem; }
-      .re-primary { background: var(--primary) !important; color: #fff !important; border: 0; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: background 0.2s ease, transform 0.2s ease; }
-      .re-primary:hover { background: var(--primary-hover) !important; transform: scale(1.02); }
-      .re-primary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-      .re-secondary { background: transparent !important; color: var(--text-primary) !important; border: 2px solid var(--text-primary) !important; border-radius: 9999px; padding: 0.5rem 1.5rem; transition: all 0.2s ease, transform 0.2s ease; }
-      .re-secondary:hover { color: var(--primary) !important; border-color: var(--primary) !important; transform: scale(1.02); }
-      @media (prefers-reduced-motion: reduce) {
-        .accordion-content { transition: none !important; }
-      }
-      .modal-overlay { transition: opacity 300ms ease; }
-      .modal-content { transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease; }
-      .modal-open .modal-content { transform: scale(1); opacity: 1; }
-      .modal-closed .modal-content { transform: scale(0.95); opacity: 0; }
-      .check-appear{opacity:0;animation:fadeInOut 1.5s ease var(--d,0s) forwards}
-      @keyframes fadeInOut{0%{opacity:0}30%{opacity:1}70%{opacity:1}100%{opacity:0}}
-      .flow-connect{background-image:linear-gradient(to right, transparent 50%, #e5e7eb 50%);background-size:4px 1px;background-repeat:repeat-x;height:1px;opacity:0.5}
-      .end-user-expand{transition:all 0.5s ease;transform:scale(1.05);background:#ffffff;border-color:#10b981}
-      .icon-launch{animation:iconLaunch 0.5s ease forwards}
-      @keyframes iconLaunch{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-      .tagline-fade{opacity:0;animation:fadeIn 1s ease 10s forwards}
-      @keyframes fadeIn{to{opacity:1}}
-      .overlay-tag{opacity:0;transition:opacity 0.3s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,0.9);padding:1rem;border-radius:var(--radius);box-shadow:var(--shadow-card);z-index:10}
-      .show-labels .overlay-tag{opacity:1;transition-delay:0.5s}
-      .meta-label{font-size:0.6rem;color:#6b7280;opacity:0;transform:translateY(5px);transition:all 0.3s ease;position:relative;top:auto;left:auto;z-index:5;white-space:nowrap;display:flex;flex-direction:column;gap:0.1rem;align-items:flex-start;width:100%;justify-content:flex-start}
-      .show-labels .meta-label{opacity:1;transform:translateY(0)}
-      .show-labels .cat-row{grid-template-columns:15ch 1fr;gap:1rem}
-      .show-labels #flowCard .flex-wrap{gap:1rem}
-      .show-labels .logo-wrap{width:calc(33.333% - 0.666rem);margin-bottom:0.5rem}
-      .env-wrap { display: flex; align-items: center; gap: 0.2rem; position: relative; transition: all 300ms ease; width: calc(16.666% - 0.5rem); flex-direction: column; }
-      .env-name { font-size: 0.7rem; color: #6b7280; opacity: 1; transform: translateY(0); transition: all 0.3s ease; white-space: nowrap; text-align: center; }
-      .env-ring { width: 1.8rem; height: 1.8rem; }
-      .run .env-ring { animation: envPulse 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s) 1 forwards; }
-      @keyframes envPulse { 0% { transform: scale(1); filter: saturate(0.4); opacity: 0.65; box-shadow: 0 0 0 rgba(37,99,235,0); } 30% { transform: scale(1.05); box-shadow: 0 0 12px rgba(37,99,235,0.5); } 60% { transform: scale(1.02); filter: saturate(1); opacity: 1; box-shadow: 0 0 8px rgba(37,99,235,0.3); } 100% { transform: scale(1); box-shadow: 0 0 0 rgba(37,99,235,0); } }
-      .arrow-line { height: 1.5rem; width: 0.15rem; background: linear-gradient(to bottom, #e5e7eb, #2563eb); transform-origin: top center; transform: scaleY(0); margin: 0 auto; position: relative; }
-      .arrow-line::after { content: ''; position: absolute; bottom: -0.3rem; left: -0.25rem; border-left: 0.4rem solid transparent; border-right: 0.4rem solid transparent; border-top: 0.6rem solid #1d4ed8; opacity: 0; transition: opacity 0.3s; }
-      .run .arrow-line { animation: arrowDrop 0.8s ease forwards var(--d, 0s); }
-      .run .arrow-line::after { animation: arrowTip 0.8s ease forwards var(--d, 0s); }
-      @keyframes arrowDrop { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
-      @keyframes arrowTip { 0% { opacity: 0; } 80% { opacity: 0; } 100% { opacity: 1; } }
-      .hub-card { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
-      .run .hub-card { animation: hubAppear 0.8s ease forwards var(--d, 2.5s); }
-      @keyframes hubAppear { to { opacity: 1; transform: translateY(0); } }
-      .metrics-banner { opacity: 0; transform: translateY(10px); transition: all 0.5s ease; text-align: center; font-size: 0.9rem; font-weight: 500; color: #111827; }
-      .run .metrics-banner { animation: metricsAppear 0.8s ease forwards var(--d, 3.5s); }
-      @keyframes metricsAppear { to { opacity: 1; transform: translateY(0); } }
-      .interactive-node { transition: opacity 0.3s, transform 0.3s; }
-      .interactive-node:hover { opacity: 0.9; transform: scale(1.05); }
+  :root {
+    --navy: #0a0f1e;
+    --navy-mid: #111827;
+    --navy-light: #1a2540;
+    --panel: #141d35;
+    --panel-border: #1f2e50;
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --gold-dim: rgba(212,168,67,0.12);
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.10);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --text: #e8eaf0;
+    --text-dim: #7a8aaa;
+    --text-muted: #4a5568;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
 
-      /* New Chart Styles */
-      .chart-container { width: 100%; height: auto; aspect-ratio: 800 / 400; }
-      #capacity-gap-chart { width: 100%; height: 100%; }
-      .chart-text { font-size: 16px; font-weight: 500; fill: #0f172a; letter-spacing: 0.02em; }
-      .chart-axis { stroke: #e5e7eb; stroke-width: 1.5; }
-      .chart-axis-label { font-size: 18px; font-weight: bold; fill: #0A1C60; }
-      .chart-year-label { font-size: 14px; fill: #111827; }
-      @media (max-width: 640px) { .chart-year-label { font-size: 12px; transform: rotate(-45deg) translate(-10px, 10px); } }
-      .chart-annotation { font-size: 20px; font-weight: 500; fill: #6b7280; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-      .demand-line { stroke-width: 3; filter: drop-shadow(0 0 4px rgba(239,68,68,0.3)); }
-      .capacity-line { stroke-width: 3; }
-      .gap-fill { }
-      .marker-group:hover { transform: scale(1.1); transition: transform 0.2s ease; }
-      .marker-group:hover circle { animation: pulse 1.5s infinite; }
-      @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-      .chart-element { opacity: 0; animation: fadeIn 0.5s forwards; }
-      @keyframes fadeIn { to { opacity: 1; } }
-      .axis-element { animation-delay: 0s; }
-      .line-element { animation-delay: 0.3s; }
-      .gap-element { animation-delay: 0.6s; }
-      .marker-element { animation-delay: 0.9s; }
-      .label-element { animation-delay: 1.2s; }
+  html { scroll-behavior: smooth; }
 
-      /* =========================
-         2026 SaaS polish overrides
-         ========================= */
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-      :root{
-        --bg-main:
-          radial-gradient(1200px 700px at 18% 0%, rgba(37,99,235,0.10), transparent 58%),
-          radial-gradient(900px 560px at 92% 28%, rgba(16,185,129,0.07), transparent 60%),
-          linear-gradient(180deg, #fbfdff 0%, #f7f8fb 55%, #f9fafb 100%);
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,168,67,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,168,67,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        --shadow-card:
-          0 2px 10px rgba(15, 23, 42, 0.06),
-          0 1px 3px rgba(15, 23, 42, 0.04);
-        --shadow-hover:
-          0 14px 36px rgba(15, 23, 42, 0.10),
-          0 4px 12px rgba(15, 23, 42, 0.06);
-        --shadow-elevated:
-          0 28px 70px rgba(15, 23, 42, 0.18),
-          0 10px 24px rgba(15, 23, 42, 0.10);
+  /* Ambient glows */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(212,168,67,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        --re-green: #10b981;
-      }
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
 
-      html, body { background: var(--bg-main); background-attachment: fixed; }
+  /* ── HEADER ── */
+  header {
+    padding: 52px 0 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
 
-      .section-card{
-        background: rgba(255,255,255,0.88);
-        border: 1px solid rgba(226,232,240,0.70);
-      }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(212,168,67,0.25);
+    color: var(--gold);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
 
-      .glass{
-        background: rgba(255,255,255,0.72) !important;
-        border: 1px solid rgba(255,255,255,0.55);
-        box-shadow: var(--shadow-elevated) !important;
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-      }
-      .glass-soft{
-        background: rgba(255,255,255,0.62) !important;
-        border: 1px solid rgba(255,255,255,0.50);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-      }
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+  }
 
-      .modal-overlay{ background: rgba(2,6,23,0.55) !important; }
-      .modal-content{ box-shadow: var(--shadow-elevated) !important; }
+  @keyframes pulse {
+    0%,100% { opacity:1; } 50% { opacity:0.3; }
+  }
 
-      .demand-line, .capacity-line{ stroke-linecap: round; stroke-linejoin: round; }
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
 
-      .marker-group{
-        transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
-      }
-      .marker-group:hover{
-        filter: drop-shadow(0 10px 18px rgba(37,99,235,0.22));
-        transform: translateY(-1px) scale(1.02);
-      }
+  h1 span { color: var(--gold); }
 
-      @media (prefers-reduced-motion: reduce){
-        .marker-group, .section-card, .logo-ring { transition: none !important; animation: none !important; }
-      }
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
 
-      /* === Impact tab mini icon buttons (Added 2026-02-11) === */
-      .icon-btn{
-        width: 40px;
-        height: 40px;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(226,232,240,0.9);
-        background: rgba(255,255,255,0.75);
-        transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-      }
-      .icon-btn:hover{
-        transform: translateY(-1px);
-        box-shadow: 0 10px 18px rgba(15,23,42,0.08);
-        background: rgba(255,255,255,0.9);
-      }
-      .icon-btn:active{ transform: translateY(0); }
-      .icon-btn:focus-visible{ outline: 2px solid var(--primary); outline-offset: 2px; }
+  /* ── LAYOUT ── */
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
 
-      .impact-pulse{
-        box-shadow: 0 0 0 0 rgba(37,99,235,0.35);
-        animation: impactPulse 900ms ease-out 1;
-      }
-      @keyframes impactPulse{
-        0%   { box-shadow: 0 0 0 0 rgba(37,99,235,0.35); }
-        100% { box-shadow: 0 0 0 14px rgba(37,99,235,0); }
-      }
-    </style>
-  </head>
+  @media (max-width: 720px) {
+    .calc-grid { grid-template-columns: 1fr; }
+  }
 
-  <body class="min-h-screen antialiased">
-    <div id="app" class="min-h-screen"></div>
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: border-color 0.3s;
+  }
 
-    <script>
-      const STATE = {
-        activeTab: 'problems',
-        impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 },
-        defaults: { impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 } },
-        ctx: { device: 'Windows', network: 'Corporate', compliant: true },
-        packHrs: 8, configHrs: 2, currentHrs: 24,
-        roiInputs: { users: 5000, ticketsPerUserPerMonth: 0.035, avgHandleMins: 18 },
-        copied: false,
-        showLabels: false,
-        showSolutionCards: true,
-        openWhy: null,
-        openWhyModal: null,
-        openCards: { core: false, onboarding: false, trust: false },
-        visitedCards: [],
-        openBuckets: { one: false, zero: false, per: false },
-        modalOpen: false,
-        editTab: 'change',
-        editBuffers: { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } },
-        insightContent: null,
-        mode: 'current_state',
-        activePopover: null,
-        years: [2025, 2026, 2027, 2028],
-        drivers: [
-          { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
-          { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
-          { id: "too_many_tools", label: " Multiple Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
-          { id: "manual_rework", label: "Re-Work Multiplier", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
-          { id: "security_compliance", label: "Security", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
-        ],
-        tippingPointYear: 2027.5,
-        tippingPoint: {
-          title: "Inflection Point",
-          bullets: ["Changes take longer", "Risk increases", "Teams burn out", "Strategic initiatives stall"],
-          closing: "This isn’t failure — it’s the limit of a model that no longer scales."
-        },
-        chartConfig: {
-          yAxis: "Expectations & Requests",
-          xAxis: "Time",
-          center: "Resources & Appreciation",
-          footer: "",
-          tipping: ""
-        },
-        currentDemandExponent: 1.6,
-        targetDemandExponent: 1.6,
-        currentCapacitySlope: 0,
-        targetCapacitySlope: 0,
-        showTippingPoint: false,
-        currentState: {
-          change: {
-            intro: "Forrester, Gartner, and McKinsey all highlight the application layer is the #1 drag on IT delivery and modernization.",
-            bullets: [
-              "TODAY Apps are tied to devices, not people = The same app has to be built and managed differently for Intune, SCCM, VDI, macOS, etc.",
-              "The same app gets rebuilt multiple times = Each platform needs its own version, packaging, testing, and fixes.",
-              "Change becomes risky = New platforms, migrations, or updates often break apps, so teams delay changes",
-              "Inconsistent User Experience = What works on one device doesn’t always work on another. = Higher Support Tickets",
-              "Tribal Knowledge is a huge risk = Tribal knowledge (workarounds) is heavliy relying on individuals"
-            ],
-            analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
-          },
+  .card:hover { border-color: rgba(212,168,67,0.2); }
 
-          now: {
-            intro: "The gap between what IT is ASKED to deliver and what it CAN sustain is widening fast.",
-            bullets: [
-              'Change is accelerating, not slowing down. More app updates, more security pressure, more platforms — with the same teams.',
-              'Manual app work compounds over time. Every custom or internal app adds more versions, more dependencies, and more risk with each change',
-              'Teams that should be driving innovation are stuck keeping apps alive.',
-            ],
-            analyst: "Organizations that succeed with AI, cloud, and new platforms over the next few years will be the ones that stabilize application delivery first. Everyone else hits a capacity wall where progress slows regardless of strategy"
-          },
-          recast: {
-            intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
-            bullets: [
-              "Applications Are Tied to the User = Apps follow the user across platforms. Assigned by user identity, not device or location.",
-              "Define Once, Deliver Everywhere = Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
-              "Support is Simplfied = IT uses a single support model across all delivery methods.",
-              " New platforms can be integrated without rework = Backend updates don’t affect user-facing experience.",
-              "Consistent User Experience = Users see the same apps and interfaces every time. Reduces user confusion and support demand.",
-              "Central management of application delivery = Ensures design consistency across environments. Reduces fragmentation and configuration drift."
-            ],
-            analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change"
-          }
-        },
-        defaultsCurrentState() {
-          return JSON.parse(JSON.stringify({
-            change: {
-              intro: "Forrester, Gartner, and McKinsey all highlight the application layer is the #1 drag on IT delivery and modernization.",
-              bullets: [
-                "TODAY Apps are tied to devices, not people = The same app has to be built and managed differently for Intune, SCCM, VDI, macOS, etc.",
-                "The same app gets rebuilt multiple times = Each platform needs its own version, packaging, testing, and fixes.",
-                "Change becomes risky = New platforms, migrations, or updates often break apps, so teams delay changes",
-                "Inconsistent User Experience = What works on one device doesn’t always work on another. = Higher Support Tickets",
-                "Tribal Knowledge is a huge risk = Tribal knowledge (workarounds) is heavliy relying on individuals"
-              ],
-              analyst: "Across industries, application delivery — not infrastructure — is now the primary bottleneck to modernization. Most transformation projects slow or fail because teams lack capacity to keep apps ready while platforms change.."
-            },
+  .card-title {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-            now: {
-              intro: "The gap between what IT is ASKED to deliver and what it CAN sustain is widening fast.",
-              bullets: [
-                'Change is accelerating, not slowing down. More app updates, more security pressure, more platforms — with the same teams.',
-                'Manual app work compounds over time. Every custom or internal app adds more versions, more dependencies, and more risk with each change',
-                'Teams that should be driving innovation are stuck keeping apps alive.',
-              ],
-              analyst: "Organizations that succeed with AI, cloud, and new platforms over the next few years will be the ones that stabilize application delivery first. Everyone else hits a capacity wall where progress slows regardless of strategy"
-            },
-            recast: {
-              intro: "Application Workspace changes how apps are delivered — to the user, not the device.",
-              bullets: [
-                "Applications Are Tied to the User = Apps follow the user across platforms. Assigned by user identity, not device or location.",
-                "Define Once, Deliver Everywhere = Applications are defined a single time. Delivered consistently across platforms. No repackaging or extra configuration required.",
-                "Support is Simplfied = IT uses a single support model across all delivery methods.",
-                " New platforms can be integrated without rework = Backend updates don’t affect user-facing experience.",
-                "Consistent User Experience = Users see the same apps and interfaces every time. Reduces user confusion and support demand.",
-                "Central management of application delivery = Ensures design consistency across environments. Reduces fragmentation and configuration drift."
-              ],
-              analyst: "Leading IT organizations are shifting from device-centric management to user-centric delivery models to reduce operational friction and keep pace with constant platform change."
-            }
-          }));
-        },
-        defaultsChartConfig() {
-          return JSON.parse(JSON.stringify({
-            yAxis: "Expectations & Requests",
-            xAxis: "Time",
-            center: "Resources & Appreciation",
-            footer: "",
-            tipping: "Operational breaking point"
-          }));
-        },
-        defaultsDrivers() {
-          return JSON.parse(JSON.stringify([
-            { id: "more_apps", label: "More Applications", subtext: "Portfolio growth across Windows, macOS, VDI, web", markerYear: 2025.6, bullets: ["Every new app adds ongoing work—packaging, testing, updates, support.", "App sprawl compounds across Windows, macOS, VDI, and web delivery paths.", "Portfolio growth increases version drift and troubleshooting load."], short: "More apps = more packaging, updates, testing, support.", state: 'off' },
-            { id: "constant_updates", label: "Constant Change", subtext: "Security patches, compatibility, vendor releases", markerYear: 2026.2, bullets: ["Updates are continuous, not occasional—work never clears.", "Security patches and compatibility changes create perpetual churn.", "Release velocity outpaces admin capacity."], short: "Updates are continuous; stability requires constant change.", state: 'off' },
-            { id: "too_many_tools", label: "Multiple Environments", subtext: "Fragmented delivery across platforms", markerYear: 2026.8, bullets: ["App delivery is fragmented across tools and environments (e.g., Intune/ConfigMgr/VDI).", "Teams rebuild packaging and deployment logic per platform.", "Tool fragmentation creates handoffs, duplication, and drift."], short: "Same app, different platforms, rebuilt logic everywhere.", state: 'off' },
-            { id: "manual_rework", label: "Too Much Manual Work", subtext: "Rebuilds, exceptions, one-off fixes", markerYear: 2027.3, bullets: ["Manual rebuilds per version create packaging backlog and rework.", "Reactive fixes become permanent exceptions (technical debt).", "Firefighting displaces planned work and modernization."], short: "Rebuilds, retesting, one-off fixes consume senior time.", state: 'off' },
-            { id: "security_compliance", label: "Security and Compliance Pressure", subtext: "Higher urgency, higher risk", markerYear: 2027.7, bullets: ["Security/compliance raises the urgency and risk of app change.", "Inconsistent versions and installs increase exposure and escalations.", "Patching timelines stretch when workflows are manual and fragmented."], short: "More urgency, less tolerance; complexity amplifies risk.", state: 'off' }
-          ]));
-        },
-        progress: { apps: 0, time: 0, tickets: 0 },
-        envProgress: { appsProcessed: 0 },
-        calcInputs: { envs: 3, changes: 10, time: 4 },
-        calcResult: null,
-        qualified: false
-      };
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--panel-border);
+  }
 
-      // New state fields (reliability + chart linking + flow timer safety)
-      STATE.recastMode = false;
-      STATE.flowTimers = { intervals: [], timeouts: [] };
-      STATE.editChartBuffer = null;
-      STATE.highlightDriverId = null;
+  /* ── INPUTS ── */
+  .field-group { display: flex; flex-direction: column; gap: 16px; }
 
-      // (Added 2026-02-11) ROI footer pulse flag
-      STATE.impactPulse = false;
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
-      const TABS = [
-        { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
-        { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-        { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
-      ];
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 
-      const NEW_CARDS = [
-        {
-          id: 'core',
-          icon: 'layers',
-          title: 'How Recast Does It.',
-          bullets: [
-            'One workspace to package, deploy, update, and retire apps across Intune, SCCM, Citrix, Omnissa, and Azure.',
-            '8,000+ pre-tested enterprise apps ready to deploy instantly.',
-            'Automated patching and validation keep apps secure and compliant.',
-            'Unified dashboard for visibility and governance across all environments.',
-            'Policy-driven automation reduces manual work by over 60%.',
-            'End users get the right app instantly — no tickets, no delays.'
-          ],
-          closer: 'Configured once — Delivered everywhere.',
-          timeline: false,
-          bgHeader: 'bg-[#f9fafb]',
-          bgContent: 'bg-[#f9fafb]'
-        },
-        {
-          id: 'onboarding',
-          icon: 'clock',
-          title: 'Onboard & Up to Speed Fast.',
-          bullets: [
-            'Standard rollout in 4–6 weeks (Kickoff — Implementation — UAT — Launch — Enablement).',
-            'No new infrastructure — integrates with your existing management tools.',
-            'Guided setup with dedicated Customer Success Manager.',
-            'Typical resource: 1–2 IT engineers part-time.',
-            'Enablement includes training, certification, and success planning.'
-          ],
-          closer: 'From first call to production in weeks, not months.',
-          timeline: true,
-          bgHeader: 'bg-[#f9fafb]',
-          bgContent: 'bg-[#f9fafb]'
-        },
-        {
-          id: 'trust',
-          icon: 'shield-check',
-          title: 'Trusted by Customers',
-          bullets: [
-            '60M+ endpoints across 130+ countries.',
-            '70k+ Customers & Trusted by global organizations| Citibank, McKinsey & Company, U.S. Air Force, FEMA, Hitachi, Johns Hopkins, Costco, Government of Canada.',
-            '87 CSAT Score | Most trusted in the industry',
-            'Proven scalability from small pilots to global deployments.',
-            'Backed by enterprise-grade support and compliance alignment (SOC 2, ISO 27001).'
-          ],
-          closer: 'Trusted by organizations that can’t afford downtime.',
-          timeline: false,
-          bgHeader: 'bg-[#f9fafb]',
-          bgContent: 'bg-[#f9fafb]'
-        }
-      ];
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
 
-      const onboardingMiniTimelineEnabled = true;
+  .prefix {
+    position: absolute;
+    left: 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+  }
 
-      function cx(...a){ return a.filter(Boolean).join(' '); }
-      function round(n){ return Math.round(n*100)/100; }
-      function num(n){ return new Intl.NumberFormat().format(Math.round(n)); }
-      function routeRecommendation(ctx){
-        if(!ctx.compliant) return 'Web';
-        if(ctx.device==='Windows' && ctx.network!=='Home') return 'Local';
-        return 'VDI';
-      }
-      function cleanNum(v){ v = Number(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(v) ? v : 0; }
+  .suffix {
+    position: absolute;
+    right: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
 
-      function render(){
-        const root=document.getElementById('app');
-        root.innerHTML = `
-          <header class="relative">
-            <div class="relative mx-auto max-w-6xl px-4 pt-8 pb-6">
-              <h1 class="text-[40px] md:text-[56px] font-semibold leading-tight"><span style="color:#0070F3">Re</span><span style="color:#0A1C60">cast</span> Software</h1>
-              <p class="mt-2 max-w-2xl text-[16px] leading-[1.5] text-[#4A5568]">
-                ${STATE.activeTab==='problems'
-                  ? 'The application layer is now the #1 primary constraint in modern IT.'
-                  : 'Application Workspace helps IT keep applications running smoothly as platforms change — without creating more work'}
-              </p>
-            </div>
+  input[type="number"] {
+    width: 100%;
+    background: var(--navy-light);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    -moz-appearance: textfield;
+  }
 
-            <div class="relative mx-auto max-w-6xl px-4">
-              <div role="tablist" aria-label="Demo sections" class="flex w-full flex-wrap gap-2 rounded bg-white/60 backdrop-blur-lg p-1 ring-1 ring-slate-200">
-                ${TABS.map(t=>`
-                  <button type="button"
-                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition',
-                      STATE.activeTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}"
-                    data-action="switch-tab"
-                    data-tab="${t.id}"
-                    aria-controls="panel-${t.id}"
-                    aria-selected="${STATE.activeTab===t.id}">
-                    <i data-lucide="${t.icon}" class="w-4 h-4"></i><span>${t.label}</span>
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-          </header>
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-          <main class="mx-auto max-w-6xl px-4 pb-16">
-            ${STATE.activeTab==='roi' ? `
-            <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              ${chip('Avg. Reactive Work Reduced', String(STATE.impact.minutes)+' min/user/mo', 'emerald')}
-              ${chip('Avg. Hours Saved from Packaging', String(round(STATE.impact.pkgHours)), 'sky')}
-              ${chip('Avg. Hours Saved from Faster Patching', String(round(STATE.impact.riskHrs)), 'yellow')}
-            </div>` : ''}
+  input[type="number"]:focus {
+    border-color: var(--gold);
+    background: rgba(212,168,67,0.04);
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.08);
+  }
 
-            <section class="mt-5">${renderActivePanel()}</section>
-          </main>
+  input.has-prefix { padding-left: 30px; }
+  input.has-suffix { padding-right: 42px; }
 
-          ${renderModal()}
-          ${renderWhyModal()}
-          ${renderInsightModal()}
-        `;
+  .hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
 
-        if (window.lucide?.createIcons) { try { window.lucide.createIcons(); } catch {} }
-        attachEvents();
+  /* ── RESULTS ── */
+  .results-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
 
-        if (STATE.activeTab === 'solution') { buildFlow(); attachAccordionKeyboard(); }
-        if (STATE.activeTab === 'roi') { updateROIOutputs(); }
-        if (STATE.activeTab === 'problems') {
-          renderCapacityGapChart();
-          if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
-            requestAnimationFrame(animateCurves);
-          }
-        }
-      }
+  .results-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--teal), var(--gold));
+    background-size: 200%;
+    animation: shimmer 3s linear infinite;
+  }
 
-      function chip(label,value,tone){
-        const tones={emerald:'from-emerald-400/80 to-teal-400/80',sky:'from-sky-400/80 to-indigo-400/80',yellow:'from-yellow-300/90 to-amber-400/90'};
-        return `
-          <div class="section-card p-3">
-            <div class="text-[11px] text-[#4A5568]">${label}</div>
-            <div class="mt-1 inline-flex items-center gap-2 rounded-[2px] bg-gradient-to-r px-2 py-0.5 text-slate-900 ${tones[tone]}">
-              <i data-lucide="badge-check" class="w-4 h-4"></i><span class="text-sm font-semibold tabular-nums">${value}</span>
-            </div>
+  @keyframes shimmer {
+    0% { background-position: 0% } 100% { background-position: 200% }
+  }
+
+  .results-title {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .results-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--panel-border);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 600px) {
+    .metrics-grid { grid-template-columns: 1fr; }
+  }
+
+  .metric {
+    background: var(--navy-light);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .metric:hover { transform: translateY(-2px); }
+
+  .metric.highlight {
+    background: var(--gold-dim);
+    border-color: rgba(212,168,67,0.3);
+  }
+
+  .metric.highlight .metric-value { color: var(--gold-light); }
+
+  .metric.positive {
+    background: var(--teal-dim);
+    border-color: rgba(45,212,191,0.2);
+  }
+
+  .metric.positive .metric-value { color: var(--teal); }
+
+  .metric.negative {
+    background: var(--red-dim);
+    border-color: rgba(248,113,113,0.2);
+  }
+
+  .metric.negative .metric-value { color: var(--red); }
+
+  .metric-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .metric-value {
+    font-family: var(--mono);
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── BREAKDOWN TABLE ── */
+  .breakdown {
+    background: var(--navy-light);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .breakdown-title {
+    padding: 12px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--panel-border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .breakdown tr { border-bottom: 1px solid var(--panel-border); }
+  .breakdown tr:last-child { border-bottom: none; }
+
+  .breakdown tr:hover { background: rgba(255,255,255,0.02); }
+
+  .breakdown td {
+    padding: 11px 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .breakdown td:last-child {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .breakdown tr.section-label td {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding-top: 16px;
+    padding-bottom: 4px;
+    background: none;
+  }
+
+  .breakdown tr.total td {
+    color: var(--text);
+    font-weight: 500;
+    border-top: 1px solid var(--panel-border);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .breakdown tr.total td:last-child { color: var(--gold-light); }
+
+  .breakdown tr.saving td:last-child { color: var(--teal); }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-top: 24px;
+  }
+
+  .disclaimer strong { color: var(--text-dim); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding-top: 40px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--panel-border);
+    margin-top: 40px;
+  }
+
+  footer a { color: var(--gold); text-decoration: none; }
+
+  /* ── ANIMATED COUNTER ── */
+  .counting { transition: color 0.3s; }
+
+  /* Range slider styles */
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    background: var(--panel-border);
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(212,168,67,0.4);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+  .range-value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--gold);
+    min-width: 40px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="badge">Healthcare IT · Workspace Modernization</div>
+    <h1>Citrix to AVD <span>ROI Calculator</span></h1>
+    <p class="subtitle">Model the financial impact of migrating from Citrix to Azure Virtual Desktop — quantify avoided renewal costs, new run-rate economics, and multi-year net benefit.</p>
+  </header>
+
+  <!-- INPUT CARDS -->
+  <div class="calc-grid">
+
+    <!-- Current State -->
+    <div class="card">
+      <div class="card-title">Current State · Citrix</div>
+      <div class="field-group">
+
+        <div class="field">
+          <label>Total Workspace Users</label>
+          <div class="input-wrap">
+            <input type="number" id="totalUsers" value="5000" min="0" oninput="calc()">
           </div>
-        `;
-      }
+        </div>
 
-      function renderActivePanel(){
-        if (STATE.activeTab==='problems') return renderProblems();
-        if (STATE.activeTab==='solution') return renderSolution();
-        if (STATE.activeTab==='roi') return renderROI();
-        return '';
-      }
-
-      function renderProblems(){
-        const items=[
-          {t:'Inconsistent Apps',s:'The same app works fine on one machine but breaks or behaves differently on another, which is why tickets keep bouncing around.',i:'layers'},
-          {t:'Slow Changes',s:'Even simple updates take way longer than they should because every platform needs its own build, testing, and rollout.',i:'boxes'},
-          {t:'Delayed Patching',s:'Security patches sit in limbo while teams test compatibility and chase edge cases, leaving known gaps open longer than anyone’s comfortable with',i:'shield'},
-          {t:'Risky Upgrades',s:'Teams delay upgrades because no one’s confident which apps will break, where they’ll break, or how painful the rollback will be.',i:'layout-grid'}
-        ];
-
-        return `
-          <section id="panel-problems" class="space-y-4">
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              ${items.map(p=>`
-                <article class="section-card p-4">
-                  <div class="flex items-center gap-2"><i data-lucide="${p.i}" class="w-5 h-5 text-[#0070F3]"></i><h3 class="text-base font-semibold">${p.t}</h3></div>
-                  <p class="mt-1 text-sm text-[#4A5568]">${p.s}</p>
-                </article>
-              `).join('')}
-            </div>
-
-            <div class="section-card p-6">
-              <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-                <div class="chart-container relative">
-                  <svg id="capacity-gap-chart" viewBox="0 0 800 400"></svg>
-                </div>
-                <div class="w-full lg:w-64 bg-white/70 backdrop-blur-lg rounded-2xl shadow-md p-5 border border-slate-200">
-                  <h3 class="text-lg font-medium mb-4">Modern IT Challenges</h3>
-                  <div class="grid grid-cols-1 gap-4 items-stretch">
-                    ${calloutDropdown('change','alert-triangle','Why Change','bg-slate-50')}
-                    ${calloutDropdown('now','clock-4','Why Now','bg-slate-50', false, "")}
-                    ${calloutDropdown('recast','sparkles','Why Recast','bg-slate-50', true)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-      }
-
-      function renderCapacityGapChart(){
-        const svg = document.getElementById('capacity-gap-chart');
-        if (!svg) return;
-
-        svg.innerHTML = '';
-        svg.setAttribute('viewBox', '0 0 800 400');
-
-        const width = 700, height = 300, margin = {left: 50, bottom: 50, top: 50, right: 50};
-        const xScale = t => margin.left + t * width;
-        const yScale = v => margin.top + height - v * height;
-
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        defs.innerHTML = `
-          <linearGradient id="demandGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#ef4444"/>
-            <stop offset="100%" stop-color="#dc2626"/>
-          </linearGradient>
-          <linearGradient id="capacityGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#3b82f6"/>
-            <stop offset="100%" stop-color="#2563eb"/>
-          </linearGradient>
-          <linearGradient id="gapGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="rgba(239,68,68,0.10)"/>
-            <stop offset="100%" stop-color="rgba(59,130,246,0.10)"/>
-          </linearGradient>
-        `;
-        svg.appendChild(defs);
-
-        const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        xAxis.classList.add('axis-element', 'chart-element');
-        xAxis.innerHTML = `
-          <line x1="${margin.left}" y1="${margin.top + height}" x2="${margin.left + width}" y2="${margin.top + height}" class="chart-axis"/>
-          <text x="${margin.left + width / 2}" y="${margin.top + height + 40}" text-anchor="middle" class="chart-axis-label">${STATE.chartConfig.xAxis}</text>
-          ${STATE.years.map((year, i) => {
-            const x = xScale(i / 3);
-            return `
-              <line x1="${x}" y1="${margin.top + height}" x2="${x}" y2="${margin.top + height + 10}" class="chart-axis"/>
-              <text x="${x}" y="${margin.top + height + 25}" text-anchor="middle" class="chart-year-label chart-text label-element chart-element">${year}</text>
-            `;
-          }).join('')}
-          <text x="${margin.left + width / 2}" y="${margin.top + height + 60}" text-anchor="middle" font-size="14" fill="#6b7280" font-family="Inter" class="label-element chart-element"> ${STATE.chartConfig.footer}</text>
-        `;
-        svg.appendChild(xAxis);
-
-        const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        yAxis.classList.add('axis-element', 'chart-element');
-        yAxis.innerHTML = `
-          <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + height}" class="chart-axis"/>
-          <text x="${margin.left - 10}" y="${margin.top + height / 2}" text-anchor="middle" class="chart-axis-label" transform="rotate(-90, ${margin.left - 10}, ${margin.top + height / 2})">${STATE.chartConfig.yAxis}</text>
-        `;
-        svg.appendChild(yAxis);
-
-        const exp = STATE.currentDemandExponent;
-        const slope = STATE.currentCapacitySlope;
-
-        let demandPath = `M ${xScale(0)} ${yScale(0)}`;
-        let capacityPath = `M ${xScale(0)} ${yScale(0.3)}`;
-
-        const demandPoints = [];
-        const capacityPoints = [];
-
-        for (let i = 0; i <= 100; i++) {
-          const t = i / 100;
-          const dem = Math.pow(t, exp);
-          const cap = 0.3 + slope * t;
-
-          demandPath += ` L ${xScale(t)} ${yScale(dem)}`;
-          capacityPath += ` L ${xScale(t)} ${yScale(cap)}`;
-
-          demandPoints.push({x: xScale(t), y: yScale(dem)});
-          capacityPoints.push({x: xScale(t), y: yScale(cap)});
-        }
-
-        const demandLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        demandLine.setAttribute('d', demandPath);
-        demandLine.setAttribute('stroke', 'url(#demandGradient)');
-        demandLine.setAttribute('fill', 'none');
-        demandLine.classList.add('demand-line', 'line-element', 'chart-element');
-        svg.appendChild(demandLine);
-
-        const capacityLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        capacityLine.setAttribute('d', capacityPath);
-        capacityLine.setAttribute('stroke', 'url(#capacityGradient)');
-        capacityLine.setAttribute('fill', 'none');
-        capacityLine.classList.add('capacity-line', 'line-element', 'chart-element');
-        svg.appendChild(capacityLine);
-
-        const gapPath = demandPoints.map(p => `L ${p.x} ${p.y}`).join(' ') +
-          capacityPoints.slice().reverse().map(p => `L ${p.x} ${p.y}`).join(' ') + 'Z';
-
-        const gap = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        gap.setAttribute('d', `M ${demandPoints[0].x} ${demandPoints[0].y} ` + gapPath);
-        gap.setAttribute('fill', 'url(#gapGradient)');
-        gap.classList.add('gap-fill', 'gap-element', 'chart-element');
-        svg.appendChild(gap);
-
-        const gapLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        gapLabel.setAttribute('x', xScale(0.5));
-        gapLabel.setAttribute('y', yScale(0.5));
-        gapLabel.setAttribute('text-anchor', 'middle');
-        gapLabel.classList.add('chart-annotation', 'label-element', 'chart-element');
-        gapLabel.textContent = STATE.chartConfig.center;
-        svg.appendChild(gapLabel);
-
-        // Markers
-        STATE.drivers.forEach(d => {
-          if (d.markerYear && (d.state === 'normal' || d.state === 'accelerating')) {
-            const t = (d.markerYear - 2025) / 3;
-            const dem = Math.pow(t, exp);
-            const x = xScale(t);
-            const y = yScale(dem);
-
-            const isHot = d.id && STATE.highlightDriverId === d.id;
-            const emphasis = isHot ? 10 : (d.state === 'accelerating' ? 8 : 6);
-            const dotColor = d.state === 'accelerating' ? '#ef4444' : '#2563eb';
-            const dotFilter = isHot ? 'filter: drop-shadow(0 10px 18px rgba(37,99,235,0.35));' : '';
-
-            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            g.classList.add('marker-group', 'marker-element', 'chart-element');
-            g.setAttribute('role', 'button');
-            g.setAttribute('tabindex', '0');
-            g.setAttribute('aria-label', `Learn more about ${d.label}`);
-            g.innerHTML = `
-              <title>${d.short}</title>
-              <circle cx="${x}" cy="${y}" r="20" fill="transparent" stroke="none"/>
-              <circle cx="${x}" cy="${y}" r="${emphasis}" fill="${dotColor}" stroke="white" stroke-width="2" style="${dotFilter}"/>
-              <text x="${x + 10}" y="${y + 4}" class="chart-text label-element chart-element">${d.label}</text>
-            `;
-            g.addEventListener('click', () => openInsight(d));
-            g.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(d); });
-            svg.appendChild(g);
-          }
-        });
-
-        if (STATE.showTippingPoint) {
-          const t = (STATE.tippingPointYear - 2025) / 3;
-          const x = xScale(t);
-
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('x1', x);
-          line.setAttribute('y1', yScale(0));
-          line.setAttribute('x2', x);
-          line.setAttribute('y2', yScale(1));
-          line.setAttribute('stroke', '#ef4444');
-          line.setAttribute('stroke-width', '2');
-          line.setAttribute('stroke-dasharray', '5 5');
-          line.classList.add('line-element', 'chart-element');
-          svg.appendChild(line);
-
-          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          label.setAttribute('x', x + 10);
-          label.setAttribute('y', yScale(1) - 10);
-          label.classList.add('chart-text', 'label-element', 'chart-element');
-          label.textContent = 'IT Inflection Point';
-          svg.appendChild(label);
-
-          const ann = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          ann.setAttribute('x', x + 10);
-          ann.setAttribute('y', yScale(0.8) + 5);
-          ann.setAttribute('fill', '#ef4444');
-          ann.classList.add('chart-text', 'label-element', 'chart-element');
-          ann.textContent = STATE.chartConfig.tipping;
-          svg.appendChild(ann);
-
-          const hit = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-          hit.setAttribute('role', 'button');
-          hit.setAttribute('tabindex', '0');
-          hit.setAttribute('aria-label', 'Learn more about Projected Tipping Point');
-          hit.innerHTML = `<rect x="${x - 10}" y="${yScale(1) - 20}" width="20" height="${height}" fill="transparent"/>`;
-          hit.addEventListener('click', () => openInsight(STATE.tippingPoint));
-          hit.addEventListener('keydown', e => { if (e.key === 'Enter') openInsight(STATE.tippingPoint); });
-          svg.appendChild(hit);
-        }
-      }
-
-      function updateCurves(){
-        if (STATE.recastMode) {
-          STATE.targetDemandExponent = 1.55;
-          STATE.targetCapacitySlope = 0.18;
-          STATE.showTippingPoint = false;
-          return;
-        }
-
-        let numNormal = 0, numAccelerating = 0;
-        STATE.drivers.forEach(d => { if (d.state === 'normal') numNormal++; if (d.state === 'accelerating') numAccelerating++; });
-
-        STATE.targetDemandExponent = 1.6 + (numNormal * 0.15 + numAccelerating * 0.3);
-        STATE.targetDemandExponent = Math.min(Math.max(STATE.targetDemandExponent, 1.2), 3);
-
-        STATE.targetCapacitySlope = 0;
-        STATE.showTippingPoint = numAccelerating >= 3;
-      }
-
-      function animateCurves(){
-        STATE.currentDemandExponent += (STATE.targetDemandExponent - STATE.currentDemandExponent) * 0.1;
-        STATE.currentCapacitySlope += (STATE.targetCapacitySlope - STATE.currentCapacitySlope) * 0.1;
-        renderCapacityGapChart();
-
-        if (Math.abs(STATE.currentDemandExponent - STATE.targetDemandExponent) > 0.001 || Math.abs(STATE.currentCapacitySlope - STATE.targetCapacitySlope) > 0.001) {
-          requestAnimationFrame(animateCurves);
-        }
-      }
-
-      function setSlider(id, value){
-        const driver = STATE.drivers.find(d => d.id === id);
-        if (driver) {
-          driver.state = ['off', 'normal', 'accelerating'][value];
-          STATE.recastMode = false;
-          updateCurves();
-          requestAnimationFrame(animateCurves);
-        }
-      }
-
-      function resetSliders(){
-        STATE.recastMode = false;
-        STATE.drivers.forEach(d => d.state = 'off');
-        STATE.currentDemandExponent = 1.6;
-        STATE.targetDemandExponent = 1.6;
-        STATE.currentCapacitySlope = 0;
-        STATE.targetCapacitySlope = 0;
-        STATE.showTippingPoint = false;
-        STATE.highlightDriverId = null;
-        render();
-      }
-
-      function openInsight(content){
-        STATE.insightContent = content;
-        STATE.highlightDriverId = content?.id || null;
-        render();
-      }
-
-      function renderInsightModal(){
-        if (!STATE.insightContent) return '';
-        const c = STATE.insightContent;
-        const title = c.title || c.label;
-        const intro = c.intro || c.short;
-        const bullets = c.bullets || [];
-        const closing = c.closing || '';
-
-        return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center modal-overlay" role="dialog" aria-modal="true" aria-labelledby="insight-modal-title">
-            <div class="w-full max-w-4xl mx-4 rounded-2xl overflow-hidden transform modal-content glass">
-              <div class="bg-white/40 backdrop-blur-lg px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex items-center gap-3">
-                  <i data-lucide="lightbulb" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
-                  <h2 id="insight-modal-title" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${title}</h2>
-                </div>
-                <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-insight-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
-              </div>
-              <div class="p-8 bg-white/35 backdrop-blur-lg">
-                ${intro ? `<p class="text-base leading-relaxed text-[#4A5568] mb-4">${intro}</p>` : ''}
-                <div class="space-y-4">
-                  ${bullets.map(b=>`
-                    <div class="bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
-                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
-                    </div>
-                  `).join('')}
-                </div>
-                ${closing ? `
-                  <div class="mt-6 bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
-                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
-                    <p class="text-base italic text-[#4A5568]">${closing}</p>
-                  </div>
-                ` : ''}
-              </div>
-            </div>
+        <div class="field">
+          <label>Current Citrix Licensed Seats</label>
+          <div class="input-wrap">
+            <input type="number" id="citrixSeats" value="5000" min="0" oninput="calc()">
           </div>
-        `;
-      }
+        </div>
 
-      const whyOrder = ['change', 'now', 'recast'];
-
-      function calloutDropdown(id, icon, label, headerTone, cta=false, subtext=''){
-        return `
-          <div class="h-full flex flex-col">
-            <button
-              type="button"
-              class="w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
-              data-action="open-why-modal"
-              data-why="${id}"
-              style="border-radius:var(--radius)"
-            >
-              <div class="${cx('flex items-center justify-between px-4 py-3', headerTone)}" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex items-center gap-2">
-                  <i data-lucide="${icon}" class="w-4 h-4 text-[#0A1C60]" aria-hidden="true"></i>
-                  <span class="text-[18px] font-semibold tracking-normal text-[#0A1C60]">${label}</span>
-                </div>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-[#4A5568] transition-transform duration-150" aria-hidden="true"></i>
-              </div>
-            </button>
-            ${subtext ? `<p class="px-5 py-2 text-sm text-gray-700">${subtext}</p>` : ''}
+        <div class="field">
+          <label>Citrix Cost per User / Year</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="citrixCostPerUser" value="150" min="0" class="has-prefix" oninput="calc()">
           </div>
-        `;
-      }
+          <span class="hint">~$150 typical enterprise rate</span>
+        </div>
 
-      function renderWhyModal(){
-        if(!STATE.openWhyModal) return '';
-        const id = STATE.openWhyModal;
-        const iconMap = { change: 'alert-triangle', now: 'clock-4', recast: 'sparkles' };
-        const labelMap = { change: 'Why Change', now: 'Why Now', recast: 'Why Recast' };
-        const data = STATE.currentState[id];
-        const currentIdx = whyOrder.indexOf(id);
-        const prev = currentIdx > 0 ? whyOrder[currentIdx - 1] : null;
-        const next = currentIdx < whyOrder.length - 1 ? whyOrder[currentIdx + 1] : null;
-
-        return `
-          <div class="fixed inset-0 z-50 flex items-center justify-center modal-overlay" role="dialog" aria-modal="true" aria-labelledby="why-modal-title-${id}">
-            <div class="w-full max-w-4xl mx-4 rounded-2xl overflow-hidden transform modal-content glass">
-              <div class="bg-white/40 backdrop-blur-lg px-8 py-6 flex items-center justify-between" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex items-center gap-3">
-                  <i data-lucide="${iconMap[id]}" class="w-8 h-8 text-[#0A1C60]" aria-hidden="true"></i>
-                  <h2 id="why-modal-title-${id}" class="text-3xl font-bold tracking-tight text-[#0A1C60]">${labelMap[id]}</h2>
-                </div>
-                <button type="button" class="text-slate-500 hover:text-slate-700 focus-ring p-2" data-action="close-why-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
-              </div>
-
-              <div class="p-8 bg-white/35 backdrop-blur-lg">
-                <p class="text-base leading-relaxed text-[#4A5568] mb-4">${data.intro}</p>
-
-                <div class="space-y-4">
-                  ${data.bullets.map(b=>`
-                    <div class="bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-[#0070F3] flex-shrink-0 mt-0.5"></i>
-                      <p class="text-base leading-relaxed text-[#4A5568]">${b}</p>
-                    </div>
-                  `).join('')}
-                </div>
-
-                <div class="mt-6 bg-white/70 backdrop-blur-lg p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
-                  <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
-                  <p class="text-base italic text-[#4A5568]">${data.analyst}</p>
-                </div>
-
-                <div class="mt-8 flex items-center justify-between w-full">
-                  ${prev ? `<button type="button" class="re-secondary inline-flex items-center gap-2" data-action="why-nav" data-to="${prev}"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back</button>` : '<div></div>'}
-                  ${next ? `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="why-nav" data-to="${next}">Next <i data-lucide="arrow-right" class="w-4 h-4"></i></button>` : `<button type="button" class="re-primary inline-flex items-center gap-2" data-action="advance" data-next="solution">See Approach <i data-lucide="arrow-right" class="w-4 h-4"></i></button>`}
-                </div>
-              </div>
-            </div>
+        <div class="field">
+          <label>Renewal Increase Multiplier</label>
+          <div class="slider-wrap">
+            <input type="range" id="renewalMultiplierSlider" min="1.0" max="5.0" step="0.1" value="2.5"
+              oninput="document.getElementById('renewalMultiplierInput').value=this.value; calc()">
+            <span class="range-value" id="renewalMultiplierDisplay">2.5×</span>
           </div>
-        `;
-      }
-
-      function popoutCard(card){
-        const expanded = STATE.openCards[card.id];
-        const contentId = `card-content-${card.id}`;
-
-        return `
-          <div class="h-full flex flex-col">
-            <button
-              type="button"
-              class="accordion-header w-full overflow-hidden ring-1 ring-slate-200 focus-ring transition hover:ring-slate-300 shadow-sm"
-              data-action="toggle-card"
-              data-card="${card.id}"
-              aria-expanded="${expanded}"
-              aria-controls="${contentId}"
-              style="border-radius:var(--radius); min-height: 44px;"
-            >
-              <div class="${card.bgHeader || 'bg-slate-50'} px-5 py-4 flex flex-col" style="border-bottom:1px solid var(--border-subtle)">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="${card.icon}" class="w-6 h-6 text-[#0A1C60]" aria-hidden="true"></i>
-                    <span class="text-xl font-semibold text-left tracking-normal text-[#0A1C60]">${card.title}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm text-[#4A5568]">${expanded ? 'Collapse' : 'Expand'}</span>
-                    <i data-lucide="chevron-down" class="w-5 h-5 text-[#4A5568] transition-transform duration-150 ${expanded ? 'rotate-180' : ''}" aria-hidden="true"></i>
-                  </div>
-                </div>
-              </div>
-            </button>
-
-            <div
-              id="${contentId}"
-              class="accordion-content overflow-hidden border-l-4 border-[#0070F3] ${expanded ? 'glass-soft' : ''}"
-              style="max-height:${expanded?'1200px':'0'};opacity:${expanded?'1':'0'};transition:max-height 180ms cubic-bezier(.2,.8,.2,1),opacity 180ms ease; padding:${expanded?'24px 20px':'0 20px'}"
-            >
-              <ul class="list-disc pl-6 text-[16px] leading-[1.45] space-y-3 text-[#4A5568] text-left">
-                ${card.bullets.map(b=>`<li>${b}</li>`).join('')}
-              </ul>
-              ${card.timeline && onboardingMiniTimelineEnabled && expanded ? renderMiniTimeline() : ''}
-              <p class="mt-4 italic text-[16px] text-[#4A5568]">${card.closer}</p>
-            </div>
+          <div class="input-wrap" style="margin-top:8px">
+            <input type="number" id="renewalMultiplierInput" value="2.5" min="1" max="10" step="0.1"
+              class="has-suffix" oninput="document.getElementById('renewalMultiplierSlider').value=this.value; document.getElementById('renewalMultiplierDisplay').textContent=this.value+'×'; calc()">
+            <span class="suffix">×</span>
           </div>
-        `;
-      }
+          <span class="hint">Typical Citrix shock: 2–3× renewals</span>
+        </div>
 
-      function renderMiniTimeline(){
-        const phases = [
-          {icon: 'play-circle', label: 'Kickoff'},
-          {icon: 'hammer', label: 'Implementation'},
-          {icon: 'check-circle', label: 'UAT'},
-          {icon: 'flag', label: 'Launch'},
-          {icon: 'book-open', label: 'Enablement'}
-        ];
-        return `
-          <div class="flex items-center justify-between mt-4" aria-hidden="true">
-            ${phases.map((p, i) => `
-              ${i > 0 ? '<div class="flex-1 h-px bg-slate-200 mx-2"></div>' : ''}
-              <div class="flex flex-col items-center">
-                <i data-lucide="${p.icon}" class="w-5 h-5 text-[#0070F3]"></i>
-                <span class="text-xs mt-1 text-[#4A5568]">${p.label}</span>
-              </div>
-            `).join('')}
+        <div class="field">
+          <label>Citrix Seats Retained Post-Migration</label>
+          <div class="input-wrap">
+            <input type="number" id="targetCitrixSeats" value="1000" min="0" oninput="calc()">
           </div>
-        `;
-      }
+          <span class="hint">Keep only users that require Citrix</span>
+        </div>
 
-      function renderSolution(){
-        return `
-          <section id="panel-solution" class="space-y-3">
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              ${renderFlow()}
-              <div class="flex flex-col gap-3 relative">
-                <div class="sticky top-0 z-10 bg-white/60 backdrop-blur-lg py-2 shadow-sm rounded-xl px-2">
-                  <div class="flex justify-between items-center text-sm">
-                    <span class="font-semibold">Recast Approach</span>
-                    <span class="text-[#4A5568]">${STATE.visitedCards.length} of 3 explored</span>
-                  </div>
-                </div>
-                <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
-                ${NEW_CARDS.map(card => popoutCard(card)).join('')}
-                <div class="sticky bottom-0 bg-white/70 backdrop-blur-lg py-3 shadow-lg mt-3 rounded-xl px-2 border border-slate-200">
-                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-      }
+      </div>
+    </div>
 
-      function renderROI(){
-        return `
-          <section id="panel-roi" class="space-y-8">
-            <div class="section-card p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 bg-white">
-              <h3 class="text-2xl font-semibold mb-6 text-gray-900">Application Workspace Impact Calculator</h3>
-              <div class="mb-6">
-                <p class="text-base text-gray-700 leading-relaxed">Most app work isn’t hard — it’s just repeated. The same update gets packaged, tested, and rolled out again for every environment you support. This calculator shows how much time that repetition creates — and how much of it disappears when changes are defined once instead of per platform.</p>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="p-4 rounded-lg bg-gray-50">
-                  <h4 class="text-lg font-medium mb-4 text-gray-900">How App Work Happens Today</h4>
-                  <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
-                    <li>The same change is handled separately for each environment</li>
-                    <li>More platforms = more rebuilds, retesting, and coordination</li>
-                    <li>Time adds up quietly every month</li>
-                  </ul>
-                </div>
-                <div class="p-4 rounded-lg bg-gray-50">
-                  <h4 class="text-lg font-medium mb-4 text-gray-900">With Application Workspace</h4>
-                  <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
-                    <li>A change is defined once, then delivered consistently across environments</li>
-                    <li>It’s delivered consistently wherever users need it</li>
-                    <li>Repeated work drops away</li>
-                  </ul>
-                </div>
-              </div>
-              <div class="grid grid-cols-1 gap-6">
-                <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">How many environments do your apps have to work in?</span>
-                  <span class="text-sm text-gray-600">Examples: Windows/ConfigMgr, Intune, macOS/Jamf, VDI/AVD/Citrix, Web.</span>
-                  <input type="number" id="calc-envs" min="1" max="10" placeholder="3" value="${STATE.calcInputs.envs}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
-                </label>
-                <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">About how many app changes do you push in a typical month?</span>
-                  <span class="text-sm text-gray-600">Includes: vendor updates, security patches that require validation, internal app releases, urgent fixes.</span>
-                  <input type="number" id="calc-changes" min="1" max="500" placeholder="10" value="${STATE.calcInputs.changes}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
-                </label>
-                <label class="flex flex-col gap-1">
-                  <span class="text-base font-medium text-gray-900">Roughly how long does one change take per environment?</span>
-                  <span class="text-sm text-gray-600">Include: packaging work, validation/testing, pilot ring, deployment coordination, and troubleshooting fallout.</span>
-                  <input type="number" id="calc-time" min="1" max="100" placeholder="4" value="${STATE.calcInputs.time}" class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus-ring">
-                </label>
-              </div>
-              <div class="mt-6">
-                <button type="button" data-action="calculate-impact" class="bg-[#0070F3] text-white px-6 py-3 text-base font-semibold rounded-full hover:bg-[#005AD0] focus-ring">Calculate Impact</button>
-              </div>
+    <!-- Future State -->
+    <div class="card">
+      <div class="card-title">Future State · AVD + Nerdio + Recast</div>
+      <div class="field-group">
 
-              <div id="calc-output" class="mt-8 ${STATE.impactPulse ? 'impact-pulse' : ''}">
-                ${STATE.calcResult ? renderCalcResult() : ''}
-              </div>
-
-              <!-- Impact tab footer actions (Added 2026-02-11) -->
-              <div class="mt-6 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  class="icon-btn focus-ring"
-                  data-action="impact-play"
-                  aria-label="Play impact demo"
-                  title="Play impact demo"
-                >
-                  <i data-lucide="play" class="w-5 h-5 text-[#0A1C60]"></i>
-                </button>
-
-                <button
-                  type="button"
-                  class="icon-btn focus-ring"
-                  data-action="impact-edit"
-                  aria-label="Edit inputs"
-                  title="Edit inputs"
-                >
-                  <i data-lucide="pencil" class="w-5 h-5 text-[#0A1C60]"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="flex justify-start">
-              <button type="button" data-action="open-currentstate-editor" class="inline-flex items-center gap-2 bg-transparent text-gray-600 border-2 border-gray-300 px-5 py-3 text-base font-medium focus-ring rounded-full hover:text-[#0070F3] hover:border-[#0070F3]">
-                <i data-lucide="edit-3" class="w-5 h-5"></i> Edit Current State
-              </button>
-            </div>
-          </section>
-        `;
-      }
-
-      function renderCalcResult(){
-        const r = STATE.calcResult;
-        const qualified = r.envs >= 2 && r.changes >= 10;
-        return `
-          <div class="mb-4 text-base text-gray-700">
-            <p>Today: ${r.changes} changes × ${r.envs} environments × ${r.time} hours = ${r.h_current} hours/month</p>
-            <p>With Application Workspace: ${r.changes} changes × 1 × ${r.time} hours = ${r.h_aw} hours/month</p>
-            <p>Qualification: ${qualified ? 'Likely a real problem worth solving' : 'May still help, but smaller value'}</p>
+        <div class="field">
+          <label>AVD Cost per User / Month</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="avdCost" value="25" min="0" class="has-prefix" oninput="calc()">
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="p-4 rounded-lg bg-gray-50">
-              <h4 class="text-lg font-medium mb-4 text-gray-900">Capacity Returned</h4>
-              <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
-                <li>Hours/month: ${r.h_saved}</li>
-                <li>Hours/year: ${r.h_saved_year}</li>
-                <li>FTE-equivalent capacity/year: ${r.fte_eq} (capacity equivalent, not people eliminated)</li>
-              </ul>
-            </div>
-            <div class="p-4 rounded-lg bg-gray-50">
-              <h4 class="text-lg font-medium mb-4 text-gray-900">Value for the Team</h4>
-              <ul class="space-y-2 list-disc pl-5 text-base text-gray-700">
-                <li>Reduce repeated app work across platforms</li>
-                <li>Make support more predictable</li>
-                <li>Increase change throughput without adding staff</li>
-              </ul>
-            </div>
+          <span class="hint">Azure compute-dominant cost</span>
+        </div>
+
+        <div class="field">
+          <label>Nerdio Cost per User / Month</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="nerdioCost" value="8" min="0" class="has-prefix" oninput="calc()">
           </div>
-        `;
-      }
+        </div>
 
-      function updateROIOutputs(){ /* render-driven */ }
-
-      function setText(id, value){
-        const el=document.getElementById(id);
-        if(el) el.textContent = String(value);
-      }
-
-      /* ---------- Catalog / Flow assets ---------- */
-
-      const CATALOG=[
-        {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
-          logo('Microsoft Word','W','#185ABD'),
-          logo('Microsoft Excel','X','#107C41'),
-          logo('PowerPoint','P','#D24726'),
-          logo('Outlook','O','#106EBE'),
-          logo('Microsoft Teams','T','#5B53D6'),
-          logo('Google Docs','Dc','#1A73E8'),
-          logo('Google Sheets','Sh','#1E8E3E'),
-          logo('Google Slides','Sl','#F9AB00')
-        ]},
-        {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-          multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-          logo('Zoom','Z','#0B5CFF'),
-          logo('Gmail','G','#EA4335'),
-          logo('Google Meet','GM','#0F9D58')
-        ]},
-        {title:'WEB BROWSERS',id:'cat-browsers',items:[
-          triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-          ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-          flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
-        ]},
-        {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-          logo('Salesforce','SF','#00A1E0'),
-          logo('Workday','WD','#1F5BFF'),
-          logo('ServiceNow','SN','#81B29A'),
-          logo('SAP','SAP','#0A6ED1'),
-          logo('Oracle NetSuite','NS','#C74634')
-        ]},
-        {title:'SECURITY & ACCESS',id:'cat-security',items:[
-          logo('Duo','D','#3CB371'),
-          logo('Okta','O','#007DC1'),
-          logo('Ping Identity','P','#C0172C'),
-          logo('Cisco AnyConnect','AC','#00B5AD'),
-          logo('Microsoft Defender','MD','#0067B8'),
-          logo('CrowdStrike Falcon','CS','#D61F26')
-        ]},
-        {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
-          logo('Adobe Acrobat','A','#ED2224'),
-          logo('Dropbox','DB','#0061FF'),
-          logo('Box','BX','#0061D5'),
-          logo('OneDrive','OD','#0A5BD5'),
-          logo('ZoomIt / Sysinternals','ZI','#58595B')
-        ]}
-      ];
-
-      const ENV_SOURCES = [
-        { name: 'SCCM', svg: '<i data-lucide="server-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
-        { name: 'Intune', svg: '<i data-lucide="cloud-cog" class="w-5 h-5 text-[#0078D4]"></i>' },
-        { name: 'Citrix', svg: '<i data-lucide="layout-dashboard" class="w-5 h-5 text-[#000000]"></i>' },
-        { name: 'AVD', svg: '<i data-lucide="monitor" class="w-5 h-5 text-[#0078D4]"></i>' },
-        { name: 'Windows 365', svg: '<i data-lucide="cloud" class="w-5 h-5 text-[#0078D4]"></i>' },
-        { name: 'Jamf', svg: '<i data-lucide="apple" class="w-5 h-5 text-[#000000]"></i>' }
-      ];
-
-      const appConfigs = [
-        {stage:'Prod', policy:'MFA + VPN', region:'AMER', device:'Windows'},
-        {stage:'QA', policy:'Compliant only', region:'APAC', device:'Any'},
-        {stage:'Dev', policy:'MFA required', region:'EMEA', device:'Mac'},
-        {stage:'Prod', policy:'VPN only', region:'Global', device:'Windows'},
-        {stage:'QA', policy:'MFA required', region:'AMER', device:'Any'},
-        {stage:'Dev', policy:'MFA required', region:'APAC', device:'Mac'},
-        {stage:'Prod', policy:'Compliant only', region:'EMEA', device:'Windows'},
-        {stage:'QA', policy:'VPN only', region:'Global', device:'Any'}
-      ];
-      let flatIndex = 0;
-      CATALOG.forEach(sec => sec.items.forEach(itm => { itm.config = appConfigs[flatIndex % appConfigs.length]; flatIndex++; }));
-
-      function logo(name,letter,color){ return { name, svg: mark(letter,color) }; }
-      function mark(letter,color){
-        return `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${letter}">
-            <defs><linearGradient id="g${letter.replace(/\W/g,'')}" x1="0" x2="1"><stop offset="0" stop-color="${shade(color,.9)}"/><stop offset="1" stop-color="${shade(color,1.1)}"/></linearGradient></defs>
-            <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="url(#g${letter.replace(/\W/g,'')})" stroke="rgba(0,0,0,.15)"/>
-            <text x="50%" y="56%" text-anchor="middle" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="800" fill="#0A1C60">${letter}</text>
-          </svg>`;
-      }
-      function multiLogo(name,colors){
-        const slices=colors.map((c,i)=>`<rect x="${4+i*9}" y="8" width="7" height="32" rx="4" fill="${c}"></rect>`).join('');
-        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" role="img" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/>${slices}</svg>` };
-      }
-      function triLogo(name,r1,r2,r3,r4){
-        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="12" fill="${r4}"/><path d="M24 12 A12 12 0 0 1 36 24 L24 24 Z" fill="${r1}"/><path d="M36 24 A12 12 0 0 1 24 36 L24 24 Z" fill="${r2}"/><path d="M24 36 A12 12 0 0 1 24 12 L24 24 Z" fill="${r3}"/></svg>` };
-      }
-      function ringLogo(name,c1,c2){
-        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><circle cx="24" cy="24" r="11" fill="${c1}"/><circle cx="20" cy="20" r="8" fill="${c2}"/></svg>` };
-      }
-      function flameLogo(name,c1,c2){
-        return { name, svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" aria-label="${name}"><rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="#F7F9FB" stroke="rgba(0,0,0,.15)"/><path d="M24 12c5 7-2 9 3 14 3 3 2 9-3 11-5-2-6-8-3-11 5-5-3-7 3-14z" fill="${c1}"/><circle cx="26" cy="28" r="4" fill="${c2}"/></svg>` };
-      }
-      function shade(hex,m){
-        const c=hex.replace('#','');
-        const n=[0,1,2].map(i=>parseInt(c.slice(i*2,i*2+2),16));
-        const s=n.map(v=>Math.max(0,Math.min(255,Math.round(v*m))));
-        return '#'+s.map(v=>v.toString(16).padStart(2,'0')).join('');
-      }
-
-      const miniApps = [
-        logo('Microsoft Word','W','#185ABD'),
-        logo('Microsoft Teams','T','#5B53D6'),
-        logo('SAP','SAP','#0A6ED1'),
-        logo('Zoom','Z','#0B5CFF')
-      ];
-
-      function renderFlow(){
-        return `
-          <div class="section-card p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <div class="h-6 w-6 rounded-[2px] grid place-items-center bg-[#0A1C60]"><i data-lucide="boxes" class="h-3.5 w-3.5 text-white"></i></div>
-                <div>
-                  <h3 class="text-base font-semibold">Application Workspace</h3>
-                  <div class="text-[12px] text-[#4A5568]">Deliver applications to users — independent of device or platform</div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 text-[12px]">
-                <button type="button" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1 rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="toggle-labels">${STATE.showLabels?'Hide':'Show'} labels</button>
-                <button type="button" data-action="start-flow" class="bg-[#0070F3] text-white px-2.5 py-1.5 text-[12px] font-semibold rounded hover:bg-[#005AD0]">Start</button>
-                <button type="button" data-action="reset-flow" class="bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-2.5 py-1.5 rounded hover:text-[#0070F3] hover:border-[#0070F3]">Reset</button>
-              </div>
-            </div>
-
-            <div id="envFlow" class="mt-3 sub-card p-3 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Environment flow">
-              <div id="envSources" class="flex flex-wrap justify-between gap-2">
-                ${ENV_SOURCES.map((env, idx) => `
-                  <div class="env-wrap" style="--d: ${idx * 0.2}s">
-                    <div class="env-ring logo-ring">${env.svg}</div>
-                    <span class="env-name">${env.name}</span>
-                  </div>
-                `).join('')}
-              </div>
-
-              <div id="envArrows" class="grid grid-cols-6 gap-2 mt-2 mb-2">
-                ${ENV_SOURCES.map((_, idx) => `<div class="arrow-line" style="--d: ${1 + idx * 0.2}s"></div>`).join('')}
-              </div>
-
-              <div id="envHub" class="hub-card sub-card p-2 text-center bg-white">
-                <div class="flex items-center justify-center gap-2">
-                  <i data-lucide="server" class="w-4 h-4 text-[#2563eb]"></i>
-                  <span class="text-sm font-medium">Application Workspace</span>
-                </div>
-              </div>
-
-              <div id="metricsBanner" class="metrics-banner mt-2">
-                <span id="appsProcessedCounter" class="tabular-nums">0</span>+ Apps Processed
-              </div>
-            </div>
-
-            <div id="flowCard" class="mt-3 sub-card p-2 relative bg-gradient-to-b from-white to-slate-50 shadow-inner ${STATE.showLabels ? 'show-labels' : ''}" role="region" aria-label="Animated flow">
-              <div id="progressCounters" class="hidden mb-3 grid grid-cols-3 gap-2 text-sm text-center">
-                <div><span class="font-semibold tabular-nums" id="appsProcessed">0</span> apps processed</div>
-                <div><span class="font-semibold tabular-nums" id="timeSaved">0</span> hours saved</div>
-                <div><span class="font-semibold tabular-nums" id="ticketsAvoided">0</span> tickets avoided</div>
-              </div>
-
-              <div class="space-y-2 relative">
-                ${CATALOG.map(s=>`
-                  <div class="cat-row">
-                    <div class="cat-title uppercase text-[#4A5568]"><i data-lucide="folder" class="w-3 h-3"></i>${s.title}</div>
-                    <div id="${s.id}" class="flex flex-wrap gap-2"></div>
-                  </div>
-                `).join('')}
-                <div id="overlayTag" class="overlay-tag hidden text-center text-sm text-[#4A5568]">Every app mapped to stage, policy, region, and device.</div>
-              </div>
-
-              <div id="flowHubFlash" class="mt-2 hidden text-[#0070F3]">
-                <span class="inline-flex items-center gap-1 text-[12px]"><i data-lucide="bolt" class="h-4 w-4"></i><span>Update published</span></span>
-              </div>
-
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Existing Platforms','Staged Rings','Access & Policy'][i]}</div>
-                    <div id="flowConn${k}" class="mt-1 grid grid-cols-10 gap-1.5"></div>
-                    <div class="mt-1 flow-bar w-full" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:${3 + .5*i}s"></div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${4 + .5*i}s;color:var(--re-green)"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 relative">
-                    <div class="text-[12px] text-[#4A5568]">${['Business Unit','Subsidiary','Region'][i]}</div>
-                    <div id="flowGrp${k}" class="mt-1 grid grid-cols-8 gap-1.5"></div>
-                    <div class="mx-auto mt-1 bolt-line h-16 w-1" style="background:linear-gradient(to bottom,#0A1C60,#0070F3);--d:${5 + .5*i}s"></div>
-                    <i data-lucide="shield-check" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${6 + .5*i}s;color:var(--re-green)"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-
-              <div class="mt-3 grid grid-cols-3 gap-2 relative" aria-hidden="true">
-                ${['A','B','C'].map((k,i)=>`
-                  <div class="sub-card p-2 text-center relative">
-                    <i data-lucide="${['monitor-smartphone','laptop','smartphone'][i]}" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="flowDev${k}" class="mt-1 grid grid-cols-6 gap-1.5"></div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">${['Windows & macOS','VDI / Web','Mobile'][i]}</div>
-                    <i data-lucide="check-circle" class="check-appear absolute top-1 right-1 w-4 h-4" style="--d:${8 + .5*i}s;color:var(--re-green)"></i>
-                  </div>
-                `).join('')}
-                <div class="flow-connect absolute top-[-0.5rem] left-0 w-full"></div>
-              </div>
-
-              <div class="mt-3">
-                <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
-                  <div class="flex items-center gap-3">
-                    <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
-                    <div class="text-sm">
-                      <div class="font-medium">End user</div>
-                      <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
-                    </div>
-                  </div>
-                  <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
-                  <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
-                    <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
-                    <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
-                    <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
-                  </div>
-                  <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
-                    ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
-                  </div>
-                </div>
-                <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:var(--re-green)"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
-              </div>
-            </div>
+        <div class="field">
+          <label>Recast AW Cost per User / Month</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="recastCost" value="4" min="0" class="has-prefix" oninput="calc()">
           </div>
-        `;
-      }
+          <span class="hint">~$4 list price</span>
+        </div>
 
-      function buildFlow(){
-        let base=0;
-        CATALOG.forEach(section=>{
-          const mount=document.getElementById(section.id); if(!mount) return;
-          mount.innerHTML='';
-          section.items.forEach((itm,idx)=>{
-            const wrap=document.createElement('div');
-            wrap.className='logo-wrap';
-            wrap.style.setProperty('--d',(base+idx*0.2 + 4).toFixed(2)+'s');
-
-            const ring=document.createElement('div');
-            ring.className='logo-ring';
-            ring.innerHTML=itm.svg;
-            ring.title=itm.name;
-            ring.setAttribute('role','img');
-            ring.setAttribute('aria-label',itm.name);
-            wrap.appendChild(ring);
-
-            if(STATE.showLabels){
-              const label=document.createElement('span');
-              label.className='logo-name';
-              label.textContent=itm.name;
-              wrap.appendChild(label);
-
-              const meta=document.createElement('div');
-              meta.className='meta-label';
-              meta.innerHTML = `<span>Stage: ${itm.config.stage}</span><span>Policy: ${itm.config.policy}</span><span>Region: ${itm.config.region}</span><span>Device: ${itm.config.device}</span>`;
-              wrap.appendChild(meta);
-            }
-
-            mount.appendChild(wrap);
-          });
-          base+=1.5;
-        });
-
-        buildTiles(document.getElementById('flowConnA'), 14, 7);
-        buildTiles(document.getElementById('flowConnB'), 14, 7.5);
-        buildTiles(document.getElementById('flowConnC'), 14, 8);
-        buildTiles(document.getElementById('flowGrpA'), 18, 9);
-        buildTiles(document.getElementById('flowGrpB'), 18, 9.5);
-        buildTiles(document.getElementById('flowGrpC'), 18, 10);
-        buildTiles(document.getElementById('flowDevA'), 10, 12);
-        buildTiles(document.getElementById('flowDevB'), 10, 12.5);
-        buildTiles(document.getElementById('flowDevC'), 10, 13);
-
-        const avatar=document.getElementById('endUserAvatar');
-        const badge=document.getElementById('endUserBadge');
-        if(avatar){ avatar.style.background='#EA4335'; avatar.style.color='#fff'; avatar.textContent='U'; }
-        if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; badge.style.color='#000'; }
-
-        const message = document.getElementById('endUserMessage');
-        if(message) message.textContent = 'Apps on demand — no waiting, no tickets.';
-
-        const mini = document.getElementById('miniWorkspace');
-        if(mini) mini.classList.add('hidden');
-
-        const counters = document.getElementById('progressCounters');
-        if(counters) counters.classList.add('hidden');
-
-        const card = document.getElementById('flowCard');
-        if(card) card.classList.remove('run');
-
-        const envCard = document.getElementById('envFlow');
-        if(envCard) envCard.classList.remove('run');
-
-        if(STATE.showLabels) { card?.classList.add('show-labels'); envCard?.classList.add('show-labels'); }
-        else { card?.classList.remove('show-labels'); envCard?.classList.remove('show-labels'); }
-
-        const endCard = document.getElementById('endUserCard');
-        endCard?.classList.remove('end-user-expand');
-
-        STATE.progress = { apps: 0, time: 0, tickets: 0 };
-        STATE.envProgress = { appsProcessed: 0 };
-        updateProgress();
-        updateEnvProgress();
-
-        const success=document.getElementById('flowSuccess');
-        success?.classList.add('hidden');
-      }
-
-      function buildTiles(container,count,baseDelay){
-        if(!container) return;
-        container.innerHTML='';
-        for(let i=0;i<count;i++){
-          const d=document.createElement('div');
-          d.className='tile';
-          d.style.setProperty('--d',(baseDelay+i*0.1).toFixed(2)+'s');
-          container.appendChild(d);
-        }
-      }
-
-      function toggleOverlay(){
-        const overlay = document.getElementById('overlayTag');
-        if(!overlay) return;
-        if(STATE.showLabels){
-          overlay.classList.remove('hidden');
-          setTimeout(()=>{ overlay.classList.add('hidden'); },3000);
-        }
-      }
-
-      function clearFlowTimers(){
-        if (!STATE.flowTimers) STATE.flowTimers = { intervals: [], timeouts: [] };
-        STATE.flowTimers.intervals.forEach(id => clearInterval(id));
-        STATE.flowTimers.timeouts.forEach(id => clearTimeout(id));
-        STATE.flowTimers.intervals = [];
-        STATE.flowTimers.timeouts = [];
-      }
-
-      function startFlow(){
-        clearFlowTimers();
-
-        const envCard=document.getElementById('envFlow'); if(!envCard) return;
-        const card=document.getElementById('flowCard'); if(!card) return;
-
-        envCard.classList.remove('run'); card.classList.remove('run');
-        void envCard.offsetWidth; void card.offsetWidth;
-        envCard.classList.add('run'); card.classList.add('run');
-
-        const flash=document.getElementById('flowHubFlash');
-        const success=document.getElementById('flowSuccess');
-        const avatar=document.getElementById('endUserAvatar');
-        const badge=document.getElementById('endUserBadge');
-        const message = document.getElementById('endUserMessage');
-        const mini = document.getElementById('miniWorkspace');
-        const counters = document.getElementById('progressCounters');
-        const endCard = document.getElementById('endUserCard');
-
-        if(flash){
-          flash.classList.remove('hidden');
-          STATE.flowTimers.timeouts.push(setTimeout(()=>flash.classList.add('hidden'),2000));
-        }
-        success?.classList.add('hidden');
-        counters?.classList.remove('hidden');
-
-        const envInterval = setInterval(updateEnvProgress, 50);
-        STATE.flowTimers.intervals.push(envInterval);
-
-        STATE.flowTimers.timeouts.push(setTimeout(() => {
-          clearInterval(envInterval);
-
-          const interval = setInterval(updateProgress, 100);
-          STATE.flowTimers.intervals.push(interval);
-
-          STATE.flowTimers.timeouts.push(setTimeout(()=> {
-            if(avatar){
-              avatar.style.background = 'var(--re-green)';
-              avatar.style.color = '#fff';
-            }
-            if(badge){
-              badge.textContent='✓';
-              badge.style.background = 'var(--re-green)';
-              badge.style.color = '#fff';
-            }
-            if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
-            mini?.classList.remove('hidden');
-            endCard?.classList.add('end-user-expand');
-            success?.classList.remove('hidden');
-
-            clearInterval(interval);
-          }, 7000));
-        }, 4000));
-
-        STATE.flowTimers.timeouts.push(setTimeout(()=> {
-          envCard.classList.remove('run');
-          card.classList.remove('run');
-        }, 16000));
-      }
-
-      function updateProgress(){
-        if(STATE.progress.apps < 128) STATE.progress.apps += 4;
-        if(STATE.progress.time < 46) STATE.progress.time += 2;
-        if(STATE.progress.tickets < 73) STATE.progress.tickets += 3;
-        setText('appsProcessed', STATE.progress.apps > 128 ? 128 : STATE.progress.apps);
-        setText('timeSaved', STATE.progress.time > 46 ? 46 : STATE.progress.time);
-        setText('ticketsAvoided', STATE.progress.tickets > 73 ? 73 : STATE.progress.tickets);
-      }
-
-      function updateEnvProgress(){
-        if(STATE.envProgress.appsProcessed < 8000) STATE.envProgress.appsProcessed += 200;
-        setText('appsProcessedCounter', STATE.envProgress.appsProcessed > 8000 ? '8,000' : STATE.envProgress.appsProcessed);
-      }
-
-      function resetFlow(){
-        clearFlowTimers();
-        STATE.progress = { apps: 0, time: 0, tickets: 0 };
-        STATE.envProgress = { appsProcessed: 0 };
-        STATE.showLabels = false;
-        buildFlow();
-      }
-
-      function calculateImpact(){
-        const envs = Math.max(1, STATE.calcInputs.envs);
-        const changes = Math.max(0, STATE.calcInputs.changes);
-        const time = Math.max(0, STATE.calcInputs.time);
-        const h_current = changes * envs * time;
-        const h_aw = changes * 1 * time;
-        const h_saved = changes * (envs - 1) * time;
-        const h_saved_year = h_saved * 12;
-        const fte_eq = round(h_saved_year / 1920);
-        STATE.calcResult = { envs, changes, time, h_current, h_aw, h_saved, h_saved_year, fte_eq };
-      }
-
-      /* ---------- Current State editor (storage helpers) ---------- */
-
-      const USER_ID = String(window.APP_USER_ID || "guest");
-      const PAGE_SCOPE = location.origin + location.pathname + location.search;
-      const STORAGE_KEY = `currentState:${USER_ID}:${PAGE_SCOPE}`;
-      let DEFAULT_CURRENT_STATE = null;
-      const $ = (sel, ctx = document) => ctx.querySelector(sel);
-
-      const fields = {
-        changeIntro: () => $('#changeIntro'),
-        changeBullets: () => $('#changeBullets'),
-        changeAnalyst: () => $('#changeAnalyst'),
-        nowIntro: () => $('#nowIntro'),
-        nowBullets: () => $('#nowBullets'),
-        nowAnalyst: () => $('#nowAnalyst'),
-        recastIntro: () => $('#recastIntro'),
-        recastBullets: () => $('#recastBullets'),
-        recastAnalyst: () => $('#recastAnalyst')
-      };
-
-      function captureDefaultsOnce(){
-        if (DEFAULT_CURRENT_STATE) return;
-        DEFAULT_CURRENT_STATE = STATE.defaultsCurrentState();
-      }
-
-      function readFields(){
-        return {
-          change: {
-            intro: fields.changeIntro()?.value ?? "",
-            bullets: fields.changeBullets()?.value ?? "",
-            analyst: fields.changeAnalyst()?.value ?? ""
-          },
-          now: {
-            intro: fields.nowIntro()?.value ?? "",
-            bullets: fields.nowBullets()?.value ?? "",
-            analyst: fields.nowAnalyst()?.value ?? ""
-          },
-          recast: {
-            intro: fields.recastIntro()?.value ?? "",
-            bullets: fields.recastBullets()?.value ?? "",
-            analyst: fields.recastAnalyst()?.value ?? ""
-          }
-        };
-      }
-
-      function readChartFieldsRaw(){
-        const getVal = (id) => {
-          const el = document.getElementById(id);
-          return el ? el.value : undefined;
-        };
-        return {
-          chartConfig: {
-            yAxis: getVal('chart-yaxis'),
-            xAxis: getVal('chart-xaxis'),
-            center: getVal('chart-center'),
-            footer: getVal('chart-footer'),
-            tipping: getVal('chart-tipping')
-          },
-          drivers: STATE.drivers.map((_,i) => ({
-            label: getVal(`driver${i}-label`),
-            bullets: getVal(`driver${i}-bullets`)
-          }))
-        };
-      }
-
-      function writeFields(data){
-        if(!data) return;
-        if(fields.changeIntro()) fields.changeIntro().value = data.change.intro ?? "";
-        if(fields.changeBullets()) fields.changeBullets().value = data.change.bullets ?? "";
-        if(fields.changeAnalyst()) fields.changeAnalyst().value = data.change.analyst ?? "";
-        if(fields.nowIntro()) fields.nowIntro().value = data.now.intro ?? "";
-        if(fields.nowBullets()) fields.nowBullets().value = data.now.bullets ?? "";
-        if(fields.nowAnalyst()) fields.nowAnalyst().value = data.now.analyst ?? "";
-        if(fields.recastIntro()) fields.recastIntro().value = data.recast.intro ?? "";
-        if(fields.recastBullets()) fields.recastBullets().value = data.recast.bullets ?? "";
-        if(fields.recastAnalyst()) fields.recastAnalyst().value = data.recast.analyst ?? "";
-      }
-
-      function writeChartFields(config, drivers){
-        if($('#chart-yaxis')) $('#chart-yaxis').value = config?.yAxis ?? "";
-        if($('#chart-xaxis')) $('#chart-xaxis').value = config?.xAxis ?? "";
-        if($('#chart-center')) $('#chart-center').value = config?.center ?? "";
-        if($('#chart-footer')) $('#chart-footer').value = config?.footer ?? "";
-        if($('#chart-tipping')) $('#chart-tipping').value = config?.tipping ?? "";
-        drivers?.forEach((dd, i) => {
-          const labelEl = $(`#driver${i}-label`);
-          const bulletsEl = $(`#driver${i}-bullets`);
-          if(labelEl) labelEl.value = dd.label ?? "";
-          if(bulletsEl) bulletsEl.value = dd.bullets ?? "";
-        });
-      }
-
-      function loadDraft(){
-        try{
-          const raw = localStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : null;
-        }catch{return null;}
-      }
-
-      function saveDraft(payload){
-        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
-        catch(e){ console.warn('Save failed (storage blocked or full):', e); }
-      }
-
-      function clearDraft(){
-        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-      }
-
-      function initCurrentStateModal(){
-        captureDefaultsOnce();
-        const draft = loadDraft();
-
-        if(draft) {
-          writeFields(draft);
-          STATE.editChartBuffer = {
-            chartConfig: draft.chartConfig || {},
-            drivers: draft.drivers || []
-          };
-          writeChartFields(draft.chartConfig, draft.drivers);
-        } else {
-          STATE.editChartBuffer = {
-            chartConfig: { ...STATE.chartConfig },
-            drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
-          };
-          writeChartFields(STATE.chartConfig, STATE.drivers.map(d => ({label: d.label, bullets: d.bullets.join('\n')})));
-        }
-      }
-
-      /* ---------- Edit modal ---------- */
-
-      function renderModal(){
-        if(!STATE.modalOpen) return '';
-        const buf = STATE.editBuffers;
-        const toLines = arr => arr.join('\n');
-        const ensure = v => v ?? '';
-        const editTabs = [
-          {id: 'change', label: 'Why Change'},
-          {id: 'now', label: 'Why Now'},
-          {id: 'recast', label: 'Why Recast'},
-          {id: 'chart', label: 'Chart Config'}
-        ];
-        return `
-          <div role="dialog" aria-modal="true" aria-labelledby="cs-editor-title" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay overflow-auto p-4 md:p-8">
-            <div class="w-[95vw] h-[95vh] rounded-2xl shadow-2xl p-8 overflow-y-auto glass">
-              <div class="flex items-center justify-between">
-                <h2 id="cs-editor-title" class="text-xl font-semibold tracking-normal">Edit Current State</h2>
-                <button type="button" class="bg-transparent text-[#0A1C60] p-2 focus-ring rounded" data-action="close-modal" aria-label="Close">
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-              </div>
-              <p class="mt-1 text-sm text-[#4A5568]">Edit the introduction, bullets (one per line, max 4), and analyst trend for each section.</p>
-
-              <div role="tablist" aria-label="Edit sections" class="flex w-full flex-wrap gap-2 rounded bg-white/60 backdrop-blur-lg p-1 ring-1 ring-slate-200 mt-4">
-                ${editTabs.map(t=>`
-                  <button type="button"
-                    class="${cx('inline-flex items-center gap-2 px-3.5 py-1.5 text-sm focus-ring transition',
-                      STATE.editTab===t.id ? 'bg-[#0070F3] text-white hover:bg-[#005AD0] rounded' : 'text-[#0A1C60] hover:bg-slate-100 rounded')}"
-                    data-action="switch-edit-tab"
-                    data-tab="${t.id}"
-                    aria-selected="${STATE.editTab===t.id}">
-                    <span>${t.label}</span>
-                  </button>
-                `).join('')}
-              </div>
-
-              <div class="mt-4">
-                ${STATE.editTab === 'change' ? editorSection('change','Why Change', ensure(buf.change.intro) || STATE.currentState.change.intro, ensure(buf.change.bullets) || toLines(STATE.currentState.change.bullets), ensure(buf.change.analyst) || STATE.currentState.change.analyst) : ''}
-                ${STATE.editTab === 'now' ? editorSection('now','Why Now', ensure(buf.now.intro) || STATE.currentState.now.intro, ensure(buf.now.bullets) || toLines(STATE.currentState.now.bullets), ensure(buf.now.analyst) || STATE.currentState.now.analyst) : ''}
-                ${STATE.editTab === 'recast' ? editorSection('recast','Why Recast', ensure(buf.recast.intro) || STATE.currentState.recast.intro, ensure(buf.recast.bullets) || toLines(STATE.currentState.recast.bullets), ensure(buf.recast.analyst) || STATE.currentState.recast.analyst) : ''}
-                ${STATE.editTab === 'chart' ? editorSectionChart() : ''}
-              </div>
-
-              <div class="mt-5 flex flex-wrap gap-2">
-                <button id="btnSaveCurrentState" type="button" data-action="save-currentstate" class="inline-flex items-center gap-2 bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold focus-ring rounded hover:bg-[#005AD0]">
-                  <i data-lucide="save" class="w-4 h-4"></i> Save
-                </button>
-                <button id="btnResetCurrentState" type="button" data-action="reset-currentstate-defaults" class="inline-flex items-center gap-2 bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] px-4 py-2 text-sm font-semibold focus-ring rounded hover:text-[#0070F3] hover:border-[#0070F3]">
-                  <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to default
-                </button>
-              </div>
-            </div>
+        <div class="field">
+          <label>One-Time Migration / Services</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="number" id="migrationCost" value="250000" min="0" class="has-prefix" oninput="calc()">
           </div>
-        `;
-      }
+        </div>
 
-      function editorSectionChart(){
-        const buffer = STATE.editChartBuffer || {
-          chartConfig: { ...STATE.chartConfig },
-          drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
-        };
-        const conf = buffer.chartConfig || {};
-        const drv = buffer.drivers || [];
-
-        return `
-          <div class="flex flex-col gap-4">
-            <span class="text-sm font-semibold">XY Chart</span>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Y-axis label</span>
-              <input id="chart-yaxis" value="${conf.yAxis ?? STATE.chartConfig.yAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">X-axis label</span>
-              <input id="chart-xaxis" value="${conf.xAxis ?? STATE.chartConfig.xAxis}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Center text</span>
-              <input id="chart-center" value="${conf.center ?? STATE.chartConfig.center}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Footer caption</span>
-              <input id="chart-footer" value="${conf.footer ?? STATE.chartConfig.footer}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">------ annotation</span>
-              <input id="chart-tipping" value="${conf.tipping ?? STATE.chartConfig.tipping}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-            </label>
-
-            <div class="space-y-4">
-              ${STATE.drivers.map((d, i) => {
-                const dBuf = drv[i] || {};
-                return `
-                  <div>
-                    <label class="flex flex-col gap-1">
-                      <span class="text-xs text-[#4A5568]">Point ${i+1} title</span>
-                      <input id="driver${i}-label" value="${(dBuf.label ?? d.label)}" class="rounded border border-slate-200 bg-white p-3 text-sm focus-ring" />
-                    </label>
-                    <label class="flex flex-col gap-1 mt-2">
-                      <span class="text-xs text-[#4A5568]">Point ${i+1} bullets (one per line, exactly 3)</span>
-                      <textarea id="driver${i}-bullets" rows="4" class="min-h-[100px] rounded border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring">${(dBuf.bullets ?? d.bullets.join('\n'))}</textarea>
-                    </label>
-                  </div>
-                `;
-              }).join('')}
-            </div>
+        <div class="field">
+          <label>Time Horizon</label>
+          <div class="slider-wrap">
+            <input type="range" id="yearsSlider" min="1" max="5" step="1" value="3"
+              oninput="document.getElementById('yearsInput').value=this.value; document.getElementById('yearsDisplay').textContent=this.value+' yr'; calc()">
+            <span class="range-value" id="yearsDisplay">3 yr</span>
           </div>
-        `;
-      }
-
-      function editorSection(key,label,introValue,bulletsValue,analystValue){
-        return `
-          <div class="flex flex-col gap-4">
-            <span class="text-sm font-semibold">${label}</span>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Introduction</span>
-              <textarea id="${key}Intro" data-action="edit-buffer" data-key="${key}" data-subkey="intro" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} introduction editor" rows="2">${introValue}</textarea>
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <div class="flex items-center gap-2 text-xs text-[#4A5568]">
-                <i data-lucide="check-circle" class="w-4 h-4 text-[#0070F3]"></i>
-                Bullets (one per line, max 4)
-              </div>
-              <textarea id="${key}Bullets" data-action="edit-buffer" data-key="${key}" data-subkey="bullets" class="min-h-[160px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} bullets editor" rows="6">${bulletsValue}</textarea>
-            </label>
-
-            <label class="flex flex-col gap-1">
-              <span class="text-xs text-[#4A5568]">Analyst Trend</span>
-              <textarea id="${key}Analyst" data-action="edit-buffer" data-key="${key}" data-subkey="analyst" class="min-h-[80px] rounded-[2px] border border-slate-200 bg-white p-3 text-sm leading-5 focus-ring" aria-label="${label} analyst editor" rows="2">${analystValue}</textarea>
-            </label>
+          <div class="input-wrap" style="margin-top:8px">
+            <input type="number" id="yearsInput" value="3" min="1" max="10"
+              class="has-suffix" oninput="document.getElementById('yearsSlider').value=this.value; document.getElementById('yearsDisplay').textContent=this.value+' yr'; calc()">
+            <span class="suffix">yrs</span>
           </div>
-        `;
-      }
+        </div>
 
-      function parseLines(s, max=4){
-        return (s || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, max);
-      }
+      </div>
+    </div>
+  </div>
 
-      /* ---------- Event system (idempotent + delegated) ---------- */
+  <!-- RESULTS -->
+  <div class="results-card">
+    <div class="results-title">ROI Analysis · Results</div>
 
-      function attachEvents(){
-        const root = document.getElementById('app');
-        if (!root || root.dataset.bound === '1') return;
-        root.dataset.bound = '1';
+    <div class="metrics-grid">
+      <div class="metric highlight">
+        <span class="metric-label">3-Year Net Benefit</span>
+        <span class="metric-value counting" id="out-netBenefit">—</span>
+        <span class="metric-sub">After one-time migration costs</span>
+      </div>
+      <div class="metric positive">
+        <span class="metric-label">Annual Avoided Cost</span>
+        <span class="metric-value counting" id="out-avoided">—</span>
+        <span class="metric-sub">vs. full Citrix renewal</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">New Annual Run Rate</span>
+        <span class="metric-value counting" id="out-runRate">—</span>
+        <span class="metric-sub">Steady-state after migration</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Current Citrix Cost</span>
+        <span class="metric-value counting" id="out-currentCitrix">—</span>
+        <span class="metric-sub">Annual at current rates</span>
+      </div>
+      <div class="metric negative">
+        <span class="metric-label">Renewal Citrix Cost</span>
+        <span class="metric-value counting" id="out-renewalCitrix">—</span>
+        <span class="metric-sub">If no migration occurs</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Users Migrated to AVD</span>
+        <span class="metric-value" id="out-usersMigrated">—</span>
+        <span class="metric-sub">Off Citrix, onto AVD</span>
+      </div>
+    </div>
 
-        root.addEventListener('click', (e) => {
-          const act = e.target.closest('[data-action]');
-          const action = act?.getAttribute('data-action');
+    <!-- Cost Breakdown -->
+    <div class="breakdown">
+      <div class="breakdown-title">Full Cost Breakdown</div>
+      <table>
+        <tbody>
+          <tr class="section-label"><td colspan="2">Current State</td></tr>
+          <tr>
+            <td>Current Citrix Annual Cost</td>
+            <td id="br-currentCitrix">—</td>
+          </tr>
+          <tr>
+            <td>Renewal Citrix Annual Cost (if no change)</td>
+            <td id="br-renewalCitrix">—</td>
+          </tr>
 
-          const node = e.target.closest('.interactive-node');
-          if (node) {
-            const id = node.dataset.id;
-            STATE.activePopover = STATE.activePopover === id ? null : id;
-            render();
-            return;
-          }
+          <tr class="section-label"><td colspan="2">Post-Migration Annual Costs</td></tr>
+          <tr>
+            <td>Retained Citrix Seats</td>
+            <td id="br-retainedCitrix">—</td>
+          </tr>
+          <tr>
+            <td>AVD (Azure Compute)</td>
+            <td id="br-avd">—</td>
+          </tr>
+          <tr>
+            <td>Nerdio Management</td>
+            <td id="br-nerdio">—</td>
+          </tr>
+          <tr>
+            <td>Recast AW</td>
+            <td id="br-recast">—</td>
+          </tr>
+          <tr class="total">
+            <td>New Annual Run Rate</td>
+            <td id="br-runRate">—</td>
+          </tr>
 
-          if (!action) return;
+          <tr class="section-label"><td colspan="2">ROI Summary</td></tr>
+          <tr class="saving">
+            <td>Annual Avoided Cost vs. Renewal</td>
+            <td id="br-annualSaving">—</td>
+          </tr>
+          <tr>
+            <td>One-Time Migration / Services</td>
+            <td id="br-migration">—</td>
+          </tr>
+          <tr>
+            <td id="br-horizonLabel">3-Year Gross Benefit</td>
+            <td id="br-grossBenefit">—</td>
+          </tr>
+          <tr class="total">
+            <td id="br-netLabel">3-Year Net Benefit</td>
+            <td id="br-netBenefit">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-          if (action === 'switch-tab') {
-            STATE.activeTab = act.getAttribute('data-tab');
-            STATE.visitedCards = [];
-            STATE.activePopover = null;
-            STATE.calcResult = null;
-            STATE.openWhyModal = null;
-            STATE.insightContent = null;
-            render();
-            return;
-          }
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This calculator provides estimates based on the input values provided and is intended for illustrative purposes only. Actual costs and savings will vary based on specific contract terms, Azure consumption patterns, organizational complexity, and other factors. Citrix per-seat costs reflect post-renewal pricing. AVD costs are dominated by Azure compute and vary by VM type, region, and hours of use. Engage your Microsoft, Nerdio, and Recast representatives for a detailed quote. Values are in USD.
+  </div>
 
-          if (action === 'advance') {
-            STATE.activeTab = act.getAttribute('data-next');
-            STATE.openWhyModal = null;
-            render();
-            return;
-          }
+  <footer>
+    Built for Healthcare IT Modernization &nbsp;·&nbsp; Citrix → AVD Migration Economics
+  </footer>
 
-          if (action === 'close-modal') {
-            STATE.modalOpen = false;
-            render();
-            return;
-          }
+</div>
 
-          if (action === 'close-why-modal') {
-            STATE.openWhyModal = null;
-            render();
-            return;
-          }
+<script>
+  function fmt(n) {
+    if (!isFinite(n)) return '—';
+    const abs = Math.abs(n);
+    let str;
+    if (abs >= 1e6) str = '$' + (n/1e6).toFixed(2) + 'M';
+    else if (abs >= 1e3) str = '$' + (n/1e3).toFixed(1) + 'K';
+    else str = '$' + Math.round(n).toLocaleString();
+    if (n < 0) str = '−' + str.replace('$','$');
+    return str;
+  }
 
-          if (action === 'close-insight-modal') {
-            STATE.insightContent = null;
-            STATE.highlightDriverId = null;
-            render();
-            return;
-          }
+  function fmtFull(n) {
+    if (!isFinite(n)) return '—';
+    const prefix = n < 0 ? '-$' : '$';
+    return prefix + Math.abs(Math.round(n)).toLocaleString();
+  }
 
-          if (action === 'why-nav') {
-            STATE.openWhyModal = act.getAttribute('data-to');
-            render();
-            return;
-          }
+  function set(id, val, full) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = full ? fmtFull(val) : fmt(val);
+  }
 
-          if (action === 'open-why-modal') {
-            const id = act.getAttribute('data-why');
-            STATE.recastMode = false;
+  function setRaw(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
 
-            STATE.drivers.forEach(d => d.state = 'off');
-            STATE.showTippingPoint = false;
+  function calc() {
+    const totalUsers        = +document.getElementById('totalUsers').value || 0;
+    const citrixSeats       = +document.getElementById('citrixSeats').value || 0;
+    const citrixCostPerUser = +document.getElementById('citrixCostPerUser').value || 0;
+    const renewalMult       = +document.getElementById('renewalMultiplierInput').value || 1;
+    const targetCitrix      = +document.getElementById('targetCitrixSeats').value || 0;
+    const avdCost           = +document.getElementById('avdCost').value || 0;
+    const nerdioCost        = +document.getElementById('nerdioCost').value || 0;
+    const recastCost        = +document.getElementById('recastCost').value || 0;
+    const migrationCost     = +document.getElementById('migrationCost').value || 0;
+    const years             = +document.getElementById('yearsInput').value || 1;
 
-            if (id === 'change') {
-              STATE.drivers.forEach(d => {
-                if (['more_apps','constant_updates','too_many_tools','manual_rework'].includes(d.id)) d.state = 'normal';
-              });
-            } else if (id === 'now') {
-              STATE.drivers.forEach(d => {
-                if (['more_apps','constant_updates','too_many_tools','manual_rework','security_compliance'].includes(d.id)) d.state = 'accelerating';
-              });
-              STATE.showTippingPoint = true;
-            } else if (id === 'recast') {
-              STATE.recastMode = true;
-            }
+    // Clamp slider display
+    document.getElementById('renewalMultiplierDisplay').textContent = renewalMult.toFixed(1) + '×';
+    document.getElementById('yearsDisplay').textContent = years + ' yr';
 
-            updateCurves();
-            requestAnimationFrame(animateCurves);
+    // Core calculations
+    const currentCitrixAnnual     = citrixSeats * citrixCostPerUser;
+    const renewalCitrixAnnual     = currentCitrixAnnual * renewalMult;
+    const postMinCitrixAnnual     = targetCitrix * citrixCostPerUser * renewalMult;
+    const usersMigrated           = Math.max(0, citrixSeats - targetCitrix);
+    const avdAnnual               = usersMigrated * avdCost * 12;
+    const nerdioAnnual            = usersMigrated * nerdioCost * 12;
+    const recastAnnual            = usersMigrated * recastCost * 12;
+    const newRunRate              = postMinCitrixAnnual + avdAnnual + nerdioAnnual + recastAnnual;
+    const avoidedCost             = renewalCitrixAnnual - newRunRate;
+    const grossBenefit            = avoidedCost * years;
+    const netBenefit              = grossBenefit - migrationCost;
 
-            STATE.openWhyModal = id;
-            render();
-            return;
-          }
+    // Update metric cards
+    set('out-netBenefit', netBenefit);
+    set('out-avoided', avoidedCost);
+    set('out-runRate', newRunRate);
+    set('out-currentCitrix', currentCitrixAnnual);
+    set('out-renewalCitrix', renewalCitrixAnnual);
+    setRaw('out-usersMigrated', usersMigrated.toLocaleString());
 
-          if (action === 'toggle-card') {
-            const id = act.getAttribute('data-card');
-            const wasOpen = STATE.openCards[id];
-            Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = false);
-            STATE.openCards[id] = !wasOpen;
+    // Style net benefit metric
+    const nbCard = document.getElementById('out-netBenefit').closest('.metric');
+    nbCard.classList.toggle('positive', netBenefit > 0 && false); // keep highlight
 
-            if (STATE.openCards[id] && !STATE.visitedCards.includes(id)) STATE.visitedCards.push(id);
+    // Update breakdown table
+    set('br-currentCitrix', currentCitrixAnnual, true);
+    set('br-renewalCitrix', renewalCitrixAnnual, true);
+    set('br-retainedCitrix', postMinCitrixAnnual, true);
+    set('br-avd', avdAnnual, true);
+    set('br-nerdio', nerdioAnnual, true);
+    set('br-recast', recastAnnual, true);
+    set('br-runRate', newRunRate, true);
+    set('br-annualSaving', avoidedCost, true);
+    set('br-migration', migrationCost, true);
+    set('br-grossBenefit', grossBenefit, true);
+    set('br-netBenefit', netBenefit, true);
 
-            render();
+    // Update year labels
+    document.getElementById('br-horizonLabel').textContent = years + '-Year Gross Benefit';
+    document.getElementById('br-netLabel').textContent = years + '-Year Net Benefit';
 
-            if (STATE.openCards[id]) {
-              setTimeout(() => act.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
-            }
-            return;
-          }
+    // Teal/red for saving rows
+    const savingEl = document.getElementById('br-annualSaving');
+    savingEl.style.color = avoidedCost >= 0 ? 'var(--teal)' : 'var(--red)';
 
-          if (action === 'expand-all') {
-            Object.keys(STATE.openCards).forEach(k => STATE.openCards[k] = true);
-            STATE.visitedCards = ['core','onboarding','trust'];
-            render();
-            return;
-          }
+    const netEl = document.getElementById('br-netBenefit');
+    netEl.style.color = netBenefit >= 0 ? 'var(--gold-light)' : 'var(--red)';
+  }
 
-          // (Added 2026-02-11) ROI footer actions
-          if (action === 'impact-play') {
-            STATE.calcInputs.envs = 3;
-            STATE.calcInputs.changes = 10;
-            STATE.calcInputs.time = 4;
-
-            calculateImpact();
-            STATE.impactPulse = true;
-            render();
-
-            setTimeout(() => {
-              document.getElementById('calc-output')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
-
-            setTimeout(() => {
-              STATE.impactPulse = false;
-              render();
-            }, 900);
-
-            return;
-          }
-
-          if (action === 'impact-edit') {
-            render();
-            setTimeout(() => {
-              const el = document.getElementById('calc-envs');
-              if (el) { el.focus(); el.select?.(); }
-            }, 0);
-            return;
-          }
-
-          if (action === 'calculate-impact') {
-            calculateImpact();
-            render();
-            return;
-          }
-
-          if (action === 'start-flow') { startFlow(); return; }
-          if (action === 'reset-flow') { resetFlow(); return; }
-
-          if (action === 'toggle-labels') {
-            STATE.showLabels = !STATE.showLabels;
-            toggleOverlay();
-            buildFlow();
-            return;
-          }
-
-          if (action === 'launch-icon') {
-            act.classList.add('icon-launch');
-            setTimeout(() => act.classList.remove('icon-launch'), 500);
-            return;
-          }
-
-          if (action === 'open-currentstate-editor') {
-            STATE.modalOpen = true;
-            STATE.editTab = 'change';
-            STATE.editBuffers = { change: { intro: '', bullets: '', analyst: '' }, now: { intro: '', bullets: '', analyst: '' }, recast: { intro: '', bullets: '', analyst: '' } };
-            STATE.editChartBuffer = null;
-            render();
-            setTimeout(()=>{ try { window.lucide?.createIcons?.(); } catch{} }, 0);
-            setTimeout(()=>{ initCurrentStateModal(); }, 0);
-            return;
-          }
-
-          if (action === 'switch-edit-tab') {
-            STATE.editTab = act.getAttribute('data-tab');
-            render();
-            setTimeout(()=>{ try { window.lucide?.createIcons?.(); } catch{} }, 0);
-            return;
-          }
-
-          if (action === 'save-currentstate') {
-            const fallback = STATE.defaultsCurrentState();
-            const formData = readFields();
-
-            STATE.currentState = {
-              change: {
-                intro: (formData.change.intro || '').trim() || fallback.change.intro,
-                bullets: parseLines(formData.change.bullets) || fallback.change.bullets,
-                analyst: (formData.change.analyst || '').trim() || fallback.change.analyst
-              },
-              now: {
-                intro: (formData.now.intro || '').trim() || fallback.now.intro,
-                bullets: parseLines(formData.now.bullets) || fallback.now.bullets,
-                analyst: (formData.now.analyst || '').trim() || fallback.now.analyst
-              },
-              recast: {
-                intro: (formData.recast.intro || '').trim() || fallback.recast.intro,
-                bullets: parseLines(formData.recast.bullets) || fallback.recast.bullets,
-                analyst: (formData.recast.analyst || '').trim() || fallback.recast.analyst
-              }
-            };
-
-            // Chart edits: only apply if we actually have values (prevents wiping chart when saving from another tab)
-            const raw = STATE.editChartBuffer || readChartFieldsRaw();
-
-            const pick = (v, keep) => (typeof v === 'string' && v.trim()) ? v.trim() : keep;
-
-            const fallbackChart = STATE.defaultsChartConfig();
-            const cfg = raw?.chartConfig || {};
-
-            STATE.chartConfig = {
-              yAxis: pick(cfg.yAxis, STATE.chartConfig.yAxis || fallbackChart.yAxis),
-              xAxis: pick(cfg.xAxis, STATE.chartConfig.xAxis || fallbackChart.xAxis),
-              center: pick(cfg.center, STATE.chartConfig.center || fallbackChart.center),
-              footer: pick(cfg.footer, STATE.chartConfig.footer || fallbackChart.footer),
-              tipping: pick(cfg.tipping, STATE.chartConfig.tipping || fallbackChart.tipping)
-            };
-
-            const fallbackDrivers = STATE.defaultsDrivers();
-            const dRaw = raw?.drivers || [];
-
-            STATE.drivers.forEach((d, i) => {
-              const lbl = dRaw[i]?.label;
-              d.label = pick(lbl, d.label || fallbackDrivers[i].label);
-
-              const bulletsRaw = dRaw[i]?.bullets;
-              if (typeof bulletsRaw === 'string') {
-                const b = parseLines(bulletsRaw, 3);
-                d.bullets = b.length === 3 ? b : (d.bullets || fallbackDrivers[i].bullets);
-              } else {
-                d.bullets = d.bullets || fallbackDrivers[i].bullets;
-              }
-            });
-
-            // Persist full snapshot so refresh keeps everything
-            saveDraft({
-              ...formData,
-              chartConfig: { ...STATE.chartConfig },
-              drivers: STATE.drivers.map(d => ({ label: d.label, bullets: d.bullets.join('\n') }))
-            });
-
-            STATE.modalOpen = false;
-            STATE.activeTab = 'problems';
-            render();
-            return;
-          }
-
-          if (action === 'reset-currentstate-defaults') {
-            clearDraft();
-            STATE.chartConfig = STATE.defaultsChartConfig();
-            STATE.drivers = STATE.defaultsDrivers();
-            STATE.currentState = STATE.defaultsCurrentState();
-            STATE.editChartBuffer = null;
-            render();
-            return;
-          }
-
-          if (action === 'reset-sliders') { resetSliders(); return; }
-        });
-
-        root.addEventListener('input', (e) => {
-          const slider = e.target.closest('[data-action="set-slider"]');
-          if (slider) {
-            const id = slider.getAttribute('data-id');
-            const value = parseInt(slider.value, 10);
-            setSlider(id, isFinite(value) ? value : 0);
-            return;
-          }
-
-          if (e.target?.id === 'calc-envs')   { STATE.calcInputs.envs = cleanNum(e.target.value); render(); return; }
-          if (e.target?.id === 'calc-changes'){ STATE.calcInputs.changes = cleanNum(e.target.value); render(); return; }
-          if (e.target?.id === 'calc-time')  { STATE.calcInputs.time = cleanNum(e.target.value); render(); return; }
-
-          const buf = e.target.closest('[data-action="edit-buffer"]');
-          if (buf) {
-            const key = buf.getAttribute('data-key');
-            const sub = buf.getAttribute('data-subkey');
-            if (STATE.editBuffers?.[key]) STATE.editBuffers[key][sub] = e.target.value;
-          }
-
-          if (STATE.modalOpen && STATE.editTab === 'chart') {
-            STATE.editChartBuffer = readChartFieldsRaw();
-          }
-        });
-      }
-
-      /* ---------- Accordion keyboard (idempotent) ---------- */
-
-      let accordionKeyboardBound = false;
-      function attachAccordionKeyboard(){
-        if (accordionKeyboardBound) return;
-        accordionKeyboardBound = true;
-
-        document.addEventListener('keydown', (e) => {
-          const target = e.target;
-          if (!target || !target.classList || !target.classList.contains('accordion-header')) return;
-
-          const headers = Array.from(document.querySelectorAll('.accordion-header'));
-          const idx = headers.indexOf(target);
-
-          if (e.key === 'ArrowDown') {
-            headers[(idx + 1) % headers.length]?.focus();
-            e.preventDefault();
-          } else if (e.key === 'ArrowUp') {
-            headers[(idx - 1 + headers.length) % headers.length]?.focus();
-            e.preventDefault();
-          } else if (e.key === 'Home') {
-            headers[0]?.focus();
-            e.preventDefault();
-          } else if (e.key === 'End') {
-            headers[headers.length - 1]?.focus();
-            e.preventDefault();
-          } else if (e.key === 'Enter' || e.key === ' ') {
-            target.click();
-            e.preventDefault();
-          }
-        });
-      }
-
-      /* ---------- Boot ---------- */
-
-      // Keep your original default “accelerating” mode if you want the demo to open hot:
-      STATE.drivers.forEach(d => d.state = 'accelerating');
-      STATE.showTippingPoint = true;
-      updateCurves();
-      STATE.currentDemandExponent = STATE.targetDemandExponent;
-      STATE.currentCapacitySlope = STATE.targetCapacitySlope;
-
-      document.addEventListener('DOMContentLoaded', render);
-
-      document.addEventListener('keydown',(e)=>{
-        if(e.key==='Escape' && (STATE.modalOpen || STATE.openWhyModal || STATE.insightContent)){
-          STATE.modalOpen=false;
-          STATE.openWhyModal=null;
-          STATE.insightContent=null;
-          STATE.highlightDriverId=null;
-          render();
-        }
-      });
-    </script>
-  </body>
+  // Run on load
+  calc();
+</script>
+</body>
 </html>
