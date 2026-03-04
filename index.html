@@ -564,7 +564,6 @@
       const TABS = [
         { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
         { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-        { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' },
         { id: 'healthcare', label: 'Healthcare ROI', icon: 'heart-pulse' }
       ];
 
@@ -1788,7 +1787,7 @@
                 <button type="button" class="md:hidden bg-transparent text-[#0A1C60] border-2 border-[#0A1C60] py-2 text-sm rounded hover:text-[#0070F3] hover:border-[#0070F3]" data-action="expand-all">Expand All</button>
                 ${NEW_CARDS.map(card => popoutCard(card)).join('')}
                 <div class="sticky bottom-0 bg-white/70 backdrop-blur-lg py-3 shadow-lg mt-3 rounded-xl px-2 border border-slate-200">
-                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="roi">See Business Impact</button>
+                  <button type="button" class="bg-[#0070F3] text-white px-4 py-2 text-sm font-semibold rounded hover:bg-[#005AD0]" data-action="advance" data-next="healthcare">See Healthcare ROI</button>
                 </div>
               </div>
             </div>
