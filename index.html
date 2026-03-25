@@ -487,16 +487,16 @@
           analyst: "Health systems that delay modernization now face compounding costs: rising Citrix licensing, growing IT team burnout, and physician productivity loss that directly affects throughput, billing, and retention."
         },
         recast: {
-          intro: "Recast Application Workspace, paired with Nerdio and AVD, eliminates the clinical app delivery problem at its root.",
+          intro: "Recast Application Workspace, paired with Nerdio and AVD, addresses clinical app delivery at two distinct layers: Nerdio migrates the infrastructure from Citrix to Azure Virtual Desktop; Application Workspace then provides the identity-driven delivery experience and self-service catalog on top of whatever infrastructure exists.",
           bullets: [
-            "Migrate Citrix-dependent clinical apps to Azure Virtual Desktop — reducing licensing exposure while preserving the clinical user experience.",
+            "Nerdio manages the migration of Citrix workloads to Azure Virtual Desktop, reducing licensing exposure. Application Workspace then delivers apps consistently on top of the new AVD environment — the same user experience regardless of whether the session runs on Citrix, AVD, or a physical workstation.",
             "Recast delivers apps to the user, not the device — physicians get the same frictionless access from a shared cart, workstation, or home office.",
-            "Define clinical app updates once. Recast propagates them consistently across every delivery environment — no per-platform rebuilds.",
-            "Nerdio's AVD management layer optimizes Azure compute costs automatically — reducing cloud spend through intelligent autoscaling.",
+            "For standard enterprise apps managed through Application Workspace, a single update definition drives consistent delivery across Intune, ConfigMgr, Citrix, and AVD — reducing redundant delivery work. Note: regulated clinical applications (Epic, PACS, lab systems) still require per-environment validation per your organization's change management and CAB process.",
+            "(Nerdio, licensed separately) Nerdio's AVD management layer optimizes Azure compute costs automatically through intelligent autoscaling — VMs scale up at census peaks and scale down overnight.",
             "IT teams shift from reactive VDI firefighting to proactive management — freeing capacity for telehealth, AI integration, and Epic upgrades.",
             "Patch clinical environments faster and more reliably — reducing HIPAA exposure and audit risk with automated, validated deployment."
           ],
-          analyst: "Leading health systems are adopting a Citrix minimization strategy: retaining virtual desktops only for true legacy dependencies while migrating the majority of clinical users to a modern, cost-efficient AVD and Recast stack."
+          analyst: "Leading health systems are exploring Citrix minimization strategies — retaining virtual desktops for true legacy dependencies while migrating to Azure Virtual Desktop for the majority of users. In this model, Application Workspace provides the application delivery and self-service layer on top of the new environment, working alongside Nerdio for AVD infrastructure management."
         }
       }));
     },
@@ -578,14 +578,14 @@
       icon: 'layers',
       title: 'How Recast + Nerdio Does It.',
       bullets: [
-        'Minimize Citrix to only the clinical use cases that truly require it — Epic, PACS, and legacy apps migrate to AVD without disruption.',
+        'Nerdio enables migration of Citrix workloads to Azure Virtual Desktop — Application Workspace then delivers apps consistently on top of the new AVD environment. Epic and legacy clinical apps that require Citrix can remain on Citrix while other workloads migrate.',
         'Physicians get the same app experience on a shared cart, a dedicated workstation, or from home — delivered by user identity, not device.',
-        '8,000+ pre-tested enterprise apps including clinical and EHR-adjacent tools, ready to deploy without custom packaging.',
+        '8,000+ pre-tested third-party enterprise apps available through Release & Patch Management (a separate licensed add-on) — covering productivity suites, browsers, security tools, and common enterprise software. Core clinical systems such as Epic, PACS, and lab applications are custom deployments and are not included in the pre-tested catalog.',
         'Nerdio autoscaling optimizes Azure compute in real time — clinical VMs spin up when census peaks and scale down overnight.',
-        'One update to a clinical app propagates across every delivery environment — no per-platform rebuilds, no manual validation loops.',
+        'For standard enterprise apps, Application Workspace can push a single update definition consistently across multiple delivery targets — reducing redundant deployment work across Intune, ConfigMgr, and VDI environments. Clinical application updates still require validation through your standard change management process.',
         'Recast + Nerdio together replace the complexity of Citrix with a single, manageable, cost-predictable stack.'
       ],
-      closer: 'From Citrix dependency to clinical agility — without disrupting care delivery.',
+      closer: 'A consistent application delivery experience across every endpoint — from physical workstations to virtual desktops.',
       timeline: false,
       bgHeader: 'bg-[#f9fafb]',
       bgContent: 'bg-[#f9fafb]'
@@ -595,13 +595,13 @@
       icon: 'clock',
       title: 'Deploy Fast. Disrupt Nothing.',
       bullets: [
-        'Standard healthcare rollout in 4–6 weeks — Kickoff, Clinical App Assessment, Pilot Wing, Validation, and Full Deployment.',
+        'Application Workspace can be deployed in 4–6 weeks — Kickoff, Assessment, Pilot, Validation, and Full Rollout. If this deployment is paired with a Citrix-to-AVD infrastructure migration via Nerdio, that project runs on a separate, longer timeline determined by infrastructure complexity.',
         'No rip-and-replace: Recast and Nerdio layer onto your existing Azure environment alongside Citrix during transition.',
         'Dedicated Customer Success Manager with healthcare IT deployment experience guides every phase.',
         'Typical resource requirement: 1–2 endpoint or VDI engineers part-time — no large project teams required.',
         'Clinical staff see zero disruption — the app experience improves on day one, not after a long migration window.'
       ],
-      closer: 'Live in production before your next Citrix renewal date.',
+      closer: 'Application Workspace live and delivering apps before your next patch cycle.',
       timeline: true,
       bgHeader: 'bg-[#f9fafb]',
       bgContent: 'bg-[#f9fafb]'
@@ -844,11 +844,11 @@
             </div>
             <div>
               <div class="text-base font-semibold text-[#0A1C60]">Healthcare Workspace ROI</div>
-              <div class="text-[12px] text-[#6b7280]">Citrix → AVD · IT Ops · Clinical Productivity</div>
+              <div class="text-[12px] text-[#6b7280]">App Delivery (AW) · Infrastructure (Nerdio + AVD) · Clinical Productivity</div>
             </div>
           </div>
           <p class="text-sm text-[#4A5568] leading-relaxed">
-            ROI in healthcare is not just infrastructure cost. <strong>Physician time is worth $200+/hr</strong> — even 5 minutes saved per day scales to millions annually. This model captures all three value drivers.
+            ROI in this model spans three categories: infrastructure savings from a Nerdio-managed Citrix-to-AVD migration (licensed separately), IT operational savings from Application Workspace reducing app management overhead, and clinical productivity gains from a faster, more consistent app experience. <strong>Physician time is worth $200+/hr</strong> — even 5 minutes saved per day scales to millions annually.
           </p>
         </div>
 
