@@ -14,7 +14,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-```
 <style>
   :root {
     --bg-main: #f9fafb;
@@ -1933,48 +1932,48 @@
   /* ---------- Catalog / Flow assets ---------- */
 
   const CATALOG=[
-    {title:'CORE PRODUCTIVITY',id:'cat-core',items:[
+    {title:'CLINICAL & EHR',id:'cat-core',items:[
+      logo('Epic EHR','Ep','#CC0000'),
+      logo('Oracle Health / Cerner','Ce','#C74634'),
+      logo('MEDITECH','MT','#005EB8'),
+      logo('Dragon Medical One','Dr','#6A0DAD'),
+      logo('Nuance DAX Copilot','DX','#5B0FBE'),
+      logo('Sectra PACS','PA','#1A6B3C'),
+      logo('Merge PACS','MP','#0A5BD5'),
+      logo('Imprivata OneSign','IM','#E87722')
+    ]},
+    {title:'IDENTITY & ACCESS',id:'cat-collab',items:[
+      logo('Imprivata Enterprise Access','IA','#E87722'),
+      logo('Microsoft Entra ID','EN','#0078D4'),
+      logo('Okta','OK','#007DC1'),
+      logo('Duo Security','Du','#3CB371')
+    ]},
+    {title:'ENDPOINT SECURITY',id:'cat-browsers',items:[
+      logo('CrowdStrike Falcon','CS','#D61F26'),
+      logo('Microsoft Defender','MD','#0067B8'),
+      logo('Zscaler','ZS','#005DA6'),
+      logo('Splunk','SP','#65A637')
+    ]},
+    {title:'COMMUNICATION & TELEHEALTH',id:'cat-enterprise',items:[
+      logo('Microsoft Teams','T','#5B53D6'),
+      logo('Outlook','OL','#106EBE'),
+      logo('Zoom for Healthcare','ZH','#0B5CFF'),
+      logo('Doximity','DM','#3A86FF'),
+      logo('Vocera','VC','#007A87')
+    ]},
+    {title:'PLATFORM MANAGEMENT',id:'cat-security',items:[
+      logo('Microsoft Intune','IN','#0078D4'),
+      logo('ConfigMgr / SCCM','CM','#0078D4'),
+      logo('Ivanti WSC (EOL Dec 2026)','IW','#B0B0B0'),
+      logo('ServiceNow','SN','#81B29A'),
+      logo('Azure Monitor','AM','#0078D4')
+    ]},
+    {title:'CORE PRODUCTIVITY',id:'cat-storage',items:[
       logo('Microsoft Word','W','#185ABD'),
       logo('Microsoft Excel','X','#107C41'),
-      logo('PowerPoint','P','#D24726'),
-      logo('Outlook','O','#106EBE'),
-      logo('Microsoft Teams','T','#5B53D6'),
-      logo('Google Docs','Dc','#1A73E8'),
-      logo('Google Sheets','Sh','#1E8E3E'),
-      logo('Google Slides','Sl','#F9AB00')
-    ]},
-    {title:'MESSAGING & MEETINGS',id:'cat-collab',items:[
-      multiLogo('Slack',['#36C5F0','#2EB67D','#E01E5A','#ECB22E']),
-      logo('Zoom','Z','#0B5CFF'),
-      logo('Gmail','G','#EA4335'),
-      logo('Google Meet','GM','#0F9D58')
-    ]},
-    {title:'WEB BROWSERS',id:'cat-browsers',items:[
-      triLogo('Google Chrome','#EA4335','#FBBC05','#34A853','#4285F4'),
-      ringLogo('Microsoft Edge','#0C8EC5','#0AA0A3'),
-      flameLogo('Mozilla Firefox','#FF7139','#FFCC00')
-    ]},
-    {title:'ENTERPRISE APPS',id:'cat-enterprise',items:[
-      logo('Salesforce','SF','#00A1E0'),
-      logo('Workday','WD','#1F5BFF'),
-      logo('ServiceNow','SN','#81B29A'),
-      logo('SAP','SAP','#0A6ED1'),
-      logo('Oracle NetSuite','NS','#C74634')
-    ]},
-    {title:'SECURITY & ACCESS',id:'cat-security',items:[
-      logo('Duo','D','#3CB371'),
-      logo('Okta','O','#007DC1'),
-      logo('Ping Identity','P','#C0172C'),
-      logo('Cisco AnyConnect','AC','#00B5AD'),
-      logo('Microsoft Defender','MD','#0067B8'),
-      logo('CrowdStrike Falcon','CS','#D61F26')
-    ]},
-    {title:'STORAGE & CREATIVE',id:'cat-storage',items:[
+      logo('PowerPoint','PP','#D24726'),
       logo('Adobe Acrobat','A','#ED2224'),
-      logo('Dropbox','DB','#0061FF'),
-      logo('Box','BX','#0061D5'),
-      logo('OneDrive','OD','#0A5BD5'),
-      logo('ZoomIt / Sysinternals','ZI','#58595B')
+      logo('OneDrive','OD','#0A5BD5')
     ]}
   ];
 
@@ -1988,14 +1987,14 @@
   ];
 
   const appConfigs = [
-    {stage:'Prod', policy:'MFA + VPN', region:'AMER', device:'Windows'},
-    {stage:'QA', policy:'Compliant only', region:'APAC', device:'Any'},
-    {stage:'Dev', policy:'MFA required', region:'EMEA', device:'Mac'},
-    {stage:'Prod', policy:'VPN only', region:'Global', device:'Windows'},
-    {stage:'QA', policy:'MFA required', region:'AMER', device:'Any'},
-    {stage:'Dev', policy:'MFA required', region:'APAC', device:'Mac'},
-    {stage:'Prod', policy:'Compliant only', region:'EMEA', device:'Windows'},
-    {stage:'QA', policy:'VPN only', region:'Global', device:'Any'}
+    {stage:'Prod', policy:'HIPAA-governed', region:'All campuses', device:'Shared cart'},
+    {stage:'UAT', policy:'PHI-protected', region:'Clinic', device:'Workstation'},
+    {stage:'Pilot', policy:'CAB-approved', region:'Remote', device:'Any'},
+    {stage:'Prod', policy:'MFA + badge-tap', region:'All campuses', device:'Workstation'},
+    {stage:'UAT', policy:'HIPAA-governed', region:'Clinic', device:'Tablet'},
+    {stage:'Pilot', policy:'PHI-protected', region:'Remote', device:'Any'},
+    {stage:'Prod', policy:'CAB-approved', region:'All campuses', device:'Shared cart'},
+    {stage:'UAT', policy:'MFA + badge-tap', region:'Clinic', device:'Workstation'}
   ];
   let flatIndex = 0;
   CATALOG.forEach(sec => sec.items.forEach(itm => { itm.config = appConfigs[flatIndex % appConfigs.length]; flatIndex++; }));
@@ -2030,10 +2029,10 @@
   }
 
   const miniApps = [
-    logo('Microsoft Word','W','#185ABD'),
-    logo('Microsoft Teams','T','#5B53D6'),
-    logo('SAP','SAP','#0A6ED1'),
-    logo('Zoom','Z','#0B5CFF')
+    logo('Epic EHR','Ep','#CC0000'),
+    logo('Dragon Medical One','Dr','#6A0DAD'),
+    logo('Imprivata OneSign','IM','#E87722'),
+    logo('Microsoft Teams','T','#5B53D6')
   ];
 
   function renderFlow(){
@@ -2970,7 +2969,5 @@
     }
   });
 </script>
-```
 
-  </body>
 </html>
