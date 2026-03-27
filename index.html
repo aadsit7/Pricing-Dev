@@ -312,9 +312,25 @@
     line-height: 1.5;
   }
 
-  /* =========================
-     2026 SaaS polish overrides
-     ========================= */
+  /* ── Healthcare User Cards (flow end-user section) ── */
+  .hc-user-card {
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease, background 0.4s ease;
+  }
+  .hc-user-card.active {
+    border-color: #10b981 !important;
+    background: #f0fdf4 !important;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    transform: translateY(-2px);
+  }
+  .hc-experience-strip {
+    transition: opacity 0.6s ease, border-color 0.6s ease, background 0.6s ease;
+  }
+  .hc-experience-strip.active {
+    opacity: 1 !important;
+    border-color: #10b981 !important;
+    background: #f0fdf4 !important;
+  }
+
 
   :root{
     --bg-main:
@@ -2138,24 +2154,74 @@
 
           <div class="mt-3">
             <div id="endUserCard" class="sub-card p-3 transition-all duration-500">
-              <div class="flex items-center gap-3">
-                <div id="endUserAvatar" class="h-9 w-9 grid place-items-center font-semibold rounded-full" style="background:#EA4335">U</div>
-                <div class="text-sm">
-                  <div class="font-medium">End user</div>
-                  <div id="endUserMessage" class="text-[#4A5568]">Apps on demand — no waiting, no tickets.</div>
+
+              <!-- Section label -->
+              <div class="text-[10px] font-bold tracking-widest text-[#0070F3] uppercase mb-2 flex items-center gap-2">
+                <i data-lucide="users" class="w-3.5 h-3.5"></i>Your Clinicians and Staff
+              </div>
+
+              <!-- 4 user type cards -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+
+                <div id="userCard-clinical" class="hc-user-card rounded-lg border border-slate-200 p-2 bg-white">
+                  <div class="flex items-start gap-2">
+                    <div class="h-7 w-7 flex-shrink-0 rounded-full grid place-items-center font-bold text-white text-sm" style="background:#0A1C60">E</div>
+                    <div>
+                      <div class="text-[11px] font-semibold text-[#0A1C60]">Clinical Exam Rooms</div>
+                      <div class="text-[10px] text-[#6b7280] mt-0.5">Badge tap, Epic + Dragon</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="userCard-nurse" class="hc-user-card rounded-lg border border-slate-200 p-2 bg-white">
+                  <div class="flex items-start gap-2">
+                    <div class="h-7 w-7 flex-shrink-0 rounded-full grid place-items-center font-bold text-white text-sm" style="background:#00B5AD">N</div>
+                    <div>
+                      <div class="text-[11px] font-semibold text-[#0A1C60]">Nurse Stations</div>
+                      <div class="text-[10px] text-[#6b7280] mt-0.5">Shared devices, fast user switching</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="userCard-physician" class="hc-user-card rounded-lg border border-slate-200 p-2 bg-white">
+                  <div class="flex items-start gap-2">
+                    <div class="h-7 w-7 flex-shrink-0 rounded-full grid place-items-center font-bold text-white text-sm" style="background:#10b981">P</div>
+                    <div>
+                      <div class="text-[11px] font-semibold text-[#0A1C60]">Physician Home Offices</div>
+                      <div class="text-[10px] text-[#6b7280] mt-0.5">Remote access, full MFA</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="userCard-admin" class="hc-user-card rounded-lg border border-slate-200 p-2 bg-white">
+                  <div class="flex items-start gap-2">
+                    <div class="h-7 w-7 flex-shrink-0 rounded-full grid place-items-center font-bold text-white text-sm" style="background:#D97706">A</div>
+                    <div>
+                      <div class="text-[11px] font-semibold text-[#0A1C60]">Admin and Billing</div>
+                      <div class="text-[10px] text-[#6b7280] mt-0.5">Standard desktops, Office suite</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- What Clinicians Experience strip -->
+              <div id="clinicianExperience" class="hc-experience-strip mt-2 rounded-lg border border-slate-200 bg-slate-50 p-2 opacity-40">
+                <div class="text-[10px] font-bold tracking-widest text-emerald-700 uppercase mb-1">What Clinicians Experience</div>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                  <div id="endUserMessage" class="text-[11px] text-[#4A5568]">One click. Right app. Right way. No choices, no confusion, no training required. Works offline. Updates transparently.</div>
+                  <div class="text-[11px] font-bold text-emerald-700 whitespace-nowrap">Nothing changes for the user.</div>
                 </div>
               </div>
-              <div class="mt-3 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
-              <div class="relative mt-2" style="border:1px solid var(--border-subtle);background:#F7F9FB;border-radius:var(--radius);padding:1rem">
-                <i data-lucide="laptop" class="h-5 w-5 text-[#4A5568]"></i>
-                <div id="endUserBadge" class="absolute right-2 top-2 badge grid place-items-center font-bold" style="--d:11s;background:#E11D48;color:#000">!</div>
-                <div class="mt-1 text-[11px] text-[#4A5568]">Workspace launches the correct app instantly</div>
-              </div>
-              <div id="miniWorkspace" class="mt-3 hidden grid grid-cols-4 gap-2">
+
+              <!-- Animated beam + mini app workspace -->
+              <div class="mt-2 user-beam" style="background:linear-gradient(to right,#0070F3,#005AD0);--d:10s"></div>
+              <div id="miniWorkspace" class="mt-2 hidden grid grid-cols-4 gap-2">
                 ${miniApps.map(app => `<div class="logo-ring cursor-pointer" data-action="launch-icon">${app.svg}</div>`).join('')}
               </div>
+
             </div>
-            <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:var(--re-green)"><i data-lucide="sparkles" class="h-4 w-4"></i><span>Configured once → delivered everywhere.</span></div>
+            <div id="flowSuccess" class="mt-2 hidden inline-flex items-center gap-1 text-[13px] tagline-fade" style="color:var(--re-green)"><i data-lucide="sparkles" class="h-4 w-4"></i><span>One definition. Every clinician. Every platform.</span></div>
           </div>
         </div>
       </div>
@@ -2207,13 +2273,15 @@
     buildTiles(document.getElementById('flowDevB'), 10, 12.5);
     buildTiles(document.getElementById('flowDevC'), 10, 13);
 
-    const avatar=document.getElementById('endUserAvatar');
-    const badge=document.getElementById('endUserBadge');
-    if(avatar){ avatar.style.background='#EA4335'; avatar.style.color='#fff'; avatar.textContent='U'; }
-    if(badge){ badge.textContent='!'; badge.style.background='#E11D48'; badge.style.color='#000'; }
+    // Reset healthcare user cards
+    ['userCard-clinical','userCard-nurse','userCard-physician','userCard-admin'].forEach(id => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    const expStrip = document.getElementById('clinicianExperience');
+    if(expStrip){ expStrip.classList.remove('active'); expStrip.style.opacity = '0.4'; }
 
     const message = document.getElementById('endUserMessage');
-    if(message) message.textContent = 'Apps on demand — no waiting, no tickets.';
+    if(message) message.textContent = 'One click. Right app. Right way. No choices, no confusion, no training required. Works offline. Updates transparently.';
 
     const mini = document.getElementById('miniWorkspace');
     if(mini) mini.classList.add('hidden');
@@ -2282,12 +2350,12 @@
 
     const flash=document.getElementById('flowHubFlash');
     const success=document.getElementById('flowSuccess');
-    const avatar=document.getElementById('endUserAvatar');
-    const badge=document.getElementById('endUserBadge');
     const message = document.getElementById('endUserMessage');
     const mini = document.getElementById('miniWorkspace');
     const counters = document.getElementById('progressCounters');
     const endCard = document.getElementById('endUserCard');
+    const expStrip = document.getElementById('clinicianExperience');
+    const userCardIds = ['userCard-clinical','userCard-nurse','userCard-physician','userCard-admin'];
 
     if(flash){
       flash.classList.remove('hidden');
@@ -2305,21 +2373,19 @@
       const interval = setInterval(updateProgress, 100);
       STATE.flowTimers.intervals.push(interval);
 
+      // Stagger-activate each user type card
+      userCardIds.forEach((id, i) => {
+        STATE.flowTimers.timeouts.push(setTimeout(() => {
+          document.getElementById(id)?.classList.add('active');
+        }, i * 350));
+      });
+
       STATE.flowTimers.timeouts.push(setTimeout(()=> {
-        if(avatar){
-          avatar.style.background = 'var(--re-green)';
-          avatar.style.color = '#fff';
-        }
-        if(badge){
-          badge.textContent='✓';
-          badge.style.background = 'var(--re-green)';
-          badge.style.color = '#fff';
-        }
-        if(message) message.textContent = 'Apps on demand — no waiting, no tickets. Workspace launches the correct app instantly.';
+        // Light up the experience strip
+        if(expStrip){ expStrip.classList.add('active'); expStrip.style.opacity = '1'; }
         mini?.classList.remove('hidden');
         endCard?.classList.add('end-user-expand');
         success?.classList.remove('hidden');
-
         clearInterval(interval);
       }, 7000));
     }, 4000));
@@ -2349,6 +2415,11 @@
     STATE.progress = { apps: 0, time: 0, tickets: 0 };
     STATE.envProgress = { appsProcessed: 0 };
     STATE.showLabels = false;
+    ['userCard-clinical','userCard-nurse','userCard-physician','userCard-admin'].forEach(id => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    const expStrip = document.getElementById('clinicianExperience');
+    if(expStrip){ expStrip.classList.remove('active'); expStrip.style.opacity = '0.4'; }
     buildFlow();
   }
 
