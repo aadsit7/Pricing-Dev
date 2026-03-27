@@ -1567,38 +1567,63 @@
                 <!-- App window opens IMMEDIATELY (not for catalog scenario) -->
                 <div class="app-window-overlay ${!catalogMode && appOpen ? (firstOpen ? 'open' : 'open-instant') : ''}" id="appWindow">
                   <div class="app-window-topbar">
-                    <div class="aw-icon" style="background:${scenario?.appIcon?.color || '#5B53D6'}">${scenario?.appIcon?.letter || 'T'}</div>
+                    <div class="aw-icon" style="background:${scenario?.appIcon?.color || '#CC0000'}">${scenario?.appIcon?.letter || 'Ep'}</div>
                     <div>
-                      <div class="aw-title">${scenario?.appName || 'Microsoft Teams'}</div>
-                      <div class="aw-subtitle">${scenario && scenario.id === 'backend' ? 'teams.microsoft.com — routed by Workspace' : scenario && scenario.id === 'update' ? 'v2.2 — auto-patched by Workspace' : 'Configured by Workspace'}</div>
+                      <div class="aw-title">${scenario?.appName || 'Epic EHR'}</div>
+                      <div class="aw-subtitle">${scenario && scenario.id === 'backend' ? 'AVD session — migrated from Citrix by Workspace' : scenario && scenario.id === 'update' ? 'HIPAA patched — auto-validated by Workspace' : 'Delivered and configured by Workspace'}</div>
                     </div>
                   </div>
-                  <div class="app-window-body" style="flex-direction:row">
-                    <div class="teams-sidebar">
-                      <div class="teams-sidebar-dot active"><i data-lucide="message-square" class="w-3 h-3"></i></div>
-                      <div class="teams-sidebar-dot"><i data-lucide="users" class="w-3 h-3"></i></div>
-                      <div class="teams-sidebar-dot"><i data-lucide="calendar" class="w-3 h-3"></i></div>
-                      <div class="teams-sidebar-dot"><i data-lucide="phone" class="w-3 h-3"></i></div>
-                      <div class="teams-sidebar-dot"><i data-lucide="file" class="w-3 h-3"></i></div>
+                  <div class="app-window-body" style="flex-direction:row;padding:0;overflow:hidden">
+                    <!-- Epic-style sidebar -->
+                    <div style="width:38px;background:#1a1f36;display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:6px;flex-shrink:0">
+                      <div style="width:24px;height:24px;border-radius:4px;background:#CC0000;display:grid;place-items:center;font-size:8px;font-weight:800;color:white">Ep</div>
+                      <div style="width:20px;height:1px;background:rgba(255,255,255,0.1)"></div>
+                      <i data-lucide="layout-dashboard" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.7)"></i>
+                      <i data-lucide="users" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.35)"></i>
+                      <i data-lucide="calendar" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.35)"></i>
+                      <i data-lucide="clipboard-list" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.35)"></i>
+                      <i data-lucide="pill" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.35)"></i>
+                      <i data-lucide="file-text" class="w-3.5 h-3.5" style="color:rgba(255,255,255,0.35)"></i>
                     </div>
-                    <div class="teams-chat-area">
-                      <div class="teams-chat-header"><i data-lucide="hash" class="w-3 h-3 text-slate-400"></i> General</div>
-                      <div class="teams-chat-body">
-                        <div class="teams-msg ${!catalogMode && appOpen ? 'show-instant' : ''}" style="transition-delay:0.3s">
-                          <div class="teams-msg-avatar" style="background:#3b82f6">AK</div>
-                          <div class="teams-msg-bubble">Hey team, the Q3 deck is updated and ready for review</div>
+                    <!-- Epic-style patient chart area -->
+                    <div style="flex:1;background:#f0f2f5;display:flex;flex-direction:column;font-family:Inter,sans-serif">
+                      <!-- Patient banner -->
+                      <div style="background:white;border-bottom:2px solid #CC0000;padding:5px 8px;display:flex;align-items:center;gap:6px">
+                        <div style="width:22px;height:22px;border-radius:50%;background:#e0e7ff;display:grid;place-items:center;font-size:8px;font-weight:700;color:#3730a3">JM</div>
+                        <div>
+                          <div style="font-size:10px;font-weight:700;color:#1a1f36">Martinez, James A.</div>
+                          <div style="font-size:8px;color:#64748b">DOB: 03/15/1958 &nbsp;|&nbsp; MRN: 4829173 &nbsp;|&nbsp; Cardiology</div>
                         </div>
-                        <div class="teams-msg ${!catalogMode && appOpen ? 'show-instant' : ''}" style="transition-delay:0.6s">
-                          <div class="teams-msg-avatar" style="background:#10b981">JR</div>
-                          <div class="teams-msg-bubble">Perfect timing — pulling it up now</div>
-                        </div>
-                        <div class="teams-msg ${!catalogMode && appOpen ? 'show-instant' : ''}" style="transition-delay:0.9s">
-                          <div class="teams-msg-bubble self">On it. Give me 5 min.</div>
+                        <div style="margin-left:auto;display:flex;gap:3px">
+                          <span style="padding:1px 5px;border-radius:3px;background:#fef2f2;border:1px solid #fecaca;font-size:7px;font-weight:600;color:#dc2626">Allergy: PCN</span>
+                          <span style="padding:1px 5px;border-radius:3px;background:#eff6ff;border:1px solid #bfdbfe;font-size:7px;font-weight:600;color:#2563eb">Code: Full</span>
                         </div>
                       </div>
-                      <div class="teams-chat-input">
-                        <div class="teams-chat-input-box">Type a message...</div>
-                        <i data-lucide="send" class="w-3 h-3 text-slate-300"></i>
+                      <!-- Chart nav tabs -->
+                      <div style="background:white;padding:2px 8px;display:flex;gap:1px;border-bottom:1px solid #e2e8f0">
+                        ${['Chart Review','Notes','Orders','Results','Meds'].map((t,i) => `
+                          <span style="padding:2px 6px;font-size:8px;font-weight:${i===0?'600':'500'};color:${i===0?'#CC0000':'#64748b'};border-bottom:${i===0?'2px solid #CC0000':'none'};cursor:default">${t}</span>
+                        `).join('')}
+                      </div>
+                      <!-- Chart content -->
+                      <div style="flex:1;padding:6px 8px;overflow:hidden;display:flex;flex-direction:column;gap:4px">
+                        <div class="${!catalogMode && appOpen ? 'show-instant' : ''} teams-msg" style="transition-delay:0.2s;background:white;border-radius:4px;padding:5px 7px;border:1px solid #e2e8f0">
+                          <div style="font-size:8px;font-weight:600;color:#CC0000;margin-bottom:2px">Progress Note — Dr. Chen</div>
+                          <div style="font-size:8px;color:#475569;line-height:1.4">Pt presents for follow-up. BP 128/82. Current meds reviewed. Echo results from 03/20 show improved EF at 48%. Continue current Entresto dose...</div>
+                        </div>
+                        <div class="${!catalogMode && appOpen ? 'show-instant' : ''} teams-msg" style="transition-delay:0.5s;background:white;border-radius:4px;padding:5px 7px;border:1px solid #e2e8f0">
+                          <div style="font-size:8px;font-weight:600;color:#1a6b3c;margin-bottom:2px">Lab Results</div>
+                          <div style="display:flex;gap:8px;font-size:8px;color:#475569">
+                            <span>BNP: <strong style="color:#1a1f36">142</strong> pg/mL</span>
+                            <span>Cr: <strong style="color:#1a1f36">1.1</strong></span>
+                            <span>K: <strong style="color:#1a1f36">4.2</strong></span>
+                            <span>Na: <strong style="color:#1a1f36">139</strong></span>
+                          </div>
+                        </div>
+                        <div class="${!catalogMode && appOpen ? 'show-instant' : ''} teams-msg" style="transition-delay:0.8s;background:white;border-radius:4px;padding:5px 7px;border:1px solid #e2e8f0">
+                          <div style="font-size:8px;font-weight:600;color:#0A5BD5;margin-bottom:2px">Active Orders</div>
+                          <div style="font-size:8px;color:#475569;line-height:1.4">Entresto 49/51mg BID &nbsp;|&nbsp; Metoprolol 25mg daily &nbsp;|&nbsp; Echo in 3 mo</div>
+                        </div>
                       </div>
                     </div>
                   </div>
