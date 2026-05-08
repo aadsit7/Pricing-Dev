@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Application Workspace for GreenShield — Recast Software</title>
+    <title>GreenShield — Application Workspace</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1562,33 +1562,37 @@
          Primary blue #00544E, Accent cyan #1C64B9, flat surfaces, Inter
          ══════════════════════════════════════════════════════════════ */
       :root {
-        /* GreenShield-themed brand tokens — primary palette from toolkit.greenshield.ca
-           Reskinned from Recast's blue/cyan to GS Primary Green + Blue Health accent. */
-        --r-blue: #00544E;           /* GS Primary Green — top bar, hero, footer */
-        --r-blue-hover: #00373A;     /* GS Dark Green */
-        --r-blue-bright: #1C64B9;    /* GS Blue Health — CTAs, highlights, accent */
-        --r-cyan: #1C64B9;           /* GS Blue Health — accent thread */
-        --r-cyan-hover: #2178D4;
-        --r-orange: #1C64B9;
-        --r-decorator: rgba(157,198,215,0.45);  /* GS Light Blue "+" marks on hero */
-        --r-decorator-2: rgba(157,198,215,0.30);
+        /* GreenShield brand tokens — palette from toolkit.greenshield.ca and greenshield.ca header.
+           Header uses Forest (dark teal); Primary Green is for body/CTAs on white;
+           Mint/Cares is the light-pill accent (e.g., the Sign In button). */
+        --r-blue: #003C40;           /* GS Forest — top bar / header chrome */
+        --r-blue-hover: #002B2E;     /* GS Forest hover */
+        --r-blue-bright: #00544E;    /* GS Primary Green — CTAs and accents on white */
+        --r-cyan: #00544E;           /* GS Primary Green — accent thread */
+        --r-cyan-hover: #00373A;
+        --r-orange: #00544E;
+        --r-decorator: rgba(166,225,220,0.55);  /* GS Mint "+" marks on hero */
+        --r-decorator-2: rgba(166,225,220,0.30);
         --r-ink: #1A1A2E;
         --r-ink-2: #4A4A5A;
-        --r-muted-blue: #AABBEE;
+        --r-muted-blue: #A6E1DC;     /* GS Mint — light pill accent */
         --r-surface: #FFFFFF;
-        --r-surface-2: #F0F0F6;
-        --r-surface-3: #FAFAFE;
-        --r-quote-bg: #F6F8FF;
-        --r-divider: #DDDDEE;
+        --r-surface-2: #F0F4F3;
+        --r-surface-3: #F7FAF9;
+        --r-quote-bg: #EEF7F5;
+        --r-divider: #DDE6E4;
         --r-red: #CC2222;
         --r-green: #0F7A3F;
         --r-amber: #CC8800;
 
-        /* GreenShield co-brand accent — official brand palette from toolkit.greenshield.ca */
-        --gs-green: #00544E;        /* Primary Green — wordmark, primary logo on white */
-        --gs-green-deep: #00373A;   /* Dark Green */
+        /* GreenShield official palette — toolkit.greenshield.ca */
+        --gs-forest: #003C40;       /* Forest (dark teal) — header chrome on greenshield.ca */
+        --gs-green: #00544E;        /* Primary Green — wordmark on white, primary buttons */
+        --gs-green-deep: #00373A;   /* Dark Green — hover states */
         --gs-green-soft: #E6EFEE;   /* Tint for chips and washes */
-        --gs-blue: #9DC6D7;         /* Light Blue (primary palette) */
+        --gs-mint: #A6E1DC;         /* Mint — light pill (Sign In) */
+        --gs-mint-soft: #C9ECE7;
+        --gs-blue: #9DC6D7;         /* Light Blue (Health accent) */
         --gs-pink: #FD5971;         /* Pink Cares — accent only */
 
         --shadow-card: 0 1px 2px rgba(26,26,46,0.06);
@@ -1720,81 +1724,72 @@
       .rs-brand {
         display: inline-flex;
         align-items: center;
-        gap: 9px;
+        gap: 8px;
         flex-shrink: 0;
       }
       .rs-brand-mark {
         display: inline-grid;
         place-items: center;
-        width: 22px;
-        height: 22px;
-        background: #fff;
-        color: var(--r-blue);
-        border-radius: 3px;
-        font-weight: 800;
-        font-size: 11.5px;
-        letter-spacing: -0.01em;
+        width: 26px;
+        height: 26px;
+        color: #ffffff;
         line-height: 1;
-      }
-      .rs-brand-label {
-        font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.005em;
-        color: #fff;
-        white-space: nowrap;
-      }
-      .rs-brand-label-soft {
-        color: rgba(255,255,255,0.7);
-        font-weight: 500;
-      }
-
-      /* GreenShield co-brand chip — sits inside the blue strip to cue "prepared for" context */
-      .rs-cobrand {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-left: auto;
-        padding: 4px 12px 4px 6px;
-        border-radius: 999px;
-        background: #ffffff;
-        border: 1px solid rgba(255,255,255,0.30);
-        font-size: 11.5px;
-        font-weight: 500;
-        color: var(--gs-green-deep);
-        letter-spacing: 0.01em;
-        white-space: nowrap;
-        flex-shrink: 0;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.10);
-      }
-      .rs-cobrand-eyebrow {
-        font-size: 9.5px;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(0, 84, 78, 0.62);
-      }
-      .rs-cobrand-mark {
-        display: inline-grid;
-        place-items: center;
-        width: 22px;
-        height: 22px;
         flex-shrink: 0;
       }
-      .rs-cobrand-mark svg {
+      .rs-brand-mark svg {
         width: 100%;
         height: 100%;
         display: block;
       }
+      .rs-brand-label {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #ffffff;
+        white-space: nowrap;
+        line-height: 1;
+      }
+      .rs-brand-label-tm {
+        font-size: 8px;
+        font-weight: 500;
+        vertical-align: super;
+        margin-left: 1px;
+        opacity: 0.85;
+      }
+
+      /* Recast Software co-brand chip — small "powered by" tag at the right of the appbar */
+      .rs-cobrand {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-left: auto;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(255,255,255,0.22);
+        font-size: 11.5px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.92);
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .rs-cobrand-eyebrow {
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.62);
+      }
       .rs-cobrand-name {
         font-weight: 700;
-        color: var(--gs-green);
+        color: #ffffff;
         letter-spacing: -0.005em;
         font-size: 12.5px;
       }
-      .rs-cobrand-name-plus {
-        color: var(--gs-green);
-        font-weight: 800;
-        margin-left: 1px;
+      .rs-cobrand-name-soft {
+        color: rgba(255,255,255,0.72);
+        font-weight: 500;
       }
       .rs-appbar-divider {
         width: 1px;
@@ -1895,10 +1890,11 @@
         }
         .rs-em-dash, .rs-appbar-divider { display: none; }
         .rs-subtitle { display: none; }
-        .rs-cobrand { padding: 4px 8px; font-size: 10.5px; }
+        .rs-cobrand { padding: 3px 8px; font-size: 10.5px; }
         .rs-cobrand-eyebrow { display: none; }
         .rs-product { font-size: 13px; }
-        .rs-brand-label { font-size: 12.5px; }
+        .rs-brand-label { font-size: 14px; }
+        .rs-brand-mark { width: 22px; height: 22px; }
         .rs-tabbar-inner { padding: 0 14px; }
         .rs-tab { padding: 11px 14px 10px; font-size: 13px; }
       }
@@ -5755,8 +5751,14 @@
             <div class="rs-appbar-strip">
               <div class="rs-appbar-inner">
                 <div class="rs-brand">
-                  <span class="rs-brand-mark">Re</span>
-                  <span class="rs-brand-label">Recast<span class="rs-brand-label-soft"> Software</span></span>
+                  <span class="rs-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">
+                      <path d="M16 2.5 L27.5 6 V14.8 C27.5 21.6 22.4 27.5 16 29.5 C9.6 27.5 4.5 21.6 4.5 14.8 V6 Z" stroke-width="2.4"/>
+                      <path d="M19.8 12.4 A4.6 4.6 0 1 0 19.8 19.6" stroke-width="2.4"/>
+                      <path d="M19.8 16 H16.1" stroke-width="2.4"/>
+                    </svg>
+                  </span>
+                  <span class="rs-brand-label">GreenShield<span class="rs-brand-label-tm" aria-hidden="true">&trade;</span></span>
                 </div>
                 <div class="rs-appbar-divider" aria-hidden="true"></div>
                 <div class="rs-product">Application Workspace</div>
@@ -5770,15 +5772,9 @@
                         ? 'Reclaim engineering capacity without adding headcount.'
                         : 'IT Leadership Brief &mdash; consolidated for executive review.'
                 }</div>
-                <div class="rs-cobrand" title="Prepared for GreenShield">
-                  <span class="rs-cobrand-eyebrow">Prepared for</span>
-                  <span class="rs-cobrand-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 1.5 L21 4.5 V12.2 C21 17.4 17.1 21.4 12 22.5 C6.9 21.4 3 17.4 3 12.2 V4.5 Z" fill="#00544E"/>
-                      <path d="M11 7 H13 V11 H17 V13 H13 V17 H11 V13 H7 V11 H11 Z" fill="#FFFFFF"/>
-                    </svg>
-                  </span>
-                  <span class="rs-cobrand-name">GreenShield<span class="rs-cobrand-name-plus">+</span></span>
+                <div class="rs-cobrand" title="Powered by Recast Software">
+                  <span class="rs-cobrand-eyebrow">Powered by</span>
+                  <span class="rs-cobrand-name">Recast<span class="rs-cobrand-name-soft"> Software</span></span>
                 </div>
               </div>
             </div>
