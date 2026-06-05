@@ -5815,7 +5815,7 @@
 
     <script>
       const STATE = {
-        activeTab: 'problems',
+        activeTab: 'solution',
         showAnalystModal: false,
         showAIAgent: false,
         impact: { minutes: 9, pkgHours: 6, riskHrs: 22.5 },
@@ -6041,16 +6041,14 @@
       STATE.highlightDriverId = null;
 
       const TABS = [
-        { id: 'problems', label: 'Current State', icon: 'alert-triangle' },
-        { id: 'solution', label: 'Recast Approach', icon: 'workflow' },
-        { id: 'roi', label: 'Business Impact', icon: 'bar-chart-3' }
+        { id: 'solution', label: 'Partnership', icon: 'workflow' }
       ];
 
       const NEW_CARDS = [
         {
-          id: 'core', icon: 'layers', title: 'How Recast + Omnissa Partnership.',
+          id: 'core', icon: 'layers', title: 'A Potential Recast + Omnissa Partnership.',
           bullets: ['<strong>Intake.</strong> Every app gets the same treatment. 8,000+ apps come pre-packaged from the Setup Store with security and compliance data attached. Custom and internal apps get the same packaging structure, the same promotion pipeline, the same delivery logic, the same self-service catalog. The catalog is the head start, not the whole story.','<strong>Deliver</strong> \u2014 Deploys to the right user, device, and path \u2014 local, VDI, SaaS, or Cloud PC \u2014 automatically.','<strong>Update</strong> \u2014 Patches flow through Dev, Test, Acceptance, Production \u2014 validated before reaching endpoints.','<strong>Govern</strong> \u2014 Every action logged. Compliance, versions, and health visible from one dashboard.','<strong>Retire</strong> \u2014 End-of-life apps removed cleanly across every environment. No orphaned installs.','<strong>Report</strong> \u2014 Real-time dashboards for compliance, licensing, and app health \u2014 no manual assembly.'],
-          closer: 'Recast keeps the apps current and secure. Omnissa delivers them everywhere.', timeline: false, bgHeader: 'bg-[#f9fafb]', bgContent: 'bg-[#f9fafb]'
+          closer: 'Recast keeps the apps current and secure. Omnissa delivers them everywhere. Better together.', timeline: false, bgHeader: 'bg-[#f9fafb]', bgContent: 'bg-[#f9fafb]'
         }
       ];
 
@@ -6806,24 +6804,6 @@
         const _focusSelEnd   = _focusId ? _focusEl.selectionEnd   : null;
         root.innerHTML = `
           <header class="rs-appbar">
-            <div class="rs-appbar-strip">
-              <div class="rs-appbar-inner">
-                <div class="rs-brand">
-                  <span class="rs-brand-mark">Re</span>
-                  <span class="rs-brand-label">Recast<span class="rs-brand-label-soft"> Software</span></span>
-                </div>
-                <div class="rs-appbar-divider" aria-hidden="true"></div>
-                <div class="rs-product">Application Workspace</div>
-                <div class="rs-em-dash" aria-hidden="true">&mdash;</div>
-                <div class="rs-subtitle">${
-                  STATE.activeTab==='problems'
-                    ? 'One package, every workspace &mdash; laptop, Cloud PC, or VDI.'
-                    : STATE.activeTab==='solution'
-                      ? 'One model that stops multiplying work per platform.'
-                      : 'Keep applications running smoothly as platforms change.'
-                }</div>
-              </div>
-            </div>
             <nav class="rs-tabbar">
               <div class="rs-tabbar-inner" role="tablist" aria-label="Demo sections">
                 ${TABS.map(t=>`
@@ -10337,12 +10317,12 @@
               <div class="arch-fit">
                 <!-- Joint thesis -->
                 <div class="arch-thesis">
-                  <div class="arch-thesis-h">How Recast <span class="om">+ Omnissa</span> do it together</div>
-                  <div class="arch-thesis-sub">Recast keeps the apps current and secure. Omnissa delivers them everywhere.</div>
+                  <div class="arch-thesis-h">A potential partnership: Recast <span class="om">+ Omnissa</span></div>
+                  <div class="arch-thesis-sub">Recast keeps the apps current and secure. Omnissa delivers them everywhere. Better together.</div>
                   <div class="arch-benefits">
-                    <div class="arch-benefit"><i data-lucide="puzzle"></i>Fills the App Volumes content gap</div>
-                    <div class="arch-benefit"><i data-lucide="shield-check"></i>Strengthens your security story</div>
-                    <div class="arch-benefit"><i data-lucide="gauge"></i>Faster Day-2 for your customers</div>
+                    <div class="arch-benefit"><i data-lucide="puzzle"></i>Closes the App Volumes content gap</div>
+                    <div class="arch-benefit"><i data-lucide="shield-check"></i>Strengthens the security story</div>
+                    <div class="arch-benefit"><i data-lucide="gauge"></i>Faster Day-2 for shared customers</div>
                   </div>
                 </div>
 
